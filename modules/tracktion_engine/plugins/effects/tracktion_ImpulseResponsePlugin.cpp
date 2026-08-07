@@ -80,7 +80,7 @@ bool ImpulseResponsePlugin::loadImpulseResponse (const void* sourceData, size_t 
     auto is = std::make_unique<yup::MemoryInputStream> (sourceData, sourceDataSize, false);
     auto& formatManager = engine.getAudioFileFormatManager().readFormatManager;
 
-    if (auto reader = std::unique_ptr<yup::AudioFormatReader> (formatManager.createReaderFor (std::move (is))))
+    if (auto reader = std::unique_ptr<yup::AudioFormatReader> (formatManager.createReaderFor (is.release())))
     {
         yup::AudioBuffer<float> buffer ((int) reader->numChannels, (int) reader->lengthInSamples);
         reader->read (&buffer, 0, buffer.getNumSamples(), 0, true, true);

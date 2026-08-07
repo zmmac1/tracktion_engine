@@ -376,7 +376,7 @@ void WaveAudioClip::deleteAllUnusedTakesConfirmingWithUser (bool)
         w->addCustomComponent (delFilesButton.get());
         w->addTextBlock (TRANS("(This will also delete these from any other Edits in this project)"));
         w->addButton (TRANS("OK"), 1, yup::KeyPress (yup::KeyPress::returnKey()));
-        w->addButton (TRANS("Cancel"), 2, yup::KeyPress (yup::KeyPress::escapeKey);
+        w->addButton (TRANS("Cancel"), 2, yup::KeyPress (yup::KeyPress::escapeKey));
 
         w->enterModalState (true, yup::ModalCallbackFunction::create (
             [w, delFilesButton, cb = std::move (callback)] (int res)

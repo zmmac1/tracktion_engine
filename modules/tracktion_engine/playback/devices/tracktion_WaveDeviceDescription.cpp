@@ -232,7 +232,7 @@ bool WaveDeviceDescriptionList::initialiseFromState (const yup::XmlElement& xml)
         }
         catch (const choc::json::ParseError& e)
         {
-            TRACKTION_LOG ("WaveDeviceDescriptionList::initialiseFromState: " + std::string (e.what()));
+            TRACKTION_LOG (yup::String ("WaveDeviceDescriptionList::initialiseFromState: " + std::string (e.what())));
         }
     }
 
@@ -248,7 +248,7 @@ choc::value::Value WaveDeviceDescriptionList::toJSON() const
 yup::XmlElement WaveDeviceDescriptionList::toXML() const
 {
     yup::XmlElement xml ("AUDIODEVICE_LAYOUT");
-    xml.setAttribute ("state", choc::json::toString (toJSON()));
+    xml.setAttribute ("state", yup::String (choc::json::toString (toJSON())));
     return xml;
 }
 

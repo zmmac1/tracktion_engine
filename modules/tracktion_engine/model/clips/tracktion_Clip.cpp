@@ -824,7 +824,7 @@ namespace details
 
     yup::String toString (Clip::FollowActionDurationType t)
     {
-        return std::string (magic_enum::enum_name (t));
+        return yup::String (std::string (magic_enum::enum_name (t)));
     }
 }
 

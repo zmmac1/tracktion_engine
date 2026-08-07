@@ -339,23 +339,23 @@ public:
         {
             TRACKTION_LOG_ERROR ("Record fail: can't create parent directory: " + targetFile.getFullPathName());
 
-            return TRANS("The directory\nXZZX\ndoesn't exist")
-                .replace ("XZZX", targetFile.getParentDirectory().getFullPathName());
+            return tl::make_unexpected (TRANS("The directory\nXZZX\ndoesn't exist")
+                .replace ("XZZX", targetFile.getParentDirectory().getFullPathName()));
         }
 
         if (! targetFile.getParentDirectory().hasWriteAccess())
         {
             TRACKTION_LOG_ERROR ("Record fail: directory is read-only: " + targetFile.getFullPathName());
 
-            return TRANS("The directory\nXZZX\n doesn't have write-access")
-                .replace ("XZZX", targetFile.getParentDirectory().getFullPathName());
+            return tl::make_unexpected (TRANS("The directory\nXZZX\n doesn't have write-access")
+                .replace ("XZZX", targetFile.getParentDirectory().getFullPathName()));
         }
 
         if (! targetFile.deleteFile())
         {
             TRACKTION_LOG_ERROR ("Record fail: can't overwrite file: " + targetFile.getFullPathName());
 
-            return TRANS("Can't overwrite the existing file:") + "\n" + targetFile.getFullPathName();
+            return tl::make_unexpected (TRANS("Can't overwrite the existing file:") + "\n" + targetFile.getFullPathName());
         }
 
         return targetFile;
@@ -452,9 +452,9 @@ public:
                         + TRANS("Couldn't create the file: XZZX").replace ("XZZX", recordedFile.getFullPathName()));
             }
         }
-        JUCE_CATCH_EXCEPTION
+        JUCE_CATCH_EXCEPTION {}
 
-        return tl::unexpected (TRANS("Unable to start recording"));
+        return tl::make_unexpected (TRANS("Unable to start recording"));
     }
 
     std::vector<tl::expected<std::unique_ptr<RecordingContext>, yup::String>> prepareToRecord (RecordingParameters params) override
@@ -1525,7 +1525,7 @@ void WaveInputDevice::saveProps()
         n.setAttribute ("filename", filenameMask);
 
     n.setAttribute ("gainDb", inputGainDb);
-    n.setAttribute ("monitorMode", std::string (magic_enum::enum_name (monitorMode)));
+    n.setAttribute ("monitorMode", yup::String (std::string (magic_enum::enum_name (monitorMode))));
     n.setAttribute ("format", outputFormat);
     n.setAttribute ("bits", bitDepth);
     n.setAttribute ("triggerDb", recordTriggerDb);

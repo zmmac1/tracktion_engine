@@ -156,7 +156,7 @@ void CurveEditor::paint (yup::Graphics& g)
 
         g.setColor (getDefaultLineColor());
         g.drawText (text, tx, 0, tw + 6, 16,
-                    yup::Justification::centred, true);
+                    yup::Justification::center, true);
     }
 
     // draw the line to the first point, or all the way across if there are no points

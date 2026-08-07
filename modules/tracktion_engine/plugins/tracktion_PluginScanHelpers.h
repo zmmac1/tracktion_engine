@@ -102,7 +102,7 @@ struct PluginScanMasterProcess  : private yup::ChildProcessCoordinator
                 if (desc.loadFromXml (*e))
                 {
                     auto newDesc = new yup::PluginDescription (desc);
-                    newDesc->lastInfoUpdateTime = yup::Time::getCurrentTime();
+                    newDesc->lastInfoUpdateTime = yup::Time::getCurrentTime().toMilliseconds();
                     result.add (newDesc);
 
                     TRACKTION_LOG ("Added " + desc.name + ": " + desc.name + "  [" + elapsed.getDescription() + "]");
@@ -334,7 +334,8 @@ struct CustomScanner  : public yup::KnownPluginList::CustomScanner
     {
         yup::PluginDescription desc;
         desc.fileOrIdentifier = fileOrIdentifier;
-        desc.uniqueId = desc.deprecatedUid = 0;
+        desc.deprecatedUid = 0;
+        desc.uniqueId = {};
 
         return format.requiresUnblockedMessageThreadDuringCreation (desc);
     }

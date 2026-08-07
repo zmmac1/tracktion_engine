@@ -888,7 +888,7 @@ void DeviceManager::loadSettings()
         if (error.isNotEmpty())
             TRACKTION_LOG_ERROR ("AudioDeviceManager init: " + error);
 
-        TRACKTION_LOG ("Audio block size: " + std::to_string (getBlockSize()) + "  Rate: " + std::to_string (getSampleRate()));
+        TRACKTION_LOG (yup::String ("Audio block size: " + std::to_string (getBlockSize()) + "  Rate: " + std::to_string (getSampleRate())));
     }
 
     auto currentDeviceType = deviceManager.getCurrentAudioDeviceType();
@@ -1432,7 +1432,9 @@ void DeviceManager::audioDeviceIOCallbackInternal (const float* const* inputChan
         {
             yup::AudioBuffer<float> ab (outputChannelData, totalNumOutputChannels, numSamples);
             yup::MidiBuffer mb;
-            globalOutputAudioProcessor->processBlock (ab, mb);
+            yup::ParameterChangeBuffer pcb;
+            yup::AudioProcessContext<float> ctx { ab, mb, pcb };
+            globalOutputAudioProcessor->processBlock (ctx);
         }
 
         // Output clipping
@@ -1485,7 +1487,7 @@ void DeviceManager::audioDeviceAboutToStart (yup::AudioIODevice* device)
     currentCpuUsage = 0.0f;
 
     if (globalOutputAudioProcessor != nullptr)
-        globalOutputAudioProcessor->prepareToPlay (device->getCurrentSampleRate(), device->getCurrentBufferSizeSamples());
+        globalOutputAudioProcessor->prepareToPlay (yup::AudioSpec (static_cast<float> (device->getCurrentSampleRate()), device->getCurrentBufferSizeSamples()));
 
    #if JUCE_ANDROID
     steadyLoadContext.setSampleRate (device->getCurrentSampleRate());
@@ -1610,7 +1612,7 @@ void DeviceManager::reloadAllContextDevices()
 void DeviceManager::setGlobalOutputAudioProcessor (std::unique_ptr<yup::AudioProcessor> newProcessor)
 {
     if (newProcessor != nullptr)
-        newProcessor->prepareToPlay (getSampleRate(), getBlockSize());
+        newProcessor->prepareToPlay (yup::AudioSpec (static_cast<float> (getSampleRate()), getBlockSize()));
 
     {
         const yup::ScopedLock sl (deviceManager.getAudioCallbackLock());

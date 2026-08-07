@@ -36,15 +36,15 @@ static bool isForDevice (const yup::ValueTree& v, const InputDevice& d, bool fal
     auto typeProp = v.getPropertyPointer (IDs::type);
 
     if (d.getDeviceType() == InputDevice::DeviceType::trackWaveDevice)
-        return typeProp != nullptr && *typeProp == "audio" && v[IDs::sourceTrack] == d.getName();
+        return typeProp != nullptr && typeProp->toString() == "audio" && v[IDs::sourceTrack].toString() == d.getName();
 
     if (d.getDeviceType() == InputDevice::DeviceType::trackMidiDevice)
-        return typeProp != nullptr && *typeProp == "MIDI" && v[IDs::sourceTrack] == d.getName();
+        return typeProp != nullptr && typeProp->toString() == "MIDI" && v[IDs::sourceTrack].toString() == d.getName();
 
-    if (v[IDs::deviceID] == d.getDeviceID())
+    if (v[IDs::deviceID].toString() == d.getDeviceID())
         return true;
 
-    return fallbackToNameCheck && v[IDs::name] == d.getName();
+    return fallbackToNameCheck && v[IDs::name].toString() == d.getName();
 }
 
 static yup::ValueTree findDeviceState (const yup::ValueTree& parent, const InputDevice& d)

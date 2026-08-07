@@ -348,8 +348,7 @@ void ParameterControlMappings::addPluginToMenu (AutomatableParameterTree::TreeNo
                     allParams.add ({ autoParam.get(), addAllItemIndex });
             }
 
-            menu.addItem (autoParam->getParameterName(, index).fromLastOccurrenceOf (" >> ", false, false),
-                          autoParam->isParameterActive());
+            menu.addItem (autoParam->getParameterName().fromLastOccurrenceOf (" >> ", false, false), index);
 
         }
 
@@ -358,7 +357,7 @@ void ParameterControlMappings::addPluginToMenu (AutomatableParameterTree::TreeNo
             yup::PopupMenu subMenu;
 
             int itemID = ++index;
-            subMenu.addItem (TRANS("Add all parameters", itemID));
+            subMenu.addItem (TRANS("Add all parameters"), itemID);
             subMenu.addSeparator();
 
             addPluginToMenu (subNode, subMenu, allParams, index, itemID);
@@ -426,7 +425,7 @@ yup::PopupMenu ParameterControlMappings::buildMenu (yup::Array<ParameterAndIndex
         yup::PopupMenu pluginSubMenu;
 
         int addAllItemIndex = ++index;
-        pluginSubMenu.addItem (TRANS("Add all parameters", addAllItemIndex));
+        pluginSubMenu.addItem (TRANS("Add all parameters"), addAllItemIndex);
         pluginSubMenu.addSeparator();
 
         addPluginToMenu (plugin, pluginSubMenu, allParams, index, addAllItemIndex);
@@ -457,7 +456,7 @@ yup::PopupMenu ParameterControlMappings::buildMenu (yup::Array<ParameterAndIndex
                 yup::PopupMenu pluginSubMenu;
 
                 int addAllItemIndex = ++index;
-                pluginSubMenu.addItem (TRANS("Add all parameters", addAllItemIndex));
+                pluginSubMenu.addItem (TRANS("Add all parameters"), addAllItemIndex);
                 pluginSubMenu.addSeparator();
 
                 addPluginToMenu (plugin, pluginSubMenu, allParams, index, addAllItemIndex);
@@ -487,7 +486,7 @@ yup::PopupMenu ParameterControlMappings::buildMenu (yup::Array<ParameterAndIndex
             yup::PopupMenu pluginSubMenu;
 
             int addAllItemIndex = ++index;
-            pluginSubMenu.addItem (TRANS("Add all parameters", addAllItemIndex));
+            pluginSubMenu.addItem (TRANS("Add all parameters"), addAllItemIndex);
             pluginSubMenu.addSeparator();
 
             addPluginToMenu (plugin, pluginSubMenu, allParams, index, addAllItemIndex);
@@ -510,7 +509,7 @@ yup::PopupMenu ParameterControlMappings::buildMenu (yup::Array<ParameterAndIndex
                         yup::PopupMenu pluginSubMenu;
 
                         int addAllItemIndex = ++index;
-                        pluginSubMenu.addItem (TRANS("Add all parameters", addAllItemIndex));
+                        pluginSubMenu.addItem (TRANS("Add all parameters"), addAllItemIndex);
                         pluginSubMenu.addSeparator();
 
                         // add all the parameters to the submenu.
@@ -696,7 +695,7 @@ void ParameterControlMappings::savePreset (int index)
 
     w->addTextEditor ("setName", plugin->getName(), TRANS("Name:"));
     w->addButton (TRANS("OK"), 1, yup::KeyPress (yup::KeyPress::returnKey()));
-    w->addButton (TRANS("Cancel"), 0, yup::KeyPress (yup::KeyPress::escapeKey);
+    w->addButton (TRANS("Cancel"), 0, yup::KeyPress (yup::KeyPress::escapeKey));
 
     w->enterModalState (true, yup::ModalCallbackFunction::create ([this, w, plugin] (int res)
     {
@@ -782,7 +781,7 @@ void ParameterControlMappings::loadPreset (int index)
 
                     w->addCustomComponent (cb.get());
                     w->addButton (TRANS("OK"), 1, yup::KeyPress (yup::KeyPress::returnKey()));
-                    w->addButton (TRANS("Cancel"), 0, yup::KeyPress (yup::KeyPress::escapeKey);
+                    w->addButton (TRANS("Cancel"), 0, yup::KeyPress (yup::KeyPress::escapeKey));
 
                     w->enterModalState (true, yup::ModalCallbackFunction::create (
                         [this, w, cb, matchingPlugins, xmlOwner, mapping] (int res)

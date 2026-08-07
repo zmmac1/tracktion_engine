@@ -18,7 +18,7 @@ std::optional<AutomationMode> automationModeFromString (yup::String s)
 
 yup::String toString (AutomationMode am)
 {
-    return std::string (magic_enum::enum_name (am));
+    return yup::String (std::string (magic_enum::enum_name (am)));
 }
 
 } // namespace tracktion::inline engine

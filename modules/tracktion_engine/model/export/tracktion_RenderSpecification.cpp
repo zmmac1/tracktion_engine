@@ -18,7 +18,7 @@ std::optional<RenderFormat> renderFormatFromString (yup::String s)
 
 yup::String toString (RenderFormat f)
 {
-    return std::string (magic_enum::enum_name (f));
+    return yup::String (std::string (magic_enum::enum_name (f)));
 }
 
 //==============================================================================
@@ -118,7 +118,7 @@ yup::StringPairArray translateMetadataForFormat (const yup::StringPairArray& met
                 break;
 
             case RenderFormat::wav:
-                if (auto riffKey = getRiffInfoKeyForTag (key))
+                if (auto riffKey = getRiffInfoKeyForTag (key); riffKey.isNotEmpty())
                     result.set (riffKey, values[i]);
 
                 break;

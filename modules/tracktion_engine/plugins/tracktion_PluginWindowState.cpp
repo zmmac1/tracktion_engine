@@ -117,7 +117,7 @@ void PluginWindowState::showWindow()
         {
             yup::RectangleList<int> trimmedDisplays;
 
-            for (auto rect : yup::Desktop::getInstance().getDisplays().getRectangleList (true))
+            for (auto rect : yup::Desktop::getInstance()->getDisplays().getRectangleList (true))
                 trimmedDisplays.addWithoutMerging (rect.withTrimmedLeft (100).withTrimmedRight (100).withTrimmedBottom (100));
 
             return trimmedDisplays;
@@ -248,7 +248,7 @@ yup::Point<int> PluginWindowState::choosePositionForPluginWindow()
             if (p->isFocused())
                 return p->getBounds().getPosition() + yup::Point<int> (80, 80);
 
-    return yup::Desktop::getInstance().getDisplays()
+    return yup::Desktop::getInstance()->getDisplays()
             .getPrimaryDisplay()->userBounds.getRelativePoint (0.2f, 0.2f).roundToInt();
 }
 

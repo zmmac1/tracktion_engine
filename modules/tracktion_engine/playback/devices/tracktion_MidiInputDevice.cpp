@@ -409,7 +409,7 @@ void MidiInputDevice::loadMidiProps (const yup::XmlElement* n)
 void MidiInputDevice::saveMidiProps (yup::XmlElement& n)
 {
     n.setAttribute ("enabled", enabled);
-    n.setAttribute ("monitorMode", std::string (magic_enum::enum_name (monitorMode)));
+    n.setAttribute ("monitorMode", yup::String (std::string (magic_enum::enum_name (monitorMode))));
     n.setAttribute ("recEnabled", recordingEnabled);
     n.setAttribute ("mergeRecordings", mergeRecordings);
     n.setAttribute ("replaceExisting", replaceExistingClips);

@@ -3,7 +3,7 @@
   ,-'  '-.,--.--.,--,--.,---.|  |,-.,-'  '-.`--' ,---. ,--,--,      Copyright 2024
   '-.  .-'|  .--' ,-.  | .--'|     /'-.  .-',--.| .-. ||      \   Tracktion Software
     |  |  |  |  \ '-'  \ `--.|  \  \  |  |  |  |' '-' '|  ||  |       Corporation
-    `---' `--'   `--`--'`---'`--'`--' `---' `--' `---' `--''--'    www.tracktion.com
+    `---' `--'   `--`--`--'`--'`--' `---' `--' `---' `--''--'    www.tracktion.com
 
     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
 */
@@ -11,23 +11,25 @@
 #pragma once
 
 #if defined(__EMSCRIPTEN__) || defined(__wasm__) || defined(__wasm)
+ // WASM: no rdtsc, no pause, no intrinsics — stub them out
 #elif defined (__arm__) || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM) || defined (_M_ARM64)
  #define TRACKTION_ARM 1
 #endif
 
-#if ! defined(__EMSCRIPTEN__) && ! defined(__wasm__) && ! defined(__wasm)
+#if !defined(__EMSCRIPTEN__) && !defined(__wasm__) && !defined(__wasm)
  #ifdef _WIN32
   #include <intrin.h>
-#elif TRACKTION_ARM
- // Use clang built-in
-#else
- #include <x86intrin.h>
-#endif
+ #elif TRACKTION_ARM
+  // Use clang built-in
+ #else
+  #include <x86intrin.h>
+ #endif
 
-#if TRACKTION_ARM
- // Use asm yield
-#elif __has_include(<emmintrin.h>)
- #include <emmintrin.h>
+ #if TRACKTION_ARM
+  // Use asm yield
+ #elif __has_include(<emmintrin.h>)
+  #include <emmintrin.h>
+ #endif
 #endif
 
 namespace tracktion::inline core {
@@ -48,20 +50,16 @@ inline std::uint64_t rdtsc()
      return __rdtsc();
     #endif
    #elif TRACKTION_ARM
-    // TODO - supposed to use __rdpmccntr64(), but it doesn't work and no idea why...
     return 0;
    #else
     return __rdtsc();
    #endif
 }
 
-/** Pauses the CPU for an instruction.
-    Can be used in constructs like spin locks to allow other cores to progress.
-*/
 inline void pause()
 {
    #if defined(__EMSCRIPTEN__) || defined(__wasm__) || defined(__wasm)
-    // no-op
+    // no-op on WASM
    #elif TRACKTION_ARM && ! defined (_MSC_VER)
     __asm__ __volatile__ ("yield");
    #elif TRACKTION_ARM

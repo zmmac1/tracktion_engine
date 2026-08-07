@@ -35,7 +35,7 @@ namespace detail
 //==============================================================================
 yup::String toString (CurveModifierType cmt)
 {
-    return std::string (magic_enum::enum_name (cmt));
+    return yup::String (std::string (magic_enum::enum_name (cmt)));
 }
 
 std::optional<CurveModifierType> curveModifierTypeFromString (yup::String s)

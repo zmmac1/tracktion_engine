@@ -24,7 +24,7 @@ std::optional<FollowAction> followActionFromString (yup::String s)
 
 yup::String toString (FollowAction fa)
 {
-    return std::string (magic_enum::enum_name (fa));
+    return yup::String (std::string (magic_enum::enum_name (fa)));
 }
 
 //==============================================================================

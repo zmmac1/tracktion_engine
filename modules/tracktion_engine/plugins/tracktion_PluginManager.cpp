@@ -379,7 +379,7 @@ yup::Array<yup::PluginDescription> PluginManager::getARACompatiblePlugDescriptio
         if (p.name != "VST3" && p.name != "AudioUnit")
             continue;
 
-        if (p.hasARAExtension)
+        if (p.hasARAExtension())
             descs.add (p);
     }
 

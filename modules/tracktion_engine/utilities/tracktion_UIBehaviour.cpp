@@ -73,12 +73,9 @@ void UIBehaviour::showYesNoCancelAlertBoxAsync (const yup::String& title, const 
 
 void UIBehaviour::showInfoMessage (const yup::String& message)
 {
-    if (auto c = yup::Desktop::getInstance()->getMainMouseSource().getComponentUnderMouse())
-    {
-        auto bmc = new yup::BubbleMessageComponent();
-        bmc->addToDesktop (0);
-        bmc->showAt (c, yup::AttributedString (message), 2000, true, true);
-    }
+    // YUP fork: getMainMouseSource() returns void* and addToDesktop requires
+    // ComponentNative::Options, so the JUCE-style implementation is stubbed out.
+    (void) message;
 }
 
 void UIBehaviour::showWarningMessage (const yup::String& message)
