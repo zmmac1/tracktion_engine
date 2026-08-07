@@ -186,7 +186,7 @@ SampleRange AudioFileUtils::scanForNonZeroSamples (Engine& engine, const yup::Fi
         for (int j = numChans; --j >= 0;)
             std::memset (chans[j], 0, sizeof (int) * sampsPerBlock);
 
-        reader->read (chans, numChans, n, sampsPerBlock, false);
+        reader->read ((int* const*)chans, numChans, n, sampsPerBlock, false);
 
         for (int j = numChans; --j >= 0;)
         {
@@ -390,7 +390,7 @@ bool AudioFileUtils::reverse (Engine& engine,
             buffers[i] = (int*) buffer.getWritePointer (i);
 
         sampleNum -= numThisTime;
-        reader->read (buffers, numChans, sampleNum, numThisTime, true);
+        reader->read ((int* const*)buffers, numChans, sampleNum, numThisTime, true);
 
         for (int i = numThisTime / 2; --i >= 0;)
         {

@@ -44,7 +44,7 @@ public:
             source = newSourceComponent;
 
             if (newSourceComponent != nullptr)
-                newSourceComponent->addMouseListener (&internalTimer, wantsHoversForAllNestedChildComponents);
+                newSourceComponent->addMouseListener (&internalTimer);
         }
     }
 
