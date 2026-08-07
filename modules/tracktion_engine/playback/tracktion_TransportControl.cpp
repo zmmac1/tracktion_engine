@@ -12,7 +12,7 @@ namespace tracktion::inline engine {
 
 namespace IDs
 {
-    #define DECLARE_ID(name)  const juce::Identifier name (#name);
+    #define DECLARE_ID(name)  const yup::Identifier name (#name);
 
     DECLARE_ID (safeRecording)
     DECLARE_ID (discardRecordings)
@@ -68,7 +68,7 @@ namespace TransportHelpers
             return;
 
         auto& edit = tc.edit;
-        juce::Array<Clip*> launchedClips;
+        yup::Array<Clip*> launchedClips;
 
         edit.clipSlotCache.visitItems ([&] (auto cs)
         {
@@ -137,9 +137,9 @@ namespace TransportHelpers
 /**
     Represents the state of an Edit's transport.
 */
-struct TransportControl::TransportState : private juce::ValueTree::Listener
+struct TransportControl::TransportState : private yup::ValueTree::Listener
 {
-    TransportState (TransportControl& tc, juce::ValueTree transportStateToUse)
+    TransportState (TransportControl& tc, yup::ValueTree transportStateToUse)
         : state (transportStateToUse), transport (tc)
     {
         juce::UndoManager* um = nullptr;
@@ -243,18 +243,18 @@ struct TransportControl::TransportState : private juce::ValueTree::Listener
     juce::CachedValue<bool> discardRecordings, clearDevices, justSendMMCIfEnabled, canSendMMCStop,
                             allowRecordingIfNoInputsArmed, clearDevicesOnStop;
     juce::CachedValue<bool> userDragging, forceVideoJump, rewindButtonDown, fastForwardButtonDown, updatingFromPlayHead;
-    juce::CachedValue<juce::int64> lastUserDragTime;
+    juce::CachedValue<yup::int64> lastUserDragTime;
     juce::CachedValue<TimePosition> startTime, endTime;
     juce::CachedValue<TimePosition> videoPosition;
     juce::CachedValue<int> reallocationInhibitors, playbackContextAllocation, nudgeLeftCount, nudgeRightCount;
 
-    juce::ValueTree state, transientState { IDs::TRANSPORT };
+    yup::ValueTree state, transientState { IDs::TRANSPORT };
     TransportControl& transport;
 
 private:
     bool isInsideRecordingCallback = false;
 
-    void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i) override
+    void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i) override
     {
         if (v == state)
         {
@@ -304,7 +304,7 @@ private:
 
                 if (recording)
                 {
-                    juce::ScopedValueSetter<bool> svs (isInsideRecordingCallback, true);
+                    yup::ScopedValueSetter<bool> svs (isInsideRecordingCallback, true);
 
                     if (auto res = transport.performRecord())
                     {
@@ -405,7 +405,7 @@ struct TransportControl::FileFlushTimer  : private Timer
         if (owner.edit.isLoading())
             return;
 
-        bool active = juce::Process::isForegroundProcess();
+        bool active = yup::Process::isForegroundProcess();
 
         if (active && forcePurge)
         {
@@ -456,7 +456,7 @@ struct TransportControl::ButtonRepeater : private Timer
     void setDown (bool b)
     {
         accel = 1.0;
-        lastClickTime = juce::Time::getCurrentTime();
+        lastClickTime = yup::Time::getCurrentTime();
 
         if (b != isDown)
         {
@@ -465,7 +465,7 @@ struct TransportControl::ButtonRepeater : private Timer
             if (b)
             {
                 firstPress = true;
-                buttonDownTime = juce::Time::getCurrentTime();
+                buttonDownTime = yup::Time::getCurrentTime();
             }
 
             static int buttsDown = 0;
@@ -497,11 +497,11 @@ private:
     TransportControl& owner;
     double accel = 1.0;
     bool isRewind, isDown = false, firstPress = false;
-    juce::Time buttonDownTime, lastClickTime;
+    yup::Time buttonDownTime, lastClickTime;
 
     void timerCallback() override
     {
-        auto now = juce::Time::getCurrentTime();
+        auto now = yup::Time::getCurrentTime();
         double secs = (now - lastClickTime).inSeconds();
         lastClickTime = now;
 
@@ -516,7 +516,7 @@ private:
 
         if (owner.snapToTimecode)
         {
-            if ((juce::Time::getCurrentTime() - buttonDownTime).inSeconds() < 0.5)
+            if ((yup::Time::getCurrentTime() - buttonDownTime).inSeconds() < 0.5)
             {
                 if (firstPress)
                 {
@@ -542,7 +542,7 @@ private:
         scrub (owner, secs * 10.0);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonRepeater)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonRepeater)
 };
 
 //==============================================================================
@@ -675,10 +675,10 @@ private:
 };
 
 //==============================================================================
-static juce::Array<TransportControl*, juce::CriticalSection> activeTransportControls;
+static yup::Array<TransportControl*, yup::CriticalSection> activeTransportControls;
 
 //==============================================================================
-TransportControl::TransportControl (Edit& ed, const juce::ValueTree& v)
+TransportControl::TransportControl (Edit& ed, const yup::ValueTree& v)
     : engine (ed.engine), edit (ed), state (v)
 {
     jassert (state.hasType (IDs::TRANSPORT));
@@ -715,9 +715,9 @@ TransportControl::~TransportControl()
 }
 
 //==============================================================================
-juce::Array<TransportControl*> TransportControl::getAllActiveTransports (Engine& engine)
+yup::Array<TransportControl*> TransportControl::getAllActiveTransports (Engine& engine)
 {
-    juce::Array<TransportControl*> controls;
+    yup::Array<TransportControl*> controls;
 
     for (auto edit : engine.getActiveEdits().getEdits())
         controls.add (&edit->getTransport());
@@ -921,29 +921,29 @@ void TransportControl::stopRecording (bool discardRecordings)
     transportState->recording = false;
 }
 
-juce::Result TransportControl::applyRetrospectiveRecord (bool armedOnly)
+yup::Result TransportControl::applyRetrospectiveRecord (bool armedOnly)
 {
     if (static_cast<int> (engine.getPropertyStorage().getProperty (SettingID::retrospectiveRecord, 30)) == 0)
-        return juce::Result::fail (TRANS("Retrospective record is currently disabled"));
+        return yup::Result::fail (TRANS("Retrospective record is currently disabled"));
 
     if (playbackContext)
     {
-        juce::Array<Clip*> clips;
+        yup::Array<Clip*> clips;
         return playbackContext->applyRetrospectiveRecord (&clips, armedOnly);
     }
 
-    return juce::Result::fail (TRANS("No active audio devices"));
+    return yup::Result::fail (TRANS("No active audio devices"));
 }
 
-juce::Array<juce::File> TransportControl::getRetrospectiveRecordAsAudioFiles()
+yup::Array<yup::File> TransportControl::getRetrospectiveRecordAsAudioFiles()
 {
     if (static_cast<int> (engine.getPropertyStorage().getProperty (SettingID::retrospectiveRecord, 30)) == 0)
         return {};
 
     if (playbackContext)
     {
-        juce::Array<juce::File> files;
-        juce::Array<Clip*> clips;
+        yup::Array<yup::File> files;
+        yup::Array<Clip*> clips;
         playbackContext->applyRetrospectiveRecord (&clips);
 
         if (clips.size() > 0)
@@ -959,14 +959,14 @@ juce::Array<juce::File> TransportControl::getRetrospectiveRecordAsAudioFiles()
                 {
                     auto clipPos = mc->getPosition();
 
-                    juce::Array<Clip*> clipsToRender;
+                    yup::Array<Clip*> clipsToRender;
                     clipsToRender.add (mc);
 
-                    auto dir = juce::File::getSpecialLocation (juce::File::tempDirectory);
+                    auto dir = yup::File::getSpecialLocation (yup::File::tempDirectory);
 
-                    auto f = dir.getNonexistentChildFile (juce::File::createLegalFileName (mc->getName()), ".wav");
+                    auto f = dir.getNonexistentChildFile (yup::File::createLegalFileName (mc->getName()), ".wav");
 
-                    juce::BigInteger tracksToDo;
+                    yup::BigInteger tracksToDo;
                     int idx = 0;
 
                     for (auto t : getAllTracks (edit))
@@ -1083,7 +1083,7 @@ void TransportControl::timerCallback()
     // Update the transport state from the playhead if we have one
     if (isPlayContextActive()
          && (! transportState->userDragging)
-         && juce::Time::getMillisecondCounter() - transportState->lastUserDragTime > 200)
+         && yup::Time::getMillisecondCounter() - transportState->lastUserDragTime > 200)
     {
         // Only update if we're not looping or we're playing as otherwise the transport
         // position will jump and be stuck at the loop in position.
@@ -1159,7 +1159,7 @@ void TransportControl::setPosition (TimePosition t)
 {
     // This drag time update is here to avoid the transport position being updated
     // from the playhead before the position has a chance to be dispatched by it
-    transportState->lastUserDragTime = juce::Time::getMillisecondCounter();
+    transportState->lastUserDragTime = yup::Time::getMillisecondCounter();
     position = t;
 }
 
@@ -1191,7 +1191,7 @@ void TransportControl::setUserDragging (bool b)
         transportState->userDragging = b;
 
         if (b)
-            transportState->lastUserDragTime = juce::Time::getMillisecondCounter();
+            transportState->lastUserDragTime = yup::Time::getMillisecondCounter();
     }
 }
 
@@ -1220,20 +1220,20 @@ void TransportControl::setLoopOut (TimePosition t)
 
 void TransportControl::setLoopPoint1 (TimePosition t)
 {
-    loopPoint1 = juce::jlimit (0_tp, toPosition (edit.getLength() + Edit::getMaximumLength() * 0.75), t);
+    loopPoint1 = yup::jlimit (0_tp, toPosition (edit.getLength() + Edit::getMaximumLength() * 0.75), t);
 }
 
 void TransportControl::setLoopPoint2 (TimePosition t)
 {
-    loopPoint2 = juce::jlimit (0_tp, toPosition (edit.getLength() + Edit::getMaximumLength() * 0.75), t);
+    loopPoint2 = yup::jlimit (0_tp, toPosition (edit.getLength() + Edit::getMaximumLength() * 0.75), t);
 }
 
 void TransportControl::setLoopRange (TimeRange times)
 {
     auto maxEndTime = toPosition (edit.getLength() + Edit::getMaximumLength() * 0.75);
 
-    loopPoint1 = juce::jlimit (0_tp, maxEndTime, times.getStart());
-    loopPoint2 = juce::jlimit (0_tp, maxEndTime, times.getEnd());
+    loopPoint1 = yup::jlimit (0_tp, maxEndTime, times.getStart());
+    loopPoint2 = yup::jlimit (0_tp, maxEndTime, times.getEnd());
 }
 
 TimeRange TransportControl::getLoopRange() const noexcept
@@ -1285,7 +1285,7 @@ void TransportControl::startedOrStopped()
     }
 }
 
-void TransportControl::sendMMC (const juce::MidiMessage& mmc)
+void TransportControl::sendMMC (const yup::MidiMessage& mmc)
 {
     CRASH_TRACER
     auto& dm = engine.getDeviceManager();
@@ -1303,9 +1303,9 @@ void TransportControl::sendMMC (const juce::MidiMessage& mmc)
     }
 }
 
-void TransportControl::sendMMCCommand (juce::MidiMessage::MidiMachineControlCommand command)
+void TransportControl::sendMMCCommand (yup::MidiMessage::MidiMachineControlCommand command)
 {
-    sendMMC (juce::MidiMessage::midiMachineControlCommand (command));
+    sendMMC (yup::MidiMessage::midiMachineControlCommand (command));
 }
 
 inline bool anyEnabledMidiOutDevicesSendingMMC (DeviceManager& dm)
@@ -1322,7 +1322,7 @@ bool TransportControl::sendMMCStartPlay()
 {
     if (anyEnabledMidiOutDevicesSendingMMC (engine.getDeviceManager()))
     {
-        sendMMCCommand (juce::MidiMessage::mmc_play);
+        sendMMCCommand (yup::MidiMessage::mmc_play);
 
         if (edit.isTimecodeSyncEnabled())
             return true;
@@ -1335,7 +1335,7 @@ bool TransportControl::sendMMCStartRecord()
 {
     if (anyEnabledMidiOutDevicesSendingMMC (engine.getDeviceManager()))
     {
-        sendMMCCommand (juce::MidiMessage::mmc_recordStart);
+        sendMMCCommand (yup::MidiMessage::mmc_recordStart);
 
         if (edit.isTimecodeSyncEnabled())
             return true;
@@ -1560,7 +1560,7 @@ std::optional<std::pair<SyncPoint, std::optional<TimeRange>>> TransportControl::
                                                    .unloopedTime = punchInTime,
                                                    .time = transportState->startTime.get(),
                                                    .beat = ts.toBeats (transportState->startTime.get()) } ;
-                        jassert (juce::approximatelyEqual (currentSyncPoint->time.inSeconds(), currentSyncPoint->unloopedTime.inSeconds()));
+                        jassert (yup::approximatelyEqual (currentSyncPoint->time.inSeconds(), currentSyncPoint->unloopedTime.inSeconds()));
 
                         TransportHelpers::resyncLauncherClips (*this, punchInPoint, false);
                     }
@@ -1599,7 +1599,7 @@ std::optional<std::pair<SyncPoint, std::optional<TimeRange>>> TransportControl::
     }
 
     if (! transportState->justSendMMCIfEnabled)
-        sendMMCCommand (juce::MidiMessage::mmc_recordStart);
+        sendMMCCommand (yup::MidiMessage::mmc_recordStart);
 
     if (transportState->safeRecording)
         engine.getUIBehaviour().showSafeRecordDialog (*this);
@@ -1638,7 +1638,7 @@ void TransportControl::performStop()
 {
     CRASH_TRACER
 
-    const juce::ScopedValueSetter<bool> svs (isStopInProgress, true);
+    const yup::ScopedValueSetter<bool> svs (isStopInProgress, true);
     screenSaverDefeater.reset();
     sectionPlayer.reset();
 
@@ -1651,7 +1651,7 @@ void TransportControl::performStop()
         return;
     }
 
-    if (! juce::Component::isMouseButtonDownAnywhere())
+    if (! yup::Component::isMouseButtonDownAnywhere())
         setUserDragging (false); // in case it gets stuck
 
     if (isRecording() || tracktion::isRecording (*playbackContext))
@@ -1692,7 +1692,7 @@ void TransportControl::performStop()
     transportState->clearDevicesOnStop = false;
 
     if (transportState->canSendMMCStop)
-        sendMMCCommand (juce::MidiMessage::mmc_stop);
+        sendMMCCommand (yup::MidiMessage::mmc_stop);
 }
 
 void TransportControl::performPositionChange()
@@ -1710,12 +1710,12 @@ void TransportControl::performPositionChange()
     if (isPlaying() && looping)
     {
         auto range = getLoopRange();
-        newPos = juce::jlimit (range.getStart(), range.getEnd(), newPos);
+        newPos = yup::jlimit (range.getStart(), range.getEnd(), newPos);
     }
     else
     {
         const auto minStartTime = edit.tempoSequence.toTime (-BeatPosition::fromBeats (edit.getNumCountInBeats())) - 0.5s;
-        newPos = juce::jlimit (minStartTime, Edit::getMaximumEditEnd(), newPos);
+        newPos = yup::jlimit (minStartTime, Edit::getMaximumEditEnd(), newPos);
     }
 
     if (playbackContext != nullptr)
@@ -1725,7 +1725,7 @@ void TransportControl::performPositionChange()
 
 
     if (! transportState->userDragging)
-        transportState->lastUserDragTime = juce::Time::getMillisecondCounter();
+        transportState->lastUserDragTime = yup::Time::getMillisecondCounter();
 
     transportState->setVideoPosition (newPos, true);
 
@@ -1739,9 +1739,9 @@ void TransportControl::performPositionChange()
     const int seconds = (((int) mmcTime) % 60);
 
    #if JUCE_VERSION >= 0x8000e
-    sendMMC (juce::MidiMessage::midiMachineControlGoto ({ 0, (uint8_t) hours, (uint8_t) minutes, (uint8_t) seconds, (uint8_t) frames, 0 }));
+    sendMMC (yup::MidiMessage::midiMachineControlGoto ({ 0, (uint8_t) hours, (uint8_t) minutes, (uint8_t) seconds, (uint8_t) frames, 0 }));
    #else
-    sendMMC (juce::MidiMessage::midiMachineControlGoto (hours, minutes, seconds, frames));
+    sendMMC (yup::MidiMessage::midiMachineControlGoto (hours, minutes, seconds, frames));
    #endif
 }
 
@@ -1751,10 +1751,10 @@ void TransportControl::performRewindButtonChanged()
     rwRepeater->setDown (isDown);
 
     if (isDown)
-        sendMMCCommand (juce::MidiMessage::mmc_rewind);
+        sendMMCCommand (yup::MidiMessage::mmc_rewind);
     else
-        sendMMCCommand (isPlaying() ? juce::MidiMessage::mmc_play
-                                    : juce::MidiMessage::mmc_stop);
+        sendMMCCommand (isPlaying() ? yup::MidiMessage::mmc_play
+                                    : yup::MidiMessage::mmc_stop);
 }
 
 void TransportControl::performFastForwardButtonChanged()
@@ -1763,10 +1763,10 @@ void TransportControl::performFastForwardButtonChanged()
     ffRepeater->setDown (isDown);
 
     if (isDown)
-        sendMMCCommand (juce::MidiMessage::mmc_fastforward);
+        sendMMCCommand (yup::MidiMessage::mmc_fastforward);
     else
-        sendMMCCommand (isPlaying() ? juce::MidiMessage::mmc_play
-                                    : juce::MidiMessage::mmc_stop);
+        sendMMCCommand (isPlaying() ? yup::MidiMessage::mmc_play
+                                    : yup::MidiMessage::mmc_stop);
 }
 
 void TransportControl::performNudgeLeft()

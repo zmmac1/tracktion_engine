@@ -13,42 +13,42 @@ namespace tracktion::inline engine {
 #if JUCE_USE_LAME_AUDIO_FORMAT
 
 //==============================================================================
-juce::File LAMEManager::getLameEncoderExe()
+yup::File LAMEManager::getLameEncoderExe()
 {
    #if JUCE_WINDOWS
-    auto defaultLame = juce::File::getSpecialLocation (juce::File::currentExecutableFile).getSiblingFile ("lame.exe");
-   #elif JUCE_MAC
-    auto defaultLame = juce::File::getSpecialLocation (juce::File::currentExecutableFile).getSiblingFile ("../Resources/lame");
+    auto defaultLame = yup::File::getSpecialLocation (yup::File::currentExecutableFile).getSiblingFile ("lame.exe");
+   #elif YUP_MAC
+    auto defaultLame = yup::File::getSpecialLocation (yup::File::currentExecutableFile).getSiblingFile ("../Resources/lame");
    #else
-    juce::File defaultLame ("/usr/bin/lame");
+    yup::File defaultLame ("/usr/bin/lame");
    #endif
 
     return defaultLame;
 }
 
-juce::File LAMEManager::getFFmpegExe()
+yup::File LAMEManager::getFFmpegExe()
 {
    #if JUCE_WINDOWS
-    auto defaultFFmpeg = juce::File::getSpecialLocation (juce::File::currentExecutableFile).getSiblingFile ("ffmpeg.exe");
-   #elif JUCE_MAC
-    auto defaultFFmpeg = juce::File::getSpecialLocation (juce::File::currentExecutableFile).getSiblingFile ("../Resources/ffmpeg");
+    auto defaultFFmpeg = yup::File::getSpecialLocation (yup::File::currentExecutableFile).getSiblingFile ("ffmpeg.exe");
+   #elif YUP_MAC
+    auto defaultFFmpeg = yup::File::getSpecialLocation (yup::File::currentExecutableFile).getSiblingFile ("../Resources/ffmpeg");
    #else
-    juce::File defaultFFmpeg ("/usr/bin/ffmpeg");
+    yup::File defaultFFmpeg ("/usr/bin/ffmpeg");
    #endif
 
     return defaultFFmpeg;
 }
 
-juce::String LAMEManager::getLameSharedLibrary()
+yup::String LAMEManager::getLameSharedLibrary()
 {
    #if TRACKTION_ENABLE_LIBLAME
     auto libraryName = LibLameEncoderAudioFormat::getDefaultLibraryName();
-    auto exe = juce::File::getSpecialLocation (juce::File::currentExecutableFile);
+    auto exe = yup::File::getSpecialLocation (yup::File::currentExecutableFile);
 
     // Prefer a copy shipped with the app. On macOS, Frameworks is where a dylib is
     // meant to live as far as codesigning and notarisation are concerned, but check
     // Resources too since that's where the lame and ffmpeg executables go
-   #if JUCE_MAC
+   #if YUP_MAC
     const char* relativePaths[] = { "../Frameworks/", "../Resources/" };
    #else
     const char* relativePaths[] = { "" };
@@ -104,8 +104,8 @@ void LAMEManager::registerAudioFormat (AudioFileFormatManager& affm)
    #else
     TRACKTION_LOG ("LAME: using exe: " + LAMEManager::getLameEncoderExe().getFullPathName());
 
-    affm.addLameFormat (std::make_unique<juce::LAMEEncoderAudioFormat> (LAMEManager::getLameEncoderExe()),
-                        std::make_unique<juce::LAMEEncoderAudioFormat> (LAMEManager::getLameEncoderExe()));
+    affm.addLameFormat (std::make_unique<yup::LAMEEncoderAudioFormat> (LAMEManager::getLameEncoderExe()),
+                        std::make_unique<yup::LAMEEncoderAudioFormat> (LAMEManager::getLameEncoderExe()));
    #endif
 }
 
@@ -128,8 +128,8 @@ bool LAMEManager::lameIsAvailable()
 //==============================================================================
 #else
 
-juce::File LAMEManager::getLameEncoderExe()     { return {}; }
-juce::String LAMEManager::getLameSharedLibrary() { return {}; }
+yup::File LAMEManager::getLameEncoderExe()     { return {}; }
+yup::String LAMEManager::getLameSharedLibrary() { return {}; }
 void LAMEManager::registerAudioFormat (AudioFileFormatManager&) {}
 bool LAMEManager::lameIsAvailable()             { return false; }
 

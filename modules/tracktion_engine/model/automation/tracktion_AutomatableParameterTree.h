@@ -25,20 +25,20 @@ public:
 
     struct TreeNode
     {
-        TreeNode (const juce::String& groupName)
+        TreeNode (const yup::String& groupName)
             : name (groupName), type (AutomatableParameterTree::Group)
         {}
 
-        TreeNode (const juce::ReferenceCountedObjectPtr<AutomatableParameter>& param)
+        TreeNode (const yup::ReferenceCountedObjectPtr<AutomatableParameter>& param)
             : parameter (param), type (AutomatableParameterTree::Parameter)
         {
             jassert (parameter.get() != nullptr);
         }
 
-        juce::String name;
-        const juce::ReferenceCountedObjectPtr<AutomatableParameter> parameter;
+        yup::String name;
+        const yup::ReferenceCountedObjectPtr<AutomatableParameter> parameter;
         NodeType type;
-        juce::OwnedArray<TreeNode> subNodes;
+        yup::OwnedArray<TreeNode> subNodes;
         TreeNode* parent = nullptr;
 
         void addSubNode (TreeNode* node)
@@ -48,9 +48,9 @@ public:
             node->parent = this;
         }
 
-        juce::String getGroupName() const         { return name; }
+        yup::String getGroupName() const         { return name; }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeNode)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeNode)
     };
 
     //==============================================================================
@@ -86,7 +86,7 @@ private:
         return {};
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomatableParameterTree)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomatableParameterTree)
 };
 
 } // namespace tracktion::inline engine

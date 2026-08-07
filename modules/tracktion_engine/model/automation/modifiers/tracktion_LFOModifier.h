@@ -15,15 +15,15 @@ class LFOModifier   : public Modifier,
                       private ValueTreeAllEventListener
 {
 public:
-    LFOModifier (Edit&, const juce::ValueTree&);
+    LFOModifier (Edit&, const yup::ValueTree&);
     ~LFOModifier() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<LFOModifier>;
-    using Array = juce::ReferenceCountedArray<LFOModifier>;
+    using Ptr = yup::ReferenceCountedObjectPtr<LFOModifier>;
+    using Array = yup::ReferenceCountedArray<LFOModifier>;
 
     using Modifier::initialise;
     void initialise() override;
-    juce::String getName() const override               { return TRANS("LFO Modifier"); }
+    yup::String getName() const override               { return TRANS("LFO Modifier"); }
 
     //==============================================================================
     /** Returns the current value of the LFO.
@@ -35,7 +35,7 @@ public:
     float getCurrentPhase() const;
 
     /** */
-    AutomatableParameter::ModifierAssignment* createAssignment (const juce::ValueTree&) override;
+    AutomatableParameter::ModifierAssignment* createAssignment (const yup::ValueTree&) override;
 
     ProcessingPosition getProcessingPosition() override { return ProcessingPosition::preFX; }
 
@@ -44,18 +44,18 @@ public:
     //==============================================================================
     struct Assignment : public AutomatableParameter::ModifierAssignment
     {
-        Assignment (const juce::ValueTree&, const LFOModifier&);
+        Assignment (const yup::ValueTree&, const LFOModifier&);
 
         bool isForModifierSource (const ModifierSource&) const override;
-        juce::ReferenceCountedObjectPtr<LFOModifier> getLFOModifier() const;
+        yup::ReferenceCountedObjectPtr<LFOModifier> getLFOModifier() const;
 
         const EditItemID lfoModifierID;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
     };
 
     //==============================================================================
-    juce::String getSelectableDescription() override    { return getName(); }
+    yup::String getSelectableDescription() override    { return getName(); }
 
     //==============================================================================
     enum Wave
@@ -73,7 +73,7 @@ public:
         noise           = 10
     };
 
-    static juce::StringArray getWaveNames();
+    static yup::StringArray getWaveNames();
 
     juce::CachedValue<float> wave, syncType, rate, rateType, depth, bipolar, phase, offset;
 

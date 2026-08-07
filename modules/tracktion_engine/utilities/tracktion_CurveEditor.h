@@ -42,15 +42,15 @@ public:
     static EditTimeRange getPointEditPositionRange (const SelectableList&);
 
     int index = 0;
-    juce::Component::SafePointer<CurveEditor> editor;
+    CurveEditor* editor = nullptr;
 };
 
 
 //==============================================================================
-class CurveEditor  : public juce::Component,
+class CurveEditor  : public yup::Component,
                      public SelectableListener,
-                     public juce::ChangeListener,
-                     public juce::TooltipClient,
+                     public yup::ChangeListener,
+                     public yup::TooltipClient,
                      public MouseHoverDetector,
                      public TransparentToMouseInTrackItemComp
 {
@@ -58,21 +58,21 @@ public:
     CurveEditor (Edit&, SelectionManager&);
     ~CurveEditor() override;
 
-    void paint (juce::Graphics&) override;
+    void paint (yup::Graphics&) override;
     bool hitTest (int x, int y) override;
     void visibilityChanged() override;
 
-    void mouseDown (const juce::MouseEvent&) override;
-    void mouseUp (const juce::MouseEvent&) override;
-    void mouseDrag (const juce::MouseEvent&) override;
-    void mouseMove (const juce::MouseEvent&) override;
-    void mouseEnter (const juce::MouseEvent&) override;
-    void mouseExit (const juce::MouseEvent&) override;
-    void mouseDoubleClick (const juce::MouseEvent&) override;
+    void mouseDown (const yup::MouseEvent&) override;
+    void mouseUp (const yup::MouseEvent&) override;
+    void mouseDrag (const yup::MouseEvent&) override;
+    void mouseMove (const yup::MouseEvent&) override;
+    void mouseEnter (const yup::MouseEvent&) override;
+    void mouseExit (const yup::MouseEvent&) override;
+    void mouseDoubleClick (const yup::MouseEvent&) override;
     void mouseHovered (int mouseX, int mouseY) override;
-    void mouseMovedAfterHover() override;
+    void mouseMovedAfterHover();
 
-    juce::MouseCursor getMouseCursor() override;
+    yup::MouseCursor getMouseCursor();
 
     void setTimes (EditPosition leftTime, EditPosition rightTime);
     EditTimeRange getTimes() const;
@@ -84,19 +84,19 @@ public:
     virtual EditPosition xToTime (double x) const;
     float valueToY (float val) const;
     float yToValue (double y) const;
-    juce::Point<float> getPosition (CurvePoint) const;
-    juce::Point<float> getPosition (int index);
+    yup::Point<float> getPosition (CurvePoint) const;
+    yup::Point<float> getPosition (int index);
 
     void selectableObjectChanged (Selectable*) override;
     void selectableObjectAboutToBeDeleted (Selectable*) override;
 
-    void changeListenerCallback (juce::ChangeBroadcaster*) override;
+    void changeListenerCallback (yup::ChangeBroadcaster*) override;
     void updateLineThickness();
 
     Edit& getEdit() const;
     virtual Track* getTrack()      { return {}; }
 
-    virtual EditPosition snapTime (EditPosition, juce::ModifierKeys);
+    virtual EditPosition snapTime (EditPosition, yup::ModifierKeys);
 
     virtual float getValueAt (EditPosition) = 0;
     virtual EditPosition getPointPosition (int idx) = 0;
@@ -114,33 +114,33 @@ public:
     virtual void setValueWhenNoPoints (float value) = 0;
     virtual CurveEditorPoint* createPoint (int idx) = 0;
     virtual int curvePoint (int index, float newCurve) = 0;
-    virtual juce::String getCurveName() = 0;
+    virtual yup::String getCurveName() = 0;
     virtual int getCurveNameOffset() = 0;
     virtual Selectable* getItem() = 0;
     virtual bool isShowingCurve() const = 0;
     virtual void updateFromTrack() = 0;
 
-    virtual juce::Colour getCurrentLineColour() = 0;
-    virtual juce::Colour getCurrentFillColour();
-    virtual juce::Colour getDefaultLineColour() const = 0;
-    virtual juce::Colour getSelectedLineColour() const = 0;
-    virtual juce::Colour getBackgroundColour() const = 0;
-    virtual juce::Colour getCurveNameTextBackgroundColour() const = 0;
-    virtual juce::Colour getPointOutlineColour() const = 0;
+    virtual yup::Color getCurrentLineColor() = 0;
+    virtual yup::Color getCurrentFillColor();
+    virtual yup::Color getDefaultLineColor() const = 0;
+    virtual yup::Color getSelectedLineColor() const = 0;
+    virtual yup::Color getBackgroundColor() const = 0;
+    virtual yup::Color getCurveNameTextBackgroundColor() const = 0;
+    virtual yup::Color getPointOutlineColor() const = 0;
 
     virtual float getLineThickness (bool mouseOverOrDragging, bool curveOrPointsSelected) const;
-    virtual void drawLine (juce::Graphics&, juce::Path, float lineThickness);
+    virtual void drawLine (yup::Graphics&, yup::Path, float lineThickness);
 
     void selectPoint (int pointIdx, bool addToSelection);
 
     virtual EditPosition toEditPosition (const TimePosition& t);
-    virtual juce::Range<float> getParameterRange() const = 0;
+    virtual yup::Range<float> getParameterRange() const = 0;
 
 protected:
     virtual bool fillPath() const { return true; }
     virtual bool isBeats() const { return false; }
     EditPosition fromUnderlying (double u);
-    void updatePointUnderMouse (juce::Point<float>);
+    void updatePointUnderMouse (yup::Point<float>);
     virtual void showBubbleForPointUnderMouse() = 0;
     virtual void hideBubble() = 0;
 
@@ -173,7 +173,7 @@ protected:
     float lineThickness = 1.0f;
     bool drawPointInsertionIndicator = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CurveEditor)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CurveEditor)
 };
 
 } // namespace tracktion::inline engine

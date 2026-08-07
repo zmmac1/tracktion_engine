@@ -31,7 +31,7 @@ struct AudioClipPlayhead
         if (! s.position.has_value())
             return std::nullopt;
 
-        if (juce::Time::getMillisecondCounter() - s.lastUpdateMs > maxAgeMs)
+        if (yup::Time::getMillisecondCounter() - s.lastUpdateMs > maxAgeMs)
             return std::nullopt;
 
         return s.position;
@@ -42,7 +42,7 @@ struct AudioClipPlayhead
     */
     void setPosition (std::optional<TimePosition> p)
     {
-        state.store ({ p, juce::Time::getMillisecondCounter() });
+        state.store ({ p, yup::Time::getMillisecondCounter() });
     }
 
 private:
@@ -74,17 +74,17 @@ private:
 */
 class AudioClipBase    : public Clip,
                          public RenderManager::Job::Listener,
-                         private juce::Timer
+                         private yup::Timer
 {
 public:
     //==============================================================================
     /** Creates a basic AudioClip. */
-    AudioClipBase (const juce::ValueTree&, EditItemID, Type, ClipOwner&);
+    AudioClipBase (const yup::ValueTree&, EditItemID, Type, ClipOwner&);
 
     /** Destructor. */
     ~AudioClipBase() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<AudioClipBase>;
+    using Ptr = yup::ReferenceCountedObjectPtr<AudioClipBase>;
 
     //==============================================================================
     /** Returns the maximum length for this clip.
@@ -108,7 +108,7 @@ public:
     AudioFile getPlaybackFile();
 
     /** Must return the file that the source ProjectItemID refers to. */
-    virtual juce::File getOriginalFile() const = 0;
+    virtual yup::File getOriginalFile() const = 0;
 
     /** Must return a unique hash for this clip's source.
         This should be the same until the clip changes as it is used to determine if
@@ -161,10 +161,10 @@ public:
         This is called periodically once a render has started. Once you are done, this
         should return an empty string to let the AudioStripBase know to stop updating.
     */
-    virtual juce::String getRenderMessage()             { return {}; }
+    virtual yup::String getRenderMessage()             { return {}; }
 
     /** Override this to return a custom message to display over the clip where the "file missing" text usually goes. */
-    virtual juce::String getClipMessage()               { return {}; }
+    virtual yup::String getClipMessage()               { return {}; }
 
     /** If a render is in progress, this will cancel it. */
     void cancelCurrentRender();
@@ -224,7 +224,7 @@ public:
         @deprecated Use getActiveChannelConfiguration() instead.
     */
     [[deprecated ("Use getActiveChannelConfiguration() instead")]]
-    juce::AudioChannelSet getActiveChannels()            { return getActiveChannelConfiguration().toChannelSet(); }
+    yup::AudioChannelSet getActiveChannels()            { return getActiveChannelConfiguration().toChannelSet(); }
 
     //==============================================================================
     /** Sets the fade in duration in seconds.
@@ -412,7 +412,7 @@ public:
     WarpTimeManager& getWarpTimeManager() const;
 
     /** Sets the number of semitones to transpose the clip by. */
-    void setTranspose (int numSemitones)                { transpose = juce::jlimit (-24, 24, numSemitones); }
+    void setTranspose (int numSemitones)                { transpose = yup::jlimit (-24, 24, numSemitones); }
 
     /** Returns the number of semitones this clip will be changed by.
         N.B. this is used if auto-pitch is enabled.
@@ -424,13 +424,13 @@ public:
     /** Sets the number of semitones to transpose the clip by.
         N.B. this is only used if auto-pitch is disabled.
     */
-    void setPitchChange (float semitones)               { pitchChange = juce::jlimit (-48.0f, 48.0f, semitones); }
+    void setPitchChange (float semitones)               { pitchChange = yup::jlimit (-48.0f, 48.0f, semitones); }
 
     /** Returns the number of semitones to transpose the clip by. */
     float getPitchChange() const                        { return pitchChange; }
 
     /** Returns the pitch change as a normalised ratio. 0 = no change, <0 = pitched down, >0 = pitched up. */
-    float getPitchRatio() const                         { return juce::jlimit (0.1f, 10.0f, std::pow (2.0f, pitchChange / 12.0f)); }
+    float getPitchRatio() const                         { return yup::jlimit (0.1f, 10.0f, std::pow (2.0f, pitchChange / 12.0f)); }
 
     /** Enables reversing of the clip's source material. */
     void setIsReversed (bool shouldBeReversed)          { isReversed = shouldBeReversed; }
@@ -453,10 +453,10 @@ public:
     bool performTempoDetect();
 
     /** Returns an array of the root note choices e.g. "C#" etc. */
-    static juce::StringArray getRootNoteChoices (Engine&);
+    static yup::StringArray getRootNoteChoices (Engine&);
 
     /** Returns an array describng what pitch each semitone change will be. */
-    juce::StringArray getPitchChoices();
+    yup::StringArray getPitchChoices();
 
     //==============================================================================
     /** Returns true if this clip can have ClipEffects added to it. */
@@ -472,7 +472,7 @@ public:
     bool effectsEnabled() const                         { return clipEffects != nullptr; }
 
     /** Adds a ClipEffect to this clip. */
-    void addEffect (const juce::ValueTree& effectsTree);
+    void addEffect (const yup::ValueTree& effectsTree);
 
     /** Sets the effectsVisible flag for this clip. */
     void setEffectsVisible (bool b)                     { clipEffectsVisible = b; }
@@ -492,13 +492,13 @@ public:
 
     //==============================================================================
     /** Returns the ProjectItemRefs of the clip's takes. */
-    virtual juce::Array<ProjectItemRef> getTakes() const;
+    virtual yup::Array<ProjectItemRef> getTakes() const;
 
     //==============================================================================
     /** Returns an empty string if this plugin can be added, otherwise an error message
         due to the clip plugin being an incorrect type (e.g. MIDI) or the list is full.
     */
-    juce::String canAddClipPlugin (const Plugin::Ptr&) const;
+    yup::String canAddClipPlugin (const Plugin::Ptr&) const;
 
     //==============================================================================
     /** Holds information about how to render a proxy for this clip. */
@@ -516,10 +516,10 @@ public:
         TimeStretcher::ElastiqueProOptions options;
 
         /** Renders this audio segment list to an AudioFile. */
-        bool render (Engine&, const AudioFile&, AudioFileWriter&, juce::ThreadPoolJob* const&, std::atomic<float>& progress) const;
+        bool render (Engine&, const AudioFile&, AudioFileWriter&, yup::ThreadPoolJob* const&, std::atomic<float>& progress) const;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProxyRenderingInfo)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProxyRenderingInfo)
     };
 
     /** Should return true if the clip is referencing the file in any way. */
@@ -592,11 +592,11 @@ public:
     void tearDownARA();
 
     /** Returns the ARAFileReader proxy if this clip is using an ARA plugin (e.g. Melodyne). */
-    juce::ReferenceCountedObjectPtr<ARAFileReader> getARAProxy() const   { return araProxy; }
+    yup::ReferenceCountedObjectPtr<ARAFileReader> getARAProxy() const   { return araProxy; }
 
     /** @deprecated Use getARAProxy() instead. */
     [[deprecated("Use getARAProxy() instead")]]
-    juce::ReferenceCountedObjectPtr<ARAFileReader> getMelodyneProxy() const  { return araProxy; }
+    yup::ReferenceCountedObjectPtr<ARAFileReader> getMelodyneProxy() const  { return araProxy; }
 
     /** Returns true if this clip is using an ARA plugin. */
     bool isUsingARA() const;
@@ -637,7 +637,7 @@ public:
     juce::CachedValue<TimeStretcher::ElastiqueProOptions> elastiqueProOptions;
 
     /** Stores the PluginDescription of the ARA plugin to use for this clip. */
-    juce::CachedValue<juce::PluginDescription> araPluginDescription;
+    juce::CachedValue<yup::PluginDescription> araPluginDescription;
 
     //==============================================================================
     /** @internal */
@@ -657,7 +657,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    juce::Colour getDefaultColour() const override;
+    yup::Color getDefaultColor() const override;
     /** @internal */
     PatternGenerator* getPatternGenerator() override;
 
@@ -669,12 +669,12 @@ public:
     /** @internal */
     void deleteMark (TimePosition relCursorPos);
     /** @internal */
-    void getRescaledMarkPoints (juce::Array<TimePosition>& rescaled, juce::Array<int>& orig) const;
+    void getRescaledMarkPoints (yup::Array<TimePosition>& rescaled, yup::Array<int>& orig) const;
     /** @internal */
-    juce::Array<TimePosition> getRescaledMarkPoints() const override;
+    yup::Array<TimePosition> getRescaledMarkPoints() const override;
 
     /** @internal */
-    juce::Array<ReferencedItem> getReferencedItems() override;
+    yup::Array<ReferencedItem> getReferencedItems() override;
     /** @internal */
     void reassignReferencedItem (const ReferencedItem&, ProjectItemRef newRef, double newStartTime) override;
 
@@ -707,7 +707,7 @@ protected:
     //==============================================================================
     std::shared_ptr<ClipLevel> level { std::make_shared<ClipLevel>() };
     std::shared_ptr<AudioClipPlayhead> playhead { std::make_shared<AudioClipPlayhead>() };
-    juce::CachedValue<juce::String> channels;
+    juce::CachedValue<yup::String> channels;
 
     juce::CachedValue<TimeDuration> fadeIn, fadeOut;
     TimeDuration autoFadeIn, autoFadeOut;
@@ -750,19 +750,19 @@ protected:
     void createNewProxyAsync();
 
     /** @internal */
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
     /** @internal */
-    void valueTreeChildAdded (juce::ValueTree& parent, juce::ValueTree&) override;
+    void valueTreeChildAdded (yup::ValueTree& parent, yup::ValueTree&) override;
     /** @internal */
-    void valueTreeChildRemoved (juce::ValueTree& parent, juce::ValueTree&, int) override;
+    void valueTreeChildRemoved (yup::ValueTree& parent, yup::ValueTree&, int) override;
     /** @internal */
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override;
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override;
     /** @internal */
-    void valueTreeParentChanged (juce::ValueTree&) override;
+    void valueTreeParentChanged (yup::ValueTree&) override;
 
 private:
     //==============================================================================
-    juce::ReferenceCountedObjectPtr<ARAFileReader> araProxy;
+    yup::ReferenceCountedObjectPtr<ARAFileReader> araProxy;
 
     class TempoDetectTask;
     class BeatSensitivityComp;
@@ -794,7 +794,7 @@ private:
     TimePosition clipTimeToSourceFileTime (TimePosition clipTime);
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioClipBase)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioClipBase)
 };
 
 //==============================================================================
@@ -823,7 +823,7 @@ inline void melodyneConvertToMIDI (AudioClipBase& c) { araConvertToMIDI (c); }
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::AudioClipBase::FadeBehaviour>
@@ -845,7 +845,7 @@ namespace juce
         static PluginDescription fromVar (const var& v)
         {
             PluginDescription pd;
-            if (auto xml = juce::parseXML (v.toString()))
+            if (auto xml = yup::parseXML (v.toString()))
                 pd.loadFromXml (*xml);
             return pd;
         }
@@ -858,13 +858,7 @@ namespace juce
         }
     };
 
-    inline bool operator== (const PluginDescription& a, const PluginDescription& b)
-    {
-        return a.name == b.name
-            && a.pluginFormatName == b.pluginFormatName
-            && a.fileOrIdentifier == b.fileOrIdentifier
-            && a.uniqueId == b.uniqueId;
-    }
+    // REMOVED: operator== (YUP provides one)
 
     inline bool operator!= (const PluginDescription& a, const PluginDescription& b)
     {

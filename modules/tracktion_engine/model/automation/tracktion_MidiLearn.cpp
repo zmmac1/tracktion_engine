@@ -56,7 +56,7 @@ void MidiAssignable::addAssignent (const Assignment newAssignment)
     assignemnts.add (newAssignment);
 }
 
-void MidiAssignable::buildMenu (juce::PopupMenu& m)
+void MidiAssignable::buildMenu (yup::PopupMenu& m)
 {
     CRASH_TRACER
 
@@ -70,15 +70,14 @@ void MidiAssignable::buildMenu (juce::PopupMenu& m)
             {
                 if (auto ec = engine.getExternalControllerManager().getActiveCustomController())
                 {
-                    juce::PopupMenu paramsMenu;
+                    yup::PopupMenu paramsMenu;
                     auto numParams = ec->getNumParameterControls();
 
                     auto baseName = ass.id == CustomControlSurface::paramTrackId ? TRANS("Parameter")
                                                                                  : TRANS("Track");
 
                     for (int i = 0; i < numParams; ++i)
-                        paramsMenu.addItem (CustomControlSurface::paramTrackId + i,
-                                            baseName + " #" + juce::String (i + 1));
+                        paramsMenu.addItem (baseName + " #" + yup::String (i + 1), CustomControlSurface::paramTrackId + i);
 
                     m.addSubMenu (ass.name, paramsMenu);
                 }
@@ -225,7 +224,7 @@ void MidiAssignable::buildMenu (juce::PopupMenu& m)
                 if (getControlledTrack() != nullptr)
                     faderIndex = getFaderIndex();
 
-                m.addItem (ass.id + faderIndex, ass.name);
+                m.addItem (ass.name, ass.id + faderIndex);
                 break;
             }
         }

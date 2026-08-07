@@ -23,13 +23,13 @@ namespace tracktion::inline engine
 class ScopedTrackMuter
 {
 public:
-    ScopedTrackMuter (Edit&, const juce::Array<EditItemID>& tracksToMute);
+    ScopedTrackMuter (Edit&, const yup::Array<EditItemID>& tracksToMute);
     ~ScopedTrackMuter();
 
 private:
     std::vector<std::pair<Track::Ptr, bool>> restoreList;
 
-    JUCE_DECLARE_NON_COPYABLE (ScopedTrackMuter)
+    YUP_DECLARE_NON_COPYABLE (ScopedTrackMuter)
 };
 
 //==============================================================================
@@ -70,7 +70,7 @@ public:
 
         //==============================================================================
         State getState() const                                  { return state; }
-        juce::String getName() const                            { return planned.name; }
+        yup::String getName() const                            { return planned.name; }
 
         /** The parameters this job renders with. */
         const Renderer::Parameters& getParameters() const       { return planned.params; }
@@ -79,22 +79,22 @@ public:
         float getProgress() const;
 
         /** Returns the rendered file once the job has completed. */
-        juce::File getFile() const                              { return resultFile; }
+        yup::File getFile() const                              { return resultFile; }
 
         /** Returns the error message if the job failed. */
-        juce::String getError() const                           { return error; }
+        yup::String getError() const                           { return error; }
 
         //==============================================================================
         /** Cancels this job. Pending jobs are skipped, an active job is stopped. */
         void cancel();
 
-        /** Sets a receiver (e.g. a juce::AudioThumbnail) to be filled while this
+        /** Sets a receiver (e.g. a yup::AudioThumbnail) to be filled while this
             job renders. Only valid while the job is still pending.
         */
-        void setThumbnail (std::shared_ptr<juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver>);
+        void setThumbnail (std::shared_ptr<yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver>);
 
         /** Returns the receiver set with setThumbnail(), if any. */
-        std::shared_ptr<juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> getThumbnail() const { return thumbnail; }
+        std::shared_ptr<yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> getThumbnail() const { return thumbnail; }
 
     private:
         //==============================================================================
@@ -104,9 +104,9 @@ public:
 
         PlannedRenderJob planned;
         State state = State::pending;
-        juce::File resultFile;
-        juce::String error;
-        std::shared_ptr<juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> thumbnail;
+        yup::File resultFile;
+        yup::String error;
+        std::shared_ptr<yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> thumbnail;
         std::shared_ptr<EditRenderer::Handle> handle;
 
         /** Set on the render thread the moment the render returns, before the
@@ -119,7 +119,7 @@ public:
             even if a handle outlives the queue. */
         std::unique_ptr<ScopedTrackMuter> muteScope;
 
-        JUCE_DECLARE_NON_COPYABLE (Job)
+        YUP_DECLARE_NON_COPYABLE (Job)
     };
 
     using JobPtr = std::shared_ptr<Job>;
@@ -172,9 +172,9 @@ private:
     std::shared_ptr<bool> aliveFlag { std::make_shared<bool> (true) };
 
     void startNextJob();
-    void handleJobFinished (Job&, tl::expected<juce::File, std::string>);
+    void handleJobFinished (Job&, tl::expected<yup::File, std::string>);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderQueue)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderQueue)
 };
 
 } // namespace tracktion::inline engine

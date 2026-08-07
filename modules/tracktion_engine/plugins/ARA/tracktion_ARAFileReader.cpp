@@ -120,10 +120,10 @@ struct ARAClipPlayer
     ExternalPlugin* getPlugin()             { return araInstance != nullptr ? araInstance->plugin.get() : nullptr; }
     const ARAFactory* getARAFactory() const { return araInstance != nullptr ? araInstance->factory : nullptr; }
 
-    juce::String getDocumentArchiveID() const
+    yup::String getDocumentArchiveID() const
     {
         if (auto f = getARAFactory())
-            return juce::String::fromUTF8 (f->documentArchiveID);
+            return yup::String::fromUTF8 (f->documentArchiveID);
 
         return {};
     }
@@ -192,7 +192,7 @@ struct ARAClipPlayer
     void contentHasChanged()
     {
         CRASH_TRACER
-        T_ARA_DBG ("ARA contentHasChanged: clip=" << clip.getName() << " modID=" << juce::String::toHexString (modificationID));
+        T_ARA_DBG ("ARA contentHasChanged: clip=" << clip.getName() << " modID=" << yup::String::toHexString (modificationID));
         updateContent (nullptr);
         updateHeadAndTailTimes();
         owner.sendChangeMessage();
@@ -204,7 +204,7 @@ struct ARAClipPlayer
         CRASH_TRACER
         TRACKTION_ASSERT_MESSAGE_THREAD
 
-        if (juce::MessageManager::getInstance()->isThisTheMessageThread())
+        if (yup::MessageManager::getInstance()->isThisTheMessageThread())
         {
             contentUpdater = nullptr;
             internalUpdateContent (clipToClone);
@@ -224,12 +224,12 @@ struct ARAClipPlayer
     }
 
     //==============================================================================
-    juce::MidiMessageSequence getAnalysedMIDISequence()
+    yup::MidiMessageSequence getAnalysedMIDISequence()
     {
         CRASH_TRACER
 
         const int midiChannel = 1;
-        juce::MidiMessageSequence result;
+        yup::MidiMessageSequence result;
 
         if (auto doc = getDocument())
         {
@@ -303,10 +303,10 @@ struct ARAClipPlayer
                                 duration = duration * speedRatio;
                             }
 
-                            result.addEvent (juce::MidiMessage::noteOn  (midiChannel, note->pitchNumber, static_cast<float> (note->volume)),
+                            result.addEvent (yup::MidiMessage::noteOn  (midiChannel, note->pitchNumber, static_cast<float> (note->volume)),
                                              startPos);
 
-                            result.addEvent (juce::MidiMessage::noteOff (midiChannel, note->pitchNumber),
+                            result.addEvent (yup::MidiMessage::noteOff (midiChannel, note->pitchNumber),
                                              startPos + duration);
                         }
                     }
@@ -322,7 +322,7 @@ struct ARAClipPlayer
     }
 
     //==============================================================================
-    juce::MemoryBlock storeARAArchiveForCopy()
+    yup::MemoryBlock storeARAArchiveForCopy()
     {
         if (auto doc = getDocument())
         {
@@ -343,10 +343,10 @@ struct ARAClipPlayer
         return {};
     }
 
-    void restoreARAArchiveForPaste (const juce::MemoryBlock& data,
-                                    const juce::String& archivedSourceID,
-                                    const juce::String& archivedModID,
-                                    const juce::String& documentArchiveID = {})
+    void restoreARAArchiveForPaste (const yup::MemoryBlock& data,
+                                    const yup::String& archivedSourceID,
+                                    const yup::String& archivedModID,
+                                    const yup::String& documentArchiveID = {})
     {
         T_ARA_DBG ("ARA restoreARAArchiveForPaste: dataSize=" << (int) data.getSize()
              << " archivedSrcID=" << archivedSourceID << " archivedModID=" << archivedModID);
@@ -376,7 +376,7 @@ struct ARAClipPlayer
         }
     }
 
-    juce::String getAudioSourcePersistentID() const
+    yup::String getAudioSourcePersistentID() const
     {
         if (playbackRegionAndSource != nullptr && playbackRegionAndSource->audioSource != nullptr)
             return clip.getAudioFile().getHashString();
@@ -384,10 +384,10 @@ struct ARAClipPlayer
         return {};
     }
 
-    juce::String getAudioModificationPersistentID() const
+    yup::String getAudioModificationPersistentID() const
     {
         if (playbackRegionAndSource != nullptr && playbackRegionAndSource->audioModification != nullptr)
-            return juce::String::toHexString (modificationID);
+            return yup::String::toHexString (modificationID);
 
         return {};
     }
@@ -551,7 +551,7 @@ struct ARAClipPlayer
         bool firstCall = true;
 
         ContentAnalyser() = delete;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentAnalyser)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentAnalyser)
     };
 
     friend class ContentAnalyser;
@@ -632,7 +632,7 @@ private:
         ARAClipPlayer& owner;
         const bool restartTimerLater;
 
-        JUCE_DECLARE_NON_COPYABLE (ScopedDocumentEditor)
+        YUP_DECLARE_NON_COPYABLE (ScopedDocumentEditor)
     };
 
     //==============================================================================
@@ -651,7 +651,7 @@ private:
 
         // Don't deactivate the renderer while the audio thread is rendering it -
         // ARANode::process try-locks this and outputs silence while we hold it
-        const juce::ScopedLock sl (owner.getProcessLock());
+        const yup::ScopedLock sl (owner.getProcessLock());
 
         // ARA requires renderer deactivation before adding/removing playback regions
         if (auto p = getPlugin())
@@ -662,7 +662,7 @@ private:
 
         playbackRegionAndSource = std::make_unique<PlaybackRegionAndSource> (*getDocument(), clip, *araInstance->factory,
                                                                              *araInstance->extensionInstance,
-                                                                             juce::String::toHexString (modificationID),
+                                                                             yup::String::toHexString (modificationID),
                                                                              clipToClone != nullptr ? clipToClone->playbackRegionAndSource.get() : nullptr);
 
         // NB: the caller already holds a ScopedDocumentEditor, so the old regions are
@@ -691,8 +691,8 @@ private:
                                         ^ static_cast<HashCode> (clip.itemID.getRawID());
 
             T_ARA_DBG ("ARA internalUpdateContent: clip=" << clip.getName()
-                 << " oldModID=" << juce::String::toHexString (modificationID)
-                 << " newModID=" << juce::String::toHexString (newModificationID)
+                 << " oldModID=" << yup::String::toHexString (modificationID)
+                 << " newModID=" << yup::String::toHexString (newModificationID)
                  << " willRecreate=" << (modificationID != newModificationID ? 1 : 0));
 
             bool regionsRecreated = false;
@@ -721,7 +721,7 @@ private:
 
                         // Don't deactivate the renderer while the audio thread is rendering
                         // it - ARANode::process try-locks this and outputs silence meanwhile
-                        const juce::ScopedLock sl (owner.getProcessLock());
+                        const yup::ScopedLock sl (owner.getProcessLock());
 
                         // ARA requires renderer deactivation before adding/removing regions
                         if (auto p = getPlugin())
@@ -761,7 +761,7 @@ private:
     }
 
     //==============================================================================
-    struct ContentUpdater  : public juce::Timer
+    struct ContentUpdater  : public yup::Timer
     {
         ContentUpdater (ARAClipPlayer& p) : owner (p) { startTimer (100); }
 
@@ -778,13 +778,13 @@ private:
             }
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentUpdater)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentUpdater)
     };
 
     std::unique_ptr<ContentUpdater> contentUpdater;
 
     //==============================================================================
-    struct ModelUpdater  : private juce::Timer
+    struct ModelUpdater  : private yup::Timer
     {
         // Polled often enough that plugin-side analysis/content updates feel responsive
         // without burning CPU - this used to be 3s, which made the arrangement's note
@@ -804,14 +804,14 @@ private:
                 document.dci->notifyModelUpdates (document.dcRef);
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModelUpdater)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ModelUpdater)
     };
 
     std::unique_ptr<ModelUpdater> modelUpdater;
 
     //==============================================================================
     ARAClipPlayer() = delete;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAClipPlayer)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAClipPlayer)
 };
 
 //==============================================================================
@@ -921,7 +921,7 @@ void ARAFileReader::contentHasChanged()
         player->contentHasChanged();
 }
 
-juce::MemoryBlock ARAFileReader::storeARAArchiveForCopy()
+yup::MemoryBlock ARAFileReader::storeARAArchiveForCopy()
 {
     if (player != nullptr)
         return player->storeARAArchiveForCopy();
@@ -929,16 +929,16 @@ juce::MemoryBlock ARAFileReader::storeARAArchiveForCopy()
     return {};
 }
 
-void ARAFileReader::restoreARAArchiveForPaste (const juce::MemoryBlock& data,
-                                               const juce::String& archivedSourceID,
-                                               const juce::String& archivedModID,
-                                               const juce::String& documentArchiveID)
+void ARAFileReader::restoreARAArchiveForPaste (const yup::MemoryBlock& data,
+                                               const yup::String& archivedSourceID,
+                                               const yup::String& archivedModID,
+                                               const yup::String& documentArchiveID)
 {
     if (player != nullptr)
         player->restoreARAArchiveForPaste (data, archivedSourceID, archivedModID, documentArchiveID);
 }
 
-juce::String ARAFileReader::getAudioSourcePersistentID() const
+yup::String ARAFileReader::getAudioSourcePersistentID() const
 {
     if (player != nullptr)
         return player->getAudioSourcePersistentID();
@@ -946,7 +946,7 @@ juce::String ARAFileReader::getAudioSourcePersistentID() const
     return {};
 }
 
-juce::String ARAFileReader::getAudioModificationPersistentID() const
+yup::String ARAFileReader::getAudioModificationPersistentID() const
 {
     if (player != nullptr)
         return player->getAudioModificationPersistentID();
@@ -954,7 +954,7 @@ juce::String ARAFileReader::getAudioModificationPersistentID() const
     return {};
 }
 
-juce::String ARAFileReader::getDocumentArchiveID() const
+yup::String ARAFileReader::getDocumentArchiveID() const
 {
     if (player != nullptr)
         return player->getDocumentArchiveID();
@@ -966,7 +966,7 @@ TimeDuration ARAFileReader::getHead() const  { return player != nullptr ? player
 TimeDuration ARAFileReader::getTail() const  { return player != nullptr ? player->getTail() : TimeDuration(); }
 
 //==============================================================================
-juce::MidiMessageSequence ARAFileReader::getAnalysedMIDISequence()
+yup::MidiMessageSequence ARAFileReader::getAnalysedMIDISequence()
 {
     if (player != nullptr)
         return player->getAnalysedMIDISequence();
@@ -991,8 +991,8 @@ struct ARADocumentHolder::Pimpl
         auto& state = edit.getARADocument().lastState;
 
         // Collect which plugin types are needed by scanning clips
-        std::set<juce::String> neededPluginKeys;
-        juce::HashMap<juce::String, juce::PluginDescription> pluginDescsByKey;
+        std::set<yup::String> neededPluginKeys;
+        yup::HashMap<yup::String, yup::PluginDescription> pluginDescsByKey;
 
         visitAllTrackItems (edit, [&] (TrackItem& i)
         {
@@ -1043,7 +1043,7 @@ struct ARADocumentHolder::Pimpl
         // Create documents for each needed plugin type
         for (auto& key : neededPluginKeys)
         {
-            juce::PluginDescription desc;
+            yup::PluginDescription desc;
 
             if (pluginDescsByKey.contains (key))
             {
@@ -1090,7 +1090,7 @@ struct ARADocumentHolder::Pimpl
             if (pluginState.isValid() && pluginState.hasType (IDs::ARAPLUGIN))
             {
                 // Create a temporary ARADOCUMENT-typed tree with the data property
-                juce::ValueTree tempState (IDs::ARADOCUMENT);
+                yup::ValueTree tempState (IDs::ARADOCUMENT);
                 tempState.setProperty ("data", pluginState.getProperty ("data"), nullptr);
 
                 if (pluginState.hasProperty (IDs::araDocumentArchiveID))
@@ -1112,11 +1112,11 @@ struct ARADocumentHolder::Pimpl
         // Each group pairs one source mapping with its associated modification mappings,
         // so that when collisions exist (multiple old sources → same new source),
         // each restoreObjectsFromArchive call only touches its own modifications.
-        juce::Array<ARAClipPlayer::PersistentIDMappingGroup> mappingGroups;
-        juce::StringArray seenSourceMappings, seenModMappings;
+        yup::Array<ARAClipPlayer::PersistentIDMappingGroup> mappingGroups;
+        yup::StringArray seenSourceMappings, seenModMappings;
 
         // Collect identity mod mappings for the new-scheme identity source group
-        juce::Array<ARAClipPlayer::PersistentIDMapping> identityModMappings;
+        yup::Array<ARAClipPlayer::PersistentIDMapping> identityModMappings;
 
         visitAllTrackItems (edit, [&] (TrackItem& i)
         {
@@ -1139,8 +1139,8 @@ struct ARADocumentHolder::Pimpl
             auto clipRawID = static_cast<HashCode> (c->itemID.getRawID());
             auto trackRawID = static_cast<HashCode> (track->itemID.getRawID());
 
-            auto oldModID = juce::String::toHexString (fileHash ^ lastModTime ^ clipRawID ^ trackRawID);
-            auto newModID = juce::String::toHexString (fileHash ^ clipRawID);
+            auto oldModID = yup::String::toHexString (fileHash ^ lastModTime ^ clipRawID ^ trackRawID);
+            auto newModID = yup::String::toHexString (fileHash ^ clipRawID);
 
             // Saved-ID group: the IDs persisted with the clip at save time take priority -
             // if they differ from the current ones (e.g. the source file moved, which
@@ -1207,7 +1207,7 @@ struct ARADocumentHolder::Pimpl
         // Add one identity source group per unique file with all identity mod mappings
         // (for archives saved with the new scheme)
         {
-            juce::StringArray seenIdentitySources;
+            yup::StringArray seenIdentitySources;
 
             visitAllTrackItems (edit, [&] (TrackItem& i)
             {
@@ -1246,7 +1246,7 @@ struct ARADocumentHolder::Pimpl
         }
     }
 
-    ARAClipPlayer::ARADocument* getOrCreateDocument (const juce::PluginDescription& desc)
+    ARAClipPlayer::ARADocument* getOrCreateDocument (const yup::PluginDescription& desc)
     {
         auto key = desc.createIdentifierString();
         auto it = araDocuments.find (key);
@@ -1263,7 +1263,7 @@ struct ARADocumentHolder::Pimpl
         return doc;
     }
 
-    ARAClipPlayer::ARADocument* getDocumentForPlugin (const juce::PluginDescription& desc)
+    ARAClipPlayer::ARADocument* getDocumentForPlugin (const yup::PluginDescription& desc)
     {
         auto key = desc.createIdentifierString();
         auto it = araDocuments.find (key);
@@ -1283,12 +1283,12 @@ struct ARADocumentHolder::Pimpl
     }
 
     Edit& edit;
-    std::map<juce::String, std::unique_ptr<ARAClipPlayer::ARADocument>> araDocuments;
+    std::map<yup::String, std::unique_ptr<ARAClipPlayer::ARADocument>> araDocuments;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
-ARADocumentHolder::ARADocumentHolder (Edit& e, const juce::ValueTree& v)
+ARADocumentHolder::ARADocumentHolder (Edit& e, const yup::ValueTree& v)
     : edit (e), lastState (v)
 {
 }
@@ -1325,7 +1325,7 @@ void ARADocumentHolder::flushStateToValueTree()
         // saved before rather than silently wiping the user's ARA edits
         for (auto& [key, doc] : pimpl->araDocuments)
         {
-            juce::ValueTree pluginState (IDs::ARAPLUGIN);
+            yup::ValueTree pluginState (IDs::ARAPLUGIN);
             pluginState.setProperty (IDs::id, key, nullptr);
             doc->flushStateToValueTree (pluginState);
 
@@ -1376,7 +1376,7 @@ void ARADocumentHolder::musicalContextContentChanged()
 }
 
 bool ARADocumentHolder::bindPluginToDocument (ExternalPlugin& plugin,
-                                              const juce::PluginDescription& desc)
+                                              const yup::PluginDescription& desc)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
 
@@ -1441,8 +1441,8 @@ ARAClipPlayer::ARADocument* ARAClipPlayer::getDocument() const
     return {};
 }
 
-juce::PluginDescription ARAFileReader::findPluginForARAArchiveID (Engine& engine, const juce::String& archiveID,
-                                                                  const juce::String& suggestedPlugInName)
+yup::PluginDescription ARAFileReader::findPluginForARAArchiveID (Engine& engine, const yup::String& archiveID,
+                                                                  const yup::String& suggestedPlugInName)
 {
     auto araDescs = engine.getPluginManager().getARACompatiblePlugDescriptions();
 
@@ -1452,7 +1452,7 @@ juce::PluginDescription ARAFileReader::findPluginForARAArchiveID (Engine& engine
     // so we mustn't load every installed ARA plugin on the off-chance it matches.
     if (suggestedPlugInName.isNotEmpty())
     {
-        juce::Array<juce::PluginDescription> matching;
+        yup::Array<yup::PluginDescription> matching;
 
         for (auto& d : araDescs)
             if (d.name.equalsIgnoreCase (suggestedPlugInName))
@@ -1489,9 +1489,9 @@ juce::PluginDescription ARAFileReader::findPluginForARAArchiveID (Engine& engine
 
             if (cached == cache.end())
             {
-                juce::ARAFactoryResult result;
+                yup::ARAFactoryResult result;
                 engine.getPluginManager().pluginFormatManager
-                    .createARAFactoryAsync (desc, [&result] (juce::ARAFactoryResult r) { result = std::move (r); });
+                    .createARAFactoryAsync (desc, [&result] (yup::ARAFactoryResult r) { result = std::move (r); });
 
                 // The callback is synchronous for VST3; if a format ever completes
                 // asynchronously the factory will be null here and the plugin is skipped
@@ -1504,12 +1504,12 @@ juce::PluginDescription ARAFileReader::findPluginForARAArchiveID (Engine& engine
         if (araFactory == nullptr)
             continue;
 
-        if (archiveID == juce::String::fromUTF8 (araFactory->documentArchiveID))
+        if (archiveID == yup::String::fromUTF8 (araFactory->documentArchiveID))
             return desc;
 
         for (ARASize i = 0; i < araFactory->compatibleDocumentArchiveIDsCount; ++i)
         {
-            if (archiveID == juce::String::fromUTF8 (araFactory->compatibleDocumentArchiveIDs[i]))
+            if (archiveID == yup::String::fromUTF8 (araFactory->compatibleDocumentArchiveIDs[i]))
                 return desc;
         }
     }
@@ -1538,20 +1538,20 @@ void ARAFileReader::hidePluginWindow()                         {}
 void ARAFileReader::notifyViewSelection()                      {}
 int ARAFileReader::getNumPlaybackRegions() const               { return 0; }
 bool ARAFileReader::isAnalysingContent()                       { return false; }
-juce::MidiMessageSequence ARAFileReader::getAnalysedMIDISequence()   { return {}; }
+yup::MidiMessageSequence ARAFileReader::getAnalysedMIDISequence()   { return {}; }
 void ARAFileReader::sourceClipChanged()                        {}
 void ARAFileReader::contentHasChanged()                        {}
-juce::MemoryBlock ARAFileReader::storeARAArchiveForCopy()      { return {}; }
-void ARAFileReader::restoreARAArchiveForPaste (const juce::MemoryBlock&, const juce::String&, const juce::String&, const juce::String&) {}
-juce::String ARAFileReader::getAudioSourcePersistentID() const { return {}; }
-juce::String ARAFileReader::getAudioModificationPersistentID() const { return {}; }
-juce::String ARAFileReader::getDocumentArchiveID() const             { return {}; }
+yup::MemoryBlock ARAFileReader::storeARAArchiveForCopy()      { return {}; }
+void ARAFileReader::restoreARAArchiveForPaste (const yup::MemoryBlock&, const yup::String&, const yup::String&, const yup::String&) {}
+yup::String ARAFileReader::getAudioSourcePersistentID() const { return {}; }
+yup::String ARAFileReader::getAudioModificationPersistentID() const { return {}; }
+yup::String ARAFileReader::getDocumentArchiveID() const             { return {}; }
 TimeDuration ARAFileReader::getHead() const                    { return {}; }
 TimeDuration ARAFileReader::getTail() const                    { return {}; }
 
-juce::PluginDescription ARAFileReader::findPluginForARAArchiveID (Engine&, const juce::String&, const juce::String&) { return {}; }
+yup::PluginDescription ARAFileReader::findPluginForARAArchiveID (Engine&, const yup::String&, const yup::String&) { return {}; }
 
-ARADocumentHolder::ARADocumentHolder (Edit& e, const juce::ValueTree&) : edit (e) { juce::ignoreUnused (edit); }
+ARADocumentHolder::ARADocumentHolder (Edit& e, const yup::ValueTree&) : edit (e) { yup::ignoreUnused (edit); }
 ARADocumentHolder::~ARADocumentHolder() {}
 ARADocumentHolder::Pimpl* ARADocumentHolder::getPimpl()             { return {}; }
 void ARADocumentHolder::flushStateToValueTree() {}
@@ -1560,7 +1560,7 @@ void ARADocumentHolder::musicalContextContentChanged() {}
 struct ARAPluginBinding::Impl {};
 ARAPluginBinding::ARAPluginBinding (std::unique_ptr<Impl> implToUse) : impl (std::move (implToUse)) {}
 ARAPluginBinding::~ARAPluginBinding() = default;
-bool ARADocumentHolder::bindPluginToDocument (ExternalPlugin&, const juce::PluginDescription&)   { return false; }
+bool ARADocumentHolder::bindPluginToDocument (ExternalPlugin&, const yup::PluginDescription&)   { return false; }
 
 } // namespace tracktion::inline engine
 
@@ -1570,9 +1570,9 @@ bool ARADocumentHolder::bindPluginToDocument (ExternalPlugin&, const juce::Plugi
 // Static utility methods that work regardless of ARA being enabled
 namespace tracktion::inline engine {
 
-juce::String ARAFileReader::readRawIXMLFromSourceFile (const juce::File& file)
+yup::String ARAFileReader::readRawIXMLFromSourceFile (const yup::File& file)
 {
-    juce::FileInputStream stream (file);
+    yup::FileInputStream stream (file);
 
     if (! stream.openedOk() || stream.getTotalLength() < 12)
         return {};
@@ -1599,7 +1599,7 @@ juce::String ARAFileReader::readRawIXMLFromSourceFile (const juce::File& file)
 
             if (std::memcmp (chunkID, "iXML", 4) == 0)
             {
-                juce::MemoryBlock block;
+                yup::MemoryBlock block;
                 stream.readIntoMemoryBlock (block, static_cast<std::ptrdiff_t> (chunkSize));
                 return block.toString();
             }
@@ -1626,7 +1626,7 @@ juce::String ARAFileReader::readRawIXMLFromSourceFile (const juce::File& file)
 
             if (std::memcmp (chunkID, "iXML", 4) == 0)
             {
-                juce::MemoryBlock block;
+                yup::MemoryBlock block;
                 stream.readIntoMemoryBlock (block, static_cast<std::ptrdiff_t> (chunkSize));
                 return block.toString();
             }
@@ -1638,11 +1638,11 @@ juce::String ARAFileReader::readRawIXMLFromSourceFile (const juce::File& file)
     return {};
 }
 
-juce::Array<ARAFileReader::ARAChunkInfo> ARAFileReader::parseARAAudioFileChunksFromIXML (const juce::String& ixmlString)
+yup::Array<ARAFileReader::ARAChunkInfo> ARAFileReader::parseARAAudioFileChunksFromIXML (const yup::String& ixmlString)
 {
-    juce::Array<ARAChunkInfo> results;
+    yup::Array<ARAChunkInfo> results;
 
-    auto xml = juce::parseXML (ixmlString);
+    auto xml = yup::parseXML (ixmlString);
 
     if (xml == nullptr)
         return results;
@@ -1674,8 +1674,8 @@ juce::Array<ARAFileReader::ARAChunkInfo> ARAFileReader::parseARAAudioFileChunksF
 
         if (auto e = audioSourceElement->getChildByName ("archiveData"))
         {
-                juce::MemoryOutputStream mos (info.archiveData, false);
-                juce::Base64::convertFromBase64 (mos, e->getAllSubText().trim());
+                yup::MemoryOutputStream mos (info.archiveData, false);
+                yup::Base64::convertFromBase64 (mos, e->getAllSubText().trim());
             }
 
         if (auto suggestedPlugin = audioSourceElement->getChildByName ("suggestedPlugIn"))
@@ -1684,7 +1684,7 @@ juce::Array<ARAFileReader::ARAChunkInfo> ARAFileReader::parseARAAudioFileChunksF
                 info.suggestedPlugInName = e->getAllSubText().trim();
 
             if (auto e = suggestedPlugin->getChildByName ("manufacturerName"))
-                info.manufacturerName = e->getAllSubText().trim();
+                info.vendor = e->getAllSubText().trim();
         }
 
         if (info.documentArchiveID.isNotEmpty())
@@ -1694,7 +1694,7 @@ juce::Array<ARAFileReader::ARAChunkInfo> ARAFileReader::parseARAAudioFileChunksF
     return results;
 }
 
-ARAIXMLResult detectARAFromIXMLChunks (Engine& engine, const juce::File& sourceFile)
+ARAIXMLResult detectARAFromIXMLChunks (Engine& engine, const yup::File& sourceFile)
 {
    #if TRACKTION_ENABLE_ARA
     if (! sourceFile.existsAsFile())
@@ -1723,7 +1723,7 @@ ARAIXMLResult detectARAFromIXMLChunks (Engine& engine, const juce::File& sourceF
                         + ") but no matching plugin installed");
     }
    #else
-    juce::ignoreUnused (engine, sourceFile);
+    yup::ignoreUnused (engine, sourceFile);
    #endif
 
     return {};

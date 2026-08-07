@@ -18,8 +18,8 @@ namespace tracktion::inline engine {
 
     N.B. This class is in development and not ready for public use yet!!
 */
-class BufferedFileReader    : public juce::AudioFormatReader,
-                              private juce::TimeSliceClient
+class BufferedFileReader    : public yup::AudioFormatReader,
+                              private yup::TimeSliceClient
 {
 public:
     /** Creates a reader.
@@ -33,8 +33,8 @@ public:
         @param samplesToBuffer  the total number of samples to buffer ahead.
                                 Pass -1 to buffer the whole source
     */
-    BufferedFileReader (juce::AudioFormatReader* sourceReader,
-                        juce::TimeSliceThread& timeSliceThread,
+    BufferedFileReader (yup::AudioFormatReader* sourceReader,
+                        yup::TimeSliceThread& timeSliceThread,
                         int samplesToBuffer);
 
     /** Destructor. */
@@ -56,19 +56,19 @@ public:
     //==============================================================================
     /** @internal */
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override;
+                      yup::int64 startSampleInFile, int numSamples) override;
 
 private:
     struct BufferedBlock
     {
-        BufferedBlock (juce::AudioFormatReader&);
+        BufferedBlock (yup::AudioFormatReader&);
 
-        void update (juce::AudioFormatReader&, juce::Range<juce::int64> range, size_t slotIndex);
+        void update (yup::AudioFormatReader&, yup::Range<yup::int64> range, size_t slotIndex);
 
-        juce::Range<juce::int64> range;
-        juce::AudioBuffer<float> buffer;
+        yup::Range<yup::int64> range;
+        yup::AudioBuffer<float> buffer;
         bool allSamplesRead = false;
-        std::atomic<juce::uint32> lastUseTime { 0 };
+        std::atomic<yup::uint32> lastUseTime { 0 };
         std::atomic<int> slotIndex { -1 };
     };
 
@@ -77,7 +77,7 @@ private:
         ScopedSlotAccess (BufferedFileReader&, size_t slotIndex);
         ~ScopedSlotAccess();
 
-        static ScopedSlotAccess fromPosition (BufferedFileReader&, juce::int64 position);
+        static ScopedSlotAccess fromPosition (BufferedFileReader&, yup::int64 position);
 
         BufferedBlock* getBlock() const     { return block; }
         void setBlock (BufferedBlock*);
@@ -102,9 +102,9 @@ private:
 
     static constexpr int samplesPerBlock = 32768;
 
-    std::unique_ptr<juce::AudioFormatReader> source;
-    juce::TimeSliceThread& thread;
-    std::atomic<juce::int64> nextReadPosition { 0 };
+    std::unique_ptr<yup::AudioFormatReader> source;
+    yup::TimeSliceThread& thread;
+    std::atomic<yup::int64> nextReadPosition { 0 };
     int timeoutMs = 0;
 
     std::vector<std::unique_ptr<BufferedBlock>> blocks;
@@ -115,11 +115,11 @@ private:
     std::atomic<size_t> numBlocksBuffered { 0 }, nextSlotScheduled { 0 };
     const bool isFullyBuffering = false;
 
-    size_t getSlotIndexFromSamplePosition (juce::int64 samplePos);
-    juce::Range<juce::int64> getSlotRange (size_t slotIndex);
+    size_t getSlotIndexFromSamplePosition (yup::int64 samplePos);
+    yup::Range<yup::int64> getSlotRange (size_t slotIndex);
     void markSlotUseState (size_t slotIndex, bool isInUse);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferedFileReader)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferedFileReader)
 };
 
 } // namespace tracktion::inline engine

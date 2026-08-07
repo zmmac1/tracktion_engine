@@ -38,9 +38,9 @@ TEST_CASE ("MidiNode")
 
     for (auto setup : tracktion::graph::test_utilities::getTestSetups())
     {
-        MESSAGE (juce::String ("Test setup: sample rate SR, block size BS, random blocks RND")
-                    .replace ("SR", juce::String (setup.sampleRate))
-                    .replace ("BS", juce::String (setup.blockSize))
+        MESSAGE (yup::String ("Test setup: sample rate SR, block size BS, random blocks RND")
+                    .replace ("SR", yup::String (setup.sampleRate))
+                    .replace ("BS", yup::String (setup.blockSize))
                     .replace ("RND", setup.randomiseBlockSizes ? "Y" : "N").toStdString());
 
         for (bool playSyncedToRange : { true, false })
@@ -67,11 +67,11 @@ TEST_CASE ("MidiNode")
             // Basic MIDI
             {
                 auto sequence = masterSequence;
-                auto node = std::make_unique<tracktion::engine::MidiNode> (std::vector<juce::MidiMessageSequence> ({ sequence }),
+                auto node = std::make_unique<tracktion::engine::MidiNode> (std::vector<yup::MidiMessageSequence> ({ sequence }),
                                                                            MidiList::TimeBase::seconds,
-                                                                           juce::Range<int>::withStartAndLength (1, 1),
+                                                                           yup::Range<int>::withStartAndLength (1, 1),
                                                                            false,
-                                                                           juce::Range<double> (0.0, duration),
+                                                                           yup::Range<double> (0.0, duration),
                                                                            LiveClipLevel(),
                                                                            processState,
                                                                            EditItemID());
@@ -84,10 +84,10 @@ TEST_CASE ("MidiNode")
 
             // Offset MIDI
             {
-                const auto editTimeRange = juce::Range<double>::withStartAndLength (1.0, duration);
-                auto node = std::make_unique<tracktion::engine::MidiNode> (std::vector<juce::MidiMessageSequence> ({ masterSequence }),
+                const auto editTimeRange = yup::Range<double>::withStartAndLength (1.0, duration);
+                auto node = std::make_unique<tracktion::engine::MidiNode> (std::vector<yup::MidiMessageSequence> ({ masterSequence }),
                                                                            MidiList::TimeBase::seconds,
-                                                                           juce::Range<int>::withStartAndLength (1, 1),
+                                                                           yup::Range<int>::withStartAndLength (1, 1),
                                                                            false,
                                                                            editTimeRange,
                                                                            LiveClipLevel(),
@@ -96,7 +96,7 @@ TEST_CASE ("MidiNode")
 
                 auto testContext = createTracktionTestContext (processState, std::move (node), ts, 0, editTimeRange.getEnd());
 
-                juce::MidiMessageSequence expectedSequence;
+                yup::MidiMessageSequence expectedSequence;
                 expectedSequence.addSequence (masterSequence,
                                               1.0,
                                               editTimeRange.getStart(),

@@ -12,15 +12,15 @@ namespace tracktion::inline engine {
 
 /** */
 class MidiInputDevice : public InputDevice,
-                        public juce::MidiInputCallback,
-                        private juce::Timer,
-                        private juce::MidiKeyboardStateListener
+                        public yup::MidiInputCallback,
+                        private yup::Timer,
+                        private yup::MidiKeyboardStateListener
 {
 public:
-    MidiInputDevice (Engine&, juce::String name, juce::String deviceID);
+    MidiInputDevice (Engine&, yup::String name, yup::String deviceID);
     ~MidiInputDevice() override;
 
-    virtual juce::String openDevice() = 0;
+    virtual yup::String openDevice() = 0;
     virtual void closeDevice() = 0;
 
     void setEnabled (bool) override;
@@ -73,7 +73,7 @@ public:
     /// Updates the timestamp of the message and handles sending it out to
     /// listeners.  false if the given message has been filtered out by channel
     /// or  number.
-    bool handleIncomingMessage (juce::MidiMessage&);
+    bool handleIncomingMessage (yup::MidiMessage&);
 
     //==============================================================================
     void addInstance (MidiInputDeviceInstanceBase*);
@@ -90,19 +90,19 @@ public:
     enum class MergeMode { always, never, optional };
 
     Clip* addMidiAsTransaction (Edit&, EditItemID targetID,
-                                Clip* takeClip, juce::MidiMessageSequence,
+                                Clip* takeClip, yup::MidiMessageSequence,
                                 TimeRange markedRange, MergeMode, MidiChannel);
 
-    juce::MidiKeyboardState keyboardState;
+    yup::MidiKeyboardState keyboardState;
 
-    void handleIncomingMidiMessage (juce::MidiInput*, const juce::MidiMessage&) override;
-    virtual void handleIncomingMidiMessage (const juce::MidiMessage&, MPESourceID) = 0;
+    void handleIncomingMidiMessage (yup::MidiInput*, const yup::MidiMessage&) override;
+    virtual void handleIncomingMidiMessage (const yup::MidiMessage&, MPESourceID) = 0;
 
     RetrospectiveMidiBuffer* getRetrospectiveMidiBuffer() const     { return retrospectiveBuffer.get(); }
     void updateRetrospectiveBufferLength (double length) override;
     double getAdjustSecs() const                                    { return adjustSecs; }
 
-    juce::Array<AudioTrack*> getDestinationTracks();
+    yup::Array<AudioTrack*> getDestinationTracks();
 
     MidiChannel getMidiChannelFor (int rawChannelNumber) const;
     MPESourceID getMPESourceID() const                              { return midiSourceID; }
@@ -116,13 +116,13 @@ public:
             virtual ~Listener() {}
 
             /** Callback to indicate notes have been played for the given track. */
-            virtual void midiKeyStateChanged (AudioTrack*, const juce::Array<int>& notesOn, const juce::Array<int>& vels, const juce::Array<int>& notesOff) = 0;
+            virtual void midiKeyStateChanged (AudioTrack*, const yup::Array<int>& notesOn, const yup::Array<int>& vels, const yup::Array<int>& notesOff) = 0;
         };
 
-        juce::ListenerList<Listener> listeners;
+        yup::ListenerList<Listener> listeners;
 
     private:
-        friend class juce::SharedResourcePointer<MidiKeyChangeDispatcher>;
+        friend class yup::SharedResourcePointer<MidiKeyChangeDispatcher>;
         MidiKeyChangeDispatcher() {}
     };
 
@@ -134,7 +134,7 @@ protected:
     double manualAdjustMs = 0;
     double minimumLengthMs = 0;
     bool overrideNoteVels = false, eventReceivedFromDevice = false;
-    juce::BigInteger disallowedChannels;
+    yup::BigInteger disallowedChannels;
     MidiChannel channelToUse;
     int programToUse = 0;
     int bankToUse = 0;
@@ -145,28 +145,28 @@ protected:
     std::unique_ptr<NoteDispatcher> noteDispatcher;
     std::vector<double> lastNoteOns;
 
-    juce::CriticalSection noteLock;
+    yup::CriticalSection noteLock;
     bool keysDown[128], keysUp[128];
     uint8_t keyDownVelocities[128];
-    juce::SharedResourcePointer<MidiKeyChangeDispatcher> midiKeyChangeDispatcher;
+    yup::SharedResourcePointer<MidiKeyChangeDispatcher> midiKeyChangeDispatcher;
 
-    juce::CriticalSection instanceLock;
-    juce::Array<MidiInputDeviceInstanceBase*> instances;
+    yup::CriticalSection instanceLock;
+    yup::Array<MidiInputDeviceInstanceBase*> instances;
     std::unique_ptr<RetrospectiveMidiBuffer> retrospectiveBuffer;
 
-    void handleNoteOn (juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
-    void handleNoteOff (juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
+    void handleNoteOn (yup::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
+    void handleNoteOff (yup::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
 
     void timerCallback() override;
 
-    void sendNoteOnToMidiKeyListeners (juce::MidiMessage&);
+    void sendNoteOnToMidiKeyListeners (yup::MidiMessage&);
 
-    void loadMidiProps (const juce::XmlElement*);
-    void saveMidiProps (juce::XmlElement&);
+    void loadMidiProps (const yup::XmlElement*);
+    void saveMidiProps (yup::XmlElement&);
 
-    void sendMessageToInstances (const juce::MidiMessage&, MPESourceID);
+    void sendMessageToInstances (const yup::MidiMessage&, MPESourceID);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputDevice)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputDevice)
 };
 
 } // namespace tracktion::inline engine

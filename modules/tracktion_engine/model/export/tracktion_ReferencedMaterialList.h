@@ -36,8 +36,8 @@ public:
             projectItem->verifyLength();
             const double srcLen = projectItem->getLength() + 0.001;
 
-            const double start = juce::jlimit (0.0, srcLen, startTime - handleSize);
-            const double end   = juce::jlimit (0.0, srcLen, startTime + length + handleSize);
+            const double start = yup::jlimit (0.0, srcLen, startTime - handleSize);
+            const double end   = yup::jlimit (0.0, srcLen, startTime + length + handleSize);
 
             add (projectItem, start, end - start);
         }
@@ -73,10 +73,10 @@ public:
     }
 
     //==============================================================================
-    juce::String getReassignedFileName (ProjectItemRef id, double requiredTime,
+    yup::String getReassignedFileName (ProjectItemRef id, double requiredTime,
                                         double& newStartTime, double& newLength) const
     {
-        requiredTime = juce::jmax (0.0, requiredTime);
+        requiredTime = yup::jmax (0.0, requiredTime);
 
         if (auto il = getIntervalsForID (id))
         {
@@ -90,7 +90,7 @@ public:
 
                     if (auto projectItem = projectManager.getProjectItem (id))
                     {
-                        auto withoutExtension = juce::File::getCurrentWorkingDirectory()
+                        auto withoutExtension = yup::File::getCurrentWorkingDirectory()
                                                   .getChildFile (projectItem->getFileName())
                                                   .getFileNameWithoutExtension();
 
@@ -150,8 +150,8 @@ public:
 
                     if (e1 >= s2 && s1 <= e2)
                     {
-                        s1 = juce::jmin (s1, s2);
-                        e1 = juce::jmax (e1, e2);
+                        s1 = yup::jmin (s1, s2);
+                        e1 = yup::jmax (e1, e2);
                         starts.remove (j);
                         ends.remove (j);
                     }
@@ -163,16 +163,16 @@ public:
         }
 
     private:
-        juce::Array<double> starts, ends;
+        yup::Array<double> starts, ends;
     };
 
     //==============================================================================
     ProjectManager& projectManager;
-    juce::Array<ProjectItem::Ptr> items;
-    juce::Array<ProjectItemRef> ids;
+    yup::Array<ProjectItem::Ptr> items;
+    yup::Array<ProjectItemRef> ids;
 
 private:
-    juce::OwnedArray<IntervalList> excerpts;
+    yup::OwnedArray<IntervalList> excerpts;
     double handleSize;
 
     const IntervalList* getIntervalsForID (const ProjectItemRef& ref) const
@@ -184,7 +184,7 @@ private:
         return {};
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReferencedMaterialList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReferencedMaterialList)
 };
 
 } // namespace tracktion::inline engine

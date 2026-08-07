@@ -13,7 +13,7 @@ namespace tracktion::inline engine {
 /** Manages a set of AutomatableParameters for an Edit and notifies controllers and
     registered listeners when they change.
 */
-class ParameterChangeHandler   : public juce::ChangeBroadcaster
+class ParameterChangeHandler   : public yup::ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -41,7 +41,7 @@ public:
         ~Disabler()                                         { owner.enabled = true; }
 
         ParameterChangeHandler& owner;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Disabler)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Disabler)
     };
 
     //==============================================================================
@@ -93,7 +93,7 @@ private:
     std::shared_mutex listenerListLock;
     std::vector<Listener*> listeners;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterChangeHandler)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterChangeHandler)
 };
 
 } // namespace tracktion::inline engine

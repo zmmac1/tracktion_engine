@@ -52,30 +52,30 @@ public:
     virtual void doAdditionalInitialisation (ExternalPlugin&)                       {}
 
     /// Gives an opportunity to load custom plugins for those that have been registered as custom formats but not added to the list.
-    virtual std::unique_ptr<juce::PluginDescription> findDescriptionForFileOrID (const juce::String&)   { return {}; }
+    virtual std::unique_ptr<yup::PluginDescription> findDescriptionForFileOrID (const yup::String&)   { return {}; }
 
     /// Should return if the given plugin is disabled or not.
     /// ExternalPlugins will use this to determine if they should load themselves or not.
     /// This can be called often so should be quick to execute.
-    virtual bool isPluginDisabled (const juce::String& /*pluginID*/)                { return false; }
+    virtual bool isPluginDisabled (const yup::String& /*pluginID*/)                { return false; }
 
     /// Should implement a way of saving if plugin is disabled or not.
     /// N.B. only in use for ExternalPlugins at the moment.
-    virtual void setPluginDisabled (const juce::String& /*pluginID*/, bool /*shouldBeDisabled*/)    {}
+    virtual void setPluginDisabled (const yup::String& /*pluginID*/, bool /*shouldBeDisabled*/)    {}
 
     /// Should the plugin be loaded. Normally plugins aren't loaded when Edit is for exporting
     /// or examining. Override this if you always need a plugin loaded
     virtual bool shouldLoadPlugin (ExternalPlugin&);
 
     /// Gives plugins an opportunity to save custom data when the plugin state gets flushed.
-    virtual void saveCustomPluginProperties (juce::ValueTree&, juce::AudioPluginInstance&, juce::UndoManager*)  {}
+    virtual void saveCustomPluginProperties (yup::ValueTree&, yup::AudioPluginInstance&, juce::UndoManager*)  {}
 
     /** Return true if your application supports scanning plugins out of process.
 
         If you want to support scanning out of process, the allowing should be added
         to your JUCEApplication::initialise() function:
 
-        void initialise (const juce::String& commandLine) override
+        void initialise (const yup::String& commandLine) override
         {
             if (PluginManager::startChildProcessPluginScan (commandLine))
                 return;
@@ -106,7 +106,7 @@ public:
 
     /// If isDescriptionOfWaveDevicesSupported returns true, this should be implemented to describe the wave devices
     /// for a given audio device.
-    virtual void describeWaveDevices (std::vector<WaveDeviceDescription>&, juce::AudioIODevice&, bool /*isInput*/) {}
+    virtual void describeWaveDevices (std::vector<WaveDeviceDescription>&, yup::AudioIODevice&, bool /*isInput*/) {}
 
     /// Should return if plugins which have been bypassed should be included in the playback graph.
     /// By default this is false and bypassed plugins will still call processBypassed and introduce
@@ -133,7 +133,7 @@ public:
 
     virtual bool shouldPlayMidiGuideNotes()                                         { return false; }
 
-    virtual int getNumberOfCPUsToUseForAudio()                                      { return juce::jmax (1, juce::SystemStats::getNumCpus()); }
+    virtual int getNumberOfCPUsToUseForAudio()                                      { return yup::jmax (1, yup::SystemStats::getNumCpus()); }
 
     /// Should muted tracks processing be disabled to save CPU
     virtual bool shouldProcessMutedTracks()                                         { return false; }
@@ -146,14 +146,14 @@ public:
 
     /// If implemented, this lets the behaviour determine exactly which file a new
     /// auto recording for the given track should be made to.
-    virtual juce::File getFileForNewAudioRecording (Track&, const juce::String& fileExtension)  { (void) fileExtension; return {}; }
+    virtual yup::File getFileForNewAudioRecording (Track&, const yup::String& fileExtension)  { (void) fileExtension; return {}; }
 
     /// If this is implemented, this folder will be used for the %project% pattern when
     /// parsing an audio input device's target filename.
-    virtual juce::File getDefaultFolderForAudioRecordings (Edit&)                   { return {}; }
+    virtual yup::File getDefaultFolderForAudioRecordings (Edit&)                   { return {}; }
 
     /// The default filename that will be used for audio input devices if not overridden
-    virtual juce::String getDefaultAudioRecordingFilePattern()                      { return "%projectdir%/%edit%_%track%_Take_%take%"; }
+    virtual yup::String getDefaultAudioRecordingFilePattern()                      { return "%projectdir%/%edit%_%track%_Take_%take%"; }
 
     //==============================================================================
     // Model-related options
@@ -165,7 +165,7 @@ public:
     virtual void setMiddleCOctave (int /*newOctave*/)                               {}
 
     // Notifies the host application that an edit has just been saved
-    virtual void editHasBeenSaved (Edit&, juce::File)                               {}
+    virtual void editHasBeenSaved (Edit&, yup::File)                               {}
 
     /// Should return the maximum number of elements that can be added to an Edit.
     virtual EditLimits getEditLimits()                                              { return {}; }
@@ -173,16 +173,16 @@ public:
     /// Returns the defaults applied to newly created Edits.
     virtual EditDefaults getEditDefaults()                                          { return {}; }
 
-    virtual juce::ReferenceCountedObjectPtr<RackType> createPresetRackType (int /*index*/, Edit&)     { return {}; }
+    virtual yup::ReferenceCountedObjectPtr<RackType> createPresetRackType (int /*index*/, Edit&)     { return {}; }
 
     /// If you have any special plugins that access items in the Edit, you need to return them
-    virtual juce::Array<Exportable::ReferencedItem> getReferencedItems (ExternalPlugin&) { return {}; }
+    virtual yup::Array<Exportable::ReferencedItem> getReferencedItems (ExternalPlugin&) { return {}; }
 
     /// If you have any special clips that access items in the Edit, you need to reassign them
     virtual void reassignReferencedItem (Clip&, const Exportable::ReferencedItem&, ProjectItemRef, double)  {}
 
     /// If you have any special clips that access items in the Edit, you need to return them
-    virtual juce::Array<Exportable::ReferencedItem> getReferencedItems (Clip&)      { return {}; }
+    virtual yup::Array<Exportable::ReferencedItem> getReferencedItems (Clip&)      { return {}; }
 
     /// If you have any special plugins that access items in the Edit, you need to reassign them
     virtual void reassignReferencedItem (ExternalPlugin&, const Exportable::ReferencedItem&, ProjectItemRef, double)  {}
@@ -192,7 +192,7 @@ public:
     /// These are bundled when archiving a single Edit so they survive the
     /// round-trip. Paths should live under the source project's directory so the
     /// archive can recreate their relative layout.
-    virtual juce::Array<juce::File> getExtraFilesToArchive (Edit&)                   { return {}; }
+    virtual yup::Array<yup::File> getExtraFilesToArchive (Edit&)                   { return {}; }
 
     /// If this returns false, ClipSlot Clips won't be included in the playback graph
     /// and arranger track clips will always be audible.
@@ -200,7 +200,7 @@ public:
 
     // Default colour for notes. How this index maps to an actual colour is host dependant.
     // Waveform uses yellow, green, blue, purple, red, auto (based on key)
-    virtual int getDefaultNoteColour()                                              { return 0; }
+    virtual int getDefaultNoteColor()                                              { return 0; }
 
     virtual bool ignoreBWavTimestamps()                                             { return false; }
 
@@ -231,7 +231,7 @@ public:
     /// Called by the MidiList to create a MidiMessageSequence for playback.
     /// You can override this to add your own messages but should generally follow the
     /// procedure in MidiList::createDefaultPlaybackMidiSequence.
-    virtual juce::MidiMessageSequence createPlaybackMidiSequence (const MidiList& list, MidiClip& clip, MidiList::TimeBase tb, bool generateMPE)
+    virtual yup::MidiMessageSequence createPlaybackMidiSequence (const MidiList& list, MidiClip& clip, MidiList::TimeBase tb, bool generateMPE)
     {
         return MidiList::createDefaultPlaybackMidiSequence (list, clip, tb, generateMPE);
     }
@@ -284,7 +284,7 @@ public:
     virtual ControlSurfaces getDesiredControlSurfaces()                             { return {}; }
 
     /// Restore a custom control surface from custom XML
-    virtual ControlSurface* getCustomControlSurfaceForXML (ExternalControllerManager&, const juce::XmlElement&)     { return {}; }
+    virtual ControlSurface* getCustomControlSurfaceForXML (ExternalControllerManager&, const yup::XmlElement&)     { return {}; }
 };
 
 } // namespace tracktion::inline engine

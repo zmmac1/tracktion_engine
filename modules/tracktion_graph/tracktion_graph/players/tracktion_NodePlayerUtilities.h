@@ -49,7 +49,7 @@ namespace node_player_utils
                                 return duplicates;
                             } (nodeIDs);
 
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         if (! duplicateIDs.empty())
         {
             auto getNodeTypeStrings = [&nodes] (auto id)

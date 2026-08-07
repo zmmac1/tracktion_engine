@@ -48,7 +48,7 @@ public:
         int outputChannels = 2;
 
         /** Names of your audio channels. If left empty, names will automatically be generated */
-        juce::StringArray inputNames, outputNames;
+        yup::StringArray inputNames, outputNames;
 
         /** @internal The number of samples to delay the input by. N.B. For testing only. */
         int inputLatencyNumSamples = 0;
@@ -63,7 +63,7 @@ public:
     void prepareToPlay (double sampleRate, int blockSize);
 
     // Pass audio and midi buffers to the engine
-    void processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&);
+    void processBlock (yup::AudioBuffer<float>& buffer, yup::MidiBuffer&);
 
     /** Returns true if the MidiInput device is a HostedMidiInputDevice. */
     static bool isHostedMidiInputDevice (const MidiInputDevice&);
@@ -75,8 +75,8 @@ private:
     friend class HostedMidiInputDevice;
     friend class HostedMidiOutputDevice;
 
-    juce::StringArray getInputChannelNames();
-    juce::StringArray getOutputChannelNames();
+    yup::StringArray getInputChannelNames();
+    yup::StringArray getOutputChannelNames();
 
     std::shared_ptr<MidiOutputDevice> createMidiOutput();
     std::shared_ptr<MidiInputDevice> createMidiInput();
@@ -91,7 +91,7 @@ private:
     int maxChannels = 0;
     std::unique_ptr<LatencyProcessor> inputLatencyProcessor, outputLatencyProcessor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HostedAudioDeviceInterface)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HostedAudioDeviceInterface)
 };
 
 } // namespace tracktion::inline engine

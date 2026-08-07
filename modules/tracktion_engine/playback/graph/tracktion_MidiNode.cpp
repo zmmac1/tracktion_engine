@@ -14,11 +14,11 @@
 
 namespace tracktion::inline engine {
 
-MidiNode::MidiNode (std::vector<juce::MidiMessageSequence> sequences,
+MidiNode::MidiNode (std::vector<yup::MidiMessageSequence> sequences,
                     MidiList::TimeBase tb,
-                    juce::Range<int> midiChannelNumbers,
+                    yup::Range<int> midiChannelNumbers,
                     bool useMPE,
-                    juce::Range<double> editTimeRange,
+                    yup::Range<double> editTimeRange,
                     LiveClipLevel liveClipLevel,
                     ProcessState& processStateToUse,
                     EditItemID editItemIDToUse,
@@ -112,9 +112,9 @@ void MidiNode::process (ProcessContext& pc)
 }
 
 void MidiNode::processSection (Node::ProcessContext& pc,
-                               juce::Range<double> sectionEditRange,
+                               yup::Range<double> sectionEditRange,
                                double secondsPerTimeBase,
-                               juce::MidiMessageSequence& sequence)
+                               yup::MidiMessageSequence& sequence)
 {
     if (sectionEditRange.isEmpty()
         || sectionEditRange.getEnd() <= editRange.getStart()
@@ -147,7 +147,7 @@ void MidiNode::processSection (Node::ProcessContext& pc,
 
     if (numEvents != 0)
     {
-        currentIndex = juce::jlimit (0, numEvents - 1, currentIndex);
+        currentIndex = yup::jlimit (0, numEvents - 1, currentIndex);
 
         if (sequence.getEventTime (currentIndex) >= localTime.getStart())
         {
@@ -181,7 +181,7 @@ void MidiNode::processSection (Node::ProcessContext& pc,
 
             if (eventTime >= 0.0)
             {
-                juce::MidiMessage m (meh->message);
+                yup::MidiMessage m (meh->message);
                 m.multiplyVelocity (volScale);
                 const auto eventTimeSeconds = eventTime * secondsPerTimeBase;
                 pc.buffers.midi.addMidiMessage (m, eventTimeSeconds, midiSourceID);

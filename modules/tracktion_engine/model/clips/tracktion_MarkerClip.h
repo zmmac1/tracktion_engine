@@ -16,7 +16,7 @@ namespace tracktion::inline engine {
 class MarkerClip   : public Clip
 {
 public:
-    MarkerClip (const juce::ValueTree&, EditItemID, ClipOwner& targetParent);
+    MarkerClip (const yup::ValueTree&, EditItemID, ClipOwner& targetParent);
     ~MarkerClip() override;
 
     int getMarkerID()                                               { return markerID; }
@@ -25,21 +25,21 @@ public:
     bool isSyncAbsolute() const noexcept                            { return syncType == syncAbsolute; }
     bool isSyncBarsBeats() const noexcept                           { return syncType == syncBarsBeats; }
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     bool canBeAddedTo (ClipOwner&) override;
-    juce::Colour getDefaultColour() const override;
+    yup::Color getDefaultColor() const override;
     void initialise() override;
 
     bool isMidi() const override                                    { return false; }
     bool isMuted() const override                                   { return false; }
 
 protected:
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
 private:
     juce::CachedValue<int> markerID;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MarkerClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MarkerClip)
 };
 
 } // namespace tracktion::inline engine

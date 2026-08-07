@@ -15,9 +15,9 @@ namespace tracktion::inline engine {
     This might be an edit, audio file, midi file, etc.
 */
 class ProjectItem   : public Selectable,
-                      public juce::ReferenceCountedObject,
-                      private juce::Timer,
-                      private juce::AsyncUpdater
+                      public yup::ReferenceCountedObject,
+                      private yup::Timer,
+                      private yup::AsyncUpdater
 {
 public:
     //==============================================================================
@@ -49,40 +49,40 @@ public:
         forceNoRename
     };
 
-    using Ptr = juce::ReferenceCountedObjectPtr<ProjectItem>;
-    using Array = juce::ReferenceCountedArray<ProjectItem>;
+    using Ptr = yup::ReferenceCountedObjectPtr<ProjectItem>;
+    using Array = yup::ReferenceCountedArray<ProjectItem>;
 
     //==============================================================================
     /** Loads a ProjectItem from a stream that was saved using writeToStream(). */
-    ProjectItem (Engine&, ProjectItemRef, juce::InputStream*);
+    ProjectItem (Engine&, ProjectItemRef, yup::InputStream*);
 
     //==============================================================================
     /** Creates a ProjectItem with some settings. */
     ProjectItem (Engine&,
-                 const juce::String& name,
-                 const juce::String& type,
-                 const juce::String& desc,
-                 const juce::String& file,
+                 const yup::String& name,
+                 const yup::String& type,
+                 const yup::String& desc,
+                 const yup::String& file,
                  Category,
                  double length,
                  ProjectItemRef);
 
     /** Creates a folder-backed ProjectItem with an absolute source file path. */
-    ProjectItem (Engine&, const juce::File& sourceFile,
-                 const juce::String& type, const juce::String& name,
+    ProjectItem (Engine&, const yup::File& sourceFile,
+                 const yup::String& type, const yup::String& name,
                  Category, Project& ownerProject);
 
     ~ProjectItem() override;
 
     //==============================================================================
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     void selectionStatusChanged (bool isNowSelected) override;
 
     //==============================================================================
     /** Returns the ProjectItemRef that identifies this item. */
     const ProjectItemRef& getProjectItemRef() const noexcept    { return itemRef; }
 
-    juce::ReferenceCountedObjectPtr<Project> getProject() const;
+    yup::ReferenceCountedObjectPtr<Project> getProject() const;
 
     // checks whether it's been removed from its project
     bool hasBeenDeleted() const;
@@ -92,36 +92,36 @@ public:
     static const char* midiItemType() noexcept      { return "midi"; }
     static const char* videoItemType() noexcept     { return "video"; }
 
-    const juce::String& getType() const;
+    const yup::String& getType() const;
 
     bool isWave() const noexcept                    { return getType() == waveItemType(); }
     bool isMidi() const noexcept                    { return getType() == midiItemType(); }
     bool isEdit() const noexcept                    { return getType() == editItemType(); }
     bool isVideo() const noexcept                   { return getType() == videoItemType(); }
 
-    const juce::String& getName() const;
-    void setName (const juce::String& name, SetNameMode);
+    const yup::String& getName() const;
+    void setName (const yup::String& name, SetNameMode);
 
     Category getCategory() const;
     void setCategory (Category cat);
 
     // get/set a persistent string property with a name. Setting to empty removes it
-    juce::String getNamedProperty (const juce::String& name) const;
-    void setNamedProperty (const juce::String& name, const juce::String& value);
+    yup::String getNamedProperty (const yup::String& name) const;
+    void setNamedProperty (const yup::String& name, const yup::String& value);
 
-    juce::String getDescription() const;
+    yup::String getDescription() const;
 
     /** Sets the user-visible description text.
-        Pass juce::dontSendNotification to update it without broadcasting a change
+        Pass yup::dontSendNotification to update it without broadcasting a change
         - used when restoring a persisted description during a folder scan, where
         firing a change would propagate to the owning project and retrigger the
         scan. */
-    void setDescription (const juce::String& newDesc,
-                         juce::NotificationType = juce::sendNotification);
+    void setDescription (const yup::String& newDesc,
+                         yup::NotificationType = yup::sendNotification);
 
     /** optional set of interesting time markers, for wave files */
-    juce::Array<TimePosition> getMarkedPoints() const;
-    void setMarkedPoints (const juce::Array<TimePosition>& points);
+    yup::Array<TimePosition> getMarkedPoints() const;
+    void setMarkedPoints (const yup::Array<TimePosition>& points);
 
     /** copies the full description, categories, properties, etc. */
     void copyAllPropertiesFrom (const ProjectItem& other);
@@ -132,12 +132,12 @@ public:
     void setLength (double length);
 
     /** name of the project it's inside. */
-    juce::String getProjectName() const;
+    yup::String getProjectName() const;
 
     //==============================================================================
-    juce::File getSourceFile();
-    juce::String getRawFileName() const       { return file; }
-    juce::String getFileName() const;
+    yup::File getSourceFile();
+    yup::String getRawFileName() const       { return file; }
+    yup::String getFileName() const;
 
     enum class FileMode
     {
@@ -146,8 +146,8 @@ public:
         relativeIfWithinProject
     };
 
-    void setSourceFile (const juce::File&, FileMode mode = FileMode::relativeIfWithinProject);
-    bool isForFile (const juce::File&);
+    void setSourceFile (const yup::File&, FileMode mode = FileMode::relativeIfWithinProject);
+    bool isForFile (const yup::File&);
     bool isAbsolutePath() const;
     void convertToRelativePath();
     void convertToAbsolutePath();
@@ -164,29 +164,29 @@ public:
     /** the actual file created may differ, e.g. if an ogg file is chopped up and
         has to become a wav.
     */
-    bool copySectionToNewFile (const juce::File& destFile,
-                               juce::File& actualFileCreated,
+    bool copySectionToNewFile (const yup::File& destFile,
+                               yup::File& actualFileCreated,
                                double startTime,
                                double length);
 
     bool deleteSourceFile();
 
     /** Updates the stored length value in this object.
-        Pass juce::dontSendNotification to update it without broadcasting a change
+        Pass yup::dontSendNotification to update it without broadcasting a change
         - a change here propagates to the owning project, which makes project list
         UIs rebuild themselves. */
-    void verifyLength (juce::NotificationType = juce::sendNotification);
+    void verifyLength (yup::NotificationType = yup::sendNotification);
 
     /** used when moving to another project. */
     void changeProjectId (ProjectID oldID, ProjectID newID);
 
     //==============================================================================
-    void writeToStream (juce::OutputStream&) const;
+    void writeToStream (yup::OutputStream&) const;
 
     /** Returns a list of search strings for this object, by chopping up the
         name and description into words.
     */
-    juce::StringArray getSearchTokens() const;
+    yup::StringArray getSearchTokens() const;
 
     Engine& engine; /**< The Engine instance this belongs to. */
 
@@ -197,17 +197,17 @@ private:
     friend class Project;
 
     ProjectItemRef itemRef;
-    juce::String type, objectName, description, file;
+    yup::String type, objectName, description, file;
     double length = 0;
-    juce::File sourceFile, newDstFile;
+    yup::File sourceFile, newDstFile;
     SafeSelectable<Project> ownerProject;
 
     void timerCallback() override;
     void handleAsyncUpdate() override;
 
-    juce::File getRelativeFile (const juce::String&) const;
+    yup::File getRelativeFile (const yup::String&) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectItem)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectItem)
 };
 
 } // namespace tracktion::inline engine

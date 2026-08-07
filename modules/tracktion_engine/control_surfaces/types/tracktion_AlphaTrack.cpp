@@ -100,7 +100,7 @@ bool AlphaTrackControlSurface::isOnEditScreen() const
     return getEditIfOnEditScreen() != nullptr;
 }
 
-void AlphaTrackControlSurface::acceptMidiMessage (int, const juce::MidiMessage& m)
+void AlphaTrackControlSurface::acceptMidiMessage (int, const yup::MidiMessage& m)
 {
     auto data = m.getRawData();
     auto datasize = m.getRawDataSize();
@@ -189,7 +189,7 @@ void AlphaTrackControlSurface::acceptMidiMessage (int, const juce::MidiMessage& 
                     if (shift)
                     {
                         if (! doKeyPress (alphaTrackF5, ! isOnEditScreen()))
-                            doKeyPress (juce::KeyPress::F5Key);
+                            doKeyPress (yup::KeyPress::F5Key);
                     }
                     else
                     {
@@ -201,7 +201,7 @@ void AlphaTrackControlSurface::acceptMidiMessage (int, const juce::MidiMessage& 
                     if (shift)
                     {
                         if (! doKeyPress(alphaTrackF6, ! isOnEditScreen()))
-                            doKeyPress (juce::KeyPress::F6Key);
+                            doKeyPress (yup::KeyPress::F6Key);
                     }
                     else
                     {
@@ -213,7 +213,7 @@ void AlphaTrackControlSurface::acceptMidiMessage (int, const juce::MidiMessage& 
                     if (shift)
                     {
                         if (! doKeyPress(alphaTrackF7, ! isOnEditScreen()))
-                            doKeyPress (juce::KeyPress::F7Key);
+                            doKeyPress (yup::KeyPress::F7Key);
                     }
                     else
                     {
@@ -225,7 +225,7 @@ void AlphaTrackControlSurface::acceptMidiMessage (int, const juce::MidiMessage& 
                     if (shift)
                     {
                         if (! doKeyPress(alphaTrackF8, ! isOnEditScreen()))
-                            doKeyPress (juce::KeyPress::F8Key);
+                            doKeyPress (yup::KeyPress::F8Key);
                     }
                     else
                     {
@@ -272,8 +272,8 @@ void AlphaTrackControlSurface::acceptMidiMessage (int, const juce::MidiMessage& 
                         userPressedRecEnable(0, false);
                     break;
                 case 0x67: // footswitch
-                    if (auto focused = juce::Component::getCurrentlyFocusedComponent())
-                        focused->keyPressed (juce::KeyPress (alphaTrackFoot));
+                    if (auto focused = yup::Component::getCurrentlyFocusedComponent())
+                        focused->keyPressed (yup::KeyPress (alphaTrackFoot));
 
                     break;
                 case 0x78: // left encoder touch
@@ -450,7 +450,7 @@ void AlphaTrackControlSurface::acceptMidiMessage (int, const juce::MidiMessage& 
 
             if (param)
             {
-                pos = juce::jlimit (0.0f, 1.0f, float(fpos) / 0x3FF);
+                pos = yup::jlimit (0.0f, 1.0f, float(fpos) / 0x3FF);
                 param->midiControllerMoved (pos);
                 updateDisplay();
                 updateFlip();
@@ -499,7 +499,7 @@ void AlphaTrackControlSurface::moveFader(int channelNum, float newSliderPos)
 
 void AlphaTrackControlSurface::moveFaderInt (float newSliderPos)
 {
-    int newPos = juce::roundToInt (newSliderPos * 0x3FF);
+    int newPos = yup::roundToInt (newSliderPos * 0x3FF);
 
     if (newPos != physicalFaderPos)
     {
@@ -559,13 +559,13 @@ void AlphaTrackControlSurface::automationWriteModeChanged (bool isWriting_)
         updateDisplay();
 }
 
-void AlphaTrackControlSurface::faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames)
+void AlphaTrackControlSurface::faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames)
 {
     currentTrack = newStartChannelNumber;
     trackName = trackNames[0];
 
     if ((newStartChannelNumber + 1) == trackName.getIntValue() && trackName.containsOnly("0123456789"))
-        trackName = TRANS("Track") + " " + juce::String (newStartChannelNumber + 1);
+        trackName = TRANS("Track") + " " + yup::String (newStartChannelNumber + 1);
 
     trackName = trackName.retainCharacters ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 ()! \"#$%&\'*+,-./:;<=>?@^_`{|}");
 
@@ -596,7 +596,7 @@ void AlphaTrackControlSurface::punchOnOffChanged (bool isPunching_)
 void AlphaTrackControlSurface::displayPrint (int line, int x, const char* const text)
 {
     const size_t len = strlen (text);
-    juce::HeapBlock<uint8_t> buffer (len + 8);
+    yup::HeapBlock<uint8_t> buffer (len + 8);
     memcpy (buffer, AlphaTrack::cmdWrite, sizeof (AlphaTrack::cmdWrite));
     buffer [sizeof (AlphaTrack::cmdWrite)] = (uint8_t) (x + line * 16);
     memcpy (buffer + sizeof (AlphaTrack::cmdWrite) + 1, text, len);
@@ -614,12 +614,12 @@ void AlphaTrackControlSurface::setLed (int led, bool state)
     sendMidiArray (0, data);
 }
 
-static juce::String dbToString (double db, int chars)
+static yup::String dbToString (double db, int chars)
 {
     if (db >= -96.0f)
-        return juce::String::formatted ("%+.1f", db).substring (0, chars);
+        return yup::String::formatted ("%+.1f", db).substring (0, chars);
 
-    return juce::String ("-INF").substring (0, chars);
+    return yup::String ("-INF").substring (0, chars);
 }
 
 void AlphaTrackControlSurface::handleAsyncUpdate()
@@ -657,7 +657,7 @@ void AlphaTrackControlSurface::handleAsyncUpdate()
                     name = edit->getAuxBusName (bus);
 
                     if (name.isEmpty())
-                        name = "Send #" + juce::String (bus + 1);
+                        name = "Send #" + yup::String (bus + 1);
                 }
 
                 if (dynamic_cast<VolumeAndPanPlugin*> (param->getPlugin()) != nullptr
@@ -700,7 +700,7 @@ void AlphaTrackControlSurface::handleAsyncUpdate()
                         auto name = edit->getAuxBusName(bus);
 
                         if (name.isEmpty())
-                            name = "snd" + juce::String (bus + 1);
+                            name = "snd" + yup::String (bus + 1);
 
                         name = ExternalController::shortenName (name, sendCnt == 2 ? 4 : 5);
 
@@ -1019,7 +1019,7 @@ void AlphaTrackControlSurface::turnParam (int paramIdx, int delta)
 
     if (param)
     {
-        pos = juce::jlimit (0.0f, 1.0f, pos + static_cast<float> (delta) / 75.0f);
+        pos = yup::jlimit (0.0f, 1.0f, pos + static_cast<float> (delta) / 75.0f);
         param->midiControllerMoved (pos);
         updateDisplay();
     }
@@ -1073,7 +1073,7 @@ bool AlphaTrackControlSurface::isPluginSelected (Plugin* p)
 
 bool AlphaTrackControlSurface::doKeyPress (int key, bool force)
 {
-    juce::KeyPress keyPress (key);
+    yup::KeyPress keyPress (key);
 
     if (auto acm = engine.getUIBehaviour().getApplicationCommandManager())
     {
@@ -1088,7 +1088,7 @@ bool AlphaTrackControlSurface::doKeyPress (int key, bool force)
 
     if (force)
     {
-        if (auto focused = juce::Component::getCurrentlyFocusedComponent())
+        if (auto focused = yup::Component::getCurrentlyFocusedComponent())
             focused->keyPressed (keyPress);
 
         return true;

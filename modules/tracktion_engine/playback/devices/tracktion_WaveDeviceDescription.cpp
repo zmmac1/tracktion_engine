@@ -24,12 +24,12 @@ static uint32_t countTotalSourceChannels (const std::vector<WaveDeviceDescriptio
 //==============================================================================
 WaveDeviceDescription::WaveDeviceDescription() {}
 
-WaveDeviceDescription::WaveDeviceDescription (const juce::String& nm, ChannelConfiguration chans, bool isEnabled)
+WaveDeviceDescription::WaveDeviceDescription (const yup::String& nm, ChannelConfiguration chans, bool isEnabled)
     : name (nm), channels (std::move (chans)), enabled (isEnabled)
 {
 }
 
-WaveDeviceDescription WaveDeviceDescription::withNumChannels (const juce::String& name, uint32_t firstChannelIndexInDevice, uint32_t numChannels, bool enabled)
+WaveDeviceDescription WaveDeviceDescription::withNumChannels (const yup::String& name, uint32_t firstChannelIndexInDevice, uint32_t numChannels, bool enabled)
 {
     WaveDeviceDescription d;
     d.name = name;
@@ -114,7 +114,7 @@ static void describeStandardDevices (std::vector<WaveDeviceDescription>& descrip
     }
 }
 
-bool WaveDeviceDescriptionList::initialiseFromCustomBehaviour (juce::AudioIODevice& device, EngineBehaviour& eb)
+bool WaveDeviceDescriptionList::initialiseFromCustomBehaviour (yup::AudioIODevice& device, EngineBehaviour& eb)
 {
     if (eb.isDescriptionOfWaveDevicesSupported())
     {
@@ -133,12 +133,12 @@ void WaveDeviceDescriptionList::initialiseFromDeviceDefault()
     describeStandardDevices (outputs, (int) deviceOutputChannelNames.size());
 }
 
-bool WaveDeviceDescriptionList::initialiseFromLegacyState (const juce::XmlElement& xml)
+bool WaveDeviceDescriptionList::initialiseFromLegacyState (const yup::XmlElement& xml)
 {
     if (! xml.hasTagName ("AUDIODEVICE"))
         return false;
 
-    juce::BigInteger outEnabled, inEnabled, outMonoChans, inStereoChans;
+    yup::BigInteger outEnabled, inEnabled, outMonoChans, inStereoChans;
     outEnabled.setRange (0, 256, true);
     inEnabled.setRange (0, 256, true);
 
@@ -206,7 +206,7 @@ bool WaveDeviceDescriptionList::initialiseFromLegacyState (const juce::XmlElemen
     return true;
 }
 
-bool WaveDeviceDescriptionList::initialiseFromState (const juce::XmlElement& xml)
+bool WaveDeviceDescriptionList::initialiseFromState (const yup::XmlElement& xml)
 {
     if (xml.hasTagName ("AUDIODEVICE_LAYOUT"))
     {
@@ -245,16 +245,16 @@ choc::value::Value WaveDeviceDescriptionList::toJSON() const
                                "outputs", choc::value::createArray ((uint32_t) outputs.size(), [&] (uint32_t i) { return outputs[i].toJSON(); }));
 }
 
-juce::XmlElement WaveDeviceDescriptionList::toXML() const
+yup::XmlElement WaveDeviceDescriptionList::toXML() const
 {
-    juce::XmlElement xml ("AUDIODEVICE_LAYOUT");
+    yup::XmlElement xml ("AUDIODEVICE_LAYOUT");
     xml.setAttribute ("state", choc::json::toString (toJSON()));
     return xml;
 }
 
-static void refreshNamesInList (std::vector<WaveDeviceDescription>&, juce::StringArray channelNames, bool isInput);
+static void refreshNamesInList (std::vector<WaveDeviceDescription>&, yup::StringArray channelNames, bool isInput);
 
-void WaveDeviceDescriptionList::initialise (Engine& engine, juce::AudioIODevice& device, const juce::XmlElement* state)
+void WaveDeviceDescriptionList::initialise (Engine& engine, yup::AudioIODevice& device, const yup::XmlElement* state)
 {
     deviceName = device.getName();
     deviceInputChannelNames = device.getInputChannelNames();
@@ -287,7 +287,7 @@ void WaveDeviceDescriptionList::initialise (Engine& engine, juce::AudioIODevice&
     sanityCheckList();
 }
 
-bool WaveDeviceDescriptionList::updateForDevice (juce::AudioIODevice& device)
+bool WaveDeviceDescriptionList::updateForDevice (yup::AudioIODevice& device)
 {
     if (device.getName() != deviceName)
         return false;
@@ -406,14 +406,14 @@ static void ensureFullChannelCoverage (std::vector<WaveDeviceDescription>& group
     {}
 }
 
-static juce::String mergeChannelNames (const juce::StringArray& names)
+static yup::String mergeChannelNames (const yup::StringArray& names)
 {
-    juce::String commonPrefix;
-    juce::StringArray suffixes;
+    yup::String commonPrefix;
+    yup::StringArray suffixes;
 
     for (auto& name : names)
     {
-        juce::String prefix, suffix;
+        yup::String prefix, suffix;
 
         if (name.containsChar ('(') && name.trim().endsWithChar (')'))
         {
@@ -425,8 +425,8 @@ static juce::String mergeChannelNames (const juce::StringArray& names)
         {
             for (int i = name.length(); --i >= 0;)
             {
-                if (juce::CharacterFunctions::isDigit (name[i]))
-                    suffix = juce::String::charToString (name[i]) + suffix;
+                if (yup::CharacterFunctions::isDigit (name[i]))
+                    suffix = yup::String::charToString (name[i]) + suffix;
                 else
                     break;
             }
@@ -456,30 +456,30 @@ static juce::String mergeChannelNames (const juce::StringArray& names)
     return commonPrefix + " " + suffixes.joinIntoString (" + ");
 }
 
-static juce::String getDefaultChannelName (bool isInput, uint32_t index)
+static yup::String getDefaultChannelName (bool isInput, uint32_t index)
 {
-    return juce::String (isInput ? TRANS("Input 123") : TRANS("Output 123"))
+    return yup::String (isInput ? TRANS("Input 123") : TRANS("Output 123"))
             .replace ("123", std::to_string (index + 1));
 }
 
-static void replaceBareNumbersWithNames (juce::StringArray& channelNames, bool isInput)
+static void replaceBareNumbersWithNames (yup::StringArray& channelNames, bool isInput)
 {
     for (int i = 0; i < channelNames.size(); ++i)
-        if (channelNames[i].trim() != juce::String (i + 1))
+        if (channelNames[i].trim() != yup::String (i + 1))
             return;
 
     for (int i = 0; i < channelNames.size(); ++i)
-        if (channelNames[i].trim() == juce::String (i + 1))
+        if (channelNames[i].trim() == yup::String (i + 1))
             channelNames.set (i, getDefaultChannelName (isInput, (uint32_t) i));
 }
 
-static void refreshNamesInList (std::vector<WaveDeviceDescription>& descriptions, juce::StringArray channelNames, bool isInput)
+static void refreshNamesInList (std::vector<WaveDeviceDescription>& descriptions, yup::StringArray channelNames, bool isInput)
 {
     replaceBareNumbersWithNames (channelNames, isInput);
 
     for (auto& desc : descriptions)
     {
-        juce::StringArray names;
+        yup::StringArray names;
 
         for (size_t i = 0; i < desc.channels.size(); ++i)
             if (desc.channels[i].indexInDevice >= 0)
@@ -559,9 +559,9 @@ void WaveDeviceDescriptionList::setDeviceEnabled (const WaveDeviceDescription& d
     jassertfalse; // The description passed in didn't come from this list (or is an out-of-date version)
 }
 
-juce::StringArray WaveDeviceDescriptionList::getPossibleChannelGroupsForDevice (const WaveDeviceDescription& d, uint32_t maxNumChannels, bool isInput) const
+yup::StringArray WaveDeviceDescriptionList::getPossibleChannelGroupsForDevice (const WaveDeviceDescription& d, uint32_t maxNumChannels, bool isInput) const
 {
-    juce::StringArray results;
+    yup::StringArray results;
 
     auto& names = isInput ? deviceInputChannelNames : deviceOutputChannelNames;
 

@@ -38,7 +38,7 @@ namespace ModifierCommon
         sixtyFourthD
     };
 
-    inline juce::StringArray getRateTypeChoices()
+    inline yup::StringArray getRateTypeChoices()
     {
         return { TRANS("Hertz"),
                  TRANS("4 Bars"),
@@ -74,7 +74,7 @@ namespace ModifierCommon
         note
     };
 
-    inline juce::StringArray getSyncTypeChoices()
+    inline yup::StringArray getSyncTypeChoices()
     {
         return { TRANS("Free"), TRANS("Transport"), TRANS("Note") };
     }

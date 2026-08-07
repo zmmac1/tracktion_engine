@@ -97,7 +97,7 @@ struct AtomicWrapper
 
     //==============================================================================
     /** Returns the underlying value as a var. */
-    operator juce::var() const noexcept
+    operator yup::var() const noexcept
     {
         return Constrainer::constrain (value.load (MemoryOrderLoad));
     }
@@ -133,7 +133,7 @@ using AtomicWrapperAcqRel = AtomicWrapper<Type, Constrainer, std::memory_order_a
 //
 //==============================================================================
 
-namespace juce
+namespace yup
 {
     template<typename T, typename C, auto L, auto S>
     struct VariantConverter<tracktion::AtomicWrapper<T, C, L, S>>

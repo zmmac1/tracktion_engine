@@ -15,15 +15,15 @@ class BreakpointOscillatorModifier  : public Modifier,
 {
 public:
     //==============================================================================
-    BreakpointOscillatorModifier (Edit&, const juce::ValueTree&);
+    BreakpointOscillatorModifier (Edit&, const yup::ValueTree&);
     ~BreakpointOscillatorModifier() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<BreakpointOscillatorModifier>;
-    using Array = juce::ReferenceCountedArray<BreakpointOscillatorModifier>;
+    using Ptr = yup::ReferenceCountedObjectPtr<BreakpointOscillatorModifier>;
+    using Array = yup::ReferenceCountedArray<BreakpointOscillatorModifier>;
 
     using Modifier::initialise;
     void initialise() override;
-    juce::String getName() const override               { return TRANS("Breakpoint Modifier"); }
+    yup::String getName() const override               { return TRANS("Breakpoint Modifier"); }
 
     //==============================================================================
     /** Returns the current value of the modifier.  */
@@ -38,7 +38,7 @@ public:
     /** Returns the total time for this envelope. */
     float getTotalTime() const;
 
-    AutomatableParameter::ModifierAssignment* createAssignment (const juce::ValueTree&) override;
+    AutomatableParameter::ModifierAssignment* createAssignment (const yup::ValueTree&) override;
 
     ProcessingPosition getProcessingPosition() override { return ProcessingPosition::preFX; }
 
@@ -47,18 +47,18 @@ public:
     //==============================================================================
     struct Assignment   : public AutomatableParameter::ModifierAssignment
     {
-        Assignment (const juce::ValueTree&, const BreakpointOscillatorModifier&);
+        Assignment (const yup::ValueTree&, const BreakpointOscillatorModifier&);
 
         bool isForModifierSource (const ModifierSource&) const override;
-        juce::ReferenceCountedObjectPtr<BreakpointOscillatorModifier> getModifier() const;
+        yup::ReferenceCountedObjectPtr<BreakpointOscillatorModifier> getModifier() const;
 
         const EditItemID breakpointOscillatorModifierID;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
     };
 
     //==============================================================================
-    juce::String getSelectableDescription() override    { return getName(); }
+    yup::String getSelectableDescription() override    { return getName(); }
 
     //==============================================================================
     juce::CachedValue<float> numActivePoints, syncType, rate, rateType, depth, bipolar,

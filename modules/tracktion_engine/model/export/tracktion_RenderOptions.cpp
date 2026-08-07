@@ -11,8 +11,8 @@
 namespace tracktion::inline engine {
 
 TimeDuration RenderOptions::findEndAllowance (Edit& edit,
-                                              juce::Array<EditItemID>* tracks,
-                                              juce::Array<Clip*>* clips)
+                                              yup::Array<EditItemID>* tracks,
+                                              yup::Array<Clip*>* clips)
 {
     auto allTracks = getAllTracks (edit);
     Plugin::Array plugins;
@@ -44,7 +44,7 @@ TimeDuration RenderOptions::findEndAllowance (Edit& edit,
     return allowance;
 }
 
-static TimeRange findTimeFromClips (const juce::Array<Clip*>& clips, TimeDuration endAllowance) noexcept
+static TimeRange findTimeFromClips (const yup::Array<Clip*>& clips, TimeDuration endAllowance) noexcept
 {
     auto time = findUnionOfEditTimeRanges (clips);
     time = time.withEnd (time.getEnd() + endAllowance);
@@ -59,9 +59,9 @@ static bool isParentTrackSelected (SelectionManager& sm, Track& t)
     return false;
 }
 
-static juce::BigInteger getSelectedTracks (Edit& edit, SelectionManager& sm)
+static yup::BigInteger getSelectedTracks (Edit& edit, SelectionManager& sm)
 {
-    juce::BigInteger b;
+    yup::BigInteger b;
     int i = 0;
 
     for (auto t : getAllTracks (edit))
@@ -107,7 +107,7 @@ void RenderOptions::loadFromUserSettings()
         rmsLevelDb        = storage.getProperty (SettingID::renderRMSLevelDb, -12.0);
         peakLevelDb       = storage.getProperty (SettingID::renderPeakLevelDb, 0.0);
         removeSilence     = storage.getProperty (SettingID::renderTrimSilence, false);
-        channelConfigStr  = storage.getProperty (SettingID::renderChannelConfig, juce::String());
+        channelConfigStr  = storage.getProperty (SettingID::renderChannelConfig, yup::String());
         sampleRate        = engine.getDeviceManager().getSampleRate();
         bitDepth          = storage.getProperty (SettingID::renderBits, 16);
         dither            = storage.getProperty (SettingID::renderDither, true);
@@ -259,7 +259,7 @@ void RenderOptions::relinkCachedValues (juce::UndoManager* um)
     updateHash();
 }
 
-void RenderOptions::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void RenderOptions::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v == state && i == IDs::renderTracks)
     {
@@ -282,9 +282,9 @@ ChannelConfiguration RenderOptions::getChannelConfiguration() const
 void RenderOptions::setChannelConfiguration (const ChannelConfiguration& config)
 {
     if (config.isEmpty())
-        channelConfigStr = juce::String();
+        channelConfigStr = yup::String();
     else
-        channelConfigStr = juce::String (config.toString());
+        channelConfigStr = yup::String (config.toString());
 }
 
 Renderer::Parameters RenderOptions::getRenderParameters (Edit& edit)
@@ -494,7 +494,7 @@ Renderer::Parameters RenderOptions::getRenderParameters (MidiClip& clip)
     return params;
 }
 
-juce::AudioFormat* RenderOptions::getAudioFormat()
+yup::AudioFormat* RenderOptions::getAudioFormat()
 {
     auto& afm = engine.getAudioFileFormatManager();
 
@@ -585,7 +585,7 @@ Clip::Ptr RenderOptions::applyRenderToEdit (Edit& edit,
 
         if (addMode == replaceTrack)
             if (auto t = tracksArray.getFirst())
-                trackToUse->setColour (t->getColour());
+                trackToUse->setColor (t->getColor());
 
         for (auto t : tracksArray)
         {
@@ -647,7 +647,7 @@ Clip::Ptr RenderOptions::applyRenderToEdit (Edit& edit,
             // and check the metadata
             AudioFile af (edit.engine, ac->getOriginalFile());
             auto metadata = af.getInfo().metadata;
-            if (metadata[juce::WavAudioFormat::acidBeats].getIntValue() > 0)
+            if (metadata[yup::WavAudioFormat::acidBeats].getIntValue() > 0)
                 ac->setAutoTempo (allowAutoTempo);
 
             // Only enable auto pitch, if we have pitch information
@@ -696,11 +696,11 @@ Clip::Ptr RenderOptions::applyRenderToEdit (Edit& edit,
     {
         if (auto mc = dynamic_cast<MidiClip*> (newClip.get()))
         {
-            juce::OwnedArray<MidiList> lists;
+            yup::OwnedArray<MidiList> lists;
             BeatDuration length;
-            juce::Array<BeatPosition> tempoChangeBeatNumbers;
-            juce::Array<double> bpms;
-            juce::Array<int> numerators, denominators;
+            yup::Array<BeatPosition> tempoChangeBeatNumbers;
+            yup::Array<double> bpms;
+            yup::Array<int> numerators, denominators;
 
             MidiList::readSeparateTracksFromFile (projectItem->getSourceFile(), lists, tempoChangeBeatNumbers,
                                                   bpms, numerators, denominators, length, false);
@@ -732,7 +732,7 @@ void RenderOptions::setToDefault()
 
     createMidiFile           = false;
     format                   = wav;
-    channelConfigStr         = juce::String();
+    channelConfigStr         = yup::String();
     sampleRate               = 44100.0;
     bitDepth                 = 32;
     qualityIndex             = 5;
@@ -759,7 +759,7 @@ void RenderOptions::setToDefault()
     addAcidMetadata          = false;
 }
 
-void RenderOptions::updateLastUsedRenderPath (RenderOptions& renderOptions, const juce::String& itemID)
+void RenderOptions::updateLastUsedRenderPath (RenderOptions& renderOptions, const yup::String& itemID)
 {
     auto& storage = renderOptions.engine.getPropertyStorage();
     auto lastEditID = storage.getProperty (SettingID::lastEditRender).toString();
@@ -795,7 +795,7 @@ std::unique_ptr<RenderOptions> RenderOptions::forGeneralExporter (Edit& edit)
     return ro;
 }
 
-std::unique_ptr<RenderOptions> RenderOptions::forTrackRender (juce::Array<Track*> tracks,
+std::unique_ptr<RenderOptions> RenderOptions::forTrackRender (yup::Array<Track*> tracks,
                                                               AddRenderOptions addOption)
 {
     if (auto first = tracks.getFirst())
@@ -820,7 +820,7 @@ std::unique_ptr<RenderOptions> RenderOptions::forTrackRender (juce::Array<Track*
     return {};
 }
 
-std::unique_ptr<RenderOptions> RenderOptions::forClipRender (juce::Array<Clip*> clips, bool midiNotes)
+std::unique_ptr<RenderOptions> RenderOptions::forClipRender (yup::Array<Clip*> clips, bool midiNotes)
 {
     if (auto first = clips.getFirst())
     {
@@ -886,11 +886,11 @@ std::unique_ptr<RenderOptions> RenderOptions::forEditClip (Clip& clip)
 
 //==============================================================================
 RenderOptions::RenderOptions (Engine& e)
-    : RenderOptions (e, juce::ValueTree (IDs::RENDER), nullptr)
+    : RenderOptions (e, yup::ValueTree (IDs::RENDER), nullptr)
 {
 }
 
-RenderOptions::RenderOptions (Engine& e, const juce::ValueTree& s, juce::UndoManager* um)
+RenderOptions::RenderOptions (Engine& e, const yup::ValueTree& s, juce::UndoManager* um)
     : engine (e), state (s)
 {
     state.addListener (this);
@@ -941,7 +941,7 @@ RenderOptions::TargetFileFormat RenderOptions::setFormat (TargetFileFormat f)
     return format;
 }
 
-void RenderOptions::setFormatType (const juce::String& typeString)
+void RenderOptions::setFormatType (const yup::String& typeString)
 {
     auto& am = engine.getAudioFileFormatManager();
 
@@ -954,7 +954,7 @@ void RenderOptions::setFormatType (const juce::String& typeString)
     else                                                           setFormat (wav);
 }
 
-juce::String RenderOptions::getFormatTypeName (TargetFileFormat fmt)
+yup::String RenderOptions::getFormatTypeName (TargetFileFormat fmt)
 {
     auto& am = engine.getAudioFileFormatManager();
 
@@ -964,14 +964,14 @@ juce::String RenderOptions::getFormatTypeName (TargetFileFormat fmt)
         case aiff:          return am.getAiffFormat()->getFormatName();
         case flac:          return am.getFlacFormat()->getFormatName();
         case ogg:           return am.getOggFormat()->getFormatName();
-        case mp3:           return am.getLameFormat() == nullptr ? juce::String() : am.getLameFormat()->getFormatName();
+        case mp3:           return am.getLameFormat() == nullptr ? yup::String() : am.getLameFormat()->getFormatName();
         case midi:          return "MIDI file";
         case numFormats:    return "MIDI file";
         default:            return {};
     }
 }
 
-void RenderOptions::setTrackIDs (const juce::Array<EditItemID>& trackIDs)
+void RenderOptions::setTrackIDs (const yup::Array<EditItemID>& trackIDs)
 {
     if (trackIDs.isEmpty())
         tracksProperty.resetToDefault();
@@ -1002,9 +1002,9 @@ void RenderOptions::setSampleRate (int sr)
     }
 }
 
-juce::BigInteger RenderOptions::getTrackIndexes (const Edit& ed) const
+yup::BigInteger RenderOptions::getTrackIndexes (const Edit& ed) const
 {
-    juce::BigInteger res;
+    yup::BigInteger res;
 
     auto trks = getAllTracks (ed);
 
@@ -1021,10 +1021,10 @@ void RenderOptions::setSelected (bool onlySelectedTrackAndClips)
     selectedClips = onlySelectedTrackAndClips;
 }
 
-void RenderOptions::setFilename (juce::String value, bool canPromptToOverwriteExisting,
+void RenderOptions::setFilename (yup::String value, bool canPromptToOverwriteExisting,
                                  std::function<void()> onComplete)
 {
-    juce::RecentlyOpenedFilesList recent;
+    yup::RecentlyOpenedFilesList recent;
     auto recentList = engine.getPropertyStorage().getProperty (SettingID::renderRecentFilesList).toString();
     recent.restoreFromString (recentList);
 
@@ -1032,14 +1032,14 @@ void RenderOptions::setFilename (juce::String value, bool canPromptToOverwriteEx
     // resolve the file path before calling setFilename().
     jassert (! value.startsWithIgnoreCase ("$browse"));
 
-    auto f = juce::File (value);
+    auto f = yup::File (value);
 
     auto finishSetFilename = [this, f, recent, recentList, callback = std::move (onComplete)] () mutable
     {
         destFile = f.getFullPathName();
         updateDefaultFilename (nullptr);
 
-        if (destFile != juce::File())
+        if (destFile != yup::File())
         {
             recent.addFile (destFile);
             auto newRecentList = recent.toString();
@@ -1081,11 +1081,11 @@ void RenderOptions::setFilename (juce::String value, bool canPromptToOverwriteEx
 }
 
 //==============================================================================
-juce::StringArray RenderOptions::getFormatTypes()
+yup::StringArray RenderOptions::getFormatTypes()
 {
     auto& am = engine.getAudioFileFormatManager();
 
-    juce::StringArray formats;
+    yup::StringArray formats;
     formats.add (am.getWavFormat()->getFormatName());
     formats.add (am.getAiffFormat()->getFormatName());
 
@@ -1108,7 +1108,7 @@ juce::StringArray RenderOptions::getFormatTypes()
     return formats;
 }
 
-juce::StringArray RenderOptions::getAddRenderOptionText()
+yup::StringArray RenderOptions::getAddRenderOptionText()
 {
     static const char* renderOptionsText[] = { NEEDS_TRANS("Replace Rendered Tracks"),
                                                NEEDS_TRANS("Add Rendered Tracks"),
@@ -1117,7 +1117,7 @@ juce::StringArray RenderOptions::getAddRenderOptionText()
                                                NEEDS_TRANS("Replace Clips"),
                                                NEEDS_TRANS("None") };
 
-    juce::StringArray renderOptions;
+    yup::StringArray renderOptions;
 
     renderOptions.add (TRANS(renderOptionsText[replaceTrack]));
     renderOptions.add (TRANS(renderOptionsText[addTrack]));
@@ -1139,7 +1139,7 @@ bool RenderOptions::isMarkedRegionBigEnough (TimeRange region)
     return region.getLength() > 0.05s;
 }
 
-juce::StringArray RenderOptions::getQualitiesList() const
+yup::StringArray RenderOptions::getQualitiesList() const
 {
     auto& af = engine.getAudioFileFormatManager();
 
@@ -1189,7 +1189,7 @@ void RenderOptions::updateFileName()
     else if (auto af = getAudioFormat())
         destFile = destFile.withFileExtension (af->getFileExtensions()[0]);
     else
-        destFile = juce::File();
+        destFile = yup::File();
 
     setFilename (destFile.getFullPathName(), false);
     updateHash();
@@ -1201,10 +1201,10 @@ void RenderOptions::updateOptionsForFormat()
     {
         // sample rate
         auto rates = af->getPossibleSampleRates();
-        juce::StringArray r;
+        yup::StringArray r;
 
         for (auto rate : rates)
-            r.add (juce::String (rate));
+            r.add (yup::String (rate));
 
         if (! rates.contains ((int) sampleRate))
             sampleRate = 44100;
@@ -1217,7 +1217,7 @@ void RenderOptions::updateOptionsForFormat()
         auto depths = af->getPossibleBitDepths();
 
         for (auto depth : depths)
-            r.add (TRANS("32-bit").replace ("32", juce::String (depth)));
+            r.add (TRANS("32-bit").replace ("32", yup::String (depth)));
 
         if (! depths.contains (bitDepth))
             bitDepth = 16;
@@ -1228,26 +1228,26 @@ void RenderOptions::updateOptionsForFormat()
         // quality
         auto qualities = af->getQualityOptions();
 
-        if (! juce::isPositiveAndBelow (qualityIndex.get(), qualities.size()))
+        if (! yup::isPositiveAndBelow (qualityIndex.get(), qualities.size()))
             qualityIndex = (int) std::ceil (qualities.size() / 2.0);
 
-        if (! juce::isPositiveAndBelow (qualityIndex.get(), qualities.size()))
+        if (! yup::isPositiveAndBelow (qualityIndex.get(), qualities.size()))
             qualityIndex = 0;
     }
 }
 
 void RenderOptions::updateDefaultFilename (Edit* edit)
 {
-    if (destFile == juce::File()
+    if (destFile == yup::File()
         || destFile.existsAsFile()
         || destFile.getFileExtension() != getCurrentFileExtension())
     {
         const ProjectItem::Category category = isRender() ? ProjectItem::Category::rendered
                                                           : ProjectItem::Category::exports;
-        juce::String nameStem;
+        yup::String nameStem;
 
         // Keep a filename the user has typed without the correct extension
-        if (destFile != juce::File() && ! destFile.isDirectory() && ! destFile.existsAsFile())
+        if (destFile != yup::File() && ! destFile.isDirectory() && ! destFile.existsAsFile())
             nameStem = destFile.getFileNameWithoutExtension().trim();
 
         if (nameStem.isEmpty() && (selectedTracks || selectedClips))
@@ -1282,25 +1282,25 @@ void RenderOptions::updateDefaultFilename (Edit* edit)
 
         // Prefer the directory the user has chosen or typed, only falling back to
         // the category default when the current path doesn't point anywhere usable
-        juce::File dir;
+        yup::File dir;
 
         if (destFile.isDirectory())
             dir = destFile;
         else if (destFile.existsAsFile())
             dir = destFile.getParentDirectory();
-        else if (destFile != juce::File() && destFile.getParentDirectory().isDirectory())
+        else if (destFile != yup::File() && destFile.getParentDirectory().isDirectory())
             dir = destFile.getParentDirectory();
         else
             dir = engine.getPropertyStorage().getDefaultLoadSaveDirectory (category);
 
-        destFile = dir.getChildFile (juce::File::createLegalFileName (nameStem)
+        destFile = dir.getChildFile (yup::File::createLegalFileName (nameStem)
                                        + getCurrentFileExtension());
 
         destFile = getNonExistentSiblingWithIncrementedNumberSuffix (destFile, false);
     }
 }
 
-juce::String RenderOptions::getCurrentFileExtension()
+yup::String RenderOptions::getCurrentFileExtension()
 {
     if (format == midi)
         return ".mid";

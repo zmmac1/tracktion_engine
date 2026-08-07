@@ -20,14 +20,14 @@ struct PluginCreationInfo
     PluginCreationInfo (PluginCreationInfo&&) = default;
     PluginCreationInfo& operator= (PluginCreationInfo&&) = delete;
 
-    PluginCreationInfo (Edit& ed, const juce::ValueTree& s, bool isNew) noexcept
+    PluginCreationInfo (Edit& ed, const yup::ValueTree& s, bool isNew) noexcept
         : edit (ed), state (s), isNewPlugin (isNew) {}
 
     PluginCreationInfo() = delete;
     PluginCreationInfo& operator= (const PluginCreationInfo&) = delete;
 
     Edit& edit;
-    juce::ValueTree state;
+    yup::ValueTree state;
     bool isNewPlugin = false;
 };
 
@@ -49,7 +49,7 @@ struct PluginInitialisationInfo
 */
 struct PluginRenderContext
 {
-    PluginRenderContext (juce::AudioBuffer<float>* buffer,
+    PluginRenderContext (yup::AudioBuffer<float>* buffer,
                          int bufferStart, int bufferSize,
                          MidiMessageArray* midiBuffer, double midiOffset,
                          TimeRange editTime, bool playing, bool scrubbing, bool rendering,
@@ -58,8 +58,8 @@ struct PluginRenderContext
     /** @deprecated Use the constructor without the bufferChannels parameter.
         The destBufferChannels field was never used by the engine.
     */
-    PluginRenderContext (juce::AudioBuffer<float>* buffer,
-                         const juce::AudioChannelSet& bufferChannels,
+    PluginRenderContext (yup::AudioBuffer<float>* buffer,
+                         const yup::AudioChannelSet& bufferChannels,
                          int bufferStart, int bufferSize,
                          MidiMessageArray* midiBuffer, double midiOffset,
                          TimeRange editTime, bool playing, bool scrubbing, bool rendering,
@@ -76,10 +76,10 @@ struct PluginRenderContext
     /** The target audio buffer which needs to be filled.
         This may be nullptr if no audio is being processed.
     */
-    juce::AudioBuffer<float>* destBuffer = nullptr;
+    yup::AudioBuffer<float>* destBuffer = nullptr;
 
     /** @deprecated This field is not used by the engine and will be removed in a future version. */
-    juce::AudioChannelSet destBufferChannels;
+    yup::AudioChannelSet destBufferChannels;
 
     /** The index of the start point in the audio buffer from which data must be written. */
     int bufferStartSample = 0;
@@ -121,7 +121,7 @@ struct PluginRenderContext
 
     A Plugin lives inside a PluginList (owned by a Track, Clip, or RackType)
     and processes audio/MIDI via applyToBuffer(). Its persistent state is stored
-    in a juce::ValueTree, and it supports automation, sidechain routing, and
+    in a yup::ValueTree, and it supports automation, sidechain routing, and
     mirroring.
 
     Subclasses include ExternalPlugin (hosted VST/AU/etc.), and the built-in
@@ -141,7 +141,7 @@ struct PluginRenderContext
     unless noted otherwise.
 */
 class Plugin  : public Selectable,
-                public juce::ReferenceCountedObject,
+                public yup::ReferenceCountedObject,
                 public Exportable,
                 public AutomatableEditItem,
                 public MacroParameterElement,
@@ -154,8 +154,8 @@ public:
     void selectableAboutToBeDeleted() override;
 
     //==============================================================================
-    using Ptr      = juce::ReferenceCountedObjectPtr<Plugin>;
-    using Array    = juce::ReferenceCountedArray<Plugin>;
+    using Ptr      = yup::ReferenceCountedObjectPtr<Plugin>;
+    using Array    = yup::ReferenceCountedArray<Plugin>;
 
     /** called by the system to let the plugin manage its automation stuff */
     void playStartedOrStopped();
@@ -171,31 +171,31 @@ public:
     // Naming & identity
 
     /** The name of the type, e.g. "Compressor" */
-    virtual juce::String getName() const override = 0;
+    virtual yup::String getName() const override = 0;
 
     /** Returns a string identifying the plugin type (used as the XML tag name). */
-    virtual juce::String getPluginType() = 0;
+    virtual yup::String getPluginType() = 0;
 
     /** Returns the plugin vendor/manufacturer name. */
-    virtual juce::String getVendor()                              { return "Tracktion"; }
+    virtual yup::String getVendor()                              { return "Tracktion"; }
 
     /** Returns an abbreviated name, ideally fitting within suggestedLength characters. */
-    virtual juce::String getShortName (int /*suggestedLength*/)   { return getName(); }
+    virtual yup::String getShortName (int /*suggestedLength*/)   { return getName(); }
 
     /** Returns the custom name if set, otherwise the built-in getName(). */
-    juce::String getDisplayName() const;
+    yup::String getDisplayName() const;
 
     /** Returns the raw custom name (may be empty). */
-    juce::String getCustomName() const;
+    yup::String getCustomName() const;
 
     /** Sets a custom display name. Trimmed and limited to 64 chars. Empty clears. */
-    void setCustomName (const juce::String&);
+    void setCustomName (const yup::String&);
 
     /** A unique string to identify a plugin independent of install location. */
-    virtual juce::String getIdentifierString()                    { return getPluginType(); }
+    virtual yup::String getIdentifierString()                    { return getPluginType(); }
 
     /** Returns a tooltip string for UI display. */
-    virtual juce::String getTooltip();
+    virtual yup::String getTooltip();
 
     //==============================================================================
     // Enable / freeze / processing state
@@ -275,7 +275,7 @@ public:
     virtual bool shouldMeasureCpuUsage() const noexcept  { return true; }
 
     /** Returns the proportion of the current buffer size spent processing this plugin. */
-    double getCpuUsage() const noexcept     { return juce::jlimit (0.0, 1.0, timeToCpuScale * cpuUsageMs.load()); }
+    double getCpuUsage() const noexcept     { return yup::jlimit (0.0, 1.0, timeToCpuScale * cpuUsageMs.load()); }
 
     //==============================================================================
     // Channel configuration & audio characteristics
@@ -299,7 +299,7 @@ public:
 
     /** Fills the provided StringArrays with the names of this plugin's input and/or
         output channels. Either pointer may be nullptr if not needed. */
-    virtual void getChannelNames (juce::StringArray* ins, juce::StringArray* outs);
+    virtual void getChannelNames (yup::StringArray* ins, yup::StringArray* outs);
 
     /** Describes the full input/output bus topology of a plugin.
         The first entry in each list (if present) is the main bus; additional entries
@@ -368,28 +368,28 @@ public:
     // Parameters
 
     /** Registers a new automatable parameter owned by this plugin. */
-    AutomatableParameter* addParam (const juce::String& paramID, const juce::String& name, juce::NormalisableRange<float> valueRange);
+    AutomatableParameter* addParam (const yup::String& paramID, const yup::String& name, yup::NormalisableRange<float> valueRange);
 
     /** Registers a new automatable parameter with custom string conversion functions. */
-    AutomatableParameter* addParam (const juce::String& paramID, const juce::String& name, juce::NormalisableRange<float> valueRange,
-                                    std::function<juce::String(float)> valueToStringFunction,
-                                    std::function<float(const juce::String&)> stringToValueFunction);
+    AutomatableParameter* addParam (const yup::String& paramID, const yup::String& name, yup::NormalisableRange<float> valueRange,
+                                    std::function<yup::String(float)> valueToStringFunction,
+                                    std::function<float(const yup::String&)> stringToValueFunction);
 
     //==============================================================================
     // Sidechain routing
 
     /** Returns the names of this plugin's input channels (convenience wrapper around getChannelNames). */
-    juce::StringArray getInputChannelNames();
+    yup::StringArray getInputChannelNames();
 
     /** Returns the names of available sidechain sources for this plugin.
         If allowNone is true, includes a "none" entry. */
-    juce::StringArray getSidechainSourceNames (bool allowNone);
+    yup::StringArray getSidechainSourceNames (bool allowNone);
 
     /** Sets the sidechain source by its display name. */
-    void setSidechainSourceByName (const juce::String& name);
+    void setSidechainSourceByName (const yup::String& name);
 
     /** Returns the display name of the current sidechain source. */
-    juce::String getSidechainSourceName();
+    yup::String getSidechainSourceName();
 
     /** Attempts to automatically determine a sensible sidechain routing. */
     void guessSidechainRouting();
@@ -402,9 +402,9 @@ public:
     /** Represents a single channel-to-channel connection for sidechain routing. */
     struct Wire
     {
-        Wire (const juce::ValueTree&, juce::UndoManager*);
+        Wire (const yup::ValueTree&, juce::UndoManager*);
 
-        juce::ValueTree state;
+        yup::ValueTree state;
         juce::CachedValue<int> sourceChannelIndex, destChannelIndex;
     };
 
@@ -418,13 +418,13 @@ public:
     /** If it's a synth that names its notes, this can return the name it uses for this note 0-127.
         Midi channel is 1-16
     */
-    virtual bool hasNameForMidiNoteNumber (int note, int midiChannel, juce::String& name);
+    virtual bool hasNameForMidiNoteNumber (int note, int midiChannel, yup::String& name);
 
     /** Returns the name for a midi program, if there is one.
         programNum = 0 to 127.
     */
-    virtual bool hasNameForMidiProgram (int programNum, int bank, juce::String& name);
-    virtual bool hasNameForMidiBank (int bank, juce::String& name);
+    virtual bool hasNameForMidiProgram (int programNum, int bank, yup::String& name);
+    virtual bool hasNameForMidiBank (int bank, yup::String& name);
 
     //==============================================================================
     // Placement constraints & status
@@ -447,14 +447,14 @@ public:
 
     /** Returns true if this plugin lives inside a RackType. */
     bool isInRack() const;
-    juce::ReferenceCountedObjectPtr<RackType> getOwnerRackType() const;
+    yup::ReferenceCountedObjectPtr<RackType> getOwnerRackType() const;
 
     /** Returns true if this plugin is being used as a clip effect. */
     bool isClipEffectPlugin() const;
 
-    /** Returns the underlying juce::AudioProcessor, if this plugin wraps one.
+    /** Returns the underlying yup::AudioProcessor, if this plugin wraps one.
         Only ExternalPlugin returns non-null by default. */
-    virtual juce::AudioProcessor* getWrappedAudioProcessor() const      { return {}; }
+    virtual yup::AudioProcessor* getWrappedAudioProcessor() const      { return {}; }
 
     //==============================================================================
     // Quick control
@@ -500,7 +500,7 @@ public:
     void changed() override;
 
     //==============================================================================
-    juce::Array<ReferencedItem> getReferencedItems() override;
+    yup::Array<ReferencedItem> getReferencedItems() override;
     void reassignReferencedItem (const ReferencedItem&, ProjectItemRef newRef, double newStartTime) override;
 
     /** Called when ProjectItem sources are re-assigned so you can reload from the new source. */
@@ -558,10 +558,10 @@ public:
     // Editor & window
 
     /** Base class for plugin editor components (custom UIs shown in plugin windows). */
-    struct EditorComponent  : public juce::Component
+    struct EditorComponent  : public yup::Component
     {
         virtual bool allowWindowResizing() = 0;
-        virtual juce::ComponentBoundsConstrainer* getBoundsConstrainer() = 0;
+        virtual yup::ComponentBoundsConstrainer* getBoundsConstrainer() = 0;
 
         /** Returns true if the underlying editor can genuinely be resized to fit
             an arbitrary host-provided size.
@@ -586,7 +586,7 @@ public:
 
     private:
         WindowState() = delete;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowState)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowState)
     };
 
     std::unique_ptr<WindowState> windowState;
@@ -601,7 +601,7 @@ public:
     Engine& engine;
 
     /** The ValueTree that stores this plugin's persistent state within the Edit. */
-    juce::ValueTree state;
+    yup::ValueTree state;
 
     juce::UndoManager* getUndoManager() const noexcept;
 
@@ -615,8 +615,8 @@ protected:
 
     juce::CachedValue<AtomicWrapper<bool>> enabled;
     juce::CachedValue<bool> frozen, processing;
-    juce::CachedValue<juce::String> quickParamName;
-    juce::CachedValue<juce::String> customName;
+    juce::CachedValue<yup::String> quickParamName;
+    juce::CachedValue<yup::String> customName;
     juce::CachedValue<EditItemID> masterPluginID, sidechainSourceID;
 
     /** Current sample rate and block size, set during baseClassInitialise(). */
@@ -626,20 +626,20 @@ protected:
     //==============================================================================
     // ValueTree callbacks
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
     void valueTreeChanged() override;
 
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
-    void valueTreeParentChanged (juce::ValueTree&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
+    void valueTreeParentChanged (yup::ValueTree&) override;
 
     /** Called when the processing enabled state changes. */
     virtual void processingChanged();
 
     //==============================================================================
     /** Helper to populate stereo left/right channel name arrays. */
-    static void getLeftRightChannelNames (juce::StringArray* ins, juce::StringArray* outs);
-    static void getLeftRightChannelNames (juce::StringArray* chans);
+    static void getLeftRightChannelNames (yup::StringArray* ins, yup::StringArray* outs);
+    static void getLeftRightChannelNames (yup::StringArray* chans);
 
 private:
     mutable AutomatableParameter::Ptr quickControlParameter;
@@ -649,12 +649,12 @@ private:
     std::atomic<double> cpuUsageMs { 0 };
     std::atomic<bool> isClipEffect { false };
 
-    juce::ValueTree getConnectionsTree();
+    yup::ValueTree getConnectionsTree();
     struct WireList;
     std::unique_ptr<WireList> sidechainWireList;
     std::atomic<bool> isInitialisingFlag { false };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Plugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Plugin)
 };
 
 } // namespace tracktion::inline engine

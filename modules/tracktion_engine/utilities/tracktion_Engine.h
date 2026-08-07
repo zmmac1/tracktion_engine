@@ -34,10 +34,10 @@ class Engine
 {
 public:
     /** Constructs a default Engine with an application name. */
-    Engine (juce::String applicationName);
+    Engine (yup::String applicationName);
 
     /** Constructs an Engine with an application name and custom UIBehaviour and EngineBehaviour. */
-    Engine (juce::String applicationName, std::unique_ptr<UIBehaviour>, std::unique_ptr<EngineBehaviour>);
+    Engine (yup::String applicationName, std::unique_ptr<UIBehaviour>, std::unique_ptr<EngineBehaviour>);
 
     /** Constructs an Engine with custom PropertyStorage, UIBehaviour and EngineBehaviour. */
     Engine (std::unique_ptr<PropertyStorage>, std::unique_ptr<UIBehaviour>, std::unique_ptr<EngineBehaviour>);
@@ -52,14 +52,14 @@ public:
     void prepareForShutdown (std::function<void()> onReadyToDestroy);
 
     /** Returns the current version of Tracktion Engine. */
-    static juce::String getVersion();
+    static yup::String getVersion();
 
    #if TRACKTION_ENABLE_SINGLETONS
     // Do not use in new projects
     static Engine& getInstance();
    #endif
     /** Returns the list of currently active engines. */
-    static juce::Array<Engine*> getEngines();
+    static yup::Array<Engine*> getEngines();
 
     TemporaryFileManager& getTemporaryFileManager() const;              ///< Returns the TemporaryFileManager allowing to handle the default app and user temporary folders.
     AudioFileFormatManager& getAudioFileFormatManager() const;          ///< Returns the AudioFileFormatManager that maintains a list of available audio file formats.
@@ -85,7 +85,7 @@ public:
     SharedTimer& getBackToArrangerUpdateTimer() const;                  ///< Returns the SharedTimer instance.
     BufferedAudioFileManager& getBufferedAudioFileManager();            ///< Returns the BufferedAudioFileManager instance
 
-    using WeakRef = juce::WeakReference<Engine>;
+    using WeakRef = yup::WeakReference<Engine>;
 
 private:
     void initialise();
@@ -114,8 +114,8 @@ private:
     mutable std::unique_ptr<SharedTimer> backToArrangerUpdateTimer;
     std::unique_ptr<BufferedAudioFileManager> bufferedAudioFileManager;
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (Engine)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Engine)
+    YUP_DECLARE_WEAK_REFERENCEABLE (Engine)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Engine)
 };
 
 } // namespace tracktion::inline engine

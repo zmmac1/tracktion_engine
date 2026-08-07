@@ -25,7 +25,7 @@ struct BenchmarkDescription
     std::string category;       /**< A category for grouping. */
     std::string name;           /**< A human-readable name for the benchmark. */
     std::string description;    /**< An optional description that might include configs etc. */
-    std::string platform { juce::SystemStats::getOperatingSystemName().toStdString() }; /**< A platform string. */
+    std::string platform { yup::SystemStats::getOperatingSystemName().toStdString() }; /**< A platform string. */
 };
 
 /** Creates a description by hashing the name and description fields. */
@@ -43,7 +43,7 @@ struct BenchmarkResult
     double totalSeconds = 0.0, meanSeconds = 0.0, minSeconds = 0.0, maxSeconds = 0.0, varianceSeconds = 0.0;
     uint64_t totalCycles = 0, meanCycles = 0, minCycles = 0, maxCycles = 0;
     double varianceCycles = 0.0;
-    juce::Time date { juce::Time::getCurrentTime() };
+    yup::Time date { yup::Time::getCurrentTime() };
 };
 
 /** Creates a BenchmarkResult from a set of Statistics. */

@@ -27,14 +27,14 @@ TEST_SUITE ("tracktion_engine")
         Engine& engine = *Engine::getEngines().getFirst();
 
         using namespace graph::test_utilities;
-        auto tempFile = getSquareFile<juce::WavAudioFormat> (44100.0, 10.0, 2);
+        auto tempFile = getSquareFile<yup::WavAudioFormat> (44100.0, 10.0, 2);
 
-        auto fileReader = std::unique_ptr<juce::AudioFormatReader> (AudioFileUtils::createReaderFor (engine, tempFile->getFile()));
-        juce::AudioBuffer<float> bufferFromFile ((int) fileReader->numChannels, (int) fileReader->lengthInSamples);
+        auto fileReader = std::unique_ptr<yup::AudioFormatReader> (AudioFileUtils::createReaderFor (engine, tempFile->getFile()));
+        yup::AudioBuffer<float> bufferFromFile ((int) fileReader->numChannels, (int) fileReader->lengthInSamples);
         fileReader->read (&bufferFromFile, 0, (int) fileReader->lengthInSamples, 0, true, true);
 
         auto cacheReader = engine.getAudioFileManager().cache.createReader (AudioFile (engine, tempFile->getFile()));
-        juce::AudioBuffer<float> bufferFromCache ((int) fileReader->numChannels, (int) fileReader->lengthInSamples);
+        yup::AudioBuffer<float> bufferFromCache ((int) fileReader->numChannels, (int) fileReader->lengthInSamples);
 
         for (int i = 0; i < bufferFromCache.getNumSamples(); i += 32'768)
         {
@@ -71,7 +71,7 @@ namespace tracktion::inline engine {
 class JUCEBufferingAudioReaderWrapper   : public AudioFormatReaderWithTimeout
 {
 public:
-    JUCEBufferingAudioReaderWrapper (std::unique_ptr<juce::BufferingAudioReader> sourceReader)
+    JUCEBufferingAudioReaderWrapper (std::unique_ptr<yup::BufferingAudioReader> sourceReader)
         : source (std::move (sourceReader))
     {
         sampleRate              = source->sampleRate;
@@ -88,14 +88,14 @@ public:
     }
 
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override
+                      yup::int64 startSampleInFile, int numSamples) override
     {
         return source->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer,
                                     startSampleInFile, numSamples);
     }
 
 private:
-    std::unique_ptr<juce::BufferingAudioReader> source;
+    std::unique_ptr<yup::BufferingAudioReader> source;
 };
 
 
@@ -120,7 +120,7 @@ public:
     }
 
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override
+                      yup::int64 startSampleInFile, int numSamples) override
     {
         return source->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer,
                                     startSampleInFile, numSamples);
@@ -138,11 +138,11 @@ private:
 
 //==============================================================================
 //==============================================================================
-class AudioFileCacheBenchmarks  : public juce::UnitTest
+class AudioFileCacheBenchmarks  : public yup::UnitTest
 {
 public:
     AudioFileCacheBenchmarks()
-        : juce::UnitTest ("AudioFileCache", "tracktion_benchmarks")
+        : yup::UnitTest ("AudioFileCache", "tracktion_benchmarks")
     {
     }
 
@@ -167,19 +167,19 @@ private:
         const int blockSize = 256;
 
         using namespace graph::test_utilities;
-        auto tempWavFile = getSquareFile<juce::WavAudioFormat> (sampleRate, fileLength, numChannels);
-        auto tempOggFile = getSquareFile<juce::OggVorbisAudioFormat> (sampleRate, fileLength, numChannels, 8);
+        auto tempWavFile = getSquareFile<yup::WavAudioFormat> (sampleRate, fileLength, numChannels);
+        auto tempOggFile = getSquareFile<yup::OggVorbisAudioFormat> (sampleRate, fileLength, numChannels, 8);
 
         // Read raw float from memory
         {
-            auto fileReader = std::unique_ptr<juce::AudioFormatReader> (AudioFileUtils::createReaderFor (engine, tempWavFile->getFile()));
-            juce::AudioBuffer<float> bufferFromFile ((int) fileReader->numChannels, (int) fileReader->lengthInSamples);
+            auto fileReader = std::unique_ptr<yup::AudioFormatReader> (AudioFileUtils::createReaderFor (engine, tempWavFile->getFile()));
+            yup::AudioBuffer<float> bufferFromFile ((int) fileReader->numChannels, (int) fileReader->lengthInSamples);
             fileReader->read (&bufferFromFile, 0, (int) fileReader->lengthInSamples, 0, true, true);
 
             auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
                                                              "Read 1000 random 256 sample blocks from a 10m stereo file stored in memory"));
-            juce::Random r (42);
-            juce::AudioBuffer<float> destBuffer ((int) fileReader->numChannels, blockSize);
+            yup::Random r (42);
+            yup::AudioBuffer<float> destBuffer ((int) fileReader->numChannels, blockSize);
 
             for (int i = 0; i < 1000; ++i)
             {
@@ -196,15 +196,15 @@ private:
 
         // Read ogg from memory
         {
-            juce::MemoryBlock mb;
+            yup::MemoryBlock mb;
             tempOggFile->getFile().loadFileAsData (mb);
 
-            auto fileReader = engine.getAudioFileFormatManager().readFormatManager.createReaderFor (std::make_unique<juce::MemoryInputStream> (mb, false));
+            auto fileReader = engine.getAudioFileFormatManager().readFormatManager.createReaderFor (std::make_unique<yup::MemoryInputStream> (mb, false));
 
             auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
                                                              "Read 1000 random 256 sample blocks from a 10m stereo ogg file stored in memory"));
-            juce::Random r (42);
-            juce::AudioBuffer<float> destBuffer ((int) fileReader->numChannels, blockSize);
+            yup::Random r (42);
+            yup::AudioBuffer<float> destBuffer ((int) fileReader->numChannels, blockSize);
 
             for (int i = 0; i < 1000; ++i)
             {
@@ -226,8 +226,8 @@ private:
 
             auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
                                                              "Read 1000 random 256 sample blocks from a 10m stereo ogg memory mapped file"));
-            juce::Random r (42);
-            juce::AudioBuffer<float> destBuffer ((int) fileReader->numChannels, blockSize);
+            yup::Random r (42);
+            yup::AudioBuffer<float> destBuffer ((int) fileReader->numChannels, blockSize);
 
             for (int i = 0; i < 1000; ++i)
             {
@@ -250,8 +250,8 @@ private:
 
             auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
                                                              "Read 1000 random 256 sample blocks from a 10m stereo wav file"));
-            juce::Random r (42);
-            juce::AudioBuffer<float> destBuffer (numChannels, blockSize);
+            yup::Random r (42);
+            yup::AudioBuffer<float> destBuffer (numChannels, blockSize);
 
             for (int i = 0; i < 1000; ++i)
             {
@@ -273,19 +273,19 @@ private:
             const AudioFile af (engine, tempOggFile->getFile());
             const auto lengthInSamples = af.getLengthInSamples();
             auto cacheReader = engine.getAudioFileManager().cache.createReader (af,
-                                                                                [] (juce::AudioFormatReader* sourceReader,
-                                                                                    juce::TimeSliceThread& timeSliceThread,
+                                                                                [] (yup::AudioFormatReader* sourceReader,
+                                                                                    yup::TimeSliceThread& timeSliceThread,
                                                                                     int samplesToBuffer) -> std::unique_ptr<AudioFormatReaderWithTimeout>
                                                                                 {
-                                                                                     return std::make_unique<JUCEBufferingAudioReaderWrapper> (std::make_unique<juce::BufferingAudioReader> (sourceReader,
+                                                                                     return std::make_unique<JUCEBufferingAudioReaderWrapper> (std::make_unique<yup::BufferingAudioReader> (sourceReader,
                                                                                                                                                                                              timeSliceThread,
                                                                                                                                                                                              samplesToBuffer));
                                                                                 });
 
             auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
-                                                             "Read 1000 random 256 sample blocks from a 10m stereo ogg file at 256 kbps using juce::BufferingAudioReader"));
-            juce::Random r (42);
-            juce::AudioBuffer<float> destBuffer (numChannels, blockSize);
+                                                             "Read 1000 random 256 sample blocks from a 10m stereo ogg file at 256 kbps using yup::BufferingAudioReader"));
+            yup::Random r (42);
+            yup::AudioBuffer<float> destBuffer (numChannels, blockSize);
 
             for (int i = 0; i < 1000; ++i)
             {
@@ -307,8 +307,8 @@ private:
 //xxx            const AudioFile af (engine, tempOggFile->getFile());
 //            const auto lengthInSamples = af.getLengthInSamples();
 //            auto cacheReader = engine.getAudioFileManager().cache.createReader (af,
-//                                                                                [] (juce::AudioFormatReader* sourceReader,
-//                                                                                    juce::TimeSliceThread& timeSliceThread,
+//                                                                                [] (yup::AudioFormatReader* sourceReader,
+//                                                                                    yup::TimeSliceThread& timeSliceThread,
 //                                                                                    int samplesToBuffer) -> std::unique_ptr<AudioFormatReaderWithTimeout>
 //                                                                                {
 //                                                                                     return std::make_unique<TracktionBufferedFileReader> (std::make_unique<BufferedFileReader> (sourceReader,
@@ -318,8 +318,8 @@ private:
 //
 //            auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
 //                                                             "Read 1000 random 256 sample blocks from a 10m stereo ogg file at 256 kbps using BufferedFileReader"));
-//            juce::Random r (42);
-//            juce::AudioBuffer<float> destBuffer (numChannels, blockSize);
+//            yup::Random r (42);
+//            yup::AudioBuffer<float> destBuffer (numChannels, blockSize);
 //
 //            for (int i = 0; i < 1000; ++i)
 //            {
@@ -343,8 +343,8 @@ private:
             const AudioFile af (engine, tempOggFile->getFile());
             const auto lengthInSamples = af.getLengthInSamples();
             auto cacheReader = engine.getAudioFileManager().cache.createReader (af,
-                                                                                [&] (juce::AudioFormatReader*,
-                                                                                     juce::TimeSliceThread&,
+                                                                                [&] (yup::AudioFormatReader*,
+                                                                                     yup::TimeSliceThread&,
                                                                                      int) -> std::unique_ptr<AudioFormatReaderWithTimeout>
                                                                                 {
                                                                                      return std::make_unique<MemoryMappedFileReader> (std::move (mappedFileAndReader));
@@ -352,8 +352,8 @@ private:
 
             auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
                                                              "Read 1000 random 256 sample blocks from a 10m stereo ogg memory mapped file at 256 kbps using a Reader"));
-            juce::Random r (42);
-            juce::AudioBuffer<float> destBuffer (numChannels, blockSize);
+            yup::Random r (42);
+            yup::AudioBuffer<float> destBuffer (numChannels, blockSize);
 
             for (int i = 0; i < 1000; ++i)
             {
@@ -375,18 +375,18 @@ private:
             const AudioFile af (engine, tempOggFile->getFile());
             const auto lengthInSamples = af.getLengthInSamples();
             auto cacheReader = engine.getAudioFileManager().cache.createReader (af,
-                                                                                [] (juce::AudioFormatReader* sourceReader,
-                                                                                    juce::TimeSliceThread& timeSliceThread,
+                                                                                [] (yup::AudioFormatReader* sourceReader,
+                                                                                    yup::TimeSliceThread& timeSliceThread,
                                                                                     int samplesToBuffer) -> std::unique_ptr<AudioFormatReaderWithTimeout>
                                                                                 {
-                                                                                     return std::make_unique<JUCEBufferingAudioReaderWrapper> (std::make_unique<juce::BufferingAudioReader> (sourceReader,
+                                                                                     return std::make_unique<JUCEBufferingAudioReaderWrapper> (std::make_unique<yup::BufferingAudioReader> (sourceReader,
                                                                                                                                                                                              timeSliceThread,
                                                                                                                                                                                              samplesToBuffer));
                                                                                 });
 
             auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
-                                                             "Read a 10m stereo ogg file sequentially at 256 kbps using juce::BufferingAudioReader"));
-            juce::AudioBuffer<float> destBuffer (numChannels, blockSize);
+                                                             "Read a 10m stereo ogg file sequentially at 256 kbps using yup::BufferingAudioReader"));
+            yup::AudioBuffer<float> destBuffer (numChannels, blockSize);
 
             for (SampleCount sourceStartSample = 0; sourceStartSample < lengthInSamples; sourceStartSample += blockSize)
             {
@@ -409,8 +409,8 @@ private:
 //xxx            const AudioFile af (engine, tempOggFile->getFile());
 //            const auto lengthInSamples = af.getLengthInSamples();
 //            auto cacheReader = engine.getAudioFileManager().cache.createReader (af,
-//                                                                                [] (juce::AudioFormatReader* sourceReader,
-//                                                                                    juce::TimeSliceThread& timeSliceThread,
+//                                                                                [] (yup::AudioFormatReader* sourceReader,
+//                                                                                    yup::TimeSliceThread& timeSliceThread,
 //                                                                                    int samplesToBuffer) -> std::unique_ptr<AudioFormatReaderWithTimeout>
 //                                                                                {
 //                                                                                     return std::make_unique<TracktionBufferedFileReader> (std::make_unique<BufferedFileReader> (sourceReader,
@@ -420,8 +420,8 @@ private:
 //
 //            auto bm = Benchmark (createBenchmarkDescription ("Files", "Audio file reading",
 //                                                             "Read a 10m stereo ogg file sequentially at 256 kbps using BufferedFileReader"));
-//            juce::Random r (42);
-//            juce::AudioBuffer<float> destBuffer (numChannels, blockSize);
+//            yup::Random r (42);
+//            yup::AudioBuffer<float> destBuffer (numChannels, blockSize);
 //
 //            for (SampleCount sourceStartSample = 0; sourceStartSample < lengthInSamples; sourceStartSample += blockSize)
 //            {

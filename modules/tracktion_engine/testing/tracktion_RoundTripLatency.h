@@ -20,11 +20,11 @@ namespace test_utilities
 
 static constexpr int testLength = 48000 / 3;
 
-inline juce::Array<int> createSpikes()
+inline yup::Array<int> createSpikes()
 {
-    juce::Array<int> spikes;
+    yup::Array<int> spikes;
 
-    juce::Random rand;
+    yup::Random rand;
     rand.setSeed (12345);
 
     int spikePos = 0;
@@ -40,9 +40,9 @@ inline juce::Array<int> createSpikes()
     return spikes;
 }
 
-inline juce::AudioBuffer<float> createSyncTestSound()
+inline yup::AudioBuffer<float> createSyncTestSound()
 {
-    juce::AudioBuffer<float> testSound;
+    yup::AudioBuffer<float> testSound;
 
     testSound.setSize (1, testLength);
     testSound.clear();
@@ -50,7 +50,7 @@ inline juce::AudioBuffer<float> createSyncTestSound()
     auto s = testSound.getWritePointer (0);
 
     {
-        juce::Random rand;
+        yup::Random rand;
 
         for (int i = 0; i < testLength; ++i)
             s[i] = (rand.nextFloat() - rand.nextFloat() + rand.nextFloat() - rand.nextFloat()) * 0.06f;
@@ -70,7 +70,7 @@ inline juce::AudioBuffer<float> createSyncTestSound()
     return testSound;
 }
 
-static int findOffsetOfSpikes (const juce::AudioBuffer<float>& buffer)
+static int findOffsetOfSpikes (const yup::AudioBuffer<float>& buffer)
 {
     auto minSpikeLevel = 5.0f;
     auto smooth = 0.975;
@@ -80,7 +80,7 @@ static int findOffsetOfSpikes (const juce::AudioBuffer<float>& buffer)
     const auto originalSpikes = createSpikes();
     const auto failedMatchesAllowed = originalSpikes.size() / 5;
 
-    juce::Array<int> spikesFound;
+    yup::Array<int> spikesFound;
     spikesFound.ensureStorageAllocated (100);
     auto runningAverage = 0.0;
     int lastSpike = 0;
@@ -165,8 +165,8 @@ static int findOffsetOfSpikes (const juce::AudioBuffer<float>& buffer)
     return bestOffset;
 }
 
-inline std::optional<int> findSyncDeltaSamples (const juce::AudioBuffer<float>& testSound,
-                                                const juce::AudioBuffer<float>& recorded)
+inline std::optional<int> findSyncDeltaSamples (const yup::AudioBuffer<float>& testSound,
+                                                const yup::AudioBuffer<float>& recorded)
 {
     auto referenceStart = findOffsetOfSpikes (testSound);
     jassert (referenceStart >= 0);
@@ -204,10 +204,10 @@ inline LatencyTesterResult getLatencyTesterResult (DeviceManager& dm, int detect
 
 //==============================================================================
 //==============================================================================
-struct LatencyTester    : public juce::AudioIODeviceCallback,
-                          private juce::Timer
+struct LatencyTester    : public yup::AudioIODeviceCallback,
+                          private yup::Timer
 {
-    LatencyTester (juce::AudioDeviceManager& d, std::function<void (std::optional<int>)>testFinishedCallback_)
+    LatencyTester (yup::AudioDeviceManager& d, std::function<void (std::optional<int>)>testFinishedCallback_)
         : deviceManager (d),
           testFinishedCallback (std::move (testFinishedCallback_))
     {
@@ -224,7 +224,7 @@ struct LatencyTester    : public juce::AudioIODeviceCallback,
     {
         startTimer (50);
 
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
         testSound = createSyncTestSound();
         recordedSound.clear();
         playingSampleNum = recordedSampleNum = 0;
@@ -256,7 +256,7 @@ struct LatencyTester    : public juce::AudioIODeviceCallback,
 
     //==============================================================================
     /** @internal */
-    void audioDeviceAboutToStart (juce::AudioIODevice* device) override
+    void audioDeviceAboutToStart (yup::AudioIODevice* device) override
     {
         isRunning = false;
         sampleRate = device->getCurrentSampleRate();
@@ -275,9 +275,9 @@ struct LatencyTester    : public juce::AudioIODeviceCallback,
                                            float* const* outputChannelData,
                                            int numOutputChannels,
                                            int numSamples,
-                                           const juce::AudioIODeviceCallbackContext&) override
+                                           const yup::AudioIODeviceCallbackContext&) override
     {
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
 
         if (isRunning)
         {
@@ -313,22 +313,22 @@ struct LatencyTester    : public juce::AudioIODeviceCallback,
             // We need to clear the output buffers, in case they're full of junk..
             for (int i = 0; i < numOutputChannels; ++i)
                 if (float* const chan = outputChannelData[i])
-                    juce::FloatVectorOperations::clear (chan, numSamples);
+                    yup::FloatVectorOperations::clear (chan, numSamples);
         }
     }
 
 private:
-    juce::AudioDeviceManager& deviceManager;
+    yup::AudioDeviceManager& deviceManager;
     std::function<void (std::optional<int>)> testFinishedCallback;
 
-    juce::AudioBuffer<float> testSound, recordedSound;
+    yup::AudioBuffer<float> testSound, recordedSound;
     int playingSampleNum = 0, recordedSampleNum = -1;
-    juce::CriticalSection lock;
+    yup::CriticalSection lock;
     double sampleRate = 0;
     bool isRunning = false;
     int deviceInputLatency = 0, deviceOutputLatency = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LatencyTester)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LatencyTester)
 };
 
 } // namespace test_utilities

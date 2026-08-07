@@ -14,19 +14,19 @@ namespace tracktion::inline engine {
 /**
     Holds a snapshot of an Edit file of the last time it was saved.
 */
-class EditSnapshot  : public juce::ReferenceCountedObject
+class EditSnapshot  : public yup::ReferenceCountedObject
 {
 public:
     //==============================================================================
-    using Ptr = juce::ReferenceCountedObjectPtr<EditSnapshot>;
+    using Ptr = yup::ReferenceCountedObjectPtr<EditSnapshot>;
 
-    static Ptr getEditSnapshot (Engine&, juce::File);
+    static Ptr getEditSnapshot (Engine&, yup::File);
 
     //==============================================================================
     struct Marker
     {
-        juce::String name;
-        juce::Colour colour;
+        yup::String name;
+        yup::Color colour;
         TimeRange time;
     };
 
@@ -34,10 +34,10 @@ public:
     ~EditSnapshot();
 
     /** Returns the File if this was created from one. */
-    juce::File getFile() const                          { return sourceFile; }
+    yup::File getFile() const                          { return sourceFile; }
 
     /** Returns the source Xml. */
-    juce::ValueTree getState() noexcept                 { return state; }
+    yup::ValueTree getState() noexcept                 { return state; }
 
     /** Sets the Edit XML that the XmlEdit should refer to.
         This will take ownership of the XmlElement so don't hang on to it.
@@ -49,7 +49,7 @@ public:
         temp Edit files work so we need to follow this. It means that this will hold up-to-date
         Xml but only cached properties of the last save which can be used in things like EditClips.
     */
-    void setState (juce::ValueTree, TimeDuration editLength);
+    void setState (yup::ValueTree, TimeDuration editLength);
 
     /** Returns true if the current source is a valid Edit. */
     bool isValid() const;
@@ -61,16 +61,16 @@ public:
     void refresh();
 
     /** deals only with snapshots so it's relatively fast. */
-    juce::ReferenceCountedArray<EditSnapshot> getNestedEditObjects();
+    yup::ReferenceCountedArray<EditSnapshot> getNestedEditObjects();
 
     //==============================================================================
     // Set of cached properties of the last saved state
-    juce::String getName() const                                        { return name; }
+    yup::String getName() const                                        { return name; }
     int getNumTracks() const                                            { return numTracks; }
     int getNumAudioTracks() const                                       { return numAudioTracks; }
     int getIndexOfTrackID (EditItemID trackID) const                    { return trackIDs.indexOf (trackID); }
-    juce::String getTrackName (int index) const                         { return trackNames[index]; }
-    juce::String getTrackNameFromID (EditItemID trackID) const          { return trackNames[getIndexOfTrackID(trackID)]; }
+    yup::String getTrackName (int index) const                         { return trackNames[index]; }
+    yup::String getTrackNameFromID (EditItemID trackID) const          { return trackNames[getIndexOfTrackID(trackID)]; }
     bool isAudioTrack (int trackIndex) const                            { return audioTracks[trackIndex]; }
     bool isTrackMuted (int trackIndex) const                            { return mutedTracks[trackIndex]; }
     bool isTrackSoloed (int trackIndex) const                           { return soloedTracks[trackIndex]; }
@@ -87,10 +87,10 @@ public:
     int getTimeSigDenominator() const                                   { return timeSigDenominator; }
     int getPitch() const                                                { return pitch; }
 
-    const juce::Array<Marker>& getMarkers() const                       { return markers; }
-    const juce::Array<EditItemID>& getTracks() const                    { return trackIDs; }
-    const juce::Array<juce::File>& getEditClips() const                 { return editClipRefs; }
-    const juce::Array<juce::File>& getClipsSourceRefs() const           { return clipSourceRefs; }
+    const yup::Array<Marker>& getMarkers() const                       { return markers; }
+    const yup::Array<EditItemID>& getTracks() const                    { return trackIDs; }
+    const yup::Array<yup::File>& getEditClips() const                 { return editClipRefs; }
+    const yup::Array<yup::File>& getClipsSourceRefs() const           { return clipSourceRefs; }
     HashCode getHash() const                                            { return lastSaveTime.toMilliseconds(); }
 
     //==============================================================================
@@ -111,35 +111,35 @@ private:
     std::unique_ptr<ListHolder> listHolder;
 
     Project::Ptr project;
-    juce::File sourceFile;
-    juce::ValueTree state;
-    juce::Time lastSaveTime;
+    yup::File sourceFile;
+    yup::ValueTree state;
+    yup::Time lastSaveTime;
 
-    juce::String name;
+    yup::String name;
     int numTracks, numAudioTracks;
-    juce::StringArray trackNames;
-    juce::BigInteger audioTracks, mutedTracks, soloedTracks, soloIsolatedTracks;
+    yup::StringArray trackNames;
+    yup::BigInteger audioTracks, mutedTracks, soloedTracks, soloIsolatedTracks;
 
-    juce::Array<EditItemID> trackIDs;
-    juce::Array<juce::File> editClipRefs, clipSourceRefs;
+    yup::Array<EditItemID> trackIDs;
+    yup::Array<yup::File> editClipRefs, clipSourceRefs;
     double length = 0.0, markIn = 0.0, markOut = 0.0, tempo = 0.0;
     bool marksActive = false;
     int timeSigNumerator = 4, timeSigDenominator = 4, pitch = 60;
-    juce::Array<Marker> markers;
+    yup::Array<Marker> markers;
 
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 
     //==============================================================================
-    EditSnapshot (Engine&, juce::File);
-    void refreshFromXml (const juce::XmlElement&, const juce::String&, double newLength);
+    EditSnapshot (Engine&, yup::File);
+    void refreshFromXml (const yup::XmlElement&, const yup::String&, double newLength);
     void refreshFromState();
     void clear();
-    void addEditClips (const juce::XmlElement& track);
-    void addClipSources (const juce::XmlElement& track);
-    void addMarkers (const juce::XmlElement& track);
-    void addSubTracksRecursively (const juce::XmlElement& parent, int& audioTrackNameNumber);
+    void addEditClips (const yup::XmlElement& track);
+    void addClipSources (const yup::XmlElement& track);
+    void addMarkers (const yup::XmlElement& track);
+    void addSubTracksRecursively (const yup::XmlElement& parent, int& audioTrackNameNumber);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditSnapshot)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditSnapshot)
 };
 
 } // namespace tracktion::inline engine

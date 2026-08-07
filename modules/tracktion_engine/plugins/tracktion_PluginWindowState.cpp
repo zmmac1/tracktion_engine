@@ -12,13 +12,13 @@ namespace tracktion::inline engine {
 
 static bool isDialogOpen()
 {
-    auto& mm = *juce::ModalComponentManager::getInstance();
+    auto& mm = *yup::ModalComponentManager::getInstance();
     if (mm.getNumModalComponents() > 0)
         return true;
 
-    for (int i = juce::TopLevelWindow::getNumTopLevelWindows(); --i >= 0;)
-        if (auto w = juce::TopLevelWindow::getTopLevelWindow (i))
-            if (dynamic_cast<juce::AlertWindow*> (w))
+    for (int i = yup::TopLevelWindow::getNumTopLevelWindows(); --i >= 0;)
+        if (auto w = yup::TopLevelWindow::getTopLevelWindow (i))
+            if (dynamic_cast<yup::AlertWindow*> (w))
                 return true;
 
     return false;
@@ -115,22 +115,22 @@ void PluginWindowState::showWindow()
         // Ensure at least 40px of the window is on screen
         const auto displayRects = []
         {
-            juce::RectangleList<int> trimmedDisplays;
+            yup::RectangleList<int> trimmedDisplays;
 
-            for (auto rect : juce::Desktop::getInstance().getDisplays().getRectangleList (true))
+            for (auto rect : yup::Desktop::getInstance().getDisplays().getRectangleList (true))
                 trimmedDisplays.addWithoutMerging (rect.withTrimmedLeft (100).withTrimmedRight (100).withTrimmedBottom (100));
 
             return trimmedDisplays;
         }();
 
-        auto oldFocus = makeWeakRef (juce::Component::getCurrentlyFocusedComponent());
+        auto oldFocus = makeWeakRef (yup::Component::getCurrentlyFocusedComponent());
 
         if (oldFocus == nullptr)
         {
-            for (int i = juce::ComponentPeer::getNumPeers(); --i >= 0;)
-                if (auto peer = juce::ComponentPeer::getPeer(i))
+            for (int i = yup::ComponentPeer::getNumPeers(); --i >= 0;)
+                if (auto peer = yup::ComponentPeer::getPeer(i))
                     if (peer->isFocused())
-                        oldFocus = std::addressof (peer->getComponent());
+                        oldFocus = peer->getComponent();
         }
 
         pluginWindow = engine.getUIBehaviour().createPluginWindow (*this);
@@ -141,7 +141,7 @@ void PluginWindowState::showWindow()
 
     if (pluginWindow)
     {
-        windowOpenTime = juce::Time::getCurrentTime();
+        windowOpenTime = yup::Time::getCurrentTime();
         pluginWindow->setVisible (true);
         pluginWindow->toFront (false);
     }
@@ -196,13 +196,13 @@ void PluginWindowState::showOrHideAllWindows (Edit& ed)
         hideAllWindowsTemporarily (ed);
 }
 
-void PluginWindowState::pluginClicked (const juce::MouseEvent& e)
+void PluginWindowState::pluginClicked (const yup::MouseEvent& e)
 {
     bool isShowing = isWindowShowing();
 
     if (e.getNumberOfClicks() >= 2)
     {
-        if ((juce::Time::getCurrentTime() - windowOpenTime).inMilliseconds() < 300)
+        if ((yup::Time::getCurrentTime() - windowOpenTime).inMilliseconds() < 300)
             return;
 
         if (isShowing)
@@ -235,20 +235,20 @@ void PluginWindowState::timerCallback()
     }
 }
 
-juce::Point<int> PluginWindowState::choosePositionForPluginWindow()
+yup::Point<int> PluginWindowState::choosePositionForPluginWindow()
 {
     if (lastWindowBounds)
         return lastWindowBounds->getPosition();
 
-    if (auto focused = juce::Component::getCurrentlyFocusedComponent())
-        return focused->getTopLevelComponent()->getPosition() + juce::Point<int> (80, 80);
+    if (auto focused = yup::Component::getCurrentlyFocusedComponent())
+        return focused->getTopLevelComponent()->getPosition() + yup::Point<int> (80, 80);
 
-    for (int i = juce::ComponentPeer::getNumPeers(); --i >= 0;)
-        if (auto p = juce::ComponentPeer::getPeer(i))
+    for (int i = yup::ComponentPeer::getNumPeers(); --i >= 0;)
+        if (auto p = yup::ComponentPeer::getPeer(i))
             if (p->isFocused())
-                return p->getBounds().getPosition() + juce::Point<int> (80, 80);
+                return p->getBounds().getPosition() + yup::Point<int> (80, 80);
 
-    return juce::Desktop::getInstance().getDisplays()
+    return yup::Desktop::getInstance().getDisplays()
             .getPrimaryDisplay()->userBounds.getRelativePoint (0.2f, 0.2f).roundToInt();
 }
 

@@ -24,14 +24,14 @@ struct CreateNodeParams
     ProcessState& processState;                         /**< The process state of the graph. */
     double sampleRate = 44100.0;                        /**< The sample rate to use. */
     int blockSize = 256;                                /**< The block size to use. */
-    const juce::Array<Clip*>* allowedClips = nullptr;   /**< The clips to include. If nullptr, all clips will be included. */
-    juce::Array<Track*>* allowedTracks = nullptr;       /**< The tracks to include. If nullptr, all tracks will be included. */
+    const yup::Array<Clip*>* allowedClips = nullptr;   /**< The clips to include. If nullptr, all clips will be included. */
+    yup::Array<Track*>* allowedTracks = nullptr;       /**< The tracks to include. If nullptr, all tracks will be included. */
     bool forRendering = false;                          /**< If the node is for rendering or not. In renders, freeze files won't be used. */
     bool includePlugins = true;                         /**< Whether to include track plugins. */
     bool includeMasterPlugins = true;                   /**< Whether to include master plugins, fades and volume. */
     bool includeBypassedPlugins = true;                 /**< If false, bypassed plugins will be completely ommited from the graph. */
     bool implicitlyIncludeSubmixChildTracks = true;     /**< If true, child track in submixes will be included regardless of the allowedTracks param. Only relevent when forRendering is also true. */
-    juce::Array<EditItemID> tracksToProcessWhileMuted = {};  /**< Tracks whose contents keep processing while the track is muted, so they can feed sidechains, aux buses and racks without being heard. Used by stem renders. @see Renderer::Parameters::tracksToProcessWhileMuted */
+    yup::Array<EditItemID> tracksToProcessWhileMuted = {};  /**< Tracks whose contents keep processing while the track is muted, so they can feed sidechains, aux buses and racks without being heard. Used by stem renders. @see Renderer::Parameters::tracksToProcessWhileMuted */
     bool allowClipSlots = true;                         /**< If true, track's clip slots will be included, set to false to disable these (which will use a slightly more efficient Node). */
     bool readAheadTimeStretchNodes = false;             /**< TEMPORARY: If true, real-time time-stretch Nodes will use a larger buffer and background thread to reduce audio CPU use. */
 

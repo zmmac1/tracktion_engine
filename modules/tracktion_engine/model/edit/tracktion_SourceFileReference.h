@@ -19,14 +19,14 @@ namespace tracktion::inline engine {
 class SourceFileReference
 {
 public:
-    SourceFileReference (Edit&, juce::ValueTree&, const juce::Identifier& prop);
+    SourceFileReference (Edit&, yup::ValueTree&, const yup::Identifier& prop);
     ~SourceFileReference();
 
     //==============================================================================
     Edit& edit;
-    juce::CachedValue<juce::String> source;
+    juce::CachedValue<yup::String> source;
 
-    juce::File getFile() const;
+    yup::File getFile() const;
     bool isUsingProjectReference() const;
     ProjectItemRef getSourceProjectItemRef() const;
     ProjectItem::Ptr getSourceProjectItem() const;
@@ -38,17 +38,17 @@ public:
         finds or creates a ProjectItem. Otherwise stores a direct file path
         using the given PathStyle.
     */
-    void setToFile (const juce::File&, PathStyle, bool allowProjectItems);
+    void setToFile (const yup::File&, PathStyle, bool allowProjectItems);
 
     void setToProjectFileReference (ProjectItemRef);
 
-    static juce::String findPathFromFile (Edit&, const juce::File&, bool useRelativePath);
-    static juce::File findFileFromString (Edit&, const juce::String& source);
+    static yup::String findPathFromFile (Edit&, const yup::File&, bool useRelativePath);
+    static yup::File findFileFromString (Edit&, const yup::String& source);
 
 private:
-    juce::ValueTree state;
+    yup::ValueTree state;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceFileReference)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceFileReference)
 };
 
 

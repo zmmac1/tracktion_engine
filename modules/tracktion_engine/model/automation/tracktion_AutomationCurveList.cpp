@@ -22,7 +22,7 @@ namespace detail
         return {};
     }
 
-    inline juce::String getClipName (const AutomationCurveModifier& acm)
+    inline yup::String getClipName (const AutomationCurveModifier& acm)
     {
         if (auto clip = getClip (acm))
             return clip->getName();
@@ -33,12 +33,12 @@ namespace detail
 
 //==============================================================================
 //==============================================================================
-juce::String toString (CurveModifierType cmt)
+yup::String toString (CurveModifierType cmt)
 {
     return std::string (magic_enum::enum_name (cmt));
 }
 
-std::optional<CurveModifierType> curveModifierTypeFromString (juce::String s)
+std::optional<CurveModifierType> curveModifierTypeFromString (yup::String s)
 {
     return magic_enum::enum_cast<CurveModifierType> (s.toStdString());
 }
@@ -53,7 +53,7 @@ std::optional<EditPosition> AutomationCurvePlayhead::getPosition() const
 //==============================================================================
 //==============================================================================
 AutomationCurveModifier::AutomationCurveModifier (Edit& e,
-                                                  const juce::ValueTree& v,
+                                                  const yup::ValueTree& v,
                                                   AutomatableParameterID destID_,
                                                   std::function<CurvePosition()> getPositionDelegate_,
                                                   std::function<ClipPositionInfo()> getClipPositionDelegate_)
@@ -92,7 +92,7 @@ AutomationCurveModifier::AutomationCurveModifier (Edit& e,
     }
 
     auto limitsString = v[IDs::absoluteLimits].toString();
-    absoluteLimits = juce::Range<float> (limitsString.upToFirstOccurrenceOf (" ", false, false).getFloatValue(),
+    absoluteLimits = yup::Range<float> (limitsString.upToFirstOccurrenceOf (" ", false, false).getFloatValue(),
                                          limitsString.fromFirstOccurrenceOf (" ", false, false).getFloatValue());
 
     stateListener.onValueTreeChanged = [this]
@@ -240,12 +240,12 @@ void AutomationCurveModifier::removeListener (Listener& l)
 }
 
 //==============================================================================
-juce::String AutomationCurveModifier::getName() const
+yup::String AutomationCurveModifier::getName() const
 {
     return TRANS("Clip Automation") + ": " + detail::getClipName (*this);
 }
 
-juce::String AutomationCurveModifier::getSelectableDescription()
+yup::String AutomationCurveModifier::getSelectableDescription()
 {
     return getName();
 }
@@ -272,7 +272,7 @@ bool hasAnyPoints (AutomationCurveModifier& curve)
     return false;
 }
 
-void AutomationCurveModifier::curveUnlinkedStateChanged (juce::ValueTree& v)
+void AutomationCurveModifier::curveUnlinkedStateChanged (yup::ValueTree& v)
 {
     using enum CurveModifierType;
 
@@ -284,7 +284,7 @@ void AutomationCurveModifier::curveUnlinkedStateChanged (juce::ValueTree& v)
             continue;
 
         timing.unlinked.forceUpdateOfCachedValue();
-        juce::ErasedScopeGuard listenerCaller ([this, type] { listeners.call (&Listener::unlinkedStateChanged, type); });
+        yup::ErasedScopeGuard listenerCaller ([this, type] { listeners.call (&Listener::unlinkedStateChanged, type); });
 
         if (timing.unlinked.get())
             return;
@@ -324,7 +324,7 @@ void AutomationCurveModifier::updateModifierAssignment()
 
 
 //==============================================================================
-AutomationCurveModifier::Assignment::Assignment (AutomationCurveModifier& acm, const juce::ValueTree& v)
+AutomationCurveModifier::Assignment::Assignment (AutomationCurveModifier& acm, const yup::ValueTree& v)
     : ModifierAssignment (acm.edit, v),
       automationCurveModifierID (acm.itemID)
 {
@@ -724,7 +724,7 @@ void updateRelativeDestinationOrRemove ([[maybe_unused]] AutomationCurveList& li
     curve.remove();
 }
 
-void assignNewIDsToAutomationCurveModifiers (Edit& edit, juce::ValueTree& state)
+void assignNewIDsToAutomationCurveModifiers (Edit& edit, yup::ValueTree& state)
 {
     if (state.hasType (IDs::AUTOMATIONCURVE))
         return;
@@ -738,7 +738,7 @@ void assignNewIDsToAutomationCurveModifiers (Edit& edit, juce::ValueTree& state)
     }
 }
 
-void removeInvalidAutomationCurveModifiers (juce::ValueTree& state, const AutomatableParameter& parameter)
+void removeInvalidAutomationCurveModifiers (yup::ValueTree& state, const AutomatableParameter& parameter)
 {
     assert (state.hasType (IDs::MODIFIERASSIGNMENTS));
 
@@ -775,7 +775,7 @@ public:
     List (AutomationCurveList& o, Edit& e,
           std::function<CurvePosition()> getPositionDelegate_,
           std::function<ClipPositionInfo()> getClipPositionDelegate_,
-          const juce::ValueTree& parent_)
+          const yup::ValueTree& parent_)
         : ValueTreeObjectList<AutomationCurveModifier> (parent_),
           curveList (o), edit (e),
           getPositionDelegate (std::move (getPositionDelegate_)),
@@ -801,9 +801,9 @@ public:
     AutomationCurveModifier::Ptr addCurve (const AutomatableParameter& destParam)
     {
         auto limits = destParam.getValueRange();
-        auto limitsString  = juce::String (limits.getStart()) + " " + juce::String (limits.getEnd());
+        auto limitsString  = yup::String (limits.getStart()) + " " + yup::String (limits.getEnd());
 
-        juce::ValueTree v (IDs::AUTOMATIONCURVEMODIFIER,
+        yup::ValueTree v (IDs::AUTOMATIONCURVEMODIFIER,
                            {
                                { IDs::source, destParam.automatableEditElement.itemID.toString() },
                                { IDs::paramID, destParam.paramID },
@@ -828,12 +828,12 @@ private:
     std::function<ClipPositionInfo()> getClipPositionDelegate;
 
     //==============================================================================
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return v.hasType (IDs::AUTOMATIONCURVEMODIFIER);
     }
 
-    AutomationCurveModifier* createNewObject (const juce::ValueTree& v) override
+    AutomationCurveModifier* createNewObject (const yup::ValueTree& v) override
     {
         assert (edit.automationCurveModifierEditItemCache.findItem (EditItemID::fromID (v)) == nullptr);
 
@@ -880,7 +880,7 @@ private:
 
 //==============================================================================
 //==============================================================================
-AutomationCurveList::AutomationCurveList (Edit& e, const juce::ValueTree& parentTree,
+AutomationCurveList::AutomationCurveList (Edit& e, const yup::ValueTree& parentTree,
                                           std::function<CurvePosition()> getPositionDelegate,
                                           std::function<ClipPositionInfo()> getClipPositionDelegate)
 {

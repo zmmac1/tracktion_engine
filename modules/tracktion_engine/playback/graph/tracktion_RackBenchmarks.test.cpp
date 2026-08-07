@@ -22,11 +22,11 @@ using namespace tracktion::graph;
 
 //==============================================================================
 //==============================================================================
-class RackBenchmarks : public juce::UnitTest
+class RackBenchmarks : public yup::UnitTest
 {
 public:
     RackBenchmarks()
-        : juce::UnitTest ("Rack Benchmarks", "tracktion_benchmarks")
+        : yup::UnitTest ("Rack Benchmarks", "tracktion_benchmarks")
     {
     }
 
@@ -184,7 +184,7 @@ public:
         const auto editName = "RackMixBus";
         auto edit = openEditFromZipData (engine, RackMixBus_zip, sizeof (RackMixBus_zip));
         const double fileLength = 20.0;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, fileLength, 2);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, fileLength, 2);
 
         beginTest ("Load Edit");
         {
@@ -326,12 +326,12 @@ public:
         auto& pl = at->pluginList;
 
         {
-            auto xml = juce::parseXML (big_mess_rack);
+            auto xml = yup::parseXML (big_mess_rack);
             assert (xml);
 
             for (int i = 0; i < 10; ++i)
             {
-                auto rackState = juce::ValueTree::fromXml (*xml);
+                auto rackState = yup::ValueTree::fromXml (*xml);
                 EditItemID::remapIDs (rackState, nullptr, *edit, nullptr);
 
                 auto rackType = edit->getRackList().addRackTypeFrom (rackState);

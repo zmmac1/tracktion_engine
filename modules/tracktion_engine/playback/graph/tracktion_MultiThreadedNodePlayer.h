@@ -82,7 +82,7 @@ public:
             const auto firstProportion = double (splitTimelineRange.timelineRange1.getLength()) / double (pc.referenceSampleRange.getLength());
 
             const auto firstReferenceRange  = pc.referenceSampleRange.withEnd (pc.referenceSampleRange.getStart() + (int64_t) std::llround (double (pc.referenceSampleRange.getLength()) * firstProportion));
-            const auto secondReferenceRange = juce::Range<int64_t> (firstReferenceRange.getEnd(), pc.referenceSampleRange.getEnd());
+            const auto secondReferenceRange = yup::Range<int64_t> (firstReferenceRange.getEnd(), pc.referenceSampleRange.getEnd());
             jassert (firstReferenceRange.getLength() + secondReferenceRange.getLength() == pc.referenceSampleRange.getLength());
 
             const auto firstNumSamples  = (choc::buffer::FrameCount) std::llround (pc.numSamples * firstProportion);

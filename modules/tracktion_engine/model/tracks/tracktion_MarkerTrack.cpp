@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-MarkerTrack::MarkerTrack (Edit& e, const juce::ValueTree& v)
+MarkerTrack::MarkerTrack (Edit& e, const yup::ValueTree& v)
     : ClipTrack (e, v, false)
 {
 }
@@ -21,8 +21,8 @@ MarkerTrack::~MarkerTrack()
 }
 
 bool MarkerTrack::isMarkerTrack() const                  { return true; }
-juce::String MarkerTrack::getSelectableDescription()     { return getName(); }
-juce::String MarkerTrack::getName() const                { return TRANS("Marker"); }
+yup::String MarkerTrack::getSelectableDescription()     { return getName(); }
+yup::String MarkerTrack::getName() const                { return TRANS("Marker"); }
 bool MarkerTrack::canContainPlugin (Plugin*) const       { return false; }
 
 } // namespace tracktion::inline engine

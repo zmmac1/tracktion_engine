@@ -29,7 +29,7 @@ public:
     bool isReadyToProcess() override;
     void process (ProcessContext&) override;
 
-    void handleIncomingMidiMessage (const juce::MidiMessage&, MPESourceID) override;
+    void handleIncomingMidiMessage (const yup::MidiMessage&, MPESourceID) override;
 
 private:
     //==============================================================================

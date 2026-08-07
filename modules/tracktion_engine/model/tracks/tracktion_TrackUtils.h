@@ -36,7 +36,7 @@ struct TrackInsertPoint
     TrackInsertPoint (Track& currentPos, bool insertBefore);
 
     /// Creates an insertion point after a given Track state.
-    TrackInsertPoint (const juce::ValueTree&);
+    TrackInsertPoint (const yup::ValueTree&);
 
     /// Returns an insertion point at the end of the tracks in the given edit.
     static TrackInsertPoint getEndOfTracks (Edit&);
@@ -50,10 +50,10 @@ struct TrackInsertPoint
     @see Edit::getTrackList, Track::getSubTrackList
 */
 struct TrackList    : public ValueTreeObjectList<Track>,
-                      private juce::AsyncUpdater
+                      private yup::AsyncUpdater
 {
     /** Creates a TrackList for a parent state. */
-    TrackList (Edit&, const juce::ValueTree& parent);
+    TrackList (Edit&, const yup::ValueTree& parent);
 
     /** Destructor. */
     ~TrackList() override;
@@ -63,7 +63,7 @@ struct TrackList    : public ValueTreeObjectList<Track>,
 
     //==============================================================================
     /** Returns a Track for a given state. */
-    Track* getTrackFor (const juce::ValueTree&) const;
+    Track* getTrackFor (const yup::ValueTree&) const;
 
     /** Calls the given function on all Track[s].
         Return false from the function to stop the traversal.
@@ -86,48 +86,48 @@ struct TrackList    : public ValueTreeObjectList<Track>,
 
     //==============================================================================
     /** Returns true if the track is movable. I.e. not a global track. */
-    static bool isMovableTrack (const juce::ValueTree&) noexcept;
+    static bool isMovableTrack (const yup::ValueTree&) noexcept;
 
     /** Returns true if the state is for an ArrangerTrack. */
-    static bool isArrangerTrack (const juce::ValueTree&) noexcept;
+    static bool isArrangerTrack (const yup::ValueTree&) noexcept;
 
     /** Returns true if the state is for a ChordTrack. */
-    static bool isChordTrack (const juce::ValueTree&) noexcept;
+    static bool isChordTrack (const yup::ValueTree&) noexcept;
 
     /** Returns true if the state is for a MarkerTrack. */
-    static bool isMarkerTrack (const juce::ValueTree&) noexcept;
+    static bool isMarkerTrack (const yup::ValueTree&) noexcept;
 
     /** Returns true if the state is for a TempoTrack. */
-    static bool isTempoTrack (const juce::ValueTree&) noexcept;
+    static bool isTempoTrack (const yup::ValueTree&) noexcept;
 
     /** Returns true if the state is for a MasterTrack. */
-    static bool isMasterTrack (const juce::ValueTree&) noexcept;
+    static bool isMasterTrack (const yup::ValueTree&) noexcept;
 
     /** Returns true if the track is fixed. I.e. a global track.
         @see TempoTrack, MarkerTrack, ChordTrack, ArrangerTrack
     */
-    static bool isFixedTrack (const juce::ValueTree&) noexcept;
+    static bool isFixedTrack (const yup::ValueTree&) noexcept;
 
     /** Returns true if the given ValeTree is for a known Track type. */
-    static bool isTrack (const juce::ValueTree&) noexcept;
+    static bool isTrack (const yup::ValueTree&) noexcept;
 
     /** Returns true if the given Identifier is for a known Track type. */
-    static bool isTrack (const juce::Identifier&) noexcept;
+    static bool isTrack (const yup::Identifier&) noexcept;
 
     /** Returns true if the track has any sub tracks.
         @see FolderTrack, AutomationTrack
     */
-    static bool hasAnySubTracks (const juce::ValueTree&);
+    static bool hasAnySubTracks (const yup::ValueTree&);
 
     //==============================================================================
     /** Sorts a list of tracks by their type, placing global tracks at the top. */
-    static void sortTracksByType (juce::ValueTree& editState, juce::UndoManager*);
+    static void sortTracksByType (yup::ValueTree& editState, juce::UndoManager*);
 
     //==============================================================================
     /** @internal */
-    bool isSuitableType (const juce::ValueTree&) const override;
+    bool isSuitableType (const yup::ValueTree&) const override;
     /** @internal */
-    Track* createNewObject (const juce::ValueTree&) override;
+    Track* createNewObject (const yup::ValueTree&) override;
     /** @internal */
     void deleteObject (Track* t) override;
     /** @internal */
@@ -143,12 +143,12 @@ struct TrackList    : public ValueTreeObjectList<Track>,
 private:
     void handleAsyncUpdate() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackList)
 };
 
 //==============================================================================
 /// Returns the number of tracks from this tree recursively.
-int countNumTracks (const juce::ValueTree&);
+int countNumTracks (const yup::ValueTree&);
 
 //==============================================================================
 /**
@@ -178,9 +178,9 @@ struct TrackSection
 
     /** Returns a set of TrackSections for the given TrackItems. */
     template <typename TrackItemArray>
-    static juce::Array<TrackSection> findSections (const TrackItemArray& trackItems)
+    static yup::Array<TrackSection> findSections (const TrackItemArray& trackItems)
     {
-        juce::Array<TrackSection> result;
+        yup::Array<TrackSection> result;
 
         for (auto&& c : trackItems)
         {
@@ -244,13 +244,13 @@ struct TrackAutomationSection
         AutomationCurve curve { param->getEdit(), AutomationCurve::TimeBase::time };    /**< The curve section of this parameter. */
     };
 
-    juce::Array<ActiveParameters> activeParameters; /**< A list of parameteres and their curves. */
+    yup::Array<ActiveParameters> activeParameters; /**< A list of parameteres and their curves. */
 };
 
 /** Moves a set of automation optionally applying an offset and copying the
     automation (rather than moving it).
 */
-void moveAutomation (const juce::Array<TrackAutomationSection>&, TimeDuration offset, bool copy);
+void moveAutomation (const yup::Array<TrackAutomationSection>&, TimeDuration offset, bool copy);
 
 
 //==============================================================================

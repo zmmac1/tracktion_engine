@@ -15,7 +15,7 @@
  JUCE Module Format.txt file.
 
 
- BEGIN_JUCE_MODULE_DECLARATION
+ BEGIN_YUP_MODULE_DECLARATION
 
   ID:               tracktion_engine
   vendor:           Tracktion Corporation
@@ -25,9 +25,9 @@
   website:          http://www.tracktion.com
   license:          Proprietary
 
-  dependencies:     juce_audio_devices juce_audio_utils juce_dsp juce_osc, juce_gui_extra tracktion_graph
+  dependencies:     yup_audio_devices yup_audio_utils yup_dsp yup_osc, yup_gui tracktion_graph
 
- END_JUCE_MODULE_DECLARATION
+ END_YUP_MODULE_DECLARATION
 
 *******************************************************************************/
 
@@ -49,10 +49,10 @@
 #include <shared_mutex>
 #include <span>
 
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_utils/juce_audio_utils.h>
-#include <juce_dsp/juce_dsp.h>
-#include <juce_osc/juce_osc.h>
+#include <yup_audio_basics/yup_audio_basics.h>
+#include <yup_audio_utils/yup_audio_utils.h>
+#include <yup_dsp/yup_dsp.h>
+#include <yup_osc/yup_osc.h>
 
 #if __has_include(<choc/audio/choc_SampleBuffers.h>)
  #include <choc/audio/choc_SampleBuffers.h>
@@ -292,8 +292,8 @@
 #endif
 
 #if TRACKTION_LOG_ENABLED
- #define TRACKTION_LOG(a)        juce::Logger::writeToLog(a)
- #define TRACKTION_LOG_ERROR(a)  juce::Logger::writeToLog (juce::String ("*** ERROR: ") + a);
+ #define TRACKTION_LOG(a)        yup::Logger::writeToLog(a)
+ #define TRACKTION_LOG_ERROR(a)  yup::Logger::writeToLog (yup::String ("*** ERROR: ") + a);
 #else
  #define TRACKTION_LOG(a)        {}
  #define TRACKTION_LOG_ERROR(a)  {}
@@ -301,7 +301,7 @@
 
 //==============================================================================
 #define TRACKTION_ASSERT_MESSAGE_THREAD \
-    jassert (juce::MessageManager::getInstance()->currentThreadHasLockedMessageManager());
+    jassert (yup::MessageManager::getInstance()->currentThreadHasLockedMessageManager());
 
 //==============================================================================
 namespace tracktion::inline graph

@@ -47,26 +47,26 @@ public:
     };
 
     Chord (ChordType type = majorTriad);
-    Chord (juce::Array<int> steps, juce::String symbol); // creates a custom chord with steps
+    Chord (yup::Array<int> steps, yup::String symbol); // creates a custom chord with steps
 
-    juce::String toString();
-    static Chord fromString (const juce::String&);
+    yup::String toString();
+    static Chord fromString (const yup::String&);
 
-    static juce::Array<ChordType> getAllChordType();
+    static yup::Array<ChordType> getAllChordType();
 
     ChordType getType() const   { return type; }
     bool isValid() const        { return type != invalidChord; }
 
-    juce::String getName() const;
-    juce::String getShortName() const;
-    juce::String getSymbol() const;
-    juce::Array<int> getSteps() const;
-    juce::Array<int> getSteps (int inversion) const;
+    yup::String getName() const;
+    yup::String getShortName() const;
+    yup::String getSymbol() const;
+    yup::Array<int> getSteps() const;
+    yup::Array<int> getSteps (int inversion) const;
 
 private:
     ChordType type;
-    juce::Array<int> steps; // for custom chords
-    juce::String symbol;    // for custom chords
+    yup::Array<int> steps; // for custom chords
+    yup::String symbol;    // for custom chords
 };
 
 //==============================================================================
@@ -110,38 +110,38 @@ public:
 
     ScaleType getType() const { return type; }
 
-    juce::String getName() const;
-    juce::String getShortName() const;
+    yup::String getName() const;
+    yup::String getShortName() const;
 
-    static juce::StringArray getIntervalNames();
+    static yup::StringArray getIntervalNames();
 
-    static juce::Array<ScaleType> getAllScaleTypes();
-    static juce::StringArray getScaleStrings();
-    static juce::String getNameForType (ScaleType type);
-    static juce::String getShortNameForType (ScaleType type);
-    static ScaleType getTypeFromName (juce::String name);
+    static yup::Array<ScaleType> getAllScaleTypes();
+    static yup::StringArray getScaleStrings();
+    static yup::String getNameForType (ScaleType type);
+    static yup::String getShortNameForType (ScaleType type);
+    static ScaleType getTypeFromName (yup::String name);
 
-    juce::Array<int> getSteps (int octaves = 1) const;
+    yup::Array<int> getSteps (int octaves = 1) const;
 
-    juce::String getIntervalName (Intervals interval) const;
+    yup::String getIntervalName (Intervals interval) const;
 
-    juce::Array<Chord> getTriads()   const { return triads;   }
-    juce::Array<Chord> getSixths()   const { return sixths;   }
-    juce::Array<Chord> getSevenths() const { return sevenths; }
-    juce::Array<Chord> getNinths()   const { return ninths;   }
+    yup::Array<Chord> getTriads()   const { return triads;   }
+    yup::Array<Chord> getSixths()   const { return sixths;   }
+    yup::Array<Chord> getSevenths() const { return sevenths; }
+    yup::Array<Chord> getNinths()   const { return ninths;   }
 
 private:
-    juce::Array<Chord> generateTriads (int offset) const;
-    juce::Array<Chord> generateSixths (int offset) const;
-    juce::Array<Chord> generateSevenths (int offset) const;
-    juce::Array<Chord> generateNinths (int offset) const;
+    yup::Array<Chord> generateTriads (int offset) const;
+    yup::Array<Chord> generateSixths (int offset) const;
+    yup::Array<Chord> generateSevenths (int offset) const;
+    yup::Array<Chord> generateNinths (int offset) const;
 
     ScaleType type;
-    juce::Array<Steps> steps;
-    juce::Array<Chord> triads;
-    juce::Array<Chord> sixths;
-    juce::Array<Chord> sevenths;
-    juce::Array<Chord> ninths;
+    yup::Array<Steps> steps;
+    yup::Array<Chord> triads;
+    yup::Array<Chord> sixths;
+    yup::Array<Chord> sevenths;
+    yup::Array<Chord> ninths;
 };
 
 //==============================================================================
@@ -161,7 +161,7 @@ public:
     static const int scaleRootChordTrack;
 
     //==============================================================================
-    PatternGenerator (Clip&, juce::ValueTree);
+    PatternGenerator (Clip&, yup::ValueTree);
     ~PatternGenerator() override;
 
     //==============================================================================
@@ -173,24 +173,24 @@ public:
     //==============================================================================
     struct ProgressionItem
     {
-        ProgressionItem (PatternGenerator&, const juce::ValueTree&, bool temporary = false);
+        ProgressionItem (PatternGenerator&, const yup::ValueTree&, bool temporary = false);
         ~ProgressionItem() noexcept;
 
         bool operator== (const ProgressionItem&) const noexcept;
         bool isValid() { return chordName.get().isNotEmpty(); }
 
         PatternGenerator& generator;
-        juce::ValueTree state;
+        yup::ValueTree state;
 
-        juce::CachedValue<juce::String> chordName;  // Chord name is simplified, use getChordName() to get unsimplified
-        juce::CachedValue<juce::String> pitches;    // A comma seperated list of pitches used for custom chords, otherwise empty
+        juce::CachedValue<yup::String> chordName;  // Chord name is simplified, use getChordName() to get unsimplified
+        juce::CachedValue<yup::String> pitches;    // A comma seperated list of pitches used for custom chords, otherwise empty
         juce::CachedValue<BeatDuration> lengthInBeats;
         juce::CachedValue<int> octave, inversion;
 
-        void setChordName (juce::String chord);
-        void setChordName (juce::String chord, juce::String pitches);
+        void setChordName (yup::String chord);
+        void setChordName (yup::String chord, yup::String pitches);
 
-        juce::String getChordName() const;
+        yup::String getChordName() const;
 
         void setRoot (int root);
         void setChord (int root, Chord::ChordType);
@@ -198,36 +198,36 @@ public:
         bool isRomanNumeral() const;                       // Is this chord stored in it's roman numberal format
 
         Chord getChord (const Scale&) const;
-        juce::String getChordSymbol();              // Gets the chords name as Cmaj, Dmin, etc based on key
+        yup::String getChordSymbol();              // Gets the chords name as Cmaj, Dmin, etc based on key
 
         int getRootNote (int key, const Scale& scale);
 
     private:
-        JUCE_LEAK_DETECTOR (ProgressionItem)
+        YUP_LEAK_DETECTOR (ProgressionItem)
     };
 
     //==============================================================================
 
-    juce::StringArray getPossibleTriadNames() const;
-    juce::StringArray getPossibleSixthNames() const;
-    juce::StringArray getPossibleSeventhNames() const;
-    juce::StringArray getPossibleNinthNames() const;
+    yup::StringArray getPossibleTriadNames() const;
+    yup::StringArray getPossibleSixthNames() const;
+    yup::StringArray getPossibleSeventhNames() const;
+    yup::StringArray getPossibleNinthNames() const;
 
     int getChordProgressionLength() const;
-    const juce::Array<ProgressionItem*>& getChordProgression() const noexcept;
-    void setChordProgression (juce::ValueTree v);
+    const yup::Array<ProgressionItem*>& getChordProgression() const noexcept;
+    void setChordProgression (yup::ValueTree v);
 
-    juce::StringArray getChordProgressionChordNames (bool simplified) const;
+    yup::StringArray getChordProgressionChordNames (bool simplified) const;
 
     /** Sets a chord progression using chord roman numerals.
         Be careful, this sets everything else to default. */
-    void setChordProgressionFromChordNames (juce::StringArray progression);
+    void setChordProgressionFromChordNames (yup::StringArray progression);
 
     void removeIndexFromProgression (int idx);
     void removeRangeFromProgression (int start, int end);
     void clearProgression();
-    void insertChordIntoProgression (int idx, juce::String chordName);
-    void insertChordIntoProgression (int idx, juce::String chordName, juce::String pitches);
+    void insertChordIntoProgression (int idx, yup::String chordName);
+    void insertChordIntoProgression (int idx, yup::String chordName, yup::String pitches);
     void moveChordInProgression (int srcIdx, int dstIdx);
     void duplicateChordInProgression (int idx);
 
@@ -245,25 +245,25 @@ public:
     NoteType getTypeForNote (const MidiClip&, const MidiNote&);
 
     //==============================================================================
-    juce::String formatChordName (juce::String simplifiedChordName) const;
-    juce::StringArray getArpStyles();
+    yup::String formatChordName (yup::String simplifiedChordName) const;
+    yup::StringArray getArpStyles();
 
     Clip& clip;
-    juce::ValueTree state;
+    yup::ValueTree state;
     juce::CachedValue<Mode> mode;
     juce::CachedValue<Scale::ScaleType> scaleType;
     juce::CachedValue<bool> autoUpdate, arpUpDown, arpPlayRoot, allNotes, octaveUp, octaveDown, spread;
     juce::CachedValue<float> arpPatternLength, velocity, gate;
     juce::CachedValue<BeatDuration> melodyNoteLength;
-    juce::CachedValue<juce::String> arpStyle;
+    juce::CachedValue<yup::String> arpStyle;
     juce::CachedValue<int> scaleRoot, arpSteps, octave;
-    juce::CachedValue<juce::int64> patternHash;
+    juce::CachedValue<yup::int64> patternHash;
 
-    juce::ValueTree getChordPattern();
-    juce::ValueTree getBassPattern();
+    yup::ValueTree getChordPattern();
+    yup::ValueTree getBassPattern();
 
-    void setChordPattern (juce::ValueTree pattern);
-    void setBassPattern (juce::ValueTree pattern);
+    void setChordPattern (yup::ValueTree pattern);
+    void setBassPattern (yup::ValueTree pattern);
 
     void generatePattern();
 
@@ -276,7 +276,7 @@ public:
 
     void editFinishedLoading();
 
-    BeatDuration getFlattenedChordProgression (juce::OwnedArray<ProgressionItem>& progression, bool globalTime = false);
+    BeatDuration getFlattenedChordProgression (yup::OwnedArray<ProgressionItem>& progression, bool globalTime = false);
 
 private:
     const int maxChords = 64;
@@ -285,7 +285,7 @@ private:
     std::unique_ptr<ProgressionList> progressionList;
 
     void valueTreeChanged() override {}
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
     ChordClip* getChordClipAt (TimePosition) const;
 
@@ -305,13 +305,13 @@ private:
     MidiClip* getMidiClip() const;
 
     //==============================================================================
-    std::unique_ptr<juce::Timer> editLoadedCallback;
+    std::unique_ptr<yup::Timer> editLoadedCallback;
 
     //==============================================================================
     struct AutoUpdateManager;
     std::unique_ptr<AutoUpdateManager> autoUpdateManager;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PatternGenerator)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PatternGenerator)
 };
 
 //==============================================================================
@@ -327,11 +327,11 @@ struct KeyResult
     bool operator< (const KeyResult& other) const { return r < other.r; }
 };
 
-juce::Array<KeyResult> determineKeyOfNotes (const juce::Array<MidiNote*>& notes);
+yup::Array<KeyResult> determineKeyOfNotes (const yup::Array<MidiNote*>& notes);
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::Chord::ChordType>

@@ -10,13 +10,13 @@
 
 namespace tracktion::inline engine {
 
-Track::Track (Edit& ed, const juce::ValueTree& v, bool hasModifierList)
+Track::Track (Edit& ed, const yup::ValueTree& v, bool hasModifierList)
     : EditItem (ed, v), state (v), pluginList (ed)
 {
     auto um = &edit.getUndoManager();
 
     trackName.referTo (state, IDs::name, um, {});
-    colour.referTo (state, IDs::colour, um, juce::Colour());
+    colour.referTo (state, IDs::colour, um, yup::Color());
     tags.referTo (state, IDs::tags, um);
     hidden.referTo (state, IDs::hidden, um);
     processing.referTo (state, IDs::process, um, true);
@@ -65,7 +65,7 @@ void Track::initialise()
             imageChanged = true;
     }
 
-    tagsArray = juce::StringArray::fromTokens (tags.get().replace ("_", " "), "|", "\"");
+    tagsArray = yup::StringArray::fromTokens (tags.get().replace ("_", " "), "|", "\"");
 
     pluginList.setTrackAndClip (this, nullptr);
 
@@ -76,7 +76,7 @@ void Track::initialise()
     updateCachedParent();
 }
 
-void Track::setName (const juce::String& n)
+void Track::setName (const yup::String& n)
 {
     auto newName = n.substring (0, 64);
 
@@ -108,9 +108,9 @@ int Track::getIndexInEditTrackList() const
     return result;
 }
 
-juce::Array<AudioTrack*> Track::getAllAudioSubTracks (bool recursive) const
+yup::Array<AudioTrack*> Track::getAllAudioSubTracks (bool recursive) const
 {
-    juce::Array<AudioTrack*> results;
+    yup::Array<AudioTrack*> results;
 
     if (trackList != nullptr)
     {
@@ -126,9 +126,9 @@ juce::Array<AudioTrack*> Track::getAllAudioSubTracks (bool recursive) const
     return results;
 }
 
-juce::Array<Track*> Track::getAllSubTracks (bool recursive) const
+yup::Array<Track*> Track::getAllSubTracks (bool recursive) const
 {
-    juce::Array<Track*> results;
+    yup::Array<Track*> results;
 
     if (trackList != nullptr)
         trackList->visitAllTracks ([&] (Track& t) { results.add (&t); return true; }, recursive);
@@ -147,7 +147,7 @@ Clip* Track::findClipForID (EditItemID id) const
 
 Track* Track::getSiblingTrack (int delta, bool keepWithinSameParent) const
 {
-    juce::Array<Track*> tracks;
+    yup::Array<Track*> tracks;
 
     if (keepWithinSameParent)
     {
@@ -343,9 +343,9 @@ void Track::flipAllPluginsEnablement()
 }
 
 //==============================================================================
-juce::Array<AutomatableParameter*> Track::getAllAutomatableParams() const
+yup::Array<AutomatableParameter*> Track::getAllAutomatableParams() const
 {
-    juce::Array<AutomatableParameter*> params;
+    yup::Array<AutomatableParameter*> params;
 
     for (auto p : getAllPlugins())
     {
@@ -377,7 +377,7 @@ void Track::visitAllAutomatableParams (const std::function<void(AutomatableParam
             m->visitAllAutomatableParams (visit);
 }
 
-static AutomatableParameter::Ptr findAutomatableParam (Edit& edit, EditItemID pluginID, const juce::String& paramID)
+static AutomatableParameter::Ptr findAutomatableParam (Edit& edit, EditItemID pluginID, const yup::String& paramID)
 {
     if (pluginID.isValid() && paramID.isNotEmpty())
     {
@@ -444,7 +444,7 @@ AutomatableParameter* Track::getCurrentlyShownAutoParam() const noexcept
 void Track::setCurrentlyShownAutoParam (const AutomatableParameter::Ptr& param)
 {
     currentAutoParamPlugin  = param == nullptr ? EditItemID()   : param->getOwnerID();
-    currentAutoParamID      = param == nullptr ? juce::String() : param->paramID;
+    currentAutoParamID      = param == nullptr ? yup::String() : param->paramID;
 }
 
 void Track::hideAutomatableParametersForSource (EditItemID pluginOrParameterID)
@@ -459,7 +459,7 @@ void Track::hideAutomatableParametersForSource (EditItemID pluginOrParameterID)
     }
 }
 
-juce::ValueTree Track::getParentTrackTree() const
+yup::ValueTree Track::getParentTrackTree() const
 {
     auto parent = state.getParent();
 
@@ -527,7 +527,7 @@ bool Track::canShowImage() const
     return isAudioTrack() || isFolderTrack();
 }
 
-void Track::setTrackImage (const juce::String& idOrData)
+void Track::setTrackImage (const yup::String& idOrData)
 {
     if (canShowImage())
         imageIdOrData = idOrData;
@@ -535,23 +535,23 @@ void Track::setTrackImage (const juce::String& idOrData)
 
 bool Track::imageHasChanged()
 {
-    const juce::ScopedValueSetter<bool> svs (imageChanged, imageChanged, false);
+    const yup::ScopedValueSetter<bool> svs (imageChanged, imageChanged, false);
     return imageChanged;
 }
 
-void Track::setTags (const juce::StringArray& s)
+void Track::setTags (const yup::StringArray& s)
 {
     tags = s.joinIntoString ("|").replace (" ", "_");
 }
 
-void Track::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void Track::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v == state)
     {
         if (i == IDs::tags)
         {
             tags.forceUpdateOfCachedValue();
-            tagsArray = juce::StringArray::fromTokens (tags.get().replace ("_", " "), "|", "\"");
+            tagsArray = yup::StringArray::fromTokens (tags.get().replace ("_", " "), "|", "\"");
             changed();
         }
         else if (i == IDs::name)
@@ -559,7 +559,7 @@ void Track::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier
             changed();
 
             if (! edit.isLoading())
-                juce::MessageManager::callAsync ([trackRef = makeSafeRef (*this)]
+                yup::MessageManager::callAsync ([trackRef = makeSafeRef (*this)]
                                                  {
                                                      if (auto t = trackRef.get())
                                                          SelectionManager::refreshAllPropertyPanelsShowing (*t);
@@ -591,7 +591,7 @@ void Track::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier
         }
         else if (i == IDs::process)
         {
-            juce::Array<Track*> tracks;
+            yup::Array<Track*> tracks;
             tracks.add (this);
             tracks.addArray (getAllSubTracks (true));
 
@@ -602,21 +602,21 @@ void Track::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier
     }
 }
 
-void Track::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
+void Track::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c)
 {
     if (p == state)
         if (TrackList::isTrack (c))
             updateTrackList();
 }
 
-void Track::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int)
+void Track::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int)
 {
     if (p == state)
         if (TrackList::isTrack (c))
             updateTrackList();
 }
 
-void Track::valueTreeParentChanged (juce::ValueTree& v)
+void Track::valueTreeParentChanged (yup::ValueTree& v)
 {
     if (v == state)
         updateCachedParent();

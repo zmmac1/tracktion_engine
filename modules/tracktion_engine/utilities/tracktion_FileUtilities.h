@@ -10,13 +10,13 @@
 
 namespace tracktion::inline engine {
 
-bool isMidiFile (const juce::File&);
-bool isTracktionEditFile (const juce::File&);
-bool isTracktionArchiveFile (const juce::File&);
-bool isTracktionProjectFile (const juce::File&);
-bool isTracktionProjectFolder (const juce::File&);
-bool isTracktionProjectFileOrFolder (const juce::File&);
-bool isTracktionPresetFile (const juce::File&);
+bool isMidiFile (const yup::File&);
+bool isTracktionEditFile (const yup::File&);
+bool isTracktionArchiveFile (const yup::File&);
+bool isTracktionProjectFile (const yup::File&);
+bool isTracktionProjectFolder (const yup::File&);
+bool isTracktionProjectFileOrFolder (const yup::File&);
+bool isTracktionPresetFile (const yup::File&);
 
 const char* const projectFileSuffix = ".tracktion";
 const char* const editFileSuffix = ".tracktionedit";
@@ -45,22 +45,22 @@ const char* const grooveTemplateSuffix = ".trkgroove";
 const char* const grooveTemplateWildCard = "*.trkgroove";
 
 //==============================================================================
-juce::File getNonExistentSiblingWithIncrementedNumberSuffix (const juce::File&, bool addHashSymbol);
+yup::File getNonExistentSiblingWithIncrementedNumberSuffix (const yup::File&, bool addHashSymbol);
 
 
 //==============================================================================
 struct ScopedDirectoryDeleter
 {
-    ScopedDirectoryDeleter (const juce::File& dir) : f (dir)  {}
+    ScopedDirectoryDeleter (const yup::File& dir) : f (dir)  {}
     ~ScopedDirectoryDeleter()  { f.deleteRecursively(); }
 
 private:
-    juce::File f;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedDirectoryDeleter)
+    yup::File f;
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedDirectoryDeleter)
 };
 
 //==============================================================================
-struct FileDragList  : public juce::ReferenceCountedObject
+struct FileDragList  : public yup::ReferenceCountedObject
 {
     enum PreferredLayout
     {
@@ -69,13 +69,13 @@ struct FileDragList  : public juce::ReferenceCountedObject
     };
 
     PreferredLayout preferredLayout = sameTrack;
-    juce::Array<juce::File> files;
+    yup::Array<yup::File> files;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<FileDragList>;
+    using Ptr = yup::ReferenceCountedObjectPtr<FileDragList>;
 
-    static FileDragList::Ptr getFromDrag (const juce::DragAndDropTarget::SourceDetails&);
-    static juce::var create (const juce::Array<juce::File>&, PreferredLayout peferredLayout);
-    static juce::var create (const juce::File& file, PreferredLayout peferredLayout);
+    static FileDragList::Ptr getFromDrag (const yup::DragAndDropTarget::SourceDetails&);
+    static yup::var create (const yup::Array<yup::File>&, PreferredLayout peferredLayout);
+    static yup::var create (const yup::File& file, PreferredLayout peferredLayout);
 };
 
 } // namespace tracktion::inline engine

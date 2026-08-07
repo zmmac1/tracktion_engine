@@ -30,7 +30,7 @@ public:
     /** Call once per block to update the jumped state.
         Usually called at the same time as the PlayHead::incrementReferenceSampleCount method.
     */
-    void update (juce::Range<int64_t> referenceSampleRange);
+    void update (yup::Range<int64_t> referenceSampleRange);
 
     /** Returns true if the play head did not jump and this block is contiguous with the previous block. */
     inline bool isContiguousWithPreviousBlock() noexcept    { return ! (didPlayheadJump() || isFirstBlockOfLoop()); }
@@ -55,7 +55,7 @@ private:
 
 
 //==============================================================================
-inline void PlayHeadState::update (juce::Range<int64_t> referenceSampleRange)
+inline void PlayHeadState::update (yup::Range<int64_t> referenceSampleRange)
 {
     const bool isPlayingNow = playHead.isPlaying();
     bool jumped = false;

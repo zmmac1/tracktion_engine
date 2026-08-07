@@ -13,19 +13,19 @@ namespace tracktion::inline engine {
 /** */
 class AudioTrack  : public ClipTrack,
                     public MacroParameterElement,
-                    private juce::Timer
+                    private yup::Timer
 {
 public:
-    AudioTrack (Edit&, const juce::ValueTree&);
+    AudioTrack (Edit&, const yup::ValueTree&);
     ~AudioTrack() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<AudioTrack>;
+    using Ptr = yup::ReferenceCountedObjectPtr<AudioTrack>;
 
     void initialise() override;
     bool isAudioTrack() const override                      { return true; }
 
     //==============================================================================
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     //==============================================================================
     // This isn't an index - it starts from 1
@@ -33,15 +33,15 @@ public:
 
     /** checks whether the name is 'track n' and if so, makes sure the number is right */
     void sanityCheckName() override;
-    juce::String getName() const override;
+    yup::String getName() const override;
 
     /// Returns a name in the form "Track [number]"
-    juce::String getNameAsTrackNumber() const;
+    yup::String getNameAsTrackNumber() const;
 
     /// Returns a name in the form "Track [number] ([track name])"
     /// (This is smart enough to not add the parenthesised name if it's just
     /// a "Track X" type name)
-    juce::String getNameAsTrackNumberWithDescription() const;
+    yup::String getNameAsTrackNumberWithDescription() const;
 
     bool canContainPlugin (Plugin*) const override;
     bool processAudioNodesWhileMuted() const override       { return edit.engine.getEngineBehaviour().shouldProcessMutedTracks() || isSidechainSource(); }
@@ -51,8 +51,8 @@ public:
 
     //==============================================================================
     /** returns a warning message about this track not being playable, or "" if it's ok */
-    juce::String getTrackPlayabilityWarning() const;
-    juce::String getLauncherPlayabilityWarning() const;
+    yup::String getTrackPlayabilityWarning() const;
+    yup::String getLauncherPlayabilityWarning() const;
 
     //==============================================================================
     VolumeAndPanPlugin* getVolumePlugin();
@@ -64,11 +64,11 @@ public:
     /** looks for a name for a midi note by trying all the plugins, and returning a
         default on failure. midiChannel is 1-16
     */
-    juce::String getNameForMidiNoteNumber (int note, int midiChannel, bool preferSharp = true) const;
+    yup::String getNameForMidiNoteNumber (int note, int midiChannel, bool preferSharp = true) const;
 
     /** prog number is 0 based. */
-    juce::String getNameForProgramNumber (int programNumber, int bank) const;
-    juce::String getNameForBank (int bank) const;
+    yup::String getNameForProgramNumber (int programNumber, int bank) const;
+    yup::String getNameForBank (int bank) const;
     int getIdForBank (int bank) const;
     bool areMidiPatchesZeroBased() const;
 
@@ -109,11 +109,11 @@ public:
     bool hasAnyLiveInputs();
     bool hasAnyTracksFeedingIn();
 
-    juce::Array<Track*> getInputTracks() const override;
-    juce::Array<Track*> findSidechainSourceTracks() const;
+    yup::Array<Track*> getInputTracks() const override;
+    yup::Array<Track*> findSidechainSourceTracks() const;
 
     void injectLiveMidiMessage (const MidiMessageWithSource&);
-    void injectLiveMidiMessage (const juce::MidiMessage&, MPESourceID);
+    void injectLiveMidiMessage (const yup::MidiMessage&, MPESourceID);
 
     //==============================================================================
     bool isMuted (bool includeMutingByDestination) const override;
@@ -134,29 +134,29 @@ public:
 
     void setTrackToGhost (AudioTrack*, bool shouldGhost);
     void clearGhostTracks()                                         { ghostTracks.resetToDefault(); }
-    juce::Array<AudioTrack*> getGhostTracks() const;
+    yup::Array<AudioTrack*> getGhostTracks() const;
 
     int getCompGroup() const noexcept                               { return compGroup.get(); }
     void setCompGroup (int groupIndex)                              { compGroup = groupIndex; }
 
     //==============================================================================
     bool hasMidiNoteNames()                                         { return midiNoteMapCache.size() > 0; }
-    void clearMidiNoteNames()                                       { midiNoteMap = juce::String(); }
-    void loadMidiNoteNames (const juce::String namesFile)           { midiNoteMap = namesFile; }
+    void clearMidiNoteNames()                                       { midiNoteMap = yup::String(); }
+    void loadMidiNoteNames (const yup::String namesFile)           { midiNoteMap = namesFile; }
 
     //==============================================================================
     /** try to add this MIDI sequence to any MIDI clips that are already in the track.
 
         @returns False if there's no existing clips in the places it needs them.
     */
-    bool mergeInMidiSequence (juce::MidiMessageSequence, TimePosition startTime,
+    bool mergeInMidiSequence (yup::MidiMessageSequence, TimePosition startTime,
                               MidiClip*, MidiList::NoteAutomationType);
 
     void playGuideNote (int note, MidiChannel midiChannel, int velocity,
                         bool stopOtherFirst = true, bool forceNote = false, bool autorelease = false);
 
-    void playGuideNotes (const juce::Array<int>& notes, MidiChannel midiChannel,
-                         const juce::Array<int>& velocities,
+    void playGuideNotes (const yup::Array<int>& notes, MidiChannel midiChannel,
+                         const yup::Array<int>& velocities,
                          bool stopOthersFirst = true);
 
     void turnOffGuideNotes();
@@ -187,7 +187,7 @@ public:
         /** Called when a recorded MidiMessage (i.e. from a clip) has been sent to the plugin chain.
             This will be called from the message thread.
         */
-        virtual void recordedMidiMessageSentToPlugins (AudioTrack&, const juce::MidiMessage&) = 0;
+        virtual void recordedMidiMessageSentToPlugins (AudioTrack&, const yup::MidiMessage&) = 0;
     };
 
     /** Adds a Listener.
@@ -199,11 +199,11 @@ public:
     void removeListener (Listener*);
 
     /** Returns the listener list so Nodes can manually call them. */
-    juce::ListenerList<Listener>& getListeners()            { return listeners; }
+    yup::ListenerList<Listener>& getListeners()            { return listeners; }
 
 protected:
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeParentChanged (juce::ValueTree& v) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeParentChanged (yup::ValueTree& v) override;
 
     bool isTrackAudible (bool areAnyTracksSolo) const override;
 
@@ -228,12 +228,12 @@ private:
     int freezePointRemovalInhibitor = 0;
     juce::CachedValue<int> maxInputs, compGroup;
 
-    juce::CachedValue<juce::String> ghostTracks;
-    juce::CachedValue<juce::String> midiNoteMap;
+    juce::CachedValue<yup::String> ghostTracks;
+    juce::CachedValue<yup::String> midiNoteMap;
 
-    std::map<int, juce::String> midiNoteMapCache;
+    std::map<int, yup::String> midiNoteMapCache;
 
-    juce::Array<int> currentlyPlayingGuideNotes;
+    yup::Array<int> currentlyPlayingGuideNotes;
 
     std::unique_ptr<FreezeUpdater> freezeUpdater;
     std::unique_ptr<TrackMuter> trackMuter;
@@ -241,7 +241,7 @@ private:
     enum { updateAutoCrossfadesFlag = 1 };
     AsyncFunctionCaller asyncCaller;
 
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
     std::unique_ptr<ClipSlotList> clipSlotList;
 
     double defaultMidiVisibleProportion = 0, defaultMidiVerticalOffset = 0;
@@ -251,9 +251,9 @@ private:
     bool insertFreezePointIfRequired();
     int getIndexOfDefaultFreezePoint();
     int getIndexOfFreezePoint();
-    void freezePlugins (juce::Range<int> pluginsToFreeze);
+    void freezePlugins (yup::Range<int> pluginsToFreeze);
     void unFreezeTrack();
-    juce::File getFreezeFile() const;
+    yup::File getFreezeFile() const;
 
     void updateTracksToGhost();
     bool isSidechainSource() const;
@@ -261,7 +261,7 @@ private:
     void updateMidiNoteMapCache();
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioTrack)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioTrack)
 };
 
 } // namespace tracktion::inline engine

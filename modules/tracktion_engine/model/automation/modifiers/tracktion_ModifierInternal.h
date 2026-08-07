@@ -14,7 +14,7 @@ namespace PredefinedWavetable
 {
     static inline float getSinSample (float phase)
     {
-        return (std::sin (phase * juce::MathConstants<float>::pi * 2.0f) + 1.0f) / 2.0f;
+        return (std::sin (phase * yup::MathConstants<float>::pi * 2.0f) + 1.0f) / 2.0f;
     }
 
     static inline float getTriangleSample (float phase)
@@ -42,7 +42,7 @@ namespace PredefinedWavetable
         jassert (totalNumSteps > 1);
         const float stageAmmount = 1.0f / float (totalNumSteps - 1);
 
-        const int stage = juce::jlimit (0, totalNumSteps - 1, (int) std::floor (phase * float (totalNumSteps)));
+        const int stage = yup::jlimit (0, totalNumSteps - 1, (int) std::floor (phase * float (totalNumSteps)));
 
         return stageAmmount * float (stage);
     }
@@ -67,8 +67,8 @@ struct Ramp
 
     void setPosition (float newPosition) noexcept
     {
-        jassert (juce::isPositiveAndBelow (newPosition, rampDuration));
-        rampPos = juce::jlimit (0.0f, rampDuration, newPosition) / rampDuration;
+        jassert (yup::isPositiveAndBelow (newPosition, rampDuration));
+        rampPos = yup::jlimit (0.0f, rampDuration, newPosition) / rampDuration;
     }
 
     void process (float duration) noexcept
@@ -96,7 +96,7 @@ private:
 //==============================================================================
 namespace modifier
 {
-    inline juce::StringArray getEnabledNames()
+    inline yup::StringArray getEnabledNames()
     {
         return { NEEDS_TRANS("Disabled"),
                  NEEDS_TRANS("Enabled") };
@@ -106,10 +106,10 @@ namespace modifier
 //==============================================================================
 //==============================================================================
 static inline AutomatableParameter* createDiscreteParameter (AutomatableEditItem& item,
-                                                             const juce::String& paramID, const juce::String& name,
-                                                             juce::Range<float> valueRange,
+                                                             const yup::String& paramID, const yup::String& name,
+                                                             yup::Range<float> valueRange,
                                                              juce::CachedValue<float>& val,
-                                                             const juce::StringArray& labels)
+                                                             const yup::StringArray& labels)
 {
     auto p = new DiscreteLabelledParameter (paramID, name, item, valueRange, labels.size(), labels);
     p->attachToCurrentValue (val);
@@ -118,10 +118,10 @@ static inline AutomatableParameter* createDiscreteParameter (AutomatableEditItem
 }
 
 static inline AutomatableParameter* createSuffixedParameter (AutomatableEditItem& item,
-                                                             const juce::String& paramID, const juce::String& name,
-                                                             juce::NormalisableRange<float> valueRange, float centreVal,
+                                                             const yup::String& paramID, const yup::String& name,
+                                                             yup::NormalisableRange<float> valueRange, float centreVal,
                                                              juce::CachedValue<float>& val,
-                                                             const juce::String& suffix)
+                                                             const yup::String& suffix)
 {
     valueRange.setSkewForCentre (centreVal);
     auto p = new SuffixedParameter (paramID, name, item, valueRange, suffix);

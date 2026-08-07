@@ -51,7 +51,7 @@ static bool checkRexError (REX::REXError e)
     if (e == REX::kREXError_NoError)
         return true;
 
-    TRACKTION_LOG_ERROR ("REX (Code " + juce::String ((int) e) + "): " + rexErrorToString (e));
+    TRACKTION_LOG_ERROR ("REX (Code " + yup::String ((int) e) + "): " + rexErrorToString (e));
     return false;
 }
 
@@ -83,11 +83,11 @@ struct RexSystem
             REX::REXUninitializeDLL();
     }
 
-    juce::CriticalSection lock;
+    yup::CriticalSection lock;
     bool initialised = false;
-    juce::String startupErrorMessage;
+    yup::String startupErrorMessage;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RexSystem)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RexSystem)
 };
 
 static RexSystem& getRexSystem()
@@ -115,25 +115,25 @@ struct RexHandleWrapper
     REX::REXHandle handle;
     bool ok = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RexHandleWrapper)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RexHandleWrapper)
 };
 
 //==============================================================================
-class RexAudioFormatReader : public juce::AudioFormatReader
+class RexAudioFormatReader : public yup::AudioFormatReader
 {
 public:
-    RexAudioFormatReader (juce::InputStream* sourceStream,  const juce::String& name)
-        : juce::AudioFormatReader (sourceStream, name), buffer (2, 2)
+    RexAudioFormatReader (yup::InputStream* sourceStream,  const yup::String& name)
+        : yup::AudioFormatReader (sourceStream, name), buffer (2, 2)
     {
         CRASH_TRACER
-        juce::MemoryBlock rexData;
+        yup::MemoryBlock rexData;
         sourceStream->readIntoMemoryBlock (rexData);
 
         loadedOk = decompress (rexData.getData(), rexData.getSize());
     }
 
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override
+                      yup::int64 startSampleInFile, int numSamples) override
     {
         CRASH_TRACER
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
@@ -162,14 +162,14 @@ public:
     bool loadedOk;
 
 private:
-    juce::AudioBuffer<float> buffer;
+    yup::AudioBuffer<float> buffer;
 
     bool decompress (const void* rexData, size_t rexDataSize)
     {
         CRASH_TRACER
         auto& rex = getRexSystem();
 
-        const juce::ScopedLock lock (rex.lock);
+        const yup::ScopedLock lock (rex.lock);
 
         if (! rex.initialised)
             return false;
@@ -197,7 +197,7 @@ private:
         buffer.setSize ((int) info.fChannels, (int) lengthInSamples);
         buffer.clear();
 
-        juce::StringArray beatPoints;
+        yup::StringArray beatPoints;
 
         for (int j = 0; j < info.fSliceCount; ++j)
         {
@@ -205,7 +205,7 @@ private:
             if (! checkRexError (REX::REXGetSliceInfo (handle.handle, j, sizeof(slcInfo), &slcInfo)))
                 return false;
 
-            juce::AudioBuffer<float> sliceData (buffer.getNumChannels(), (int) slcInfo.fSampleLength);
+            yup::AudioBuffer<float> sliceData (buffer.getNumChannels(), (int) slcInfo.fSampleLength);
 
             if (! checkRexError (REX::REXRenderSlice (handle.handle, j, slcInfo.fSampleLength, (float**)sliceData.getArrayOfWritePointers())))
                 return false;
@@ -217,12 +217,12 @@ private:
                 for (int i = 0; i < sliceData.getNumChannels(); ++i)
                     buffer.addFrom (i, (int) offset, sliceData, i, 0, numSamples);
 
-            beatPoints.add (juce::String (offset));
+            beatPoints.add (yup::String (offset));
         }
 
-        metadataValues.set (RexAudioFormat::rexDenominator, juce::String ((int) info.fTimeSignDenom));
-        metadataValues.set (RexAudioFormat::rexNumerator,   juce::String ((int) info.fTimeSignNom));
-        metadataValues.set (RexAudioFormat::rexTempo,       juce::String (info.fTempo / 1000.0));
+        metadataValues.set (RexAudioFormat::rexDenominator, yup::String ((int) info.fTimeSignDenom));
+        metadataValues.set (RexAudioFormat::rexNumerator,   yup::String ((int) info.fTimeSignNom));
+        metadataValues.set (RexAudioFormat::rexTempo,       yup::String (info.fTempo / 1000.0));
 
         if (beatPoints.size() > 0)
             metadataValues.set (RexAudioFormat::rexBeatPoints, beatPoints.joinIntoString (";"));
@@ -230,7 +230,7 @@ private:
         return true;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RexAudioFormatReader)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RexAudioFormatReader)
 };
 
 //==============================================================================
@@ -243,7 +243,7 @@ RexAudioFormat::~RexAudioFormat()
 {
 }
 
-juce::AudioFormatReader* RexAudioFormat::createReaderFor (juce::InputStream* sourceStream, bool deleteStreamIfOpeningFails)
+yup::AudioFormatReader* RexAudioFormat::createReaderFor (yup::InputStream* sourceStream, bool deleteStreamIfOpeningFails)
 {
     CRASH_TRACER
     auto r = std::make_unique<RexAudioFormatReader> (sourceStream, getFormatName());
@@ -257,13 +257,13 @@ juce::AudioFormatReader* RexAudioFormat::createReaderFor (juce::InputStream* sou
     return {};
 }
 
-std::unique_ptr<juce::AudioFormatWriter> RexAudioFormat::createWriterFor (std::unique_ptr<juce::OutputStream>&,
-                                                                          const juce::AudioFormatWriterOptions&)
+std::unique_ptr<yup::AudioFormatWriter> RexAudioFormat::createWriterFor (std::unique_ptr<yup::OutputStream>&,
+                                                                          const yup::WriteOptions&)
 {
     return {};
 }
 
-juce::String RexAudioFormat::getErrorLoadingDLL()
+yup::String RexAudioFormat::getErrorLoadingDLL()
 {
     return getRexSystem().startupErrorMessage;
 }

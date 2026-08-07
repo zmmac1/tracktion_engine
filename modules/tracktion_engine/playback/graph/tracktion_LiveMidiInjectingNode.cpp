@@ -48,7 +48,7 @@ void LiveMidiInjectingNode::prepareToPlay (const tracktion::graph::PlaybackIniti
     {
         if (oldNode->track == track)
         {
-            const juce::ScopedLock sl2 (oldNode->liveMidiLock);
+            const yup::ScopedLock sl2 (oldNode->liveMidiLock);
             liveMidiMessages.swapWith (oldNode->liveMidiMessages);
             midiSourceID = oldNode->midiSourceID;
         }
@@ -69,7 +69,7 @@ void LiveMidiInjectingNode::process (ProcessContext& pc)
     destMidiBlock.copyFrom (sourceBuffers.midi);
     setAudioOutput (input.get(), sourceBuffers.audio);
 
-    const juce::ScopedLock sl (liveMidiLock);
+    const yup::ScopedLock sl (liveMidiLock);
 
     if (liveMidiMessages.isEmpty())
         return;
@@ -82,7 +82,7 @@ void LiveMidiInjectingNode::injectMessage (MidiMessageWithSource mm)
 {
     mm.setTimeStamp (0.0);
 
-    const juce::ScopedLock sl (liveMidiLock);
+    const yup::ScopedLock sl (liveMidiLock);
     liveMidiMessages.add (std::move (mm));
 }
 

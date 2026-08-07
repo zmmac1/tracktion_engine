@@ -23,61 +23,61 @@ public:
     DAWprojectExporter (Edit& edit, const WriteOptions& options);
 
     /** Creates the project.xml content. */
-    tl::expected<std::unique_ptr<juce::XmlElement>, juce::String> createProjectXml();
+    tl::expected<std::unique_ptr<yup::XmlElement>, yup::String> createProjectXml();
 
     /** Creates the metadata.xml content. */
-    std::unique_ptr<juce::XmlElement> createMetadataXml();
+    std::unique_ptr<yup::XmlElement> createMetadataXml();
 
     /** Writes the complete .dawproject file. */
-    juce::Result writeToFile (const juce::File& file);
+    yup::Result writeToFile (const yup::File& file);
 
 private:
     //==============================================================================
     // Structure export
-    juce::XmlElement* createStructure (juce::XmlElement& parent);
-    juce::XmlElement* createTrackElement (juce::XmlElement& parent, Track& track);
-    juce::XmlElement* createChannelElement (juce::XmlElement& parent, Track& track);
+    yup::XmlElement* createStructure (yup::XmlElement& parent);
+    yup::XmlElement* createTrackElement (yup::XmlElement& parent, Track& track);
+    yup::XmlElement* createChannelElement (yup::XmlElement& parent, Track& track);
 
     // Transport/tempo export
-    juce::XmlElement* createTransport (juce::XmlElement& parent);
-    juce::XmlElement* createTempoAutomation (juce::XmlElement& parent);
-    juce::XmlElement* createTimeSignatureAutomation (juce::XmlElement& parent);
+    yup::XmlElement* createTransport (yup::XmlElement& parent);
+    yup::XmlElement* createTempoAutomation (yup::XmlElement& parent);
+    yup::XmlElement* createTimeSignatureAutomation (yup::XmlElement& parent);
 
     // Arrangement export
-    juce::XmlElement* createArrangement (juce::XmlElement& parent);
-    juce::XmlElement* createLanes (juce::XmlElement& parent, Track& track);
-    juce::XmlElement* createClipsElement (juce::XmlElement& parent, ClipTrack& track);
-    juce::XmlElement* createMarkersElement (juce::XmlElement& parent);
+    yup::XmlElement* createArrangement (yup::XmlElement& parent);
+    yup::XmlElement* createLanes (yup::XmlElement& parent, Track& track);
+    yup::XmlElement* createClipsElement (yup::XmlElement& parent, ClipTrack& track);
+    yup::XmlElement* createMarkersElement (yup::XmlElement& parent);
 
     // Scenes (clip launcher) export
-    juce::XmlElement* createScenes (juce::XmlElement& parent);
+    yup::XmlElement* createScenes (yup::XmlElement& parent);
 
     // Clip export
-    juce::XmlElement* createClipElement (juce::XmlElement& parent, Clip& clip);
-    void exportAudioClip (juce::XmlElement& clipElement, WaveAudioClip& clip);
-    void exportMidiClip (juce::XmlElement& clipElement, MidiClip& clip);
-    juce::XmlElement* createNotesElement (juce::XmlElement& parent, MidiClip& clip);
-    juce::XmlElement* createNoteElement (juce::XmlElement& parent, const MidiNote& note);
-    void createControllerLanes (juce::XmlElement& parent, MidiClip& clip);
+    yup::XmlElement* createClipElement (yup::XmlElement& parent, Clip& clip);
+    void exportAudioClip (yup::XmlElement& clipElement, WaveAudioClip& clip);
+    void exportMidiClip (yup::XmlElement& clipElement, MidiClip& clip);
+    yup::XmlElement* createNotesElement (yup::XmlElement& parent, MidiClip& clip);
+    yup::XmlElement* createNoteElement (yup::XmlElement& parent, const MidiNote& note);
+    void createControllerLanes (yup::XmlElement& parent, MidiClip& clip);
 
     // Plugin export
-    juce::XmlElement* createDevices (juce::XmlElement& parent, Track& track);
-    juce::XmlElement* createPluginElement (juce::XmlElement& parent, Plugin& plugin);
+    yup::XmlElement* createDevices (yup::XmlElement& parent, Track& track);
+    yup::XmlElement* createPluginElement (yup::XmlElement& parent, Plugin& plugin);
 
     // Automation export
-    juce::XmlElement* createAutomationPoints (juce::XmlElement& parent, AutomatableParameter& param);
+    yup::XmlElement* createAutomationPoints (yup::XmlElement& parent, AutomatableParameter& param);
 
     // Audio file handling
-    juce::String addAudioFile (const juce::File& file);
-    void writeAudioFiles (juce::ZipFile::Builder& zipBuilder);
-    void writePluginStates (juce::ZipFile::Builder& zipBuilder);
+    yup::String addAudioFile (const yup::File& file);
+    void writeAudioFiles (yup::ZipFile::Builder& zipBuilder);
+    void writePluginStates (yup::ZipFile::Builder& zipBuilder);
 
     //==============================================================================
     // Utility functions
-    juce::String getTrackContentType (Track& track) const;
-    juce::String getMixerRole (Track& track) const;
-    juce::String getPluginType (Plugin& plugin) const;
-    juce::String getDeviceRole (Plugin& plugin) const;
+    yup::String getTrackContentType (Track& track) const;
+    yup::String getMixerRole (Track& track) const;
+    yup::String getPluginType (Plugin& plugin) const;
+    yup::String getDeviceRole (Plugin& plugin) const;
 
     //==============================================================================
     Edit& edit;
@@ -85,26 +85,26 @@ private:
     IDGenerator idGenerator;
 
     // Maps tracks to their generated IDs
-    std::unordered_map<Track*, juce::String> trackToId;
-    std::unordered_map<Track*, juce::String> trackToChannelId;
+    std::unordered_map<Track*, yup::String> trackToId;
+    std::unordered_map<Track*, yup::String> trackToChannelId;
 
     // Audio files to embed
     struct AudioFileEntry
     {
-        juce::File sourceFile;
-        juce::String archivePath;
+        yup::File sourceFile;
+        yup::String archivePath;
     };
     std::vector<AudioFileEntry> audioFilesToEmbed;
 
     // Plugin states to embed
     struct PluginStateEntry
     {
-        juce::MemoryBlock state;
-        juce::String archivePath;
+        yup::MemoryBlock state;
+        yup::String archivePath;
     };
     std::vector<PluginStateEntry> pluginStatesToEmbed;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DAWprojectExporter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DAWprojectExporter)
 };
 
 }} // namespace tracktion::inline engine::dawproject

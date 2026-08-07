@@ -22,16 +22,16 @@ class ContainerClip  : public AudioClipBase,
 {
 public:
     /** Creates a ContainerClip from a given state. @see ClipOwner::insertWaveClip. */
-    ContainerClip (const juce::ValueTree&, EditItemID, ClipOwner&);
+    ContainerClip (const yup::ValueTree&, EditItemID, ClipOwner&);
 
     /** Destructor. */
     ~ContainerClip() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<ContainerClip>;
+    using Ptr = yup::ReferenceCountedObjectPtr<ContainerClip>;
 
     //==============================================================================
     /** @internal */
-    juce::ValueTree& getClipOwnerState() override;
+    yup::ValueTree& getClipOwnerState() override;
     /** @internal */
     EditItemID getClipOwnerID() override;
     /** @internal */
@@ -41,7 +41,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    juce::File getOriginalFile() const override                 { return {}; }
+    yup::File getOriginalFile() const override                 { return {}; }
     /** @internal */
     bool isUsingFile (const AudioFile&) override;
 
@@ -53,7 +53,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     /** @internal */
     bool isMidi() const override;
 
@@ -75,7 +75,7 @@ public:
 
 private:
     //==============================================================================
-    juce::ValueTree clipListState;
+    yup::ValueTree clipListState;
 
     void clipCreated (Clip&) override;
     void clipAddedOrRemoved() override;
@@ -83,7 +83,7 @@ private:
     void clipPositionChanged() override;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContainerClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContainerClip)
 };
 
 } // namespace tracktion::inline engine

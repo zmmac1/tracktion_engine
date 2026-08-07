@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-bool ColourArea::contains (ClipSlot& clipSlot) const
+bool ColorArea::contains (ClipSlot& clipSlot) const
 {
     auto t1 = firstTrack.getIndexInEditTrackList();
     auto t2 = lastTrack.getIndexInEditTrackList();
@@ -24,7 +24,7 @@ bool ColourArea::contains (ClipSlot& clipSlot) const
     return false;
 }
 
-bool ColourArea::isLeft (ClipSlot& clipSlot) const
+bool ColorArea::isLeft (ClipSlot& clipSlot) const
 {
     auto t1 = firstTrack.getIndexInEditTrackList();
 
@@ -37,7 +37,7 @@ bool ColourArea::isLeft (ClipSlot& clipSlot) const
     return false;
 }
 
-bool ColourArea::isRight (ClipSlot& clipSlot) const
+bool ColorArea::isRight (ClipSlot& clipSlot) const
 {
     auto t2 = lastTrack.getIndexInEditTrackList();
 
@@ -50,7 +50,7 @@ bool ColourArea::isRight (ClipSlot& clipSlot) const
     return false;
 }
 
-bool ColourArea::isTop (ClipSlot& clipSlot) const
+bool ColorArea::isTop (ClipSlot& clipSlot) const
 {
     auto t1 = firstTrack.getIndexInEditTrackList();
     auto t2 = lastTrack.getIndexInEditTrackList();
@@ -64,7 +64,7 @@ bool ColourArea::isTop (ClipSlot& clipSlot) const
     return false;
 }
 
-bool ColourArea::isBottom (ClipSlot& clipSlot) const
+bool ColorArea::isBottom (ClipSlot& clipSlot) const
 {
     auto t1 = firstTrack.getIndexInEditTrackList();
     auto t2 = lastTrack.getIndexInEditTrackList();
@@ -78,9 +78,9 @@ bool ColourArea::isBottom (ClipSlot& clipSlot) const
     return false;
 }
 
-struct ExternalControllerManager::EditTreeWatcher   : private juce::ValueTree::Listener,
-                                                      private juce::Timer,
-                                                      private juce::AsyncUpdater,
+struct ExternalControllerManager::EditTreeWatcher   : private yup::ValueTree::Listener,
+                                                      private yup::Timer,
+                                                      private yup::AsyncUpdater,
                                                       private SceneWatcher::Listener
 {
     EditTreeWatcher (ExternalControllerManager& o, Edit& e) : owner (o), edit (e)
@@ -106,11 +106,11 @@ private:
     ExternalControllerManager& owner;
     Edit& edit;
 
-    juce::Array<juce::ValueTree, juce::CriticalSection> pluginsToUpdate;
-    juce::Atomic<int> updateAux;
-    juce::Atomic<bool> updatePads;
+    yup::Array<yup::ValueTree, yup::CriticalSection> pluginsToUpdate;
+    yup::Atomic<int> updateAux;
+    yup::Atomic<bool> updatePads;
 
-    void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i) override
+    void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i) override
     {
         if (v.hasType (IDs::MARKERCLIP))
         {
@@ -135,25 +135,25 @@ private:
         }
     }
 
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree& c) override
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree& c) override
     {
         if (c.hasType (IDs::MARKERCLIP))
             triggerAsyncUpdate();
     }
 
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree& c, int) override
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree& c, int) override
     {
         if (c.hasType (IDs::MARKERCLIP))
             triggerAsyncUpdate();
     }
 
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override   {}
-    void valueTreeParentChanged (juce::ValueTree&) override                 {}
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override   {}
+    void valueTreeParentChanged (yup::ValueTree&) override                 {}
 
     void timerCallback() override
     {
         {
-            juce::Array<juce::ValueTree, juce::CriticalSection> plugins;
+            yup::Array<yup::ValueTree, yup::CriticalSection> plugins;
             plugins.swapWith (pluginsToUpdate);
 
             for (int i = plugins.size(); --i >= 0;)
@@ -183,7 +183,7 @@ private:
             owner.auxSendLevelsChanged();
 
         if (updatePads.compareAndSetBool (false, true))
-            owner.updatePadColours();
+            owner.updatePadColors();
     }
 
     void handleAsyncUpdate() override
@@ -191,13 +191,13 @@ private:
         owner.updateMarkers();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditTreeWatcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditTreeWatcher)
 };
 
 struct ExternalControllerManager::MasterLevelClientState
 {
     LevelMeasurer::Client client;
-    juce::WeakReference<LevelMeasurer> measurer;
+    yup::WeakReference<LevelMeasurer> measurer;
 };
 
 //==============================================================================
@@ -292,7 +292,7 @@ void ExternalControllerManager::initialise()
     }
    #endif
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     if (controllers.remoteSLCompact) addNewController (new RemoteSLCompact (*this));
    #endif
 
@@ -398,7 +398,7 @@ void ExternalControllerManager::detachFromSelectionManager (SelectionManager* sm
         setCurrentEdit (currentEdit, nullptr);
 }
 
-bool ExternalControllerManager::createCustomController (const juce::String& name, Protocol protocol)
+bool ExternalControllerManager::createCustomController (const yup::String& name, Protocol protocol)
 {
     CRASH_TRACER
 
@@ -477,9 +477,9 @@ void ExternalControllerManager::deleteController (ExternalController* c)
     }
 }
 
-juce::StringArray ExternalControllerManager::getAllControllerNames()
+yup::StringArray ExternalControllerManager::getAllControllerNames()
 {
-    juce::StringArray s;
+    yup::StringArray s;
 
     for (auto ec : devices)
         s.add (ec->getName());
@@ -504,7 +504,7 @@ void ExternalControllerManager::updateTrackRecordLights()   { FOR_EACH_ACTIVE_DE
 void ExternalControllerManager::updatePunchLights()         { FOR_EACH_ACTIVE_DEVICE (updatePunchLights()); }
 void ExternalControllerManager::updateScrollLights()        { FOR_EACH_ACTIVE_DEVICE (updateScrollLights()); }
 void ExternalControllerManager::updateUndoLights()          { FOR_EACH_ACTIVE_DEVICE (updateUndoLights()); }
-void ExternalControllerManager::updatePadColours()          { FOR_EACH_ACTIVE_DEVICE (updatePadColours()); }
+void ExternalControllerManager::updatePadColors()          { FOR_EACH_ACTIVE_DEVICE (updatePadColors()); }
 
 void ExternalControllerManager::changeListenerCallback (ChangeBroadcaster* source)
 {
@@ -514,7 +514,7 @@ void ExternalControllerManager::changeListenerCallback (ChangeBroadcaster* sourc
     {
         playStateChanged (tc->isPlaying());
         recordStateChanged (tc->isRecording());
-        updatePadColours();
+        updatePadColors();
     }
     else if (currentSelectionManager != nullptr)
     {
@@ -542,7 +542,7 @@ void ExternalControllerManager::updateAllDevices()
 {
     if (! isTimerRunning())
     {
-        auto now = juce::Time::getMillisecondCounter();
+        auto now = yup::Time::getMillisecondCounter();
 
         if (now - lastUpdate > 250)
         {
@@ -564,7 +564,7 @@ void ExternalControllerManager::timerCallback()
     CRASH_TRACER
     stopTimer();
 
-    lastUpdate = juce::Time::getMillisecondCounter();
+    lastUpdate = yup::Time::getMillisecondCounter();
 
     updateDeviceState();
     updateParameters();
@@ -583,9 +583,9 @@ void ExternalControllerManager::BlinkTimer::timerCallback()
     ecm.blinkNow();
 }
 
-juce::Array<ExternalController*> ExternalControllerManager::getActiveDevices() const
+yup::Array<ExternalController*> ExternalControllerManager::getActiveDevices() const
 {
-    juce::Array<ExternalController*> activeDevices;
+    yup::Array<ExternalController*> activeDevices;
 
     for (auto d : devices)
         if (d->isEnabled())
@@ -797,7 +797,7 @@ void ExternalControllerManager::editPositionChanged (Edit* ed, TimePosition newC
     if (ed != nullptr)
     {
         CRASH_TRACER
-        juce::String parts[4];
+        yup::String parts[4];
         ed->getTimecodeFormat().getPartStrings (TimecodeDuration::fromSecondsOnly (toDuration (newCursorPosition)),
                                                 ed->tempoSequence,
                                                 false, parts);
@@ -1161,35 +1161,35 @@ int ExternalControllerManager::mapTrackNumToChannelNum (int index) const
     return result;
 }
 
-bool ExternalControllerManager::shouldTrackBeColoured (int channelNum)
+bool ExternalControllerManager::shouldTrackBeColored (int channelNum)
 {
     if (! devices.isEmpty())
     {
         auto cn = mapTrackNumToChannelNum (channelNum);
 
         for (auto& d : devices)
-            if (d->shouldTrackBeColoured (cn))
+            if (d->shouldTrackBeColored (cn))
                 return true;
     }
 
     return false;
 }
 
-std::vector<ColourArea> ExternalControllerManager::ExternalControllerManager::getColouredArea (const Edit& e)
+std::vector<ColorArea> ExternalControllerManager::ExternalControllerManager::getColoredArea (const Edit& e)
 {
-    std::vector<ColourArea> areas;
+    std::vector<ColorArea> areas;
 
     for (auto device : devices)
         if (device->isEnabled())
-            if (auto area = device->getColouredArea (e); area.has_value())
+            if (auto area = device->getColoredArea (e); area.has_value())
                 areas.push_back (*area);
 
     return areas;
 }
 
-juce::Colour ExternalControllerManager::getTrackColour (int channelNum)
+yup::Color ExternalControllerManager::getTrackColor (int channelNum)
 {
-    juce::Colour c;
+    yup::Color c;
 
     if (devices.isEmpty())
         return c;
@@ -1202,7 +1202,7 @@ juce::Colour ExternalControllerManager::getTrackColour (int channelNum)
         auto cn = mapTrackNumToChannelNum (channelNum);
 
         for (auto d : activeDevices)
-            d->getTrackColour (cn, c);
+            d->getTrackColor (cn, c);
     }
 
     return c;
@@ -1220,30 +1220,30 @@ void ExternalControllerManager::repaintSlots (int channelNum)
         t->changed();
 }
 
-bool ExternalControllerManager::shouldPluginBeColoured (Plugin* plugin)
+bool ExternalControllerManager::shouldPluginBeColored (Plugin* plugin)
 {
     for (auto d : devices)
         if (d->isEnabled())
-            if (d->shouldPluginBeColoured (plugin))
+            if (d->shouldPluginBeColored (plugin))
                 return true;
 
     return false;
 }
 
-juce::Colour ExternalControllerManager::getPluginColour (Plugin* plugin)
+yup::Color ExternalControllerManager::getPluginColor (Plugin* plugin)
 {
-    juce::Colour c;
-    FOR_EACH_ACTIVE_DEVICE (getPluginColour (plugin, c));
+    yup::Color c;
+    FOR_EACH_ACTIVE_DEVICE (getPluginColor (plugin, c));
     return c;
 }
 
 void ExternalControllerManager::repaintPlugin (Plugin& plugin)
 {
     if (auto c = PluginComponent::getComponentFor (plugin))
-        c->updateColour();
+        c->updateColor();
 }
 
-int ExternalControllerManager::getXTCount (const juce::String& desc)
+int ExternalControllerManager::getXTCount (const yup::String& desc)
 {
     if (desc == "Mackie Control Universal")
         return engine.getPropertyStorage().getProperty (SettingID::xtCount);
@@ -1251,10 +1251,10 @@ int ExternalControllerManager::getXTCount (const juce::String& desc)
     return engine.getPropertyStorage().getPropertyItem (SettingID::xtCount, desc);
 }
 
-void ExternalControllerManager::setXTCount (const juce::String& desc, int after)
+void ExternalControllerManager::setXTCount (const yup::String& desc, int after)
 {
     CRASH_TRACER
-    juce::ignoreUnused (desc, after);
+    yup::ignoreUnused (desc, after);
 
    #if TRACKTION_ENABLE_CONTROL_SURFACES
     for (int devIdx = 0; devIdx < devices.size(); devIdx++)
@@ -1302,7 +1302,7 @@ void ExternalControllerManager::refreshXTOrder()
             for (int i = 0; i < getXTCount (mcu->deviceDescription); ++i)
                 xt[i] = devices[offset + 1 + i] ? devices[offset + 1 + i]->getControlSurfaceIfType<MackieXT>() : nullptr;
 
-            juce::StringArray indices;
+            yup::StringArray indices;
             if (mcu->deviceDescription == "Mackie Control Universal")
                 indices.addTokens (engine.getPropertyStorage().getProperty (SettingID::xtIndices, "0 1 2 3").toString(), false);
             else

@@ -26,22 +26,22 @@ namespace tracktion::inline engine
     Stereo main I/O + mono sidechain input + mono sidechain output.
     Total: 3 input channels, 3 output channels. Main bus: 2 in, 2 out.
 */
-class SidechainTestPlugin  : public juce::AudioPluginInstance
+class SidechainTestPlugin  : public yup::AudioPluginInstance
 {
 public:
     SidechainTestPlugin()
-        : juce::AudioPluginInstance (BusesProperties()
-                                        .withInput  ("Input",     juce::AudioChannelSet::stereo(), true)
-                                        .withOutput ("Output",    juce::AudioChannelSet::stereo(), true)
-                                        .withInput  ("Sidechain", juce::AudioChannelSet::mono(),   true)
-                                        .withOutput ("SC Monitor", juce::AudioChannelSet::mono(),  true))
+        : yup::AudioPluginInstance (BusesProperties()
+                                        .withInput  ("Input",     yup::AudioChannelSet::stereo(), true)
+                                        .withOutput ("Output",    yup::AudioChannelSet::stereo(), true)
+                                        .withInput  ("Sidechain", yup::AudioChannelSet::mono(),   true)
+                                        .withOutput ("SC Monitor", yup::AudioChannelSet::mono(),  true))
     {
     }
 
-    void fillInPluginDescription (juce::PluginDescription& d) const override
+    void fillInPluginDescription (yup::PluginDescription& d) const override
     {
         d.name = "SidechainTestPlugin";
-        d.pluginFormatName = "Test";
+        d.name = "Test";
         d.fileOrIdentifier = "SidechainTestPlugin";
         d.descriptiveName = "Test plugin with sidechain";
         d.numInputChannels = getTotalNumInputChannels();
@@ -49,12 +49,12 @@ public:
         d.isInstrument = false;
     }
 
-    const juce::String getName() const override { return "SidechainTestPlugin"; }
+    const yup::String getName() const override { return "SidechainTestPlugin"; }
     void prepareToPlay (double, int) override {}
     void releaseResources() override {}
-    using juce::AudioProcessor::processBlock;
+    using yup::AudioProcessor::processBlock;
 
-    void processBlock (juce::AudioBuffer<float>& b, juce::MidiBuffer&) override
+    void processBlock (yup::AudioBuffer<float>& b, yup::MidiBuffer&) override
     {
         // Recorded so a test can check which signal arrived on which input channel.
         // Only read these once processing has finished
@@ -70,14 +70,14 @@ public:
     double getTailLengthSeconds() const override { return 0.0; }
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
-    juce::AudioProcessorEditor* createEditor() override { return nullptr; }
+    yup::AudioProcessorEditor* createEditor() override { return nullptr; }
     bool hasEditor() const override { return false; }
     int getNumPrograms() override { return 1; }
     int getCurrentProgram() override { return 0; }
     void setCurrentProgram (int) override {}
-    const juce::String getProgramName (int) override { return {}; }
-    void changeProgramName (int, const juce::String&) override {}
-    void getStateInformation (juce::MemoryBlock&) override {}
+    const yup::String getProgramName (int) override { return {}; }
+    void changeProgramName (int, const yup::String&) override {}
+    void getStateInformation (yup::MemoryBlock&) override {}
     void setStateInformation (const void*, int) override {}
 };
 
@@ -103,8 +103,8 @@ TEST_SUITE ("tracktion_engine")
         auto prevCallback = pm.createPluginInstance;
 
         pm.createPluginInstance =
-            [&] (const juce::PluginDescription& d, double, int, juce::String&)
-            -> std::unique_ptr<juce::AudioPluginInstance>
+            [&] (const yup::PluginDescription& d, double, int, yup::String&)
+            -> std::unique_ptr<yup::AudioPluginInstance>
             {
                 if (d.name == "SidechainTestPlugin")
                     return std::make_unique<SidechainTestPlugin>();
@@ -172,8 +172,8 @@ TEST_SUITE ("tracktion_engine")
         SidechainTestPlugin testProc;
 
         pm.createPluginInstance =
-            [&] (const juce::PluginDescription& d, double, int, juce::String&)
-            -> std::unique_ptr<juce::AudioPluginInstance>
+            [&] (const yup::PluginDescription& d, double, int, yup::String&)
+            -> std::unique_ptr<yup::AudioPluginInstance>
             {
                 if (d.name == "SidechainTestPlugin")
                     return std::make_unique<SidechainTestPlugin>();
@@ -271,8 +271,8 @@ TEST_SUITE ("tracktion_engine")
         SidechainTestPlugin* createdInstance = nullptr;
 
         pm.createPluginInstance =
-            [&] (const juce::PluginDescription& d, double, int, juce::String&)
-            -> std::unique_ptr<juce::AudioPluginInstance>
+            [&] (const yup::PluginDescription& d, double, int, yup::String&)
+            -> std::unique_ptr<yup::AudioPluginInstance>
             {
                 if (d.name != "SidechainTestPlugin")
                     return nullptr;
@@ -292,7 +292,7 @@ TEST_SUITE ("tracktion_engine")
 
         // A track's channel count comes from its clips, so a mono clip makes the track
         // node mono and forces the conversion this test is about
-        auto monoFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (sampleRate, durationInSeconds, 1, 220.0f);
+        auto monoFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (sampleRate, durationInSeconds, 1, 220.0f);
         insertWaveClip (*pluginTrack, {}, monoFile->getFile(),
                         { .time = { 0_tp, TimePosition::fromSeconds (durationInSeconds) } },
                         DeleteExistingClips::no);
@@ -300,7 +300,7 @@ TEST_SUITE ("tracktion_engine")
 
         // The sidechain source needs audio of its own: a silent one can't tell a
         // preserved sidechain channel apart from one the conversion dropped
-        auto sidechainFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (sampleRate, durationInSeconds, 2, 440.0f);
+        auto sidechainFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (sampleRate, durationInSeconds, 2, 440.0f);
         insertWaveClip (*sidechainSourceTrack, {}, sidechainFile->getFile(),
                         { .time = { 0_tp, TimePosition::fromSeconds (durationInSeconds) } },
                         DeleteExistingClips::no);
@@ -376,8 +376,8 @@ TEST_SUITE ("tracktion_engine")
         auto prevCallback = pm.createPluginInstance;
 
         pm.createPluginInstance =
-            [&] (const juce::PluginDescription& d, double, int, juce::String&)
-            -> std::unique_ptr<juce::AudioPluginInstance>
+            [&] (const yup::PluginDescription& d, double, int, yup::String&)
+            -> std::unique_ptr<yup::AudioPluginInstance>
             {
                 if (d.name == "SidechainTestPlugin")
                     return std::make_unique<SidechainTestPlugin>();
@@ -396,14 +396,14 @@ TEST_SUITE ("tracktion_engine")
         // Fabricate a saved layout with 4 input buses — the plugin only has 2.
         // This happens when an edit was saved with a plugin version that supported
         // more buses, or when the plugin format changed.
-        juce::ValueTree layoutTree (IDs::LAYOUT);
+        yup::ValueTree layoutTree (IDs::LAYOUT);
 
-        juce::ValueTree inputs (IDs::INPUTS);
+        yup::ValueTree inputs (IDs::INPUTS);
 
         for (int i = 0; i < 4; ++i)
             inputs.addChild (createValueTree (IDs::BUS, IDs::index, i, IDs::layout, "stereo"), -1, nullptr);
 
-        juce::ValueTree outputs (IDs::OUTPUTS);
+        yup::ValueTree outputs (IDs::OUTPUTS);
 
         for (int i = 0; i < 4; ++i)
             outputs.addChild (createValueTree (IDs::BUS, IDs::index, i, IDs::layout, "stereo"), -1, nullptr);
@@ -411,16 +411,16 @@ TEST_SUITE ("tracktion_engine")
         layoutTree.addChild (inputs, -1, nullptr);
         layoutTree.addChild (outputs, -1, nullptr);
 
-        juce::MemoryBlock mb;
+        yup::MemoryBlock mb;
         {
-            juce::MemoryOutputStream os (mb, false);
+            yup::MemoryOutputStream os (mb, false);
             layoutTree.writeToStream (os);
         }
 
         pluginState.setProperty (IDs::layout, mb, nullptr);
 
         // Without the fix, readBusLayout populates targetBuses for bus indices
-        // that addBus failed to create, causing a size mismatch in setBusesLayout.
+        // that addBus failed to create, causing a size mismatch in setAudioBusLayout.
         auto pluginRef = track->pluginList.insertPlugin (pluginState, 0);
         auto externalPlugin = dynamic_cast<ExternalPlugin*> (pluginRef.get());
         REQUIRE (externalPlugin != nullptr);
@@ -453,8 +453,8 @@ TEST_SUITE ("tracktion_engine")
         auto prevCallback = pm.createPluginInstance;
 
         pm.createPluginInstance =
-            [&] (const juce::PluginDescription& d, double, int, juce::String&)
-            -> std::unique_ptr<juce::AudioPluginInstance>
+            [&] (const yup::PluginDescription& d, double, int, yup::String&)
+            -> std::unique_ptr<yup::AudioPluginInstance>
             {
                 if (d.name == "SidechainTestPlugin")
                     return std::make_unique<SidechainTestPlugin>();
@@ -471,20 +471,20 @@ TEST_SUITE ("tracktion_engine")
         auto pluginState = ExternalPlugin::create (engine, pluginDesc);
 
         // Saved layout with only 1 input + 1 output bus (plugin defaults to 2 each)
-        juce::ValueTree layoutTree (IDs::LAYOUT);
+        yup::ValueTree layoutTree (IDs::LAYOUT);
 
-        juce::ValueTree inputs (IDs::INPUTS);
+        yup::ValueTree inputs (IDs::INPUTS);
         inputs.addChild (createValueTree (IDs::BUS, IDs::index, 0, IDs::layout, "stereo"), -1, nullptr);
 
-        juce::ValueTree outputs (IDs::OUTPUTS);
+        yup::ValueTree outputs (IDs::OUTPUTS);
         outputs.addChild (createValueTree (IDs::BUS, IDs::index, 0, IDs::layout, "stereo"), -1, nullptr);
 
         layoutTree.addChild (inputs, -1, nullptr);
         layoutTree.addChild (outputs, -1, nullptr);
 
-        juce::MemoryBlock mb;
+        yup::MemoryBlock mb;
         {
-            juce::MemoryOutputStream os (mb, false);
+            yup::MemoryOutputStream os (mb, false);
             layoutTree.writeToStream (os);
         }
 

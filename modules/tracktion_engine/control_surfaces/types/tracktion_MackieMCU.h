@@ -13,8 +13,8 @@ namespace tracktion::inline engine {
 class MackieXT;
 
 class MackieMCU  : public ControlSurface,
-                   protected juce::Timer,
-                   protected juce::AsyncUpdater
+                   protected yup::Timer,
+                   protected yup::AsyncUpdater
 {
 public:
     MackieMCU (ExternalControllerManager&);
@@ -25,10 +25,10 @@ public:
     void updateMiscFeatures() override;
     void cpuTimerCallback();
     void auxTimerCallback();
-    void acceptMidiMessage (int, const juce::MidiMessage&) override;
-    virtual void acceptMidiMessageInt (int deviceIdx, const juce::MidiMessage&);
+    void acceptMidiMessage (int, const yup::MidiMessage&) override;
+    virtual void acceptMidiMessageInt (int deviceIdx, const yup::MidiMessage&);
     void flip();
-    void setAssignmentText (const juce::String&);
+    void setAssignmentText (const yup::String&);
     void setDisplay (int devIdx, const char* topLine, const char* bottomLine);
 
     enum AssignmentMode
@@ -71,7 +71,7 @@ public:
     void automationWriteModeChanged (bool isWriting) override;
     void parameterChanged (int parameterNumber, const ParameterSetting&) override;
     void clearParameter (int parameterNumber) override;
-    void faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames) override;
+    void faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames) override;
     void channelLevelChanged (int channel, std::span<const float> levels) override;
     void masterLevelsChanged (std::span<const float> levels) override;
     void updateTCDisplay (const char* newDigits);
@@ -122,13 +122,13 @@ protected:
     int lastStartChan = 0;
     int deviceIdx = 0;
     int auxBank = 0;
-    juce::Array<int> userMovedAuxes;
+    yup::Array<int> userMovedAuxes;
 
     void clearAllDisplays();
-    void setDisplay (int devIdx, const juce::String& text, int pos);
+    void setDisplay (int devIdx, const yup::String& text, int pos);
     void clearDisplaySegment (int devIdx, int column, int row);
-    void setDisplaySegment (int devIdx, int column, int row, const juce::String& text);
-    void centreDisplaySegment (int devIdx, int column, int row, const juce::String& text);
+    void setDisplaySegment (int devIdx, int column, int row, const yup::String& text);
+    void centreDisplaySegment (int devIdx, int column, int row, const yup::String& text);
 
     void handleAsyncUpdate() override;
     void timerCallback() override;
@@ -151,9 +151,9 @@ protected:
 
     std::unique_ptr<CpuMeterTimer> cpuMeterTimer;
     std::unique_ptr<AuxTimer> auxTimer;
-    juce::Array<MackieXT*> extenders;
+    yup::Array<MackieXT*> extenders;
 
-    juce::String auxString (int chan) const;
+    yup::String auxString (int chan) const;
 
 
     bool isEditValidAndNotSafeRecording() const;

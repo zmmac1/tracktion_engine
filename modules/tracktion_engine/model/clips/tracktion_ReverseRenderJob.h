@@ -22,8 +22,8 @@ public:
         render will be abandoned. If you delete yourself, make sure to unregister as a listener too.
     */
     static Ptr getOrCreateRenderJob (Engine& e,
-                                     const juce::File& source,
-                                     const juce::File& destination)
+                                     const yup::File& source,
+                                     const yup::File& destination)
     {
         AudioFile targetFile (e, destination);
 
@@ -41,7 +41,7 @@ protected:
     {
         CRASH_TRACER
 
-        juce::TemporaryFile tempFile (proxy.getFile(), juce::TemporaryFile::useHiddenFile);
+        yup::TemporaryFile tempFile (proxy.getFile(), yup::TemporaryFile::useHiddenFile);
         success = AudioFileUtils::reverse (engine, source, tempFile.getFile(), progress, this);
 
         if (success)
@@ -65,15 +65,15 @@ protected:
 
 private:
     //==============================================================================
-    ReverseRenderJob (Engine& e, const juce::File& src, const AudioFile& destination)
+    ReverseRenderJob (Engine& e, const yup::File& src, const AudioFile& destination)
         : Job (e, destination), source (src)
     {
     }
 
-    juce::File source;
+    yup::File source;
     bool success = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverseRenderJob)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverseRenderJob)
 };
 
 } // namespace tracktion::inline engine

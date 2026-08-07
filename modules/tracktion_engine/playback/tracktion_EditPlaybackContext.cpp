@@ -38,7 +38,7 @@ namespace EditPlaybackContextInternal
         return useAudioWorkgroup;
     }
 
-    inline juce::AudioWorkgroup getAudioWorkgroupIfEnabled (Engine& e)
+    inline yup::AudioWorkgroup getAudioWorkgroupIfEnabled (Engine& e)
     {
         if (! getAudioWorkgroupFlag())
             return {};
@@ -53,7 +53,7 @@ namespace EditPlaybackContextInternal
 
         auto wg = getAudioWorkgroupIfEnabled (edit.engine);
         return wg ? wg.getMaxParallelThreadCount() - 1
-                  : static_cast<size_t> (juce::SystemStats::getNumCpus() - 1);
+                  : static_cast<size_t> (yup::SystemStats::getNumCpus() - 1);
     }
 }
 
@@ -88,7 +88,7 @@ struct EditPlaybackContext::ContextSyncroniser
 
         const auto sourceTimelineTime = TimePosition::fromSamples (sourcePlayHead.getPosition(), sampleRate);
         const auto millisecondsSinceEpoch = std::chrono::duration_cast<std::chrono::milliseconds> (sourcePlayHead.getLastUserInteractionTime().time_since_epoch()).count();
-        const juce::Time sourceLastInteractionTime (static_cast<int64_t> (millisecondsSinceEpoch));
+        const yup::Time sourceLastInteractionTime (static_cast<int64_t> (millisecondsSinceEpoch));
 
         const auto destTimelineTime = TimePosition::fromSamples (destPlayHead.getPosition(), sampleRate);
         const auto destLoopDuration = TimeDuration::fromSamples (destPlayHead.getLoopRange().getLength(), sampleRate);
@@ -112,10 +112,10 @@ private:
     TimePosition lastSourceTimelineTime;
     bool hasSynced = false, isValid = false;
 
-    SyncAndPosition getSyncAction (const TimePosition sourceTimelineTime, const bool sourceIsPlaying, const juce::Time sourceLastInteractionTime,
+    SyncAndPosition getSyncAction (const TimePosition sourceTimelineTime, const bool sourceIsPlaying, const yup::Time sourceLastInteractionTime,
                                    const TimePosition destTimelineTime, const bool destIsLooping, const TimeDuration destLoopDuration)
     {
-        const juce::ScopedValueSetter<TimePosition> lastSourceTimelineTimeUpdater (lastSourceTimelineTime, lastSourceTimelineTime,
+        const yup::ScopedValueSetter<TimePosition> lastSourceTimelineTimeUpdater (lastSourceTimelineTime, lastSourceTimelineTime,
                                                                                    sourceTimelineTime);
 
         if (! hasSynced)
@@ -138,7 +138,7 @@ private:
 
         if (! sourceIsPlaying || std::abs (lastSourceTimelineTime.inSeconds() - sourceTimelineTime.inSeconds()) > 0.2)
         {
-            auto rt = juce::Time::getCurrentTime() - sourceLastInteractionTime;
+            auto rt = yup::Time::getCurrentTime() - sourceLastInteractionTime;
 
             if (! sourceIsPlaying || rt.inSeconds() < 0.2)
             {
@@ -201,7 +201,7 @@ struct EditPlaybackContext::NodePlaybackContext
     {
         jassert (sampleRate > 0.0);
         jassert (blockSize > 0);
-        blockSize = juce::roundToInt (blockSize * (1.0 + (10.0 * 0.01))); // max speed comp
+        blockSize = yup::roundToInt (blockSize * (1.0 + (10.0 * 0.01))); // max speed comp
         player.setLatencyCompensationEnabled (editPlaybackContext.edit.isLatencyCompensationEnabled());
         player.setNode (std::move (node), sampleRate, blockSize);
 
@@ -264,7 +264,7 @@ struct EditPlaybackContext::NodePlaybackContext
 
     void setSpeedCompensation (double plusOrMinus)
     {
-        speedCompensation = juce::jlimit (-10.0, 10.0, plusOrMinus);
+        speedCompensation = yup::jlimit (-10.0, 10.0, plusOrMinus);
     }
 
     void setTempoAdjustment (double plusOrMinusProportion)
@@ -294,14 +294,14 @@ struct EditPlaybackContext::NodePlaybackContext
     void updateReferenceSampleRange (int numSamples)
     {
         if (speedCompensation != 0.0)
-            numSamples = juce::roundToInt (numSamples * (1.0 + (speedCompensation * 0.01)));
+            numSamples = yup::roundToInt (numSamples * (1.0 + (speedCompensation * 0.01)));
 
         double sampleDuration = static_cast<double> (numSamples);
 
         if (blockLengthScaleFactor != 1.0)
             sampleDuration *= blockLengthScaleFactor;
 
-        referenceStreamRange = juce::Range<double>::withStartAndLength (referenceStreamRange.getEnd(), sampleDuration);
+        referenceStreamRange = yup::Range<double>::withStartAndLength (referenceStreamRange.getEnd(), sampleDuration);
         playHead.setReferenceSampleRange (getReferenceSampleRange());
         numSamplesToProcess = static_cast<choc::buffer::FrameCount> (numSamples);
         processState.setPlaybackSpeedRatio (blockLengthScaleFactor);
@@ -310,11 +310,11 @@ struct EditPlaybackContext::NodePlaybackContext
         checkForTempoSequenceChanges();
     }
 
-    void resyncToReferenceSampleRange (juce::Range<int64_t> newReferenceSampleRange)
+    void resyncToReferenceSampleRange (yup::Range<int64_t> newReferenceSampleRange)
     {
         const double sampleRate = getSampleRate();
         const auto currentPos = tracktion::graph::sampleToTime (playHead.getPosition(), sampleRate);
-        referenceStreamRange = juce::Range<double> (static_cast<double> (newReferenceSampleRange.getStart()),
+        referenceStreamRange = yup::Range<double> (static_cast<double> (newReferenceSampleRange.getStart()),
                                                     static_cast<double> (newReferenceSampleRange.getEnd()));
         playHead.setReferenceSampleRange (getReferenceSampleRange());
         playHead.setPosition (tracktion::graph::timeToSample (currentPos, sampleRate));
@@ -331,7 +331,7 @@ struct EditPlaybackContext::NodePlaybackContext
 
             if (pendingPositionJumpTimeValid)
             {
-                const auto currentTimeSeconds = sampleToTime (juce::Range<int64_t>::withStartAndLength (playHead.getPosition(), referenceSampleRange.getLength()), sampleRate);
+                const auto currentTimeSeconds = sampleToTime (yup::Range<int64_t>::withStartAndLength (playHead.getPosition(), referenceSampleRange.getLength()), sampleRate);
                 const auto jumpTimeSeconds = pendingPositionJumpTime.load (std::memory_order_acquire);
 
                 // Check if loop end time is in this block and if it is, cancel the jump
@@ -430,18 +430,18 @@ struct EditPlaybackContext::NodePlaybackContext
     ProcessState processState { playHeadState, tempoSequence };
 
 private:
-    juce::AudioBuffer<float> scratchAudioBuffer;
+    yup::AudioBuffer<float> scratchAudioBuffer;
     MidiMessageArray scratchMidiBuffer;
     TracktionNodePlayer player;
     const size_t maxNumThreads;
 
     int latencySamples = 0;
     choc::buffer::FrameCount numSamplesToProcess = 0;
-    juce::Range<double> referenceStreamRange;
+    yup::Range<double> referenceStreamRange;
     std::atomic<double> pendingPosition { 0.0 }, pendingPositionJumpTime { 0.0 };
     std::atomic<bool> positionUpdatePending { false }, pendingRollInToLoop { false }, pendingPositionJumpTimeValid { false }, playPending { false };
     double speedCompensation = 0.0, blockLengthScaleFactor = 1.0;
-    std::vector<std::unique_ptr<juce::LagrangeInterpolator>> interpolators;
+    std::vector<std::unique_ptr<yup::LagrangeInterpolator>> interpolators;
     bool isUsingInterpolator = false;
 
     struct TempoState
@@ -452,7 +452,7 @@ private:
 
     TempoState tempoState;
 
-    juce::Range<int64_t> getReferenceSampleRange() const
+    yup::Range<int64_t> getReferenceSampleRange() const
     {
         return { static_cast<int64_t> (std::llround (referenceStreamRange.getStart())),
                  static_cast<int64_t> (std::llround (referenceStreamRange.getEnd())) };
@@ -461,7 +461,7 @@ private:
     void ensureNumInterpolators (int numRequired)
     {
         for (size_t i = interpolators.size(); i < (size_t) numRequired; ++i)
-            interpolators.push_back (std::make_unique<juce::LagrangeInterpolator>());
+            interpolators.push_back (std::make_unique<yup::LagrangeInterpolator>());
     }
 };
 
@@ -522,9 +522,9 @@ void EditPlaybackContext::releaseDeviceList()
     TRACKTION_ASSERT_MESSAGE_THREAD
     CRASH_TRACER
 
-    const juce::ScopedValueSetter<bool> alocateSetter (isAllocated, isAllocated);
+    const yup::ScopedValueSetter<bool> alocateSetter (isAllocated, isAllocated);
     clearNodes();
-    midiDispatcher.setMidiDeviceList (juce::OwnedArray<MidiOutputDeviceInstance>());
+    midiDispatcher.setMidiDeviceList (yup::OwnedArray<MidiOutputDeviceInstance>());
 
     // Clear the outputs before the inputs as the midi inputs will be referenced by the MidiDeviceInstanceBase::Consumer
     waveOutputs.clear();
@@ -577,7 +577,7 @@ void EditPlaybackContext::rebuildDeviceList()
 void EditPlaybackContext::removeInstanceForDevice (InputDevice& device)
 {
     // Keep the instances alive until after reallocating because the nodes will refer to them
-    juce::OwnedArray<InputDeviceInstance> removedInstances;
+    yup::OwnedArray<InputDeviceInstance> removedInstances;
 
     for (int i = midiInputs.size(); --i >= 0;)
         if (&midiInputs.getUnchecked (i)->owner == &device)
@@ -709,7 +709,7 @@ void EditPlaybackContext::startPlaying (TimePosition start)
         mo->start();
 }
 
-juce::Result EditPlaybackContext::startRecording (TimePosition start, TimePosition punchIn)
+yup::Result EditPlaybackContext::startRecording (TimePosition start, TimePosition punchIn)
 {
     struct InputAndContext
     {
@@ -747,14 +747,14 @@ juce::Result EditPlaybackContext::startRecording (TimePosition start, TimePositi
                 anyContexts = true;
 
         if (! anyContexts)
-            return juce::Result::fail (TRANS("Failed to start recording: No input devices"));
+            return yup::Result::fail (TRANS("Failed to start recording: No input devices"));
     }
 
     // Check if any had errors
     for (auto& inputAndContext : inputAndContexts)
         for (auto& res : inputAndContext.preparedContext)
             if (! res)
-                return juce::Result::fail (res.error());
+                return yup::Result::fail (res.error());
 
     // Now start the recordings
     startPlaying (start);
@@ -769,7 +769,7 @@ juce::Result EditPlaybackContext::startRecording (TimePosition start, TimePositi
         jassert (contextsLeft.empty());
     }
 
-    return juce::Result::ok();
+    return yup::Result::ok();
 }
 
 void EditPlaybackContext::prepareOutputDevices (TimePosition start)
@@ -818,7 +818,7 @@ static SelectionManager* findAppropriateSelectionManager (Edit& ed)
     return found;
 }
 
-tl::expected<Clip::Array, juce::String> EditPlaybackContext::stopRecording (InputDeviceInstance& in, bool discardRecordings)
+tl::expected<Clip::Array, yup::String> EditPlaybackContext::stopRecording (InputDeviceInstance& in, bool discardRecordings)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     CRASH_TRACER
@@ -834,12 +834,12 @@ tl::expected<Clip::Array, juce::String> EditPlaybackContext::stopRecording (Inpu
     return in.stopRecording (params);
 }
 
-tl::expected<Clip::Array, juce::String> EditPlaybackContext::stopRecording (TimePosition unloopedEnd, bool discardRecordings)
+tl::expected<Clip::Array, yup::String> EditPlaybackContext::stopRecording (TimePosition unloopedEnd, bool discardRecordings)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     CRASH_TRACER
     Clip::Array clips;
-    juce::String error;
+    yup::String error;
 
     InputDeviceInstance::StopRecordingParameters params;
     params.unloopedTimeToEndRecording = unloopedEnd;
@@ -864,7 +864,7 @@ tl::expected<Clip::Array, juce::String> EditPlaybackContext::stopRecording (Time
     return clips;
 }
 
-juce::Result EditPlaybackContext::applyRetrospectiveRecord (juce::Array<Clip*>* clips, bool armedOnly)
+yup::Result EditPlaybackContext::applyRetrospectiveRecord (yup::Array<Clip*>* clips, bool armedOnly)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     CRASH_TRACER
@@ -881,7 +881,7 @@ juce::Result EditPlaybackContext::applyRetrospectiveRecord (juce::Array<Clip*>* 
     }
 
     if (! inputAssigned)
-        return juce::Result::fail (TRANS("Unable to perform retrospective record, no inputs are assigned to a track"));
+        return yup::Result::fail (TRANS("Unable to perform retrospective record, no inputs are assigned to a track"));
 
     InputDevice::setRetrospectiveLock (edit.engine, getAllInputs(), true);
 
@@ -901,7 +901,7 @@ juce::Result EditPlaybackContext::applyRetrospectiveRecord (juce::Array<Clip*>* 
     InputDevice::setRetrospectiveLock (edit.engine, getAllInputs(), false);
 
     if (! clipCreated)
-        return juce::Result::fail (TRANS("Unable to perform retrospective record, all input buffers are empty"));
+        return yup::Result::fail (TRANS("Unable to perform retrospective record, all input buffers are empty"));
 
     if (clips != nullptr)
     {
@@ -912,12 +912,12 @@ juce::Result EditPlaybackContext::applyRetrospectiveRecord (juce::Array<Clip*>* 
         }
     }
 
-    return juce::Result::ok();
+    return yup::Result::ok();
 }
 
-juce::Array<InputDeviceInstance*> EditPlaybackContext::getAllInputs()
+yup::Array<InputDeviceInstance*> EditPlaybackContext::getAllInputs()
 {
-    juce::Array<InputDeviceInstance*> allInputs;
+    yup::Array<InputDeviceInstance*> allInputs;
     allInputs.addArray (waveInputs);
     allInputs.addArray (midiInputs);
 
@@ -1202,7 +1202,7 @@ TimePosition EditPlaybackContext::globalStreamTimeToEditTimeUnlooped (double glo
     return TimePosition::fromSamples (timelinePosition, sampleRate);
 }
 
-void EditPlaybackContext::resyncToGlobalStreamTime (juce::Range<double> globalStreamTime, double sampleRate)
+void EditPlaybackContext::resyncToGlobalStreamTime (yup::Range<double> globalStreamTime, double sampleRate)
 {
     if (! nodePlaybackContext)
         return;
@@ -1213,7 +1213,7 @@ void EditPlaybackContext::resyncToGlobalStreamTime (juce::Range<double> globalSt
 
 void EditPlaybackContext::setThreadPoolStrategy (int type)
 {
-    type = juce::jlimit (static_cast<int> (tracktion::graph::ThreadPoolStrategy::conditionVariable),
+    type = yup::jlimit (static_cast<int> (tracktion::graph::ThreadPoolStrategy::conditionVariable),
                          static_cast<int> (tracktion::graph::ThreadPoolStrategy::lightweightSemHybrid),
                          type);
 
@@ -1222,7 +1222,7 @@ void EditPlaybackContext::setThreadPoolStrategy (int type)
 
 int EditPlaybackContext::getThreadPoolStrategy()
 {
-    const int type = juce::jlimit (static_cast<int> (tracktion::graph::ThreadPoolStrategy::conditionVariable),
+    const int type = yup::jlimit (static_cast<int> (tracktion::graph::ThreadPoolStrategy::conditionVariable),
                                    static_cast<int> (tracktion::graph::ThreadPoolStrategy::lightweightSemHybrid),
                                    EditPlaybackContextInternal::getThreadPoolStrategyType());
 

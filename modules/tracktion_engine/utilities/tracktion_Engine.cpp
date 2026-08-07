@@ -15,7 +15,7 @@ extern void cleanUpDanglingPlugins();
 extern void waitForPluginDeletion (std::function<void()> onComplete);
 
 static Engine* instance = nullptr;
-static juce::Array<Engine*> engines;
+static yup::Array<Engine*> engines;
 
 Engine::Engine (std::unique_ptr<PropertyStorage> ps, std::unique_ptr<UIBehaviour> ub, std::unique_ptr<EngineBehaviour> eb)
 {
@@ -38,12 +38,12 @@ Engine::Engine (std::unique_ptr<PropertyStorage> ps, std::unique_ptr<UIBehaviour
     initialise();
 }
 
-Engine::Engine (juce::String applicationName, std::unique_ptr<UIBehaviour> ub, std::unique_ptr<EngineBehaviour> eb)
+Engine::Engine (yup::String applicationName, std::unique_ptr<UIBehaviour> ub, std::unique_ptr<EngineBehaviour> eb)
     : Engine (std::make_unique<PropertyStorage> (applicationName), std::move (ub), std::move (eb))
 {
 }
 
-Engine::Engine (juce::String applicationName)  : Engine (applicationName, nullptr, nullptr)
+Engine::Engine (yup::String applicationName)  : Engine (applicationName, nullptr, nullptr)
 {
 }
 
@@ -138,12 +138,12 @@ Engine::~Engine()
     engines.removeFirstMatchingValue (this);
 }
 
-juce::String Engine::getVersion()
+yup::String Engine::getVersion()
 {
     return "Tracktion Engine v3.1.0";
 }
 
-juce::Array<Engine*> Engine::getEngines()
+yup::Array<Engine*> Engine::getEngines()
 {
     return engines;
 }

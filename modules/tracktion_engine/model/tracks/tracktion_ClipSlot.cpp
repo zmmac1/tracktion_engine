@@ -11,7 +11,7 @@
 
 namespace tracktion::inline engine {
 
-ClipSlot::ClipSlot (const juce::ValueTree& v, Track& t)
+ClipSlot::ClipSlot (const yup::ValueTree& v, Track& t)
     : EditItem (t.edit, v), state (v), track (t)
 {
     assert (state.hasType (IDs::CLIPSLOT));
@@ -67,12 +67,12 @@ InputDeviceInstance::Destination* ClipSlot::getInputDestination()
 }
 
 //==============================================================================
-juce::String ClipSlot::getName() const
+yup::String ClipSlot::getName() const
 {
     return TRANS("Clip Slot");
 }
 
-juce::String ClipSlot::getSelectableDescription()
+yup::String ClipSlot::getSelectableDescription()
 {
     return TRANS("Clip Slot");
 }
@@ -82,7 +82,7 @@ EditItemID ClipSlot::getClipOwnerID()
     return itemID;
 }
 
-juce::ValueTree& ClipSlot::getClipOwnerState()
+yup::ValueTree& ClipSlot::getClipOwnerState()
 {
     return state;
 }
@@ -118,7 +118,7 @@ void ClipSlot::clipPositionChanged()
 
 //==============================================================================
 //==============================================================================
-ClipSlotList::ClipSlotList (const juce::ValueTree& v, Track& t)
+ClipSlotList::ClipSlotList (const yup::ValueTree& v, Track& t)
     : ValueTreeObjectList<ClipSlot> (v),
       state (v),
       track (t)
@@ -137,7 +137,7 @@ ClipSlotList::~ClipSlotList()
     freeObjects();
 }
 
-juce::Array<ClipSlot*> ClipSlotList::getClipSlots() const
+yup::Array<ClipSlot*> ClipSlotList::getClipSlots() const
 {
     return objects;
 }
@@ -146,7 +146,7 @@ void ClipSlotList::ensureNumberOfSlots (int numSlots)
 {
     for (int i = size(); i < numSlots; ++i)
     {
-        auto newSlotState = juce::ValueTree (IDs::CLIPSLOT);
+        auto newSlotState = yup::ValueTree (IDs::CLIPSLOT);
         EditItemID::readOrCreateNewID (track.edit, newSlotState);
         parent.appendChild (newSlotState, &track.edit.getUndoManager());
     }
@@ -169,7 +169,7 @@ void ClipSlotList::setNumberOfSlots (int numSlots)
 
 ClipSlot* ClipSlotList::insertSlot (int index)
 {
-    auto newSlotState = juce::ValueTree (IDs::CLIPSLOT);
+    auto newSlotState = yup::ValueTree (IDs::CLIPSLOT);
     EditItemID::readOrCreateNewID (track.edit, newSlotState);
     parent.addChild (newSlotState, index, &track.edit.getUndoManager());
     return getClipSlots()[index];
@@ -182,12 +182,12 @@ void ClipSlotList::deleteSlot (ClipSlot& cs)
 }
 
 //==============================================================================
-bool ClipSlotList::isSuitableType (const juce::ValueTree& v) const
+bool ClipSlotList::isSuitableType (const yup::ValueTree& v) const
 {
     return v.hasType (IDs::CLIPSLOT);
 }
 
-ClipSlot* ClipSlotList::createNewObject (const juce::ValueTree& v)
+ClipSlot* ClipSlotList::createNewObject (const yup::ValueTree& v)
 {
     return new ClipSlot (v, track);
 }

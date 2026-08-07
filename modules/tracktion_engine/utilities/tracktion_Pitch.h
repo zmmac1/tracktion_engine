@@ -12,11 +12,11 @@ namespace tracktion::inline engine {
 
 struct Pitch
 {
-    static juce::String getPitchAsString (Engine& engine, int pitch)
+    static yup::String getPitchAsString (Engine& engine, int pitch)
     {
         auto middleC = engine.getEngineBehaviour().getMiddleCOctave();
-        auto sharp = juce::MidiMessage::getMidiNoteName (pitch, true,  false, middleC);
-        auto flat  = juce::MidiMessage::getMidiNoteName (pitch, false, false, middleC);
+        auto sharp = yup::MidiMessage::getMidiNoteName (pitch, true,  false, middleC);
+        auto flat  = yup::MidiMessage::getMidiNoteName (pitch, false, false, middleC);
 
         if (sharp == flat)
             return sharp;
@@ -24,13 +24,13 @@ struct Pitch
         return sharp + " / " + flat;
     }
 
-    static juce::StringArray getPitchAsStrings (Engine& engine, int pitch)
+    static yup::StringArray getPitchAsStrings (Engine& engine, int pitch)
     {
         auto middleC = engine.getEngineBehaviour().getMiddleCOctave();
-        auto sharp = juce::MidiMessage::getMidiNoteName (pitch, true,  false, middleC);
-        auto flat  = juce::MidiMessage::getMidiNoteName (pitch, false, false, middleC);
+        auto sharp = yup::MidiMessage::getMidiNoteName (pitch, true,  false, middleC);
+        auto flat  = yup::MidiMessage::getMidiNoteName (pitch, false, false, middleC);
 
-        juce::StringArray res;
+        yup::StringArray res;
 
         if (sharp == flat)
         {
@@ -45,7 +45,7 @@ struct Pitch
         return res;
     }
 
-    static int getPitchFromString (Engine& engine, const juce::String& str)
+    static int getPitchFromString (Engine& engine, const yup::String& str)
     {
         for (int i = 0; i < 12; ++i)
             if (getPitchAsStrings (engine, i + 60).contains (str))
@@ -54,9 +54,9 @@ struct Pitch
         return 60;
     }
 
-    static juce::StringArray getPitchStrings (Engine& engine, bool separateSharpFlat)
+    static yup::StringArray getPitchStrings (Engine& engine, bool separateSharpFlat)
     {
-        juce::StringArray pitchChoices;
+        yup::StringArray pitchChoices;
 
         if (separateSharpFlat)
         {

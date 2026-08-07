@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-AutomatableEditItem::AutomatableEditItem (Edit& ed, const juce::ValueTree& v)
+AutomatableEditItem::AutomatableEditItem (Edit& ed, const yup::ValueTree& v)
     : EditItem (ed, v),
       elementState (v)
 {
@@ -33,9 +33,9 @@ void AutomatableEditItem::flushPluginStateToValueTree()
 }
 
 //==============================================================================
-juce::Array<AutomatableParameter*> AutomatableEditItem::getAutomatableParameters() const
+yup::Array<AutomatableParameter*> AutomatableEditItem::getAutomatableParameters() const
 {
-    juce::Array<AutomatableParameter*> params;
+    yup::Array<AutomatableParameter*> params;
     params.addArray (automatableParams);
     return params;
 }
@@ -51,7 +51,7 @@ void AutomatableEditItem::visitAllAutomatableParams (const std::function<void(Au
         visit (*p);
 }
 
-AutomatableParameter::Ptr AutomatableEditItem::getAutomatableParameterByID (const juce::String& paramID) const
+AutomatableParameter::Ptr AutomatableEditItem::getAutomatableParameterByID (const yup::String& paramID) const
 {
     for (auto p : automatableParams)
         if (p->paramID == paramID)
@@ -86,7 +86,7 @@ void AutomatableEditItem::deleteAutomatableParameters()
 
     {
         // N.B. swap under the lock here to minimise the time held
-        juce::ReferenceCountedArray<AutomatableParameter> nowActiveParams;
+        yup::ReferenceCountedArray<AutomatableParameter> nowActiveParams;
 
         {
             const std::scoped_lock sl (activeParameterLock);
@@ -113,9 +113,9 @@ AutomatableParameterTree& AutomatableEditItem::getParameterTree() const
     return parameterTree;
 }
 
-juce::ReferenceCountedArray<AutomatableParameter> AutomatableEditItem::getFlattenedParameterTree() const
+yup::ReferenceCountedArray<AutomatableParameter> AutomatableEditItem::getFlattenedParameterTree() const
 {
-    juce::ReferenceCountedArray<AutomatableParameter> params;
+    yup::ReferenceCountedArray<AutomatableParameter> params;
 
     for (auto node : getParameterTree().rootNode->subNodes)
     {
@@ -145,7 +145,7 @@ void AutomatableEditItem::setAutomatableParamPosition (TimePosition time)
 
 bool AutomatableEditItem::isBeingActivelyPlayed() const
 {
-    return juce::Time::getApproximateMillisecondCounter() < (unsigned int) (systemTimeOfLastPlayedBlock + 150);
+    return yup::Time::getApproximateMillisecondCounter() < (unsigned int) (systemTimeOfLastPlayedBlock + 150);
 }
 
 void AutomatableEditItem::updateAutomatableParamPosition (TimePosition time)
@@ -186,7 +186,7 @@ void AutomatableEditItem::addActiveParameter (const AutomatableParameter& p)
     if (auto param = automatableParams[automatableParams.indexOf (&p)])
     {
         // This confusing order is to avoid allocating whilst the lock is held
-        juce::ReferenceCountedArray<AutomatableParameter> newParams;
+        yup::ReferenceCountedArray<AutomatableParameter> newParams;
         int numParams = 0;
 
          {
@@ -219,8 +219,8 @@ void AutomatableEditItem::removeActiveParameter (const AutomatableParameter& p)
     if (auto param = automatableParams[automatableParams.indexOf (&p)])
     {
         // This confusing order is to avoid removing whilst the lock is held,
-        // juce::ReferenceCountedArray can free when that happens
-        juce::ReferenceCountedArray<AutomatableParameter> nowActiveParams;
+        // yup::ReferenceCountedArray can free when that happens
+        yup::ReferenceCountedArray<AutomatableParameter> nowActiveParams;
         int numParams = 0;
 
         {
@@ -257,7 +257,7 @@ void AutomatableEditItem::buildParameterTree() const
 
 void AutomatableEditItem::updateLastPlaybackTime()
 {
-    systemTimeOfLastPlayedBlock = juce::Time::getApproximateMillisecondCounter();
+    systemTimeOfLastPlayedBlock = yup::Time::getApproximateMillisecondCounter();
 }
 
 void AutomatableEditItem::clearParameterList()
@@ -283,9 +283,9 @@ void AutomatableEditItem::rebuildParameterTree()
     parameterTreeBuilt = false;
 }
 
-juce::ReferenceCountedArray<AutomatableParameter> AutomatableEditItem::getFlattenedParameterTree (AutomatableParameterTree::TreeNode& node) const
+yup::ReferenceCountedArray<AutomatableParameter> AutomatableEditItem::getFlattenedParameterTree (AutomatableParameterTree::TreeNode& node) const
 {
-    juce::ReferenceCountedArray<AutomatableParameter> params;
+    yup::ReferenceCountedArray<AutomatableParameter> params;
 
     for (auto subNode : node.subNodes)
     {
@@ -306,7 +306,7 @@ bool AutomatableEditItem::isActiveParameter (AutomatableParameter& p)
 
 void AutomatableEditItem::saveChangedParametersToState()
 {
-    juce::MemoryOutputStream stream;
+    yup::MemoryOutputStream stream;
 
     for (auto ap : automatableParams)
     {
@@ -330,7 +330,7 @@ void AutomatableEditItem::restoreChangedParametersFromState()
 {
     if (auto mb = elementState[IDs::parameters].getBinaryData())
     {
-        juce::MemoryInputStream stream (*mb, false);
+        yup::MemoryInputStream stream (*mb, false);
 
         while (! stream.isExhausted())
         {
@@ -339,7 +339,7 @@ void AutomatableEditItem::restoreChangedParametersFromState()
             auto value = stream.readFloat();
 
             if (auto ap = getAutomatableParameterByID (paramID))
-                ap->setParameter (value, juce::dontSendNotification);
+                ap->setParameter (value, yup::dontSendNotification);
         }
     }
 }

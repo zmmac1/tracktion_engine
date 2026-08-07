@@ -31,7 +31,7 @@ public:
     /** Returns the current RMS for a new input sample. */
     inline float processSingleSample (float in) noexcept
     {
-        state += (juce::square (in) - state) * coefficient;
+        state += (yup::square (in) - state) * coefficient;
         return std::sqrt (state);
     }
 
@@ -42,7 +42,7 @@ private:
 
     void update() noexcept
     {
-        coefficient = 1.0f - std::exp (-2.0f * juce::MathConstants<float>::pi * 100.0f / sampleRate);
+        coefficient = 1.0f - std::exp (-2.0f * yup::MathConstants<float>::pi * 100.0f / sampleRate);
         state = 0.0f;
     }
 };
@@ -155,7 +155,7 @@ public:
             }
             case msMode:
             {
-                input = juce::square (std::abs (input));
+                input = yup::square (std::abs (input));
                 break;
             }
             case rmsMode:
@@ -181,7 +181,7 @@ public:
 
         jassert (! std::isnan (envelope));
         jassert (envelope == 0.0f || std::isnormal (envelope));
-        envelope = juce::jlimit (0.0f, 1.0f, envelope);
+        envelope = yup::jlimit (0.0f, 1.0f, envelope);
 
         return envelope;
     }
@@ -210,12 +210,12 @@ protected:
         return numMiliseconds * 0.001 * sr;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnvelopeFollower)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnvelopeFollower)
 };
 
 
 //==============================================================================
-EnvelopeFollowerModifier::EnvelopeFollowerModifier (Edit& e, const juce::ValueTree& v)
+EnvelopeFollowerModifier::EnvelopeFollowerModifier (Edit& e, const yup::ValueTree& v)
     : Modifier (e, v)
 {
     auto um = &edit.getUndoManager();
@@ -231,9 +231,9 @@ EnvelopeFollowerModifier::EnvelopeFollowerModifier (Edit& e, const juce::ValueTr
     lowPassFrequency.referTo (state, IDs::lowPassFrequency, um, 2000.0f);
     highPassFrequency.referTo (state, IDs::highPassFrequency, um, 500.0f);
 
-    auto addDiscreteParam = [this] (const juce::String& paramID, const juce::String& name,
-                                    juce::Range<float> valueRange, juce::CachedValue<float>& val,
-                                    const juce::StringArray& labels) -> AutomatableParameter*
+    auto addDiscreteParam = [this] (const yup::String& paramID, const yup::String& name,
+                                    yup::Range<float> valueRange, juce::CachedValue<float>& val,
+                                    const yup::StringArray& labels) -> AutomatableParameter*
     {
         auto* p = new DiscreteLabelledParameter (paramID, name, *this, valueRange, labels.size(), labels);
         addAutomatableParameter (p);
@@ -242,9 +242,9 @@ EnvelopeFollowerModifier::EnvelopeFollowerModifier (Edit& e, const juce::ValueTr
         return p;
     };
 
-    auto addParam = [this] (const juce::String& paramID, const juce::String& name,
-                            juce::NormalisableRange<float> valueRange, float centreVal,
-                            juce::CachedValue<float>& val, const juce::String& suffix) -> AutomatableParameter*
+    auto addParam = [this] (const yup::String& paramID, const yup::String& name,
+                            yup::NormalisableRange<float> valueRange, float centreVal,
+                            juce::CachedValue<float>& val, const yup::String& suffix) -> AutomatableParameter*
     {
         valueRange.setSkewForCentre (centreVal);
         auto* p = new SuffixedParameter (paramID, name, *this, valueRange, suffix);
@@ -254,7 +254,7 @@ EnvelopeFollowerModifier::EnvelopeFollowerModifier (Edit& e, const juce::ValueTr
         return p;
     };
 
-    const juce::NormalisableRange<float> freqRange (20.0f, 20000.0f);
+    const yup::NormalisableRange<float> freqRange (20.0f, 20000.0f);
 
     gainDbParam             = addParam          ("gainDb",              TRANS("Gain"),                  { -20.0f, 20.0f, 0.001f }, 0.0f,    gainDb,             "dB");
     attackParam             = addParam          ("attack",              TRANS("Attack"),                { 1.0f, 5000.0f }, 50.0f,           attack,             "ms");
@@ -295,12 +295,12 @@ float EnvelopeFollowerModifier::getCurrentValue()
     return (getEnvelopeValue() * depthParam->getCurrentValue()) + offsetParam->getCurrentValue();
 }
 
-AutomatableParameter::ModifierAssignment* EnvelopeFollowerModifier::createAssignment (const juce::ValueTree& v)
+AutomatableParameter::ModifierAssignment* EnvelopeFollowerModifier::createAssignment (const yup::ValueTree& v)
 {
     return new Assignment (v, *this);
 }
 
-juce::StringArray EnvelopeFollowerModifier::getAudioInputNames()
+yup::StringArray EnvelopeFollowerModifier::getAudioInputNames()
 {
     return { TRANS("Audio input left"),
              TRANS("Audio input right") };
@@ -325,7 +325,7 @@ void EnvelopeFollowerModifier::applyToBuffer (const PluginRenderContext& pc)
 
     updateParameterStreams (pc.editTime.getStart());
 
-    juce::AudioBuffer<float> ab (pc.destBuffer->getArrayOfWritePointers(),
+    yup::AudioBuffer<float> ab (pc.destBuffer->getArrayOfWritePointers(),
                            pc.destBuffer->getNumChannels(),
                            pc.bufferStartSample,
                            pc.bufferNumSamples);
@@ -333,7 +333,7 @@ void EnvelopeFollowerModifier::applyToBuffer (const PluginRenderContext& pc)
 }
 
 //==============================================================================
-EnvelopeFollowerModifier::Assignment::Assignment (const juce::ValueTree& v, const EnvelopeFollowerModifier& evm)
+EnvelopeFollowerModifier::Assignment::Assignment (const yup::ValueTree& v, const EnvelopeFollowerModifier& evm)
     : AutomatableParameter::ModifierAssignment (evm.edit, v),
       envelopeFollowerModifierID (evm.itemID)
 {
@@ -361,12 +361,12 @@ void EnvelopeFollowerModifier::prepareToPlay (double newSampleRate)
     envelopeFollower->setSampleRate ((float) newSampleRate);
 }
 
-void EnvelopeFollowerModifier::processBlock (const juce::AudioBuffer<float>& ab)
+void EnvelopeFollowerModifier::processBlock (const yup::AudioBuffer<float>& ab)
 {
     envelopeFollower->setAttackTime (attackParam->getCurrentValue());
     envelopeFollower->setHoldTime (holdParam->getCurrentValue());
     envelopeFollower->setReleaseTime (releaseParam->getCurrentValue());
-    auto gainVal = juce::Decibels::decibelsToGain (gainDbParam->getCurrentValue());
+    auto gainVal = yup::Decibels::decibelsToGain (gainDbParam->getCurrentValue());
     const bool lowPass = getBoolParamValue (*lowPassEnabledParam);
     const bool highPass = getBoolParamValue (*highPassEnabledParam);
 
@@ -391,10 +391,10 @@ void EnvelopeFollowerModifier::processBlock (const juce::AudioBuffer<float>& ab)
 
     // Filter if required
     if (setIfDifferent (currentLowPassFrequency, lowPassFrequencyParam->getCurrentValue()))
-        lowPassFilter.setCoefficients (juce::IIRCoefficients::makeLowPass (getSampleRate(), currentLowPassFrequency));
+        lowPassFilter.setCoefficients (yup::IIRCoefficients::makeLowPass (getSampleRate(), currentLowPassFrequency));
 
     if (setIfDifferent (currentHighPassFrequency, highPassFrequencyParam->getCurrentValue()))
-        highPassFilter.setCoefficients (juce::IIRCoefficients::makeHighPass (getSampleRate(), currentHighPassFrequency));
+        highPassFilter.setCoefficients (yup::IIRCoefficients::makeHighPass (getSampleRate(), currentHighPassFrequency));
 
     if (lowPass)
         lowPassFilter.processSamples (scratchData, numSamples);

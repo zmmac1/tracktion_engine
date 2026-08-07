@@ -19,10 +19,10 @@ struct InternalPluginParamTest
 {
     const char* paramID;
     float desiredValue;
-    const juce::Identifier valueProperty;
+    const yup::Identifier valueProperty;
 };
 
-static void testPreset (const juce::String& pluginName, std::initializer_list<InternalPluginParamTest> params)
+static void testPreset (const yup::String& pluginName, std::initializer_list<InternalPluginParamTest> params)
 {
     // Create Edit for testing and a plugin instance
     auto edit = Edit::createSingleTrackEdit (*Engine::getEngines()[0]);
@@ -31,7 +31,7 @@ static void testPreset (const juce::String& pluginName, std::initializer_list<In
     CHECK (pluginPtr != nullptr);
 
     // Create a state for restoration
-    juce::ValueTree preset (IDs::PLUGIN);
+    yup::ValueTree preset (IDs::PLUGIN);
     preset.setProperty (IDs::type, pluginName, nullptr);
 
     for (auto param : params)

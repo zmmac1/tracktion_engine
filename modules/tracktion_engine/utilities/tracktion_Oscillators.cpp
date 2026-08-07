@@ -18,7 +18,7 @@ inline int oddEven (int x)
 //==============================================================================
 static float sine (float phase)
 {
-    return std::sin (phase * 2 * juce::MathConstants<float>::pi);
+    return std::sin (phase * 2 * yup::MathConstants<float>::pi);
 }
 
 static float triangle (float phase, float freq, double sampleRate)
@@ -27,10 +27,10 @@ static float triangle (float phase, float freq, double sampleRate)
     int k = 1;
     while (freq * float (k) < sampleRate / 2)
     {
-        sum += std::pow (-1.0f, (float (k) - 1.0f) / 2.0f) / float (k * k) * std::sin (float (k) * (phase * 2 * juce::MathConstants<float>::pi));
+        sum += std::pow (-1.0f, (float (k) - 1.0f) / 2.0f) / float (k * k) * std::sin (float (k) * (phase * 2 * yup::MathConstants<float>::pi));
         k += 2;
     }
-    return float (8.0f / (juce::MathConstants<float>::pi * juce::MathConstants<float>::pi) * sum);
+    return float (8.0f / (yup::MathConstants<float>::pi * yup::MathConstants<float>::pi) * sum);
 }
 
 static float sawUp (float phase, float freq, double sampleRate)
@@ -39,10 +39,10 @@ static float sawUp (float phase, float freq, double sampleRate)
     int k = 1;
     while (freq * float (k) < sampleRate / 2)
     {
-        sum += float (oddEven (k)) * std::sin (float (k) * (phase * 2 * juce::MathConstants<float>::pi)) / float (k);
+        sum += float (oddEven (k)) * std::sin (float (k) * (phase * 2 * yup::MathConstants<float>::pi)) / float (k);
         k++;
     }
-    return float (-2.0f / juce::MathConstants<float>::pi * sum);
+    return float (-2.0f / yup::MathConstants<float>::pi * sum);
 }
 
 static float sawDown (float phase, float freq, double sampleRate)
@@ -51,16 +51,16 @@ static float sawDown (float phase, float freq, double sampleRate)
     int k = 1;
     while (freq * float (k) < sampleRate / 2)
     {
-        sum += float (oddEven (k)) * std::sin (float (k) * (phase * 2 * juce::MathConstants<float>::pi)) / float (k);
+        sum += float (oddEven (k)) * std::sin (float (k) * (phase * 2 * yup::MathConstants<float>::pi)) / float (k);
         k++;
     }
-    return float (2.0f / juce::MathConstants<float>::pi * sum);
+    return float (2.0f / yup::MathConstants<float>::pi * sum);
 }
 
 //==============================================================================
 void Oscillator::start()
 {
-    static juce::Random r;
+    static yup::Random r;
     phase = r.nextFloat();
 }
 
@@ -72,7 +72,7 @@ void Oscillator::setSampleRate (double sr)
         lookupTables = BandlimitedWaveLookupTables::getLookupTables (sampleRate);
 }
 
-void Oscillator::process (juce::AudioBuffer<float>& buffer, int startSample, int numSamples)
+void Oscillator::process (yup::AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
     if (lookupTables != nullptr)
     {
@@ -88,7 +88,7 @@ void Oscillator::process (juce::AudioBuffer<float>& buffer, int startSample, int
     }
 }
 
-void Oscillator::processSine (juce::AudioBuffer<float>& buffer, int startSample, int numSamples)
+void Oscillator::processSine (yup::AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
     const float frequency = std::min (float (sampleRate) / 2.0f, 440.0f * std::pow (2.0f, (note - 69.0f) / 12.0f));
     const float period = 1.0f / float (frequency);
@@ -110,7 +110,7 @@ void Oscillator::processSine (juce::AudioBuffer<float>& buffer, int startSample,
     }
 }
 
-void Oscillator::processNoise (juce::AudioBuffer<float>& buffer, int startSample, int numSamples)
+void Oscillator::processNoise (yup::AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
     auto* channels = buffer.getArrayOfWritePointers();
     const int numChannels = buffer.getNumChannels();
@@ -123,8 +123,8 @@ void Oscillator::processNoise (juce::AudioBuffer<float>& buffer, int startSample
     }
 }
 
-void Oscillator::processLookup (juce::AudioBuffer<float>& buffer, int startSample, int numSamples,
-                                const juce::OwnedArray<juce::dsp::LookupTableTransform<float>>& tableSet)
+void Oscillator::processLookup (yup::AudioBuffer<float>& buffer, int startSample, int numSamples,
+                                const yup::OwnedArray<yup::dsp::LookupTableTransform<float>>& tableSet)
 {
     const float frequency = std::min (float (sampleRate) / 2.0f, 440.0f * std::pow (2.0f, (note - 69.0f) / 12.0f));
     const float period = 1.0f / float (frequency);
@@ -134,7 +134,7 @@ void Oscillator::processLookup (juce::AudioBuffer<float>& buffer, int startSampl
     auto* channels = buffer.getArrayOfWritePointers();
     const int numChannels = buffer.getNumChannels();
 
-    int tableIndex = juce::jlimit (0, tableSet.size() - 1, int ((note - 0.5) / lookupTables->tablePerNumNotes));
+    int tableIndex = yup::jlimit (0, tableSet.size() - 1, int ((note - 0.5) / lookupTables->tablePerNumNotes));
 
     auto table = tableSet[tableIndex];
     jassert (table != nullptr);
@@ -154,7 +154,7 @@ void Oscillator::processLookup (juce::AudioBuffer<float>& buffer, int startSampl
     }
 }
 
-void Oscillator::processSquare (juce::AudioBuffer<float>& buffer, int startSample, int numSamples)
+void Oscillator::processSquare (yup::AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
     const float frequency = std::min (float (sampleRate) / 2.0f, 440.0f * std::pow (2.0f, (note - 69.0f) / 12.0f));
     const float period = 1.0f / float (frequency);
@@ -164,7 +164,7 @@ void Oscillator::processSquare (juce::AudioBuffer<float>& buffer, int startSampl
     auto* channels = buffer.getArrayOfWritePointers();
     const int numChannels = buffer.getNumChannels();
 
-    int tableIndex = juce::jlimit (0, lookupTables->sawUpFunctions.size() - 1, int ((note - 0.5) / lookupTables->tablePerNumNotes));
+    int tableIndex = yup::jlimit (0, lookupTables->sawUpFunctions.size() - 1, int ((note - 0.5) / lookupTables->tablePerNumNotes));
 
     auto saw1 = lookupTables->sawUpFunctions[tableIndex];
     auto saw2 = lookupTables->sawDownFunctions[tableIndex];
@@ -203,7 +203,7 @@ MultiVoiceOscillator::MultiVoiceOscillator (int maxVoices)
 
 void MultiVoiceOscillator::start()
 {
-    static juce::Random r;
+    static yup::Random r;
 
     for (int i = 0; i < oscillators.size(); i += 2)
     {
@@ -261,7 +261,7 @@ void MultiVoiceOscillator::setSpread (float s)
     spread = s;
 }
 
-void MultiVoiceOscillator::process (juce::AudioBuffer<float>& buffer, int startSample, int numSamples)
+void MultiVoiceOscillator::process (yup::AudioBuffer<float>& buffer, int startSample, int numSamples)
 {
     if (voices == 1)
     {
@@ -276,7 +276,7 @@ void MultiVoiceOscillator::process (juce::AudioBuffer<float>& buffer, int startS
             float* data = buffer.getWritePointer (left ? 0 : 1, startSample);
             float* dataPointers[] = {data};
 
-            juce::AudioBuffer<float> channelBuffer (dataPointers, 1, numSamples);
+            yup::AudioBuffer<float> channelBuffer (dataPointers, 1, numSamples);
 
             auto& o = *oscillators[i];
 
@@ -290,7 +290,7 @@ void MultiVoiceOscillator::process (juce::AudioBuffer<float>& buffer, int startS
         for (int i = 0; i < std::min (voices * 2, oscillators.size()); i++)
         {
             int voiceIndex = (i / 2);
-            float localPan = juce::jlimit (-1.0f, 1.0f, ((voiceIndex % 2 == 0) ? 1 : -1) * spread);
+            float localPan = yup::jlimit (-1.0f, 1.0f, ((voiceIndex % 2 == 0) ? 1 : -1) * spread);
 
             float leftGain  = 1.0f - localPan;
             float rightGain = 1.0f + localPan;
@@ -303,7 +303,7 @@ void MultiVoiceOscillator::process (juce::AudioBuffer<float>& buffer, int startS
             float* data = buffer.getWritePointer (left ? 0 : 1, startSample);
             float* dataPointers[] = {data};
 
-            juce::AudioBuffer<float> channelBuffer (dataPointers, 1, numSamples);
+            yup::AudioBuffer<float> channelBuffer (dataPointers, 1, numSamples);
 
             auto& o = *oscillators[i];
 
@@ -315,7 +315,7 @@ void MultiVoiceOscillator::process (juce::AudioBuffer<float>& buffer, int startS
 }
 
 //==============================================================================
-static juce::Array<BandlimitedWaveLookupTables*> tableCache;
+static yup::Array<BandlimitedWaveLookupTables*> tableCache;
 
 BandlimitedWaveLookupTables::Ptr BandlimitedWaveLookupTables::getLookupTables (double sampleRate)
 {
@@ -336,24 +336,24 @@ BandlimitedWaveLookupTables::BandlimitedWaveLookupTables (double sr, int tableSi
         return 440.0f * std::pow (2.0f, (noteNumber - 69) / 12.0f);
     };
 
-    auto start = juce::Time::getCurrentTime();
+    auto start = yup::Time::getCurrentTime();
 
     for (float note = float (tablePerNumNotes) + 0.5f; note < 127; note += float (tablePerNumNotes))
     {
         const float freq = getMidiNoteInHertz (note);
 
-        triangleFunctions.add (new juce::dsp::LookupTableTransform<float> ([freq, sr] (float value)
+        triangleFunctions.add (new yup::dsp::LookupTableTransform<float> ([freq, sr] (float value)
                                { return triangle (value, freq, sr); }, 0.0f, 1.0f, (size_t) tableSize));
 
-        sawUpFunctions.add (new juce::dsp::LookupTableTransform<float> ([freq, sr] (float value)
+        sawUpFunctions.add (new yup::dsp::LookupTableTransform<float> ([freq, sr] (float value)
                             { return sawUp (value, freq, sr); }, 0.0f, 1.0f, (size_t) tableSize));
 
-        sawDownFunctions.add (new juce::dsp::LookupTableTransform<float> ([freq, sr] (float value)
+        sawDownFunctions.add (new yup::dsp::LookupTableTransform<float> ([freq, sr] (float value)
                               { return sawDown (value, freq, sr); }, 0.0f, 1.0f, (size_t) tableSize));
     }
 
-    auto elapsed = (juce::Time::getCurrentTime() - start);
-    DBG ("Generating waves: " + juce::String (elapsed.inMilliseconds()) + "ms");
+    auto elapsed = (yup::Time::getCurrentTime() - start);
+    DBG ("Generating waves: " + yup::String (elapsed.inMilliseconds()) + "ms");
 
     tableCache.add (this);
 }

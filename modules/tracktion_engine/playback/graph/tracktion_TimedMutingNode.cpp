@@ -13,7 +13,7 @@ namespace tracktion::inline engine {
 //==============================================================================
 //==============================================================================
 TimedMutingNode::TimedMutingNode (std::unique_ptr<tracktion::graph::Node> inputNode,
-                                  juce::Array<TimeRange> muteTimes_,
+                                  yup::Array<TimeRange> muteTimes_,
                                   tracktion::graph::PlayHeadState& playHeadStateToUse)
     : input (std::move (inputNode)),
       playHeadState (playHeadStateToUse),

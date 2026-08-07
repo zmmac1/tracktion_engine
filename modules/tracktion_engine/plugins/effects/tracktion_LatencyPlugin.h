@@ -23,11 +23,11 @@ public:
     //==============================================================================
     static const char* getPluginName()                      { return NEEDS_TRANS("Latency Tester"); }
     static const char* xmlTypeName;
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
-    juce::String getName() const override                   { return getPluginName(); }
-    juce::String getPluginType() override                   { return xmlTypeName; }
-    juce::String getSelectableDescription() override        { return getName(); }
+    yup::String getName() const override                   { return getPluginName(); }
+    yup::String getPluginType() override                   { return xmlTypeName; }
+    yup::String getSelectableDescription() override        { return getName(); }
 
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
 
@@ -37,7 +37,7 @@ public:
 
     double getLatencySeconds() override                     { return latencyTimeSeconds.get(); }
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     //==============================================================================
     ConstrainedCachedValue<float> latencyTimeSeconds;
@@ -48,9 +48,9 @@ private:
     std::unique_ptr<DelayRegister> delayCompensator[2];
     LambdaTimer playbackRestartTimer;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LatencyPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LatencyPlugin)
 };
 
 } // namespace tracktion::inline engine

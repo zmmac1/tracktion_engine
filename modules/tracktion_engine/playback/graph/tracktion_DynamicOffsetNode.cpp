@@ -52,7 +52,7 @@ DynamicOffsetNode::DynamicOffsetNode (ProcessState& editProcessState,
 
 void DynamicOffsetNode::setDynamicOffsetBeats (BeatDuration newOffset)
 {
-    if (juce::approximatelyEqual (dynamicOffsetBeats->inBeats(), newOffset.inBeats()))
+    if (yup::approximatelyEqual (dynamicOffsetBeats->inBeats(), newOffset.inBeats()))
         return;
 
     (*dynamicOffsetBeats) = newOffset;
@@ -115,7 +115,7 @@ bool DynamicOffsetNode::isReadyToProcess()
     return true;
 }
 
-void DynamicOffsetNode::prefetchBlock (juce::Range<int64_t> referenceSampleRange)
+void DynamicOffsetNode::prefetchBlock (yup::Range<int64_t> referenceSampleRange)
 {
     for (auto& node : orderedNodes)
         node->prepareForNextBlock (referenceSampleRange);
@@ -149,10 +149,10 @@ void DynamicOffsetNode::process (ProcessContext& pc)
             section1 = sectionEditBeatRange.withEnd (loopEndBeat);
             section2 = sectionEditBeatRange.withStart (section1.getEnd());
 
-            assert (juce::approximatelyEqual (section1.getLength().inBeats() + section2->getLength().inBeats(),
+            assert (yup::approximatelyEqual (section1.getLength().inBeats() + section2->getLength().inBeats(),
                                               sectionEditBeatRange.getLength().inBeats()));
-            assert (juce::approximatelyEqual (section1.getStart().inBeats(), sectionEditBeatRange.getStart().inBeats()));
-            assert (juce::approximatelyEqual (section2->getEnd().inBeats(), sectionEditBeatRange.getEnd().inBeats()));
+            assert (yup::approximatelyEqual (section1.getStart().inBeats(), sectionEditBeatRange.getStart().inBeats()));
+            assert (yup::approximatelyEqual (section2->getEnd().inBeats(), sectionEditBeatRange.getEnd().inBeats()));
         }
     }
 
@@ -173,12 +173,12 @@ void DynamicOffsetNode::process (ProcessContext& pc)
     else
     {
         assert (section2->getLength() > 0_bd);
-        const juce::NormalisableRange blockRangeBeats (sectionEditBeatRange.getStart().inBeats(),
+        const yup::NormalisableRange blockRangeBeats (sectionEditBeatRange.getStart().inBeats(),
                                                        sectionEditBeatRange.getEnd().inBeats());
 
         auto processSubSection = [this, &pc, &blockRangeBeats] (auto section)
         {
-            const auto proportion = juce::Range (blockRangeBeats.convertTo0to1 (section.getStart().inBeats()),
+            const auto proportion = yup::Range (blockRangeBeats.convertTo0to1 (section.getStart().inBeats()),
                                                  blockRangeBeats.convertTo0to1 (section.getEnd().inBeats()));
             const auto startFrame  = (choc::buffer::FrameCount) std::llround (proportion.getStart() * pc.numSamples);
             const auto endFrame    = (choc::buffer::FrameCount) std::llround (proportion.getEnd() * pc.numSamples);
@@ -192,7 +192,7 @@ void DynamicOffsetNode::process (ProcessContext& pc)
             const auto startRefSample  = pc.referenceSampleRange.getStart() + (int64_t) std::llround (proportion.getStart() * static_cast<double> (numRefSamples));
             const auto endRefSample    = pc.referenceSampleRange.getStart() + (int64_t) std::llround (proportion.getEnd() * static_cast<double> (numRefSamples));
 
-            const juce::Range subSectionReferenceSampleRange (startRefSample, endRefSample);
+            const yup::Range subSectionReferenceSampleRange (startRefSample, endRefSample);
 
             for (auto& node : orderedNodes)
                 node->prepareForNextBlock (subSectionReferenceSampleRange);

@@ -11,7 +11,7 @@
 namespace tracktion::inline engine {
 
 using SampleCount = int64_t;
-using SampleRange = juce::Range<SampleCount>;
+using SampleRange = yup::Range<SampleCount>;
 
 /** Specifies a number of resampling qualities that can be used. */
 enum class ResamplingQuality
@@ -26,13 +26,13 @@ float dbToGain (float db) noexcept;
 float gainToDb (float gain) noexcept;
 
 // returns "n dB" and handles -INF
-juce::String gainToDbString (float gain, float infLevel = -96.0f, int decPlaces = 2);
-float dbStringToDb (const juce::String& dbStr);
-float dbStringToGain (const juce::String& dbStr);
+yup::String gainToDbString (float gain, float infLevel = -96.0f, int decPlaces = 2);
+float dbStringToDb (const yup::String& dbStr);
+float dbStringToGain (const yup::String& dbStr);
 
-juce::String getPanString (float pan);
+yup::String getPanString (float pan);
 
-juce::String getSemitonesAsString (double semitones);
+yup::String getSemitonesAsString (double semitones);
 
 template<typename FloatType>
 FloatType midiNoteToFrequency (FloatType midiNote)
@@ -48,27 +48,27 @@ FloatType frequencyToMidiNote (FloatType freq)
         * std::log2 (freq / static_cast<FloatType> (440)) + static_cast<FloatType> (69);
 }
 
-void sanitiseValues (juce::AudioBuffer<float>&,
+void sanitiseValues (yup::AudioBuffer<float>&,
                      int startSample, int numSamples,
                      float maxAbsValue,
                      float minAbsThreshold = 1.0f / 262144.0f);
 
-void addAntiDenormalisationNoise (juce::AudioBuffer<float>&, int start, int numSamples) noexcept;
+void addAntiDenormalisationNoise (yup::AudioBuffer<float>&, int start, int numSamples) noexcept;
 
 void resetFP() noexcept;
 bool hasFloatingPointDenormaliseOccurred() noexcept;
-void zeroDenormalisedValuesIfNeeded (juce::AudioBuffer<float>&) noexcept;
+void zeroDenormalisedValuesIfNeeded (yup::AudioBuffer<float>&) noexcept;
 
 bool isAudioDataAlmostSilent (const float* data, int num);
 float getAudioDataMagnitude (const float* data, int num);
 
-void convertIntsToFloats (juce::AudioBuffer<float>&);
-void convertFloatsToInts (juce::AudioBuffer<float>&);
+void convertIntsToFloats (yup::AudioBuffer<float>&);
+void convertFloatsToInts (yup::AudioBuffer<float>&);
 
 //==============================================================================
-/** Converts a juce::AudioBuffer<SampleType> to a choc::buffer::BufferView. */
+/** Converts a yup::AudioBuffer<SampleType> to a choc::buffer::BufferView. */
 template<typename SampleType>
-inline choc::buffer::BufferView<SampleType, choc::buffer::SeparateChannelLayout> toBufferView (juce::AudioBuffer<SampleType>& buffer)
+inline choc::buffer::BufferView<SampleType, choc::buffer::SeparateChannelLayout> toBufferView (yup::AudioBuffer<SampleType>& buffer)
 {
     return choc::buffer::createChannelArrayView (buffer.getArrayOfWritePointers(),
                                                  (choc::buffer::ChannelCount) buffer.getNumChannels(),
@@ -93,7 +93,7 @@ enum PanLaw
 
 PanLaw getDefaultPanLaw() noexcept;
 void setDefaultPanLaw (PanLaw);
-juce::StringArray getPanLawChoices (bool includeDefault) noexcept;
+yup::StringArray getPanLawChoices (bool includeDefault) noexcept;
 
 //==============================================================================
 float decibelsToVolumeFaderPosition (float dB) noexcept;
@@ -146,7 +146,7 @@ public:
         fifo.finishedWrite (size1 + size2);
     }
 
-    void writeAudioAndMidi (const juce::AudioBuffer<float>& audioSrc, const juce::MidiBuffer& midiSrc)
+    void writeAudioAndMidi (const yup::AudioBuffer<float>& audioSrc, const yup::MidiBuffer& midiSrc)
     {
         jassert (getNumSamplesFree() >= audioSrc.getNumSamples());
         jassert (audioSrc.getNumChannels() == audioBuffer.getNumChannels());
@@ -156,7 +156,7 @@ public:
         int start1, size1, start2, size2;
         fifo.prepareToWrite (audioSrc.getNumSamples(), start1, size1, start2, size2);
 
-        int channels = juce::jmin (audioBuffer.getNumChannels(), audioSrc.getNumChannels());
+        int channels = yup::jmin (audioBuffer.getNumChannels(), audioSrc.getNumChannels());
         for (int ch = 0; ch < channels; ch++)
         {
             if (size1 > 0)
@@ -168,7 +168,7 @@ public:
         fifo.finishedWrite (size1 + size2);
     }
 
-    void readAudioAndMidi (juce::AudioBuffer<float>& audioDst, juce::MidiBuffer& midiDst)
+    void readAudioAndMidi (yup::AudioBuffer<float>& audioDst, yup::MidiBuffer& midiDst)
     {
         jassert (getNumSamplesAvailable() >= audioDst.getNumSamples());
         jassert (audioDst.getNumChannels() == audioBuffer.getNumChannels());
@@ -176,14 +176,14 @@ public:
         midiDst.addEvents (midiBuffer, 0, audioDst.getNumSamples(), 0);
 
         // Move all the remaining midi events forward by the number of samples removed
-        juce::MidiBuffer temp;
+        yup::MidiBuffer temp;
         temp.addEvents (midiBuffer, audioDst.getNumSamples(), fifo.getNumReady(), -audioDst.getNumSamples());
         midiBuffer = temp;
 
         int start1, size1, start2, size2;
         fifo.prepareToRead (audioDst.getNumSamples(), start1, size1, start2, size2);
 
-        int numCh = juce::jmin (audioBuffer.getNumChannels(), audioDst.getNumChannels());
+        int numCh = yup::jmin (audioBuffer.getNumChannels(), audioDst.getNumChannels());
         for (int ch = 0; ch < numCh; ch++)
         {
             if (size1 > 0)
@@ -196,11 +196,11 @@ public:
     }
 
  private:
-    juce::AbstractFifo fifo {1};
-    juce::AudioBuffer<float> audioBuffer;
-    juce::MidiBuffer midiBuffer;
+    yup::AbstractFifo fifo {1};
+    yup::AudioBuffer<float> audioBuffer;
+    yup::MidiBuffer midiBuffer;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioMidiFifo)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioMidiFifo)
 };
 
 //================================================================================================
@@ -209,7 +209,7 @@ public:
 class AudioBufferSnapshot
 {
 public:
-    AudioBufferSnapshot (juce::AudioBuffer<float>& b)
+    AudioBufferSnapshot (yup::AudioBuffer<float>& b)
         : buffer (b)
     {
         numChannels = buffer.getNumChannels();
@@ -235,12 +235,12 @@ public:
     }
 
 private:
-    juce::AudioBuffer<float>& buffer;
+    yup::AudioBuffer<float>& buffer;
     int numChannels = 0, numSamples = 0;
     const float* channels[10] = { nullptr }; // assume buffers have no more than 10 channels
 };
 
-inline void clearChannels (juce::AudioBuffer<float>& buffer, int startChannel, int endChannel = -1, int startSample = 0, int endSample = -1)
+inline void clearChannels (yup::AudioBuffer<float>& buffer, int startChannel, int endChannel = -1, int startSample = 0, int endSample = -1)
 {
     if (endChannel == -1)
         endChannel = buffer.getNumChannels();
@@ -271,7 +271,7 @@ inline SampleType getRMS (choc::buffer::MonoView<SampleType> view)
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::ResamplingQuality>

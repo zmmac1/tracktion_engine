@@ -10,40 +10,40 @@
 
 namespace tracktion::inline engine {
 
-static juce::String controllerIDToString (int id, int channelid)
+static yup::String controllerIDToString (int id, int channelid)
 {
-    auto channel = " [" + juce::String (channelid) + "]";
+    auto channel = " [" + yup::String (channelid) + "]";
 
     if (id >= 0x40000) return TRANS("Channel Pressure Controller") + "# " + channel;
-    if (id >= 0x30000) return "RPN #"  + juce::String (id & 0x7fff) + channel;
-    if (id >= 0x20000) return "NRPN #" + juce::String (id & 0x7fff) + channel;
+    if (id >= 0x30000) return "RPN #"  + yup::String (id & 0x7fff) + channel;
+    if (id >= 0x20000) return "NRPN #" + yup::String (id & 0x7fff) + channel;
 
     if (id >= 0x10000)
     {
-        auto name = TRANS(juce::MidiMessage::getControllerName (id & 0x7f));
+        auto name = TRANS(yup::MidiMessage::getControllerName (id & 0x7f));
 
         if (name.isNotEmpty())
             name = " (" + name + ")";
 
-        return TRANS("Controller") + " #" + juce::String (id & 0x7f) + name + channel;
+        return TRANS("Controller") + " #" + yup::String (id & 0x7f) + name + channel;
     }
 
     return {};
 }
 
-static void removeAddAllCommandIfTooManyItems (juce::PopupMenu& menu)
+static void removeAddAllCommandIfTooManyItems (yup::PopupMenu& menu)
 {
     // if there are more than 200 parameters, strip off the initial two items ("add all" and separator)
     if (menu.getNumItems() > 201)
     {
-        juce::PopupMenu m2;
+        yup::PopupMenu m2;
         int n = 0;
 
-        for (juce::PopupMenu::MenuItemIterator i (menu); i.next();)
+        for (yup::PopupMenu::MenuItemIterator i (menu); i.next();)
             if (++n >= 2)
-                m2.addItem (i.getItem());
+                m2.addItem (i.getItem().text, i.getItem().itemID);
 
-        menu = m2;
+        menu = std::move(m2);
     }
 }
 
@@ -67,7 +67,7 @@ ParameterControlMappings* ParameterControlMappings::getCurrentlyFocusedMappings 
 //==============================================================================
 int ParameterControlMappings::addMapping (int controllerID, int channel, const AutomatableParameter::Ptr& param)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     for (int i = controllerIDs.size(); --i >= 0;)
     {
@@ -89,7 +89,7 @@ int ParameterControlMappings::addMapping (int controllerID, int channel, const A
 
 void ParameterControlMappings::removeMapping (int index)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     controllerIDs.remove (index);
     channelIDs.remove (index);
@@ -99,14 +99,14 @@ void ParameterControlMappings::removeMapping (int index)
     tellEditAboutChange();
 }
 
-void ParameterControlMappings::showMappingsEditor (juce::DialogWindow::LaunchOptions& o)
+void ParameterControlMappings::showMappingsEditor (yup::DialogWindow::LaunchOptions& o)
 {
     listenToRow (-1);
     checkForDeletedParams();
 
     auto* dw = o.create();
     dw->enterModalState (true,
-                         juce::ModalCallbackFunction::create ([this] (int)
+                         yup::ModalCallbackFunction::create ([this] (int)
                          {
                              listenToRow (-1);
                              setLearntParam (false);
@@ -128,7 +128,7 @@ void ParameterControlMappings::handleAsyncUpdate()
         setLearntParam (false);
         tellEditAboutChange();
     }
-    else if (juce::isPositiveAndBelow (listeningOnRow, controllerIDs.size() + 1))
+    else if (yup::isPositiveAndBelow (listeningOnRow, controllerIDs.size() + 1))
     {
         setLearntParam (true);
     }
@@ -136,7 +136,7 @@ void ParameterControlMappings::handleAsyncUpdate()
 
 void ParameterControlMappings::sendChange (int controllerID, float newValue, int channel)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     lastControllerID = controllerID;
     lastControllerChannel = channel;
@@ -198,7 +198,7 @@ void ParameterControlMappings::tellEditAboutChange()
 
 void ParameterControlMappings::checkForDeletedParams()
 {
-    juce::Array<AutomatableParameter*> allParams;
+    yup::Array<AutomatableParameter*> allParams;
 
     for (int j = parameters.size(); --j >= 0;)
     {
@@ -230,7 +230,7 @@ void ParameterControlMappings::checkForDeletedParams()
 //==============================================================================
 void ParameterControlMappings::loadFromEdit()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     controllerIDs.clear();
     channelIDs.clear();
@@ -241,7 +241,7 @@ void ParameterControlMappings::loadFromEdit()
 
     if (state.isValid())
     {
-        juce::Array<AutomatableParameter*> allParams;
+        yup::Array<AutomatableParameter*> allParams;
 
         for (int j = 0; j < state.getNumChildren(); ++j)
         {
@@ -287,7 +287,7 @@ void ParameterControlMappings::loadFromEdit()
 
 void ParameterControlMappings::saveToEdit()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     checkForDeletedParams();
 
@@ -323,15 +323,15 @@ void ParameterControlMappings::saveToEdit()
     }
 }
 
-void ParameterControlMappings::addPluginToMenu (Plugin::Ptr plugin, juce::PopupMenu& menu,
-                                                juce::Array<ParameterAndIndex>& allParams, int& index, int addAllItemIndex)
+void ParameterControlMappings::addPluginToMenu (Plugin::Ptr plugin, yup::PopupMenu& menu,
+                                                yup::Array<ParameterAndIndex>& allParams, int& index, int addAllItemIndex)
 {
     AutomatableParameterTree::TreeNode* node = plugin->getParameterTree().rootNode.get();
     addPluginToMenu (node, menu, allParams, index, addAllItemIndex);
 }
 
-void ParameterControlMappings::addPluginToMenu (AutomatableParameterTree::TreeNode* node, juce::PopupMenu& menu,
-                                                juce::Array<ParameterAndIndex>& allParams, int& index, int addAllItemIndex)
+void ParameterControlMappings::addPluginToMenu (AutomatableParameterTree::TreeNode* node, yup::PopupMenu& menu,
+                                                yup::Array<ParameterAndIndex>& allParams, int& index, int addAllItemIndex)
 {
     for (auto subNode : node->subNodes)
     {
@@ -348,17 +348,17 @@ void ParameterControlMappings::addPluginToMenu (AutomatableParameterTree::TreeNo
                     allParams.add ({ autoParam.get(), addAllItemIndex });
             }
 
-            menu.addItem (index, autoParam->getParameterName().fromLastOccurrenceOf (" >> ", false, false),
+            menu.addItem (autoParam->getParameterName(, index).fromLastOccurrenceOf (" >> ", false, false),
                           autoParam->isParameterActive());
 
         }
 
         if (subNode->type == AutomatableParameterTree::Group)
         {
-            juce::PopupMenu subMenu;
+            yup::PopupMenu subMenu;
 
             int itemID = ++index;
-            subMenu.addItem (itemID, TRANS("Add all parameters"));
+            subMenu.addItem (TRANS("Add all parameters", itemID));
             subMenu.addSeparator();
 
             addPluginToMenu (subNode, subMenu, allParams, index, itemID);
@@ -372,28 +372,28 @@ void ParameterControlMappings::addPluginToMenu (AutomatableParameterTree::TreeNo
     }
 }
 
-juce::PopupMenu ParameterControlMappings::buildMenu (juce::Array<ParameterAndIndex>& allParams)
+yup::PopupMenu ParameterControlMappings::buildMenu (yup::Array<ParameterAndIndex>& allParams)
 {
     CRASH_TRACER
 
-    juce::StringArray presets (getPresets());
+    yup::StringArray presets (getPresets());
 
-    juce::PopupMenu loadPresets, deletePresets;
+    yup::PopupMenu loadPresets, deletePresets;
     addSortedListToMenu (loadPresets, presets, 60000);
     addSortedListToMenu (deletePresets, presets, 70000);
 
-    juce::PopupMenu m;
+    yup::PopupMenu m;
     m.addSubMenu (TRANS("Load presets"), loadPresets, loadPresets.getNumItems() > 0);
 
     // save preset
-    juce::Array<Plugin*> plugins;
+    yup::Array<Plugin*> plugins;
 
     for (auto param : parameters)
         if (param != nullptr)
             if (auto p = param->getPlugin())
                 plugins.addIfNotAlreadyThere (p);
 
-    juce::StringArray pluginNames;
+    yup::StringArray pluginNames;
 
     for (auto f : plugins)
     {
@@ -405,7 +405,7 @@ juce::PopupMenu ParameterControlMappings::buildMenu (juce::Array<ParameterAndInd
 
     pluginNames.sort (true);
 
-    juce::PopupMenu savePresets;
+    yup::PopupMenu savePresets;
     addSortedListToMenu (savePresets, pluginNames, 50000);
 
     m.addSubMenu (TRANS("Save preset"), savePresets, savePresets.getNumItems() > 0);
@@ -414,7 +414,7 @@ juce::PopupMenu ParameterControlMappings::buildMenu (juce::Array<ParameterAndInd
     m.addSeparator();
 
     // Build the menu for the main parameters
-    juce::PopupMenu masterPluginsSubMenu;
+    yup::PopupMenu masterPluginsSubMenu;
 
     int index = 0;
 
@@ -423,10 +423,10 @@ juce::PopupMenu ParameterControlMappings::buildMenu (juce::Array<ParameterAndInd
 
     for (auto plugin : edit.getMasterPluginList())
     {
-        juce::PopupMenu pluginSubMenu;
+        yup::PopupMenu pluginSubMenu;
 
         int addAllItemIndex = ++index;
-        pluginSubMenu.addItem (addAllItemIndex, TRANS("Add all parameters"));
+        pluginSubMenu.addItem (TRANS("Add all parameters", addAllItemIndex));
         pluginSubMenu.addSeparator();
 
         addPluginToMenu (plugin, pluginSubMenu, allParams, index, addAllItemIndex);
@@ -445,19 +445,19 @@ juce::PopupMenu ParameterControlMappings::buildMenu (juce::Array<ParameterAndInd
 
     if (rackTypes.size() > 0)
     {
-        juce::PopupMenu racksSubMenu;
+        yup::PopupMenu racksSubMenu;
 
         for (int i = 0; i < rackTypes.size(); ++i)
         {
-            juce::PopupMenu rackSubMenu;
+            yup::PopupMenu rackSubMenu;
             auto rackType = rackTypes.getRackType(i);
 
             for (auto plugin : rackType->getPlugins())
             {
-                juce::PopupMenu pluginSubMenu;
+                yup::PopupMenu pluginSubMenu;
 
                 int addAllItemIndex = ++index;
-                pluginSubMenu.addItem (addAllItemIndex, TRANS("Add all parameters"));
+                pluginSubMenu.addItem (TRANS("Add all parameters", addAllItemIndex));
                 pluginSubMenu.addSeparator();
 
                 addPluginToMenu (plugin, pluginSubMenu, allParams, index, addAllItemIndex);
@@ -479,15 +479,15 @@ juce::PopupMenu ParameterControlMappings::buildMenu (juce::Array<ParameterAndInd
     // Build the menu for each track
     for (auto track : getAllTracks (edit))
     {
-        juce::PopupMenu tracksSubMenu;
+        yup::PopupMenu tracksSubMenu;
 
         // Build a menu for each plugin in the plugin panel
         for (auto plugin : track->pluginList)
         {
-            juce::PopupMenu pluginSubMenu;
+            yup::PopupMenu pluginSubMenu;
 
             int addAllItemIndex = ++index;
-            pluginSubMenu.addItem (addAllItemIndex, TRANS("Add all parameters"));
+            pluginSubMenu.addItem (TRANS("Add all parameters", addAllItemIndex));
             pluginSubMenu.addSeparator();
 
             addPluginToMenu (plugin, pluginSubMenu, allParams, index, addAllItemIndex);
@@ -507,10 +507,10 @@ juce::PopupMenu ParameterControlMappings::buildMenu (juce::Array<ParameterAndInd
                 {
                     for (auto plugin : *pluginList)
                     {
-                        juce::PopupMenu pluginSubMenu;
+                        yup::PopupMenu pluginSubMenu;
 
                         int addAllItemIndex = ++index;
-                        pluginSubMenu.addItem (addAllItemIndex, TRANS("Add all parameters"));
+                        pluginSubMenu.addItem (TRANS("Add all parameters", addAllItemIndex));
                         pluginSubMenu.addSeparator();
 
                         // add all the parameters to the submenu.
@@ -529,13 +529,13 @@ juce::PopupMenu ParameterControlMappings::buildMenu (juce::Array<ParameterAndInd
             m.addSubMenu (track->getName(), tracksSubMenu);
     }
 
-    return m;
+    return std::move(m);
 }
 
 void ParameterControlMappings::showMappingsListForRow (int row)
 {
     CRASH_TRACER
-    juce::Array<ParameterAndIndex> allParams;
+    yup::Array<ParameterAndIndex> allParams;
     auto m = buildMenu (allParams);
 
     m.showMenuAsync ({}, [this, row, movedParams = std::move (allParams)] (int r) mutable
@@ -593,15 +593,15 @@ int ParameterControlMappings::getRowBeingListenedTo() const
     return listeningOnRow;
 }
 
-std::pair<juce::String, juce::String> ParameterControlMappings::getTextForRow (int rowNumber) const
+std::pair<yup::String, yup::String> ParameterControlMappings::getTextForRow (int rowNumber) const
 {
-    auto getLeftText = [&] () -> juce::String
+    auto getLeftText = [&] () -> yup::String
     {
         if (rowNumber == listeningOnRow)
         {
             if (lastControllerID > 0)
                 return controllerIDToString (lastControllerID, lastControllerChannel)
-                         + ": " + juce::String (juce::roundToInt (lastControllerValue * 100.0f)) + "%";
+                         + ": " + yup::String (yup::roundToInt (lastControllerValue * 100.0f)) + "%";
 
             return "(" + TRANS("Move a MIDI controller") + ")";
         }
@@ -612,7 +612,7 @@ std::pair<juce::String, juce::String> ParameterControlMappings::getTextForRow (i
         return TRANS("Click here to choose a controller");
     };
 
-    auto getRightText = [&] () -> juce::String
+    auto getRightText = [&] () -> yup::String
     {
         if (auto p = parameters[rowNumber])
             return p->getFullName();
@@ -663,20 +663,20 @@ void ParameterControlMappings::setLearntParam (bool keepListening)
 
 void ParameterControlMappings::savePreset (int index)
 {
-    juce::Array<Plugin*> plugins;
+    yup::Array<Plugin*> plugins;
 
     for (auto param : parameters)
         if (param != nullptr)
             if (auto p = param->getPlugin())
                 plugins.addIfNotAlreadyThere (p);
 
-    juce::StringArray pluginNames;
+    yup::StringArray pluginNames;
 
     for (int i = 0; i < plugins.size(); ++i)
     {
         if (auto* f = plugins.getUnchecked(i))
         {
-            auto name = f->getName() + "|" + juce::String (i);
+            auto name = f->getName() + "|" + yup::String (i);
 
             if (auto t = f->getOwnerTrack())
                 name = t->getName() + " >> " + name;
@@ -689,23 +689,23 @@ void ParameterControlMappings::savePreset (int index)
 
     auto plugin = plugins[pluginNames[index].getTrailingIntValue()];
 
-    auto w = std::shared_ptr<juce::AlertWindow> (juce::LookAndFeel::getDefaultLookAndFeel()
+    auto w = std::shared_ptr<yup::AlertWindow> (yup::LookAndFeel::getDefaultLookAndFeel()
                                                     .createAlertWindow (TRANS("Plugin mapping preset"),
                                                                         TRANS("Create a new plugin mapping preset"),
-                                                                        {}, {}, {}, juce::AlertWindow::QuestionIcon, 0, nullptr));
+                                                                        {}, {}, {}, yup::AlertWindow::QuestionIcon, 0, nullptr));
 
     w->addTextEditor ("setName", plugin->getName(), TRANS("Name:"));
-    w->addButton (TRANS("OK"), 1, juce::KeyPress (juce::KeyPress::returnKey));
-    w->addButton (TRANS("Cancel"), 0, juce::KeyPress (juce::KeyPress::escapeKey));
+    w->addButton (TRANS("OK"), 1, yup::KeyPress (yup::KeyPress::returnKey()));
+    w->addButton (TRANS("Cancel"), 0, yup::KeyPress (yup::KeyPress::escapeKey);
 
-    w->enterModalState (true, juce::ModalCallbackFunction::create ([this, w, plugin] (int res)
+    w->enterModalState (true, yup::ModalCallbackFunction::create ([this, w, plugin] (int res)
     {
         auto name = w->getTextEditorContents ("setName");
 
         if (res == 0 || name.trim().isEmpty())
             return;
 
-        auto xml = new juce::XmlElement ("filter");
+        auto xml = new yup::XmlElement ("filter");
         xml->setAttribute ("name", name);
         xml->setAttribute ("filter", plugin->getName());
 
@@ -715,7 +715,7 @@ void ParameterControlMappings::savePreset (int index)
             {
                 if (p->getPlugin() == plugin)
                 {
-                    auto mapping = new juce::XmlElement ("mapping");
+                    auto mapping = new yup::XmlElement ("mapping");
                     mapping->setAttribute ("controller", controllerIDs[i]);
                     mapping->setAttribute ("channel", channelIDs[i]);
                     mapping->setAttribute ("parameter", p->paramID);
@@ -724,13 +724,13 @@ void ParameterControlMappings::savePreset (int index)
             }
         }
 
-        juce::XmlElement xmlNew ("FILTERMAPPINGPRESETS");
+        yup::XmlElement xmlNew ("FILTERMAPPINGPRESETS");
         xmlNew.addChildElement (xml);
 
         if (auto xmlOld = edit.engine.getPropertyStorage().getXmlProperty (SettingID::filterControlMappingPresets))
             for (auto n : xmlOld->getChildIterator())
                 if (n->getStringAttribute ("name") != name)
-                    xmlNew.addChildElement (new juce::XmlElement (*n));
+                    xmlNew.addChildElement (new yup::XmlElement (*n));
 
         edit.engine.getPropertyStorage().setXmlProperty (SettingID::filterControlMappingPresets, xmlNew);
     }));
@@ -738,7 +738,7 @@ void ParameterControlMappings::savePreset (int index)
 
 void ParameterControlMappings::loadPreset (int index)
 {
-    if (auto xmlOwner = std::shared_ptr<juce::XmlElement> (edit.engine.getPropertyStorage().getXmlProperty (SettingID::filterControlMappingPresets).release()))
+    if (auto xmlOwner = std::shared_ptr<yup::XmlElement> (edit.engine.getPropertyStorage().getXmlProperty (SettingID::filterControlMappingPresets).release()))
     {
         if (auto mapping = xmlOwner->getChildElement (index))
         {
@@ -763,7 +763,7 @@ void ParameterControlMappings::loadPreset (int index)
 
                 if (matchingPlugins.size() > 1)
                 {
-                    auto cb = std::make_shared<juce::ComboBox>();
+                    auto cb = std::make_shared<yup::ComboBox>();
                     cb->setSize (200, 20);
 
                     for (int i = 0; i < matchingPlugins.size(); ++i)
@@ -774,17 +774,17 @@ void ParameterControlMappings::loadPreset (int index)
 
                     cb->setSelectedId (1);
 
-                    auto w = std::shared_ptr<juce::AlertWindow> (juce::LookAndFeel::getDefaultLookAndFeel()
+                    auto w = std::shared_ptr<yup::AlertWindow> (yup::LookAndFeel::getDefaultLookAndFeel()
                                                                     .createAlertWindow (TRANS("Select plugin"),
                                                                                         TRANS("Select plugin to apply preset to:"),
                                                                                         {}, {}, {},
-                                                                                        juce::AlertWindow::QuestionIcon, 0, nullptr));
+                                                                                        yup::AlertWindow::QuestionIcon, 0, nullptr));
 
                     w->addCustomComponent (cb.get());
-                    w->addButton (TRANS("OK"), 1, juce::KeyPress (juce::KeyPress::returnKey));
-                    w->addButton (TRANS("Cancel"), 0, juce::KeyPress (juce::KeyPress::escapeKey));
+                    w->addButton (TRANS("OK"), 1, yup::KeyPress (yup::KeyPress::returnKey()));
+                    w->addButton (TRANS("Cancel"), 0, yup::KeyPress (yup::KeyPress::escapeKey);
 
-                    w->enterModalState (true, juce::ModalCallbackFunction::create (
+                    w->enterModalState (true, yup::ModalCallbackFunction::create (
                         [this, w, cb, matchingPlugins, xmlOwner, mapping] (int res)
                         {
                             Plugin::Ptr selectedPlugin;
@@ -825,9 +825,9 @@ void ParameterControlMappings::loadPreset (int index)
     }
 }
 
-juce::StringArray ParameterControlMappings::getPresets() const
+yup::StringArray ParameterControlMappings::getPresets() const
 {
-    juce::StringArray result;
+    yup::StringArray result;
 
     if (auto xml = edit.engine.getPropertyStorage().getXmlProperty (SettingID::filterControlMappingPresets))
         for (auto e : xml->getChildIterator())
@@ -840,7 +840,7 @@ void ParameterControlMappings::deletePreset (int index)
 {
     if (auto xml = edit.engine.getPropertyStorage().getXmlProperty (SettingID::filterControlMappingPresets))
     {
-        juce::XmlElement xmlCopy (*xml);
+        yup::XmlElement xmlCopy (*xml);
         xmlCopy.removeChildElement (xmlCopy.getChildElement (index), true);
         edit.engine.getPropertyStorage().setXmlProperty (SettingID::filterControlMappingPresets, xmlCopy);
     }

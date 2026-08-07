@@ -15,7 +15,7 @@ namespace tracktion::inline engine {
 /**
     Asyncronously call a function.
 */
-struct AsyncCaller  : public juce::AsyncUpdater
+struct AsyncCaller  : public yup::AsyncUpdater
 {
     /** Creates an empty AsyncCaller. */
     AsyncCaller() = default;
@@ -52,7 +52,7 @@ struct AsyncCaller  : public juce::AsyncUpdater
 /**
     Holds a list of function objects and enables you to call them asyncronously.
 */
-struct AsyncFunctionCaller  : private juce::AsyncUpdater
+struct AsyncFunctionCaller  : private yup::AsyncUpdater
 {
     /** Creates an empty AsyncFunctionCaller. */
     AsyncFunctionCaller() = default;
@@ -93,7 +93,7 @@ struct AsyncFunctionCaller  : private juce::AsyncUpdater
     */
     void handleUpdateNowIfNeeded()
     {
-        juce::AsyncUpdater::handleUpdateNowIfNeeded();
+        yup::AsyncUpdater::handleUpdateNowIfNeeded();
     }
 
     /** @internal. */
@@ -117,7 +117,7 @@ struct AsyncFunctionCaller  : private juce::AsyncUpdater
 };
 
 //==============================================================================
-class LambdaTimer   : public juce::Timer
+class LambdaTimer   : public yup::Timer
 {
 public:
     LambdaTimer() = default;
@@ -135,10 +135,10 @@ public:
     template<typename DurationType>
     void startTimer (std::chrono::duration<DurationType> interval)
     {
-        juce::Timer::startTimer (static_cast<int> (std::chrono::duration_cast<std::chrono::milliseconds> (interval).count()));
+        yup::Timer::startTimer (static_cast<int> (std::chrono::duration_cast<std::chrono::milliseconds> (interval).count()));
     }
 
-    using juce::Timer::startTimer;
+    using yup::Timer::startTimer;
 
     void timerCallback() override
     {
@@ -149,13 +149,13 @@ public:
 private:
     std::function<void()> callback;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LambdaTimer)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LambdaTimer)
 };
 
 
 //==============================================================================
 /** Calls a function on the message thread checking a calling thread for an exit signal. */
-class MessageThreadCallback   : private juce::AsyncUpdater
+class MessageThreadCallback   : private yup::AsyncUpdater
 {
 public:
     MessageThreadCallback() = default;
@@ -169,7 +169,7 @@ public:
     */
     void triggerAndWaitForCallback()
     {
-        if (juce::MessageManager::getInstance()->isThisTheMessageThread())
+        if (yup::MessageManager::getInstance()->isThisTheMessageThread())
         {
             handleAsyncUpdate();
             return;
@@ -177,7 +177,7 @@ public:
 
         triggerAsyncUpdate();
 
-        if (auto job = juce::ThreadPoolJob::getCurrentThreadPoolJob())
+        if (auto job = yup::ThreadPoolJob::getCurrentThreadPoolJob())
         {
             while (! (job->shouldExit() || hasFinished()))
                 waiter.wait (50);
@@ -191,7 +191,7 @@ public:
             return;
         }
 
-        if (auto thread = juce::Thread::getCurrentThread())
+        if (auto thread = yup::Thread::getCurrentThread())
         {
             while (! (thread->threadShouldExit() || hasFinished()))
                 waiter.wait (50);
@@ -235,7 +235,7 @@ public:
 
 private:
     std::atomic<bool> finished { false }, hasBeenCancelled { false };
-    juce::WaitableEvent waiter;
+    yup::WaitableEvent waiter;
 
     void handleAsyncUpdate() override
     {
@@ -250,7 +250,7 @@ private:
         waiter.signal();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageThreadCallback)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageThreadCallback)
 };
 
 //==============================================================================
@@ -262,7 +262,7 @@ private:
     std::function<void()> fn;
     void performAction() override    { fn(); }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockingFunction)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BlockingFunction)
 };
 
 /** Calls a function on the message thread by posting a message and then waiting
@@ -278,8 +278,8 @@ inline bool callBlocking (std::function<void()> f)
     if (! bf.hasFinished())
     {
         std::string err ("Blocking function unable to complete");
-       #if JUCE_DEBUG
-        err += ("\n" + juce::SystemStats::getStackBacktrace().toStdString());
+       #if YUP_DEBUG
+        err += ("\n" + yup::SystemStats::getStackBacktrace().toStdString());
        #endif
         throw std::runtime_error (std::move (err));
     }

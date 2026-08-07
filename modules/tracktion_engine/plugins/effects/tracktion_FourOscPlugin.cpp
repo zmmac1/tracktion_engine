@@ -14,7 +14,7 @@ namespace Distortion
 {
     inline float saturate (float input, float drive, float lowclip, float highclip)
     {
-        input = juce::jlimit (lowclip, highclip, input);
+        input = yup::jlimit (lowclip, highclip, input);
         return input - drive * input * std::fabs (input);
     }
 
@@ -37,7 +37,7 @@ inline void clip (float* data, int numSamples)
 {
     while (--numSamples >= 0)
     {
-        *data = juce::jlimit (-1.0f, 1.0f, *data);
+        *data = yup::jlimit (-1.0f, 1.0f, *data);
         data++;
     }
 }
@@ -117,7 +117,7 @@ protected:
 class FODelay
 {
 public:
-    void process (juce::AudioBuffer<float>& buffer, int numSamples)
+    void process (yup::AudioBuffer<float>& buffer, int numSamples)
     {
         float* lOut = buffer.getWritePointer (0);
         float* rOut = buffer.getWritePointer (1);
@@ -127,8 +127,8 @@ public:
         float* lWork = scratchBuffer.buffer.getWritePointer (0);
         float* rWork = scratchBuffer.buffer.getWritePointer (1);
 
-        juce::FloatVectorOperations::copy (lWork, lOut, numSamples);
-        juce::FloatVectorOperations::copy (rWork, rOut, numSamples);
+        yup::FloatVectorOperations::copy (lWork, lOut, numSamples);
+        yup::FloatVectorOperations::copy (rWork, rOut, numSamples);
 
         for (int i = 0; i < numSamples; i++)
         {
@@ -182,7 +182,7 @@ private:
 class FOChorus
 {
 public:
-    void process (juce::AudioBuffer<float>& buffer, int numSamples)
+    void process (yup::AudioBuffer<float>& buffer, int numSamples)
     {
         float ph = 0.0f;
         int bufPos = 0;
@@ -190,9 +190,9 @@ public:
         const float delayMs = 20.0f;
         const float minSweepSamples = (float) ((delayMs * sampleRate) / 1000.0);
         const float maxSweepSamples = (float) (((delayMs + depthMs) * sampleRate) / 1000.0);
-        const float speed = (float)((juce::MathConstants<double>::pi * 2.0) / (sampleRate / speedHz));
-        const int maxLengthMs = 1 + juce::roundToInt (delayMs + depthMs);
-        const int lengthInSamples = juce::roundToInt ((maxLengthMs * sampleRate) / 1000.0);
+        const float speed = (float)((yup::MathConstants<double>::pi * 2.0) / (sampleRate / speedHz));
+        const int maxLengthMs = 1 + yup::roundToInt (delayMs + depthMs);
+        const int lengthInSamples = yup::roundToInt ((maxLengthMs * sampleRate) / 1000.0);
 
         delayBuffer.ensureMaxBufferSize (lengthInSamples);
 
@@ -208,7 +208,7 @@ public:
 
             ph = phase;
             if (chan > 0)
-                ph += juce::MathConstants<float>::pi * width;
+                ph += yup::MathConstants<float>::pi * width;
 
             bufPos = delayBuffer.bufferPos;
 
@@ -219,7 +219,7 @@ public:
                 const float sweep = lfoOffset + lfoFactor * sinf (ph);
                 ph += speed;
 
-                int intSweepPos = juce::roundToInt (sweep);
+                int intSweepPos = yup::roundToInt (sweep);
                 const float interp = sweep - float (intSweepPos);
                 intSweepPos = bufPos + lengthInSamples - intSweepPos;
 
@@ -239,8 +239,8 @@ public:
         zeroDenormalisedValuesIfNeeded (buffer);
 
         phase = ph;
-        if (phase >= juce::MathConstants<float>::pi * 2)
-            phase -= juce::MathConstants<float>::pi * 2;
+        if (phase >= yup::MathConstants<float>::pi * 2)
+            phase -= yup::MathConstants<float>::pi * 2;
 
         delayBuffer.bufferPos = bufPos;
     }
@@ -250,8 +250,8 @@ public:
         sampleRate = sr;
 
         const float delayMs = 20.0f;
-        auto maxLengthMs = 1 + juce::roundToInt (delayMs + depthMs);
-        auto bufferSizeSamples = juce::roundToInt ((maxLengthMs * sr) / 1000.0);
+        auto maxLengthMs = 1 + yup::roundToInt (delayMs + depthMs);
+        auto bufferSizeSamples = yup::roundToInt ((maxLengthMs * sr) / 1000.0);
         delayBuffer.ensureMaxBufferSize (bufferSizeSamples);
         delayBuffer.clearBuffer();
         phase = 0.0f;
@@ -278,7 +278,7 @@ private:
 };
 
 //==============================================================================
-class FourOscVoice : public juce::MPESynthesiserVoice
+class FourOscVoice : public yup::MPESynthesiserVoice
 {
 public:
     FourOscVoice (FourOscPlugin& s) : synth (s)
@@ -322,7 +322,7 @@ public:
             lfo1.reset();
             lfo2.reset();
 
-            juce::ScopedValueSetter<bool> svs (snapAllValues, true);
+            yup::ScopedValueSetter<bool> svs (snapAllValues, true);
             updateParams (0);
 
             ampAdsr.noteOn();
@@ -399,9 +399,9 @@ public:
     }
 
     using MPESynthesiserVoice::renderNextBlock;
-    void renderNextBlock (juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
+    void renderNextBlock (yup::AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
     {
-        juce::ScopedValueSetter<bool> svs (snapAllValues, firstBlock || snapAllValues);
+        yup::ScopedValueSetter<bool> svs (snapAllValues, firstBlock || snapAllValues);
 
         updateParams (numSamples);
 
@@ -422,7 +422,7 @@ public:
 
         // Apply velocity
         float velocityGain = velocityToGain (currentlyPlayingNote.noteOnVelocity.asUnsignedFloat(), paramValue (synth.ampVelocity) / 100.0f);
-        velocityGain = juce::jlimit (0.0f, 1.0f, velocityGain);
+        velocityGain = yup::jlimit (0.0f, 1.0f, velocityGain);
         renderBuffer.applyGain (velocityGain);
 
         // Apply filter
@@ -475,7 +475,7 @@ public:
             itr.second.process (numSamples);
     }
 
-    void applyEnvelopeToBuffer (juce::ADSR& adsr, juce::AudioBuffer<float>& buffer, int startSample, int numSamples)
+    void applyEnvelopeToBuffer (yup::ADSR& adsr, yup::AudioBuffer<float>& buffer, int startSample, int numSamples)
     {
         float* l = buffer.getWritePointer (0, startSample);
         float* r = buffer.getWritePointer (1, startSample);
@@ -483,20 +483,20 @@ public:
         while (--numSamples >= 0)
         {
             float db = adsr.getNextSample() * 100.0f - 100.0f;
-            float gain = juce::Decibels::decibelsToGain (db);
+            float gain = yup::Decibels::decibelsToGain (db);
 
             *l++ *= gain;
             *r++ *= gain;
         }
     }
 
-    void getLiveModulationPositions (AutomatableParameter::Ptr param, juce::Array<float>& positions)
+    void getLiveModulationPositions (AutomatableParameter::Ptr param, yup::Array<float>& positions)
     {
         if (isActive())
             positions.add (param->valueRange.convertTo0to1 (paramValue (param)));
     }
 
-    void getLiveFilterFrequency (juce::Array<float>& positions)
+    void getLiveFilterFrequency (yup::Array<float>& positions)
     {
         if (isActive())
              positions.add ((12.0f * std::log2 (lastFilterFreq / 440.0f) + 69.0f) / 135.076232f);
@@ -616,7 +616,7 @@ public:
         freqNote = filterFrequencySmoother.getCurrentValue() * 135.076232f;
         filterFrequencySmoother.process (numSamples);
 
-        lastFilterFreq = juce::jlimit (8.0f,
+        lastFilterFreq = yup::jlimit (8.0f,
                                        std::min (20000.0f, float (currentSampleRate) / 2.0f),
                                        getMidiNoteInHertz (freqNote));
 
@@ -624,27 +624,27 @@ public:
 
         if (type != 0)
         {
-            juce::IIRCoefficients coefs1, coefs2;
+            yup::IIRCoefficients coefs1, coefs2;
 
             if (type == 1)
             {
-                coefs1 = juce::IIRCoefficients::makeLowPass (currentSampleRate, lastFilterFreq, q);
-                coefs2 = juce::IIRCoefficients::makeLowPass (currentSampleRate, lastFilterFreq, 0.70710678118655f);
+                coefs1 = yup::IIRCoefficients::makeLowPass (currentSampleRate, lastFilterFreq, q);
+                coefs2 = yup::IIRCoefficients::makeLowPass (currentSampleRate, lastFilterFreq, 0.70710678118655f);
             }
             else if (type == 2)
             {
-                coefs1 = juce::IIRCoefficients::makeHighPass (currentSampleRate, lastFilterFreq, q);
-                coefs2 = juce::IIRCoefficients::makeHighPass (currentSampleRate, lastFilterFreq, 0.70710678118655f);
+                coefs1 = yup::IIRCoefficients::makeHighPass (currentSampleRate, lastFilterFreq, q);
+                coefs2 = yup::IIRCoefficients::makeHighPass (currentSampleRate, lastFilterFreq, 0.70710678118655f);
             }
             else if (type == 3)
             {
-                coefs1 = juce::IIRCoefficients::makeBandPass (currentSampleRate, lastFilterFreq, q);
-                coefs2 = juce::IIRCoefficients::makeBandPass (currentSampleRate, lastFilterFreq, 0.70710678118655f);
+                coefs1 = yup::IIRCoefficients::makeBandPass (currentSampleRate, lastFilterFreq, q);
+                coefs2 = yup::IIRCoefficients::makeBandPass (currentSampleRate, lastFilterFreq, 0.70710678118655f);
             }
             else if (type == 4)
             {
-                coefs1 = juce::IIRCoefficients::makeNotchFilter (currentSampleRate, lastFilterFreq, q);
-                coefs2 = juce::IIRCoefficients::makeNotchFilter (currentSampleRate, lastFilterFreq, 0.70710678118655f);
+                coefs1 = yup::IIRCoefficients::makeNotchFilter (currentSampleRate, lastFilterFreq, q);
+                coefs2 = yup::IIRCoefficients::makeNotchFilter (currentSampleRate, lastFilterFreq, 0.70710678118655f);
             }
 
             filterL1.setCoefficients (coefs1);
@@ -662,11 +662,11 @@ public:
         for (auto& o : oscillators)
         {
             double note = activeNoteSmoothed + currentlyPlayingNote.totalPitchbendInSemitones;
-            note += juce::roundToInt (paramValue (synth.oscParams[idx]->tune))
+            note += yup::roundToInt (paramValue (synth.oscParams[idx]->tune))
                       + paramValue (synth.oscParams[idx]->fineTune) / 100.0;
 
             o.setNote (float (note));
-            o.setGain (juce::Decibels::decibelsToGain (paramValue (synth.oscParams[idx]->level)));
+            o.setGain (yup::Decibels::decibelsToGain (paramValue (synth.oscParams[idx]->level)));
             o.setWave ((Oscillator::Waves)(int (synth.oscParams[idx]->waveShapeValue.get())));
             o.setPulseWidth (paramValue (synth.oscParams[idx]->pulseWidth));
             o.setNumVoices (synth.oscParams[idx]->voicesValue);
@@ -716,7 +716,7 @@ private:
 
             auto& mod = modItr->second;
 
-            for (int i = mod.firstModIndex; i < juce::numElementsInArray (mod.depths) && i <= mod.lastModIndex; i++)
+            for (int i = mod.firstModIndex; i < yup::numElementsInArray (mod.depths) && i <= mod.lastModIndex; i++)
             {
                 float d = mod.depths[i];
 
@@ -724,7 +724,7 @@ private:
                     val += currentModValue[i] * d;
             }
 
-            val = juce::jlimit (0.0f, 1.0f, val);
+            val = yup::jlimit (0.0f, 1.0f, val);
 
             smoothItr->second.setValue (val);
 
@@ -737,17 +737,17 @@ private:
 
     FourOscPlugin& synth;
 
-    juce::AudioBuffer<float> renderBuffer {2, 512};
+    yup::AudioBuffer<float> renderBuffer {2, 512};
     MultiVoiceOscillator oscillators[4];
     ExpEnvelope ampAdsr;
     LinEnvelope filterAdsr, modAdsr1, modAdsr2;
     SimpleLFO lfo1, lfo2;
-    juce::IIRFilter filterL1, filterR1, filterL2, filterR2;
+    yup::IIRFilter filterL1, filterR1, filterL2, filterR2;
 
     ValueSmoother<float> filterFrequencySmoother;
 
     bool retrigger = false, isPlaying = false, isQuickStop = false, snapAllValues = false, firstBlock = false;
-    juce::LinearSmoothedValue<float> activeNote;
+    yup::LinearSmoothedValue<float> activeNote;
     float lastLegato = -1.0f, lastFilterFreq = 0;
 
     float currentModValue[FourOscPlugin::numModSources] = {0};
@@ -760,9 +760,9 @@ FourOscPlugin::OscParams::OscParams (FourOscPlugin& plugin, int oscNum)
 {
     auto um = plugin.getUndoManager();
 
-    auto oscID = [] (juce::Identifier i, int num)
+    auto oscID = [] (yup::Identifier i, int num)
     {
-        return juce::Identifier (i.toString() + juce::String (num));
+        return yup::Identifier (i.toString() + yup::String (num));
     };
 
     waveShapeValue.referTo (plugin.state, oscID (IDs::waveShape, oscNum), um, oscNum == 1 ? 1 : 0);
@@ -775,18 +775,18 @@ FourOscPlugin::OscParams::OscParams (FourOscPlugin& plugin, int oscNum)
     spreadValue.referTo (plugin.state, oscID (IDs::spread, oscNum), um, 0);
     panValue.referTo (plugin.state, oscID (IDs::pan, oscNum), um, 0);
 
-    auto paramID = [] (juce::Identifier i, int num)
+    auto paramID = [] (yup::Identifier i, int num)
     {
-        return juce::Identifier (i.toString() + juce::String (num)).toString();
+        return yup::Identifier (i.toString() + yup::String (num)).toString();
     };
 
-    tune        = plugin.addParam (paramID (IDs::tune, oscNum), TRANS("Tune") + " " + juce::String (oscNum), {-36.0f, 36.0f, 1.0f}, "st");
-    fineTune    = plugin.addParam (paramID (IDs::fineTune, oscNum), TRANS("Fine Tune") + " " + juce::String (oscNum), {-100.0f, 100.0f});
-    level       = plugin.addParam (paramID (IDs::level, oscNum), TRANS("Level") + " " + juce::String (oscNum), {-100.0f, 0.0f, 0.0f, 4.0f}, "dB");
-    pulseWidth  = plugin.addParam (paramID (IDs::pulseWidth, oscNum), TRANS("Pulse Width") + " " + juce::String (oscNum), {0.01f, 0.99f});
-    detune      = plugin.addParam (paramID (IDs::detune, oscNum), TRANS("Detune") + " " + juce::String (oscNum), {0.0f, 0.5f});
-    spread      = plugin.addParam (paramID (IDs::spread, oscNum), TRANS("Spread") + " " + juce::String (oscNum), {-100.0f, 100.0f}, "%");
-    pan         = plugin.addParam (paramID (IDs::pan, oscNum), TRANS("Pan") + " " + juce::String (oscNum), {-1.0f, 1.0f});
+    tune        = plugin.addParam (paramID (IDs::tune, oscNum), TRANS("Tune") + " " + yup::String (oscNum), {-36.0f, 36.0f, 1.0f}, "st");
+    fineTune    = plugin.addParam (paramID (IDs::fineTune, oscNum), TRANS("Fine Tune") + " " + yup::String (oscNum), {-100.0f, 100.0f});
+    level       = plugin.addParam (paramID (IDs::level, oscNum), TRANS("Level") + " " + yup::String (oscNum), {-100.0f, 0.0f, 0.0f, 4.0f}, "dB");
+    pulseWidth  = plugin.addParam (paramID (IDs::pulseWidth, oscNum), TRANS("Pulse Width") + " " + yup::String (oscNum), {0.01f, 0.99f});
+    detune      = plugin.addParam (paramID (IDs::detune, oscNum), TRANS("Detune") + " " + yup::String (oscNum), {0.0f, 0.5f});
+    spread      = plugin.addParam (paramID (IDs::spread, oscNum), TRANS("Spread") + " " + yup::String (oscNum), {-100.0f, 100.0f}, "%");
+    pan         = plugin.addParam (paramID (IDs::pan, oscNum), TRANS("Pan") + " " + yup::String (oscNum), {-1.0f, 1.0f});
 }
 
 void FourOscPlugin::OscParams::attach()
@@ -816,9 +816,9 @@ FourOscPlugin::LFOParams::LFOParams (FourOscPlugin& plugin, int lfoNum)
 {
     auto um = plugin.getUndoManager();
 
-    auto lfoID = [] (juce::Identifier i, int num)
+    auto lfoID = [] (yup::Identifier i, int num)
     {
-        return juce::Identifier (i.toString() + juce::String (num));
+        return yup::Identifier (i.toString() + yup::String (num));
     };
 
     waveShapeValue.referTo (plugin.state, lfoID (IDs::lfoWaveShape, lfoNum), um, lfoNum == 1 ? 1 : 0);
@@ -827,13 +827,13 @@ FourOscPlugin::LFOParams::LFOParams (FourOscPlugin& plugin, int lfoNum)
     depthValue.referTo (plugin.state, lfoID (IDs::lfoDepth, lfoNum), um, 1.0f);
     beatValue.referTo (plugin.state, lfoID (IDs::lfoBeat, lfoNum), um, 1);
 
-    auto paramID = [] (juce::Identifier i, int num)
+    auto paramID = [] (yup::Identifier i, int num)
     {
-        return juce::Identifier (i.toString() + juce::String (num)).toString();
+        return yup::Identifier (i.toString() + yup::String (num)).toString();
     };
 
-    rate        = plugin.addParam (paramID (IDs::lfoRate, lfoNum),  TRANS("Rate") + " " + juce::String (lfoNum), {0.0f, 500.0f, 0.0f, 0.3f}, "Hz");
-    depth       = plugin.addParam (paramID (IDs::lfoDepth, lfoNum), TRANS("Depth") + " " + juce::String (lfoNum), {0.0f, 1.0f});
+    rate        = plugin.addParam (paramID (IDs::lfoRate, lfoNum),  TRANS("Rate") + " " + yup::String (lfoNum), {0.0f, 500.0f, 0.0f, 0.3f}, "Hz");
+    depth       = plugin.addParam (paramID (IDs::lfoDepth, lfoNum), TRANS("Depth") + " " + yup::String (lfoNum), {0.0f, 1.0f});
 }
 
 void FourOscPlugin::LFOParams::attach()
@@ -853,9 +853,9 @@ FourOscPlugin::MODEnvParams::MODEnvParams (FourOscPlugin& plugin, int modNum)
 {
     auto um = plugin.getUndoManager();
 
-    auto modID = [] (juce::Identifier i, int num)
+    auto modID = [] (yup::Identifier i, int num)
     {
-        return juce::Identifier (i.toString() + juce::String (num));
+        return yup::Identifier (i.toString() + yup::String (num));
     };
 
     modAttackValue.referTo (plugin.state, modID (IDs::modAttack, modNum), um, 0.1f);
@@ -863,15 +863,15 @@ FourOscPlugin::MODEnvParams::MODEnvParams (FourOscPlugin& plugin, int modNum)
     modSustainValue.referTo (plugin.state, modID (IDs::modSustain, modNum), um, 80.0f);
     modReleaseValue.referTo (plugin.state, modID (IDs::modRelease, modNum), um, 0.1f);
 
-    auto paramID = [] (juce::Identifier i, int num)
+    auto paramID = [] (yup::Identifier i, int num)
     {
-        return juce::Identifier (i.toString() + juce::String (num)).toString();
+        return yup::Identifier (i.toString() + yup::String (num)).toString();
     };
 
-    modAttack   = plugin.addParam (paramID (IDs::modAttack, modNum),  TRANS("Mod Attack")  + " " + juce::String (modNum), {0.0f, 60.0f, 0.0f, 0.2f});
-    modDecay    = plugin.addParam (paramID (IDs::modDecay, modNum),   TRANS("Mod Decay")   + " " + juce::String (modNum), {0.0f, 60.0f, 0.0f, 0.2f});
-    modSustain  = plugin.addParam (paramID (IDs::modSustain, modNum), TRANS("Mod Sustain") + " " + juce::String (modNum), {0.0f, 100.0f}, "%");
-    modRelease  = plugin.addParam (paramID (IDs::modRelease, modNum), TRANS("Mod Release") + " " + juce::String (modNum), {0.001f, 60.0f, 0.0f, 0.2f});
+    modAttack   = plugin.addParam (paramID (IDs::modAttack, modNum),  TRANS("Mod Attack")  + " " + yup::String (modNum), {0.0f, 60.0f, 0.0f, 0.2f});
+    modDecay    = plugin.addParam (paramID (IDs::modDecay, modNum),   TRANS("Mod Decay")   + " " + yup::String (modNum), {0.0f, 60.0f, 0.0f, 0.2f});
+    modSustain  = plugin.addParam (paramID (IDs::modSustain, modNum), TRANS("Mod Sustain") + " " + yup::String (modNum), {0.0f, 100.0f}, "%");
+    modRelease  = plugin.addParam (paramID (IDs::modRelease, modNum), TRANS("Mod Release") + " " + yup::String (modNum), {0.001f, 60.0f, 0.0f, 0.2f});
 }
 
 void FourOscPlugin::MODEnvParams::attach()
@@ -898,7 +898,7 @@ FourOscPlugin::FourOscPlugin (PluginCreationInfo info)  : Plugin (info)
     levelMeasurer.addClient (*this);
 
     instrument.enableLegacyMode();
-    setPitchbendTrackingMode (juce::MPEInstrument::allNotesOnChannel);
+    setPitchbendTrackingMode (yup::MPEInstrument::allNotesOnChannel);
 
     setVoiceStealingEnabled (true);
 
@@ -1118,7 +1118,7 @@ FourOscPlugin::~FourOscPlugin()
 
 const char* FourOscPlugin::xmlTypeName = "4osc";
 
-AutomatableParameter* FourOscPlugin::addParam (const juce::String& paramID, const juce::String& name, juce::NormalisableRange<float> valueRange, juce::String label)
+AutomatableParameter* FourOscPlugin::addParam (const yup::String& paramID, const yup::String& name, yup::NormalisableRange<float> valueRange, yup::String label)
 {
     auto p = Plugin::addParam (paramID, name, valueRange);
 
@@ -1133,23 +1133,23 @@ void FourOscPlugin::setupTextFunctions()
     // Add a default function that does number of decimal places nicely and adds a labels
     for (auto p : getAutomatableParameters())
     {
-        juce::String label;
+        yup::String label;
         auto itr = labels.find (p->paramID);
         if (itr != labels.end())
             label = itr->second;
 
         auto basicValueToTextFunction = [label] (float value)
         {
-            juce::String text;
+            yup::String text;
             float v = std::abs (value);
             if (v > 100)
-                text = juce::String (juce::roundToInt (value));
+                text = yup::String (yup::roundToInt (value));
             else if (v > 10)
-                text = juce::String (value, 1);
+                text = yup::String (value, 1);
             else if (v > 1)
-                text = juce::String (value, 2);
+                text = yup::String (value, 2);
             else
-                text = juce::String (value, 3);
+                text = yup::String (value, 3);
 
             if (label.isNotEmpty())
                 text += label;
@@ -1163,40 +1163,40 @@ void FourOscPlugin::setupTextFunctions()
     auto timeValueToTextFunction = [] (float value)
     {
         if (value < 1.0f)
-            return juce::String (juce::roundToInt (value * 1000)) + "ms";
-        return juce::String (value, 2) + "s";
+            return yup::String (yup::roundToInt (value * 1000)) + "ms";
+        return yup::String (value, 2) + "s";
     };
 
     auto panValueToTextFunction = [] (float value)
     {
         if (value < 0.0f)
-            return juce::String (juce::roundToInt (-value * 100)) + "L";
-        return juce::String (juce::roundToInt (value * 100)) + "R";
+            return yup::String (yup::roundToInt (-value * 100)) + "L";
+        return yup::String (yup::roundToInt (value * 100)) + "R";
     };
 
     auto percentValueToTextFunction = [] (float value)
     {
-        return juce::String (juce::roundToInt (value * 100)) + "%";
+        return yup::String (yup::roundToInt (value * 100)) + "%";
     };
 
     auto tuneValueToTextFunction = [] (float value)
     {
-        return juce::String (juce::roundToInt (value)) + "st";
+        return yup::String (yup::roundToInt (value)) + "st";
     };
 
     auto freqValueToTextFunction = [] (float value)
     {
         float freq = 440.0f * std::pow (2.0f, (value - 69) / 12.0f);
-        return juce::String (juce::roundToInt (freq)) + "Hz";
+        return yup::String (yup::roundToInt (freq)) + "Hz";
     };
 
-    auto textToFreqValueFunction = [] (juce::String text)
+    auto textToFreqValueFunction = [] (yup::String text)
     {
         float freq = text.getFloatValue();
         return 12.0f * std::log2 (freq / 440.0f) + 69.0f;
     };
 
-    auto textToTimeValueFunction = [] (juce::String text)
+    auto textToTimeValueFunction = [] (yup::String text)
     {
         float time = text.getFloatValue();
         return (text.contains ("ms") || time > 10.0f) ? (time / 1000.0f) : time;
@@ -1259,7 +1259,7 @@ float FourOscPlugin::getLevel (int channel)
 {
     auto& peak = levels[channel];
 
-    auto elapsedMilliseconds = std::max (0, int (juce::Time::getApproximateMillisecondCounter() - peak.time) - 50);
+    auto elapsedMilliseconds = std::max (0, int (yup::Time::getApproximateMillisecondCounter() - peak.time) - 50);
     float currentLevel = peak.dB - (48.0f * float (elapsedMilliseconds) / 1000.0f);
 
     auto latest = getAndClearAudioLevel (channel);
@@ -1267,10 +1267,10 @@ float FourOscPlugin::getLevel (int channel)
     if (latest.dB > currentLevel)
     {
         peak = latest;
-        return juce::jlimit (-100.0f, 0.0f, peak.dB);
+        return yup::jlimit (-100.0f, 0.0f, peak.dB);
     }
 
-    return juce::jlimit (-100.0f, 0.0f, currentLevel);
+    return yup::jlimit (-100.0f, 0.0f, currentLevel);
 }
 
 void FourOscPlugin::valueTreeChanged()
@@ -1278,7 +1278,7 @@ void FourOscPlugin::valueTreeChanged()
     Plugin::valueTreeChanged();
 }
 
-void FourOscPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void FourOscPlugin::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     Plugin::valueTreePropertyChanged (v, i);
 
@@ -1287,7 +1287,7 @@ void FourOscPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Id
         if (i == IDs::voiceMode
             || i == IDs::voices)
         {
-            juce::ScopedLock sl (voicesLock);
+            yup::ScopedLock sl (voicesLock);
             if (voiceModeValue == 2)
             {
                 reduceNumVoices (voicesValue.get());
@@ -1306,15 +1306,15 @@ void FourOscPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Id
         {
             if ((bool) state[IDs::mpe])
             {
-                juce::MPEZoneLayout zones;
+                yup::MPEZoneLayout zones;
                 zones.setLowerZone (15);
                 instrument.setZoneLayout (zones);
-                setPitchbendTrackingMode (juce::MPEInstrument::lastNotePlayedOnChannel);
+                setPitchbendTrackingMode (yup::MPEInstrument::lastNotePlayedOnChannel);
             }
             else
             {
                 instrument.enableLegacyMode();
-                setPitchbendTrackingMode (juce::MPEInstrument::allNotesOnChannel);
+                setPitchbendTrackingMode (yup::MPEInstrument::allNotesOnChannel);
             }
         }
     }
@@ -1325,7 +1325,7 @@ void FourOscPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Id
     }
 }
 
-void FourOscPlugin::valueTreeChildAdded (juce::ValueTree& v, juce::ValueTree& c)
+void FourOscPlugin::valueTreeChildAdded (yup::ValueTree& v, yup::ValueTree& c)
 {
     Plugin::valueTreeChildAdded (v, c);
 
@@ -1334,7 +1334,7 @@ void FourOscPlugin::valueTreeChildAdded (juce::ValueTree& v, juce::ValueTree& c)
             triggerAsyncUpdate();
 }
 
-void FourOscPlugin::valueTreeChildRemoved (juce::ValueTree& v, juce::ValueTree& c, int i)
+void FourOscPlugin::valueTreeChildRemoved (yup::ValueTree& v, yup::ValueTree& c, int i)
 {
     Plugin::valueTreeChildRemoved (v, c, i);
 
@@ -1391,7 +1391,7 @@ void FourOscPlugin::loadModMatrix()
 
 void FourOscPlugin::flushPluginStateToValueTree()
 {
-    juce::ScopedValueSetter<bool> svs (flushingState, true);
+    yup::ScopedValueSetter<bool> svs (flushingState, true);
 
     auto um = getUndoManager();
 
@@ -1399,7 +1399,7 @@ void FourOscPlugin::flushPluginStateToValueTree()
     if (vt.isValid())
         state.removeChild (vt, um);
 
-    auto mm = juce::ValueTree (IDs::MODMATRIX);
+    auto mm = yup::ValueTree (IDs::MODMATRIX);
 
     for (const auto& itr : modMatrix)
     {
@@ -1407,7 +1407,7 @@ void FourOscPlugin::flushPluginStateToValueTree()
         {
             if (itr.second.depths[s] >= -1.0f)
             {
-                auto mmi = juce::ValueTree (IDs::MODMATRIXITEM);
+                auto mmi = yup::ValueTree (IDs::MODMATRIXITEM);
                 mmi.setProperty (IDs::modParam, itr.first->paramID, um);
                 mmi.setProperty (IDs::modItem, modulationSourceToID ((ModSource)s), um);
                 mmi.setProperty (IDs::modDepth, itr.second.depths[s], um);
@@ -1455,7 +1455,7 @@ void FourOscPlugin::midiPanic()
 
 void FourOscPlugin::applyToBuffer (const PluginRenderContext& fc)
 {
-    juce::ScopedLock sl (voicesLock);
+    yup::ScopedLock sl (voicesLock);
 
     if (fc.destBuffer != nullptr)
     {
@@ -1481,12 +1481,12 @@ void FourOscPlugin::applyToBuffer (const PluginRenderContext& fc)
             AudioScratchBuffer workBuffer (2, thisBlock);
             workBuffer.buffer.clear();
 
-            juce::MidiBuffer midi;
+            yup::MidiBuffer midi;
             if (fc.bufferForMidiMessages != nullptr)
             {
                 for (auto m : *fc.bufferForMidiMessages)
                 {
-                    int midiPos = juce::roundToInt (m.getTimeStamp() * getSampleRate());
+                    int midiPos = yup::roundToInt (m.getTimeStamp() * getSampleRate());
                     if (midiPos >= pos && midiPos < pos + thisBlock)
                         midi.addEvent (m, midiPos - pos);
                 }
@@ -1515,7 +1515,7 @@ void FourOscPlugin::applyToBuffer (const PluginRenderContext& fc)
     }
 }
 
-void FourOscPlugin::applyToBuffer (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
+void FourOscPlugin::applyToBuffer (yup::AudioBuffer<float>& buffer, yup::MidiBuffer& midi)
 {
     updateParams (buffer);
     renderNextBlock (buffer, midi, 0, buffer.getNumSamples());
@@ -1525,7 +1525,7 @@ void FourOscPlugin::applyToBuffer (juce::AudioBuffer<float>& buffer, juce::MidiB
         itr.second.process (buffer.getNumSamples());
 }
 
-void FourOscPlugin::applyEffects (juce::AudioBuffer<float>& buffer)
+void FourOscPlugin::applyEffects (yup::AudioBuffer<float>& buffer)
 {
     int numSamples = buffer.getNumSamples();
 
@@ -1551,17 +1551,17 @@ void FourOscPlugin::applyEffects (juce::AudioBuffer<float>& buffer)
         reverb.processStereo (buffer.getWritePointer (0), buffer.getWritePointer (1), numSamples);
 
     // Apply master level
-    buffer.applyGain (juce::Decibels::decibelsToGain (paramValue (masterLevel)));
+    buffer.applyGain (yup::Decibels::decibelsToGain (paramValue (masterLevel)));
 }
 
-void FourOscPlugin::updateParams (juce::AudioBuffer<float>& buffer)
+void FourOscPlugin::updateParams (yup::AudioBuffer<float>& buffer)
 {
     ignoreUnused (buffer);
 
     // Reverb
     AudioFadeCurve::CrossfadeLevels wetDry (paramValue (reverbMix));
 
-    juce::Reverb::Parameters params;
+    yup::Reverb::Parameters params;
     params.roomSize = paramValue (reverbSize);
     params.damping = paramValue (reverbDamping);
     params.width = paramValue (reverbWidth);
@@ -1574,8 +1574,8 @@ void FourOscPlugin::updateParams (juce::AudioBuffer<float>& buffer)
     // Delay
     float delayTime = (delayValue.get()) / (currentTempo / 60.0f);
     delay->setParams (delayTime,
-                      juce::Decibels::decibelsToGain (paramValue (delayFeedback)),
-                      juce::Decibels::decibelsToGain (paramValue (delayCrossfeed)),
+                      yup::Decibels::decibelsToGain (paramValue (delayFeedback)),
+                      yup::Decibels::decibelsToGain (paramValue (delayCrossfeed)),
                       paramValue (delayMix));
 
     // Chorus
@@ -1586,7 +1586,7 @@ void FourOscPlugin::updateParams (juce::AudioBuffer<float>& buffer)
 }
 
 //==============================================================================
-void FourOscPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void FourOscPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, ampAttackValue, ampDecayValue, ampSustainValue, ampReleaseValue, ampVelocityValue, filterAttackValue,
                                   filterDecayValue, filterSustainValue, filterReleaseValue, filterFreqValue, filterResonanceValue,
@@ -1622,7 +1622,7 @@ void FourOscPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
         p->updateFromAttachedValue();
 }
 
-juce::String FourOscPlugin::modulationSourceToName (ModSource src)
+yup::String FourOscPlugin::modulationSourceToName (ModSource src)
 {
     switch (src)
     {
@@ -1642,8 +1642,8 @@ juce::String FourOscPlugin::modulationSourceToName (ModSource src)
         {
             if (src >= ccBankSelect && src <= ccPolyMode)
             {
-                auto prefix = juce::String ("CC#") + juce::String ((int)(src - ccBankSelect));
-                auto name = juce::String (juce::MidiMessage::getControllerName (src - ccBankSelect));
+                auto prefix = yup::String ("CC#") + yup::String ((int)(src - ccBankSelect));
+                auto name = yup::String (yup::MidiMessage::getControllerName (src - ccBankSelect));
 
                 if (name.isEmpty())
                     return prefix;
@@ -1657,7 +1657,7 @@ juce::String FourOscPlugin::modulationSourceToName (ModSource src)
     }
 }
 
-juce::String FourOscPlugin::modulationSourceToID (FourOscPlugin::ModSource src)
+yup::String FourOscPlugin::modulationSourceToID (FourOscPlugin::ModSource src)
 {
     switch (src)
     {
@@ -1676,7 +1676,7 @@ juce::String FourOscPlugin::modulationSourceToID (FourOscPlugin::ModSource src)
         default:
         {
             if (src >= ccBankSelect && src <= ccPolyMode)
-                return "cc" + juce::String (int (src - ccBankSelect));
+                return "cc" + yup::String (int (src - ccBankSelect));
 
             jassertfalse;
             return {};
@@ -1684,7 +1684,7 @@ juce::String FourOscPlugin::modulationSourceToID (FourOscPlugin::ModSource src)
     }
 }
 
-FourOscPlugin::ModSource FourOscPlugin::idToModulationSource (juce::String idStr)
+FourOscPlugin::ModSource FourOscPlugin::idToModulationSource (yup::String idStr)
 {
     if (idStr == "lfo1")            return lfo1;
     if (idStr == "lfo2")            return lfo2;
@@ -1701,9 +1701,9 @@ FourOscPlugin::ModSource FourOscPlugin::idToModulationSource (juce::String idStr
     return none;
 }
 
-juce::Array<float> FourOscPlugin::getLiveModulationPositions (AutomatableParameter::Ptr param)
+yup::Array<float> FourOscPlugin::getLiveModulationPositions (AutomatableParameter::Ptr param)
 {
-    juce::Array<float> positions;
+    yup::Array<float> positions;
 
     // Filter frequency is a special case, not only do we want to show modulation,
     // also want to show effect of key tracking and filter envelope
@@ -1740,12 +1740,12 @@ bool FourOscPlugin::isModulated (AutomatableParameter::Ptr param)
     return false;
 }
 
-juce::Array<FourOscPlugin::ModSource> FourOscPlugin::getModulationSources (AutomatableParameter::Ptr param)
+yup::Array<FourOscPlugin::ModSource> FourOscPlugin::getModulationSources (AutomatableParameter::Ptr param)
 {
     auto itr = modMatrix.find (param.get());
     if (itr != modMatrix.end())
     {
-        juce::Array<ModSource> res;
+        yup::Array<ModSource> res;
         for (int s = lfo1; s < numModSources; s++)
             if (itr->second.depths[s] >= -1.0f)
                 res.add ((ModSource) s);

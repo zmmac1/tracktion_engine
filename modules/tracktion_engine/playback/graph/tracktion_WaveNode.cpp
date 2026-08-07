@@ -180,7 +180,7 @@ public:
             if (t >= 0)
                 t = loopStart + (t % loopLength);
             else
-                t = loopStart + juce::negativeAwareModulo (t, loopLength);
+                t = loopStart + yup::negativeAwareModulo (t, loopLength);
         }
 
         source->setPosition (t);
@@ -214,7 +214,7 @@ public:
 
         while (numSamplesToDo > 0)
         {
-            jassert (juce::isPositiveAndBelow (readPos - loopStart, loopLength));
+            jassert (yup::isPositiveAndBelow (readPos - loopStart, loopLength));
 
             const auto numToRead = std::min ((SampleCount) numSamplesToDo, loopStart + loopLength - readPos);
 
@@ -325,7 +325,7 @@ public:
 
         if (std::exchange (hasBeenReset, false))
         {
-            constexpr auto baseLatencyNumSamples = static_cast<FrameCount> (juce::LagrangeInterpolator::getBaseLatency());
+            constexpr auto baseLatencyNumSamples = static_cast<FrameCount> (yup::LagrangeInterpolator::getBaseLatency());
             timeSourceIsAheadDueToLatency = TimeDuration::fromSamples (baseLatencyNumSamples, destSampleRate);
             const auto modifiedNumSourceFramesToRead = numSourceFramesToRead + static_cast<int> (baseLatencyNumSamples);
             const auto numFramesToDrop = static_cast<FrameCount> (std::lround (baseLatencyNumSamples / ratio));
@@ -351,14 +351,14 @@ public:
     const double sourceSampleRate { source->getSampleRate() };
     const double sampleRatio { sourceSampleRate / destSampleRate  };
     double speedRatio = 1.0;
-    std::vector<juce::LagrangeInterpolator> resamplers;
+    std::vector<yup::LagrangeInterpolator> resamplers;
     float gains[2] = { 1.0f, 1.0f };
     TimeDuration timeSourceIsAheadDueToLatency;
     bool hasBeenReset = true;
 
     static bool readResampling (choc::buffer::ChannelArrayView<float> destBuffer,
                                 AudioReader& sourceReader, int numSourceFramesToRead,
-                                std::vector<juce::LagrangeInterpolator>& resamplers_,
+                                std::vector<yup::LagrangeInterpolator>& resamplers_,
                                 const std::array<float, 2> gains)
     {
         const auto numChannels = destBuffer.getNumChannels();
@@ -1444,7 +1444,7 @@ public:
     {
         for (int i = (int) getNumChannels(); --i >= 0;)
         {
-            resamplers.emplace_back (juce::LagrangeInterpolator());
+            resamplers.emplace_back (yup::LagrangeInterpolator());
             resamplers.back().reset();
         }
     }
@@ -1509,7 +1509,7 @@ private:
 
     SpeedFadeDescription fadeDesc;
     std::optional<tempo::Sequence::Position> tempoPosition;
-    std::vector<juce::LagrangeInterpolator> resamplers;
+    std::vector<yup::LagrangeInterpolator> resamplers;
 
     bool shouldWarp() const
     {
@@ -1556,21 +1556,21 @@ private:
         switch (t)
         {
             case AudioFadeCurve::convex:
-                return rampUp ? (-2.0 * std::cos ((juce::MathConstants<double>::pi * proportion) / 2.0)) / juce::MathConstants<double>::pi + 1.0
-                              : 1.0 - ((-2.0 * std::cos ((juce::MathConstants<double>::pi * (proportion - 1.0)) / 2.0)) / juce::MathConstants<double>::pi + 1.0);
+                return rampUp ? (-2.0 * std::cos ((yup::MathConstants<double>::pi * proportion) / 2.0)) / yup::MathConstants<double>::pi + 1.0
+                              : 1.0 - ((-2.0 * std::cos ((yup::MathConstants<double>::pi * (proportion - 1.0)) / 2.0)) / yup::MathConstants<double>::pi + 1.0);
 
             case AudioFadeCurve::concave:
-                return rampUp ? proportion - (2.0 * std::sin ((juce::MathConstants<double>::pi * proportion) / 2.0)) / juce::MathConstants<double>::pi + (2.0 / juce::MathConstants<double>::pi)
-                              : ((2.0 * std::sin ((juce::MathConstants<double>::pi * (proportion + 1.0)) / 2.0)) / juce::MathConstants<double>::pi) + proportion - (2.0 / juce::MathConstants<double>::pi);
+                return rampUp ? proportion - (2.0 * std::sin ((yup::MathConstants<double>::pi * proportion) / 2.0)) / yup::MathConstants<double>::pi + (2.0 / yup::MathConstants<double>::pi)
+                              : ((2.0 * std::sin ((yup::MathConstants<double>::pi * (proportion + 1.0)) / 2.0)) / yup::MathConstants<double>::pi) + proportion - (2.0 / yup::MathConstants<double>::pi);
 
             case AudioFadeCurve::sCurve:
-                return rampUp ? (proportion / 2.0) - (std::sin (juce::MathConstants<double>::pi * proportion) / (2.0 * juce::MathConstants<double>::pi)) + 0.5
-                              : std::sin (juce::MathConstants<double>::pi * proportion) / (2.0 * juce::MathConstants<double>::pi) + (proportion / 2.0);
+                return rampUp ? (proportion / 2.0) - (std::sin (yup::MathConstants<double>::pi * proportion) / (2.0 * yup::MathConstants<double>::pi)) + 0.5
+                              : std::sin (yup::MathConstants<double>::pi * proportion) / (2.0 * yup::MathConstants<double>::pi) + (proportion / 2.0);
 
             case AudioFadeCurve::linear:
             default:
-                return rampUp ? (juce::square (proportion) * 0.5) + 0.5
-                              : ((-juce::square (proportion - 1.0)) * 0.5) + 0.5;
+                return rampUp ? (yup::square (proportion) * 0.5) + 0.5
+                              : ((-yup::square (proportion - 1.0)) * 0.5) + 0.5;
         }
     }
 };
@@ -1582,7 +1582,7 @@ struct WaveNode::PerChannelState
 {
     PerChannelState()    { resampler.reset(); }
 
-    juce::LagrangeInterpolator resampler;
+    yup::LagrangeInterpolator resampler;
     float lastSample = 0;
 };
 
@@ -1639,7 +1639,7 @@ void WaveNode::prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo
 
     if (! channelState)
     {
-        channelState = std::make_shared<juce::OwnedArray<PerChannelState>>();
+        channelState = std::make_shared<yup::OwnedArray<PerChannelState>>();
 
         if (reader != nullptr)
             for (int i = numChannelsToUse; --i >= 0;)
@@ -1734,7 +1734,7 @@ void WaveNode::replaceChannelStateIfPossible (WaveNode& other, int numChannelsTo
         channelState = other.channelState;
 }
 
-void WaveNode::processSection (ProcessContext& pc, juce::Range<int64_t> timelineRange)
+void WaveNode::processSection (ProcessContext& pc, yup::Range<int64_t> timelineRange)
 {
     const auto sectionEditTime = tracktion::timeRangeFromSamples (timelineRange, outputSampleRate);
 
@@ -2104,7 +2104,7 @@ WaveNodeRealTime::WaveNodeRealTime (const AudioFile& af,
 //==============================================================================
 void WaveNodeRealTime::setDynamicOffsetBeats (BeatDuration newOffset)
 {
-    if (juce::approximatelyEqual (dynamicOffsetBeats->inBeats(), newOffset.inBeats()))
+    if (yup::approximatelyEqual (dynamicOffsetBeats->inBeats(), newOffset.inBeats()))
         return;
 
     (*dynamicOffsetBeats) = newOffset;
@@ -2167,7 +2167,7 @@ bool WaveNodeRealTime::buildAudioReaderGraph()
     {
         if (auto bufferedFileReader = audioFile.engine->getBufferedAudioFileManager().get (audioFile.getFile()))
         {
-            fileCacheReader = audioFile.engine->getAudioFileManager().cache.createAudioFormatReaderWithTimeout ([&bufferedFileReader] (juce::TimeSliceThread&, int) mutable -> std::unique_ptr<AudioFormatReaderWithTimeout>
+            fileCacheReader = audioFile.engine->getAudioFileManager().cache.createAudioFormatReaderWithTimeout ([&bufferedFileReader] (yup::TimeSliceThread&, int) mutable -> std::unique_ptr<AudioFormatReaderWithTimeout>
                                                                                                   {
                                                                                                       return std::make_unique<BufferedFileReaderWrapper> (std::move (bufferedFileReader));
                                                                                                   });

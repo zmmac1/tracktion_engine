@@ -66,7 +66,7 @@ public:
     virtual bool wantsDevice (const MidiID&) { return false; }
 
     // If the device communicates via OSC, then this tells the device the new settings
-    virtual void updateOSCSettings (int /*oscInputPort*/, int /*oscOutputPort*/, juce::String /*oscOutputAddr*/) {}
+    virtual void updateOSCSettings (int /*oscInputPort*/, int /*oscOutputPort*/, yup::String /*oscOutputAddr*/) {}
 
     // most settings will be updated by the ExternalControllerManager, but this allows a device
     // a chance to do some extra stuff when it needs to refresh itself
@@ -78,7 +78,7 @@ public:
     // called by tracktion when a midi message comes in from the controller. The
     // subclass must translate this and call methods in this class accordingly to
     // trigger whatever action the user is trying to do.
-    virtual void acceptMidiMessage ([[maybe_unused]] int idx, const juce::MidiMessage&) {}
+    virtual void acceptMidiMessage ([[maybe_unused]] int idx, const yup::MidiMessage&) {}
 
     // tells the device to move one of its faders.
     // the channel number is the physical channel on the device, regardless of bank selection
@@ -127,7 +127,7 @@ public:
     //
     // the trackname array is the set of names for the tracks that now map onto the device's physical
     // fader channels, so if it has a display that can show track names, it should update this.
-    virtual void faderBankChanged ([[maybe_unused]] int newStartChannelNumber, [[maybe_unused]] const juce::StringArray& trackNames) {}
+    virtual void faderBankChanged ([[maybe_unused]] int newStartChannelNumber, [[maybe_unused]] const yup::StringArray& trackNames) {}
 
     // tells the device that a pad has changed colour
     // colour 0: off
@@ -195,14 +195,14 @@ public:
 
     virtual void auxBankChanged (int)                   {}
 
-    virtual bool wantsMessage (int, const juce::MidiMessage&) { return true; }
+    virtual bool wantsMessage (int, const yup::MidiMessage&) { return true; }
     virtual bool eatsAllMessages()                      { return true; }
     virtual bool canSetEatsAllMessages()                { return false; }
     virtual void setEatsAllMessages(bool)               {}
     virtual bool canChangeSelectedPlugin()              { return true; }
-    virtual void currentSelectionChanged (juce::String) {}
+    virtual void currentSelectionChanged (yup::String) {}
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     virtual bool showingPluginParams()                  { return false; }
     virtual bool showingMarkers()                       { return false; }
@@ -242,7 +242,7 @@ public:
 
     // sends a MIDI message to the device's back-channel
     void sendMidiCommandToController (int idx, const void* midiData, int numBytes);
-    void sendMidiCommandToController (int idx, const juce::MidiMessage&);
+    void sendMidiCommandToController (int idx, const yup::MidiMessage&);
 
     template <size_t size>
     void sendMidiArray (int idx, const uint8_t (&rawData)[size])   { sendMidiCommandToController (idx, rawData, (int) size); }
@@ -395,7 +395,7 @@ public:
 
     //==============================================================================
     /** These values need to be set by the subclass. */
-    juce::String deviceDescription;
+    yup::String deviceDescription;
 
     // The number of multiple similar devices can be connected to add additional tracks
     int supportedExtenders = 0;
@@ -404,14 +404,14 @@ public:
     bool needsMidiChannel = true;
 
     // If the midi device always has the same name, set it and device will auto configure
-    juce::String midiChannelName;
+    yup::String midiChannelName;
 
     // does this driver need to be able to send MIDI messages back to the
     // controller as well as receive them?
     bool needsMidiBackChannel = false;
 
     // If the midi device always has the same name, set it and device will auto configure
-    juce::String midiBackChannelName;
+    yup::String midiBackChannelName;
 
     // does this driver need to be able to communicate via OSC
     bool needsOSCSocket = false;
@@ -446,7 +446,7 @@ public:
     bool pickUpMode = false;
 
     // pad colors are limited to < 8
-    bool limitedPadColours = false;
+    bool limitedPadColors = false;
 
     int numAuxes = 0;
     int numCharactersForAuxLabels = 0;
@@ -490,7 +490,7 @@ private:
 
     std::map<std::pair<ControlType, int>, PickUpInfo> pickUpMap;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlSurface)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlSurface)
 };
 
 } // namespace tracktion::inline engine

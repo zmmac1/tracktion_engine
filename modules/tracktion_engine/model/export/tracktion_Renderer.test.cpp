@@ -27,20 +27,20 @@ TEST_SUITE("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine);
 
         auto fileLength = 5_td;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds());
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds());
 
         auto track = getAudioTracks (*edit)[0];
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, fileLength } },
                         DeleteExistingClips::no);
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         Renderer::Parameters params (*edit);
         params.destFile = destFile.getFile();
         params.time = params.time.withLength (fileLength);
         params.audioFormat = engine.getAudioFileFormatManager().getWavFormat();
         std::atomic<bool> callbackFinished { false };
 
-        auto thumbnail = std::make_shared<juce::AudioThumbnail> (256,
+        auto thumbnail = std::make_shared<yup::AudioThumbnail> (256,
                                                                  engine.getAudioFileFormatManager().readFormatManager,
                                                                  engine.getAudioFileManager().getAudioThumbnailCache());
 
@@ -84,15 +84,15 @@ TEST_SUITE("tracktion_engine")
             for (choc::buffer::FrameCount f = 0; f < numFrames; ++f)
                 sourceBuffer.getSample (ch, f) = (float) (ch + 1) * 0.1f;  // ch0=0.1, ch1=0.2, ch2=0.3, ch3=0.4
 
-        const juce::File virtualFile ("/memory/multichannel-test.wav");
+        const yup::File virtualFile ("/memory/multichannel-test.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, sourceBuffer.getView(), sampleRate);
 
         // Helper: render an edit and return the result buffer
         auto renderEdit = [&] (Edit& edit, ChannelConfiguration channelConfig, bool mustMono = false)
-            -> std::optional<juce::AudioBuffer<float>>
+            -> std::optional<yup::AudioBuffer<float>>
         {
-            juce::TemporaryFile destFile (".wav");
+            yup::TemporaryFile destFile (".wav");
             Renderer::Parameters params (edit);
             params.destFile = destFile.getFile();
             params.time = params.time.withLength (clipLength);
@@ -213,7 +213,7 @@ TEST_SUITE("tracktion_engine")
             for (choc::buffer::FrameCount f = 0; f < numFrames; ++f)
                 sourceBuffer.getSample (ch, f) = (float) (ch + 1) * 0.05f;
 
-        const juce::File virtualFile ("/memory/7.1-test.wav");
+        const yup::File virtualFile ("/memory/7.1-test.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, sourceBuffer.getView(), sampleRate);
 
@@ -225,7 +225,7 @@ TEST_SUITE("tracktion_engine")
         REQUIRE (clip != nullptr);
 
         // Render with explicit 7.1 channel config
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         Renderer::Parameters params (*edit);
         params.destFile = destFile.getFile();
         params.time = params.time.withLength (clipLength);
@@ -271,7 +271,7 @@ TEST_SUITE("tracktion_engine")
             for (choc::buffer::FrameCount f = 0; f < numFrames; ++f)
                 sourceBuffer.getSample (ch, f) = (float) (ch + 1) * 0.1f;
 
-        const juce::File virtualFile ("/memory/3ch-auto-detect.wav");
+        const yup::File virtualFile ("/memory/3ch-auto-detect.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, sourceBuffer.getView(), sampleRate);
 
@@ -287,7 +287,7 @@ TEST_SUITE("tracktion_engine")
         auto renderOptions = RenderOptions::forGeneralExporter (*edit);
         renderOptions->setChannelConfiguration ({});  // "From Edit"
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         auto params = renderOptions->getRenderParameters (*edit);
         params.destFile = destFile.getFile();
         params.time = params.time.withLength (clipLength);
@@ -337,8 +337,8 @@ TEST_SUITE("tracktion_engine")
             for (choc::buffer::ChannelCount ch = 0; ch < numChannels; ++ch)
                 buffer.getSample (ch, f) = testValue;
 
-        // Register with a key that matches the juce::File path we'll give the clip
-        const juce::File virtualFile ("/memory/test-buffer.wav");
+        // Register with a key that matches the yup::File path we'll give the clip
+        const yup::File virtualFile ("/memory/test-buffer.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, buffer.getView(), sampleRate);
 
@@ -351,7 +351,7 @@ TEST_SUITE("tracktion_engine")
         REQUIRE (clip != nullptr);
 
         // Render the edit to a file
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         Renderer::Parameters params (*edit);
         params.destFile = destFile.getFile();
         params.time = params.time.withLength (clipLength);
@@ -400,7 +400,7 @@ TEST_SUITE("tracktion_engine")
             for (choc::buffer::FrameCount f = 0; f < numFrames; ++f)
                 sourceBuffer.getSample (ch, f) = (float) (ch + 1) * 0.1f;
 
-        const juce::File virtualFile ("/memory/6ch-plugin-passthrough.wav");
+        const yup::File virtualFile ("/memory/6ch-plugin-passthrough.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, sourceBuffer.getView(), sampleRate);
 
@@ -414,7 +414,7 @@ TEST_SUITE("tracktion_engine")
 
         // The track already has a VolumeAndPanPlugin at unity gain.
         // Render and verify all 6 channels survive.
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         Renderer::Parameters params (*edit);
         params.destFile = destFile.getFile();
         params.time = params.time.withLength (clipLength);
@@ -467,7 +467,7 @@ TEST_SUITE("tracktion_engine")
             for (choc::buffer::FrameCount f = 0; f < numFrames; ++f)
                 sourceBuffer.getSample (ch, f) = (float) (ch + 1) * 0.1f;
 
-        const juce::File virtualFile ("/memory/4ch-channel-selection.wav");
+        const yup::File virtualFile ("/memory/4ch-channel-selection.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, sourceBuffer.getView(), sampleRate);
 
@@ -481,7 +481,7 @@ TEST_SUITE("tracktion_engine")
         // Select only first 2 channels out of 4
         clip->setActiveChannelConfiguration (ChannelConfiguration::discreteChannels (2));
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         Renderer::Parameters params (*edit);
         params.destFile = destFile.getFile();
         params.time = params.time.withLength (clipLength);
@@ -532,7 +532,7 @@ TEST_SUITE("tracktion_engine")
             for (choc::buffer::FrameCount f = 0; f < numFrames; ++f)
                 sourceBuffer.getSample (ch, f) = (float) (ch + 1) * 0.1f;
 
-        const juce::File virtualFile ("/memory/4ch-submix.wav");
+        const yup::File virtualFile ("/memory/4ch-submix.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, sourceBuffer.getView(), sampleRate);
 
@@ -549,7 +549,7 @@ TEST_SUITE("tracktion_engine")
         // Route track1 → track2
         track1->getOutput().setOutputToTrack (track2);
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         Renderer::Parameters params (*edit);
         params.destFile = destFile.getFile();
         params.time = params.time.withLength (clipLength);
@@ -601,7 +601,7 @@ TEST_SUITE("tracktion_engine")
             for (choc::buffer::FrameCount f = 0; f < numFrames; ++f)
                 sourceBuffer.getSample (ch, f) = (float) (ch + 1) * 0.1f;
 
-        const juce::File virtualFile ("/memory/4ch-aux-send.wav");
+        const yup::File virtualFile ("/memory/4ch-aux-send.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, sourceBuffer.getView(), sampleRate);
 
@@ -621,7 +621,7 @@ TEST_SUITE("tracktion_engine")
         sourceTrack->pluginList.insertPlugin (edit->getPluginCache().createNewPlugin (AuxSendPlugin::xmlTypeName, {}), 0, nullptr);
         returnTrack->pluginList.insertPlugin (edit->getPluginCache().createNewPlugin (AuxReturnPlugin::xmlTypeName, {}), 0, nullptr);
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         Renderer::Parameters params (*edit);
         params.destFile = destFile.getFile();
         params.time = params.time.withLength (clipLength);
@@ -665,13 +665,13 @@ TEST_SUITE("tracktion_engine")
         // 997Hz over a 3s region is a whole number of cycles, so the folded
         // tail lands in phase and doubles the level of the first 2s. Measuring
         // during the render pass instead of after the fold would miss that.
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 5.0, 1, 997.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 5.0, 1, 997.0f);
         auto clip = insertWaveClip (*getAudioTracks (*edit)[0], {}, sinFile->getFile(), { .time = { 0_tp, 5_tp } },
                                     DeleteExistingClips::no);
         REQUIRE (clip != nullptr);
         clip->setGainDB (-12.0f);   // leaves headroom for the folded tail to double the level
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
         Renderer::Parameters params (*edit);
         params.destFile = destFile.getFile();
         params.audioFormat = engine.getAudioFileFormatManager().getWavFormat();
@@ -735,8 +735,8 @@ TEST_SUITE ("tracktion_engine")
         auto synth = dynamic_cast<FourOscPlugin*> (edit->getPluginCache().createNewPlugin (FourOscPlugin::xmlTypeName, {}).get());
         static auto organPatch = "<PLUGIN type=\"4osc\" id=\"1069\" enabled=\"1\" filterType=\"1\" presetName=\"4OSC: Organ\" filterFreq=\"127.0\" ampAttack=\"0.60000002384185791016\" ampDecay=\"10.0\" ampSustain=\"100.0\" ampRelease=\"0.40000000596046447754\" waveShape1=\"4\" tune2=\"-24.0\" waveShape2=\"4\"> <MODMATRIX/> </PLUGIN>";
 
-        if (auto e = juce::parseXML (organPatch))
-            if (auto v = juce::ValueTree::fromXml (*e); v.isValid())
+        if (auto e = yup::parseXML (organPatch))
+            if (auto v = yup::ValueTree::fromXml (*e); v.isValid())
                 synth->restorePluginStateFromValueTree (v);
 
         const auto tailLength = synth->getTailLength();
@@ -751,8 +751,8 @@ TEST_SUITE ("tracktion_engine")
         CHECK (std::abs (trackLength.inSeconds() - 1.0) <= 0.001);
 
         // Check expected end allowance
-        juce::Array<EditItemID> trackIDs { track->itemID };
-        juce::Array<Clip*> clips { midiClip.get() };
+        yup::Array<EditItemID> trackIDs { track->itemID };
+        yup::Array<Clip*> clips { midiClip.get() };
         const auto endAllowance = RenderOptions::findEndAllowance (*edit, &trackIDs, &clips);
         CHECK (std::abs (endAllowance.inSeconds() - tailLength) <= 0.001);
 
@@ -775,7 +775,7 @@ TEST_SUITE ("tracktion_engine")
             // Create a new track and set the destination of the first one to this
             auto track2 = edit->insertNewAudioTrack ({ {},{} }, nullptr);
             track->getOutput().setOutputToTrack (track2.get());
-            trackIDs = juce::Array<EditItemID> { track2->itemID };
+            trackIDs = yup::Array<EditItemID> { track2->itemID };
             CHECK_MESSAGE (RenderOptions::findEndAllowance (*edit, &trackIDs, nullptr) == TimeDuration(),
                            "End allowance of new empty track is not 0");
 
@@ -810,7 +810,7 @@ TEST_SUITE ("tracktion_engine")
             for (choc::buffer::FrameCount f = 0; f < numFrames; ++f)
                 sourceBuffer.getSample (ch, f) = (float) (ch + 1) * 0.1f;
 
-        const juce::File virtualFile ("/memory/multichannel-freeze-test.wav");
+        const yup::File virtualFile ("/memory/multichannel-freeze-test.wav");
         const auto key = virtualFile.getFullPathName().toStdString();
         afm.registerMemoryBuffer (key, sourceBuffer.getView(), sampleRate);
 

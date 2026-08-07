@@ -17,11 +17,11 @@ class MidiNode final    : public tracktion::graph::Node,
                           public TracktionEngineNode
 {
 public:
-    MidiNode (std::vector<juce::MidiMessageSequence> sequences,
+    MidiNode (std::vector<yup::MidiMessageSequence> sequences,
               MidiList::TimeBase,
-              juce::Range<int> midiChannelNumbers,
+              yup::Range<int> midiChannelNumbers,
               bool useMPE,
-              juce::Range<double> editSection,
+              yup::Range<double> editSection,
               LiveClipLevel,
               ProcessState&,
               EditItemID,
@@ -34,13 +34,13 @@ public:
 
 private:
     //==============================================================================
-    std::vector<juce::MidiMessageSequence> ms;
+    std::vector<yup::MidiMessageSequence> ms;
     const MidiList::TimeBase timeBase;
     int64_t lastStart = 0;
     size_t currentSequence = 0;
-    juce::Range<int> channelNumbers;
+    yup::Range<int> channelNumbers;
     bool useMPEChannelMode;
-    juce::Range<double> editRange;
+    yup::Range<double> editRange;
     LiveClipLevel clipLevel;
     EditItemID editItemID;
     std::function<bool()> shouldBeMutedDelegate = nullptr;
@@ -50,13 +50,13 @@ private:
     MPESourceID midiSourceID = createUniqueMPESourceID();
     bool wasMute = false, shouldCreateMessagesForTime = false;
 
-    juce::Array<juce::MidiMessage> controllerMessagesScratchBuffer;
+    yup::Array<yup::MidiMessage> controllerMessagesScratchBuffer;
 
     //==============================================================================
     void processSection (Node::ProcessContext&,
-                         juce::Range<double> sectionEditTime,
+                         yup::Range<double> sectionEditTime,
                          double secondsPerTimeBase,
-                         juce::MidiMessageSequence&);
+                         yup::MidiMessageSequence&);
 };
 
 } // namespace tracktion::inline engine

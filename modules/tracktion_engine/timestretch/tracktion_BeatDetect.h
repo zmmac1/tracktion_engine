@@ -16,7 +16,7 @@ struct BeatDetect
 
     void setSampleRate (double sampleRate)
     {
-        blockSize = juce::roundToInt (sampleRate / 43.06640625);
+        blockSize = yup::roundToInt (sampleRate / 43.06640625);
     }
 
     void setSensitivity (double newSensitivity)
@@ -49,14 +49,14 @@ struct BeatDetect
     }
 
     SampleCount getBlockSize() const                    { return blockSize; }
-    const juce::Array<SampleCount>& getBeats() const    { return beatSamples; }
+    const yup::Array<SampleCount>& getBeats() const    { return beatSamples; }
 
 private:
     static constexpr int historyLength = 43;
     double energy[historyLength] = {};
     int curBlock = 0, lastBlock = -2;
     SampleCount blockSize = 0;
-    juce::Array<SampleCount> beatSamples;
+    yup::Array<SampleCount> beatSamples;
     double sensitivity = 0;
 
     void pushEnergy (double e)
@@ -103,7 +103,7 @@ private:
         return total / historyLength;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatDetect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatDetect)
 };
 
 } // namespace tracktion::inline engine

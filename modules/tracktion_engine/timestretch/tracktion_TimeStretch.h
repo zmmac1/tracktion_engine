@@ -73,10 +73,10 @@ public:
         /** Create a default set of options. */
         ElastiqueProOptions() = default;
         /** Create a set of options from a saved string @see toString. */
-        ElastiqueProOptions (const juce::String& string);
+        ElastiqueProOptions (const yup::String& string);
 
         /** Save the current options as a string. */
-        juce::String toString() const;
+        yup::String toString() const;
 
         /** Compare these options with another set. */
         bool operator== (const ElastiqueProOptions&) const;
@@ -94,13 +94,13 @@ public:
     static Mode checkModeIsAvailable (Mode);
 
     /** Returns the names of the available Modes. */
-    static juce::StringArray getPossibleModes (Engine&, bool excludeARA);
+    static yup::StringArray getPossibleModes (Engine&, bool excludeARA);
 
     /** Returns the Mode for a given name @see getPossibleModes. */
-    static Mode getModeFromName (Engine&, const juce::String& name);
+    static Mode getModeFromName (Engine&, const yup::String& name);
 
     /** Returns the name of a given Mode for display purposes. */
-    static juce::String getNameOfMode (Mode);
+    static yup::String getNameOfMode (Mode);
 
     /** Returns true if the given Mode is an ARA mode. */
     static bool isARA (Mode);
@@ -193,12 +193,12 @@ private:
     std::unique_ptr<Stretcher> stretcher;
     int samplesPerBlockRequested = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeStretcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeStretcher)
 };
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::TimeStretcher::Mode>

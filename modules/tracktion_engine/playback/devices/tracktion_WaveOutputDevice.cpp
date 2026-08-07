@@ -11,7 +11,7 @@
 namespace tracktion::inline engine {
 
 WaveOutputDevice::WaveOutputDevice (Engine& e, const WaveDeviceDescription& desc)
-    : OutputDevice (e, desc.name, "waveout_" + juce::String::toHexString (desc.name.hashCode())),
+    : OutputDevice (e, desc.name, "waveout_" + yup::String::toHexString (desc.name.hashCode())),
       deviceDescription (desc),
       originalChannels (desc.channels),
       channelSet (desc.channels.toChannelSet()),
@@ -45,7 +45,7 @@ void WaveOutputDevice::setEnabled (bool b)
     }
 }
 
-juce::String WaveOutputDevice::openDevice()
+yup::String WaveOutputDevice::openDevice()
 {
     return {};
 }
@@ -71,7 +71,7 @@ void WaveOutputDevice::loadProps()
 
 void WaveOutputDevice::saveProps()
 {
-    juce::XmlElement n ("SETTINGS");
+    yup::XmlElement n ("SETTINGS");
 
     n.setAttribute ("dithering", ditheringEnabled);
     n.setAttribute ("reversed", leftRightReversed);
@@ -133,7 +133,7 @@ void WaveOutputDevice::updateLevelMeasurer (float* const* outputChannelData, int
         meterChannelPtrs[(size_t) i] = outputChannelData[idx];
     }
 
-    juce::AudioBuffer<float> buf (meterChannelPtrs.data(), numDeviceChannels, numSamples);
+    yup::AudioBuffer<float> buf (meterChannelPtrs.data(), numDeviceChannels, numSamples);
     levelMeasurer.processBuffer (buf, 0, numSamples);
 }
 
@@ -145,7 +145,7 @@ void WaveOutputDevice::startTestTone()
         return;
 
     testTonePendingSampleRate.store ((float) sampleRate, std::memory_order_relaxed);
-    testTonePendingTotalSamples.store (juce::roundToInt (sampleRate), std::memory_order_relaxed);
+    testTonePendingTotalSamples.store (yup::roundToInt (sampleRate), std::memory_order_relaxed);
     testToneStartRequested.store (true, std::memory_order_release);
 }
 
@@ -164,13 +164,13 @@ void WaveOutputDevice::renderTestTone (float* const* outputChannelData, int tota
 
     constexpr float amplitude = 0.5f;
     const int total = testToneTotalSamples;
-    const int fadeInSamples = juce::jmax (1, total / 10);
-    const int fadeOutStart  = total - juce::jmax (1, total / 4);
+    const int fadeInSamples = yup::jmax (1, total / 10);
+    const int fadeOutStart  = total - yup::jmax (1, total / 4);
 
     auto& channels = getChannels();
     const auto numDeviceChannels = (int) channels.getNumChannels();
 
-    const int samplesAvailable = juce::jmin (numSamples, total - testToneSampleIndex);
+    const int samplesAvailable = yup::jmin (numSamples, total - testToneSampleIndex);
 
     for (int s = 0; s < samplesAvailable; ++s)
     {
@@ -218,7 +218,7 @@ void WaveOutputDeviceInstance::prepareToPlay (double, int blockSize)
     const auto numChannels = (int) getWaveOutput().getChannels().getNumChannels();
     outputBuffer.setSize (numChannels, blockSize);
 
-    int ditherDepth = juce::jlimit (16, 32, edit.engine.getDeviceManager().getBitDepth());
+    int ditherDepth = yup::jlimit (16, 32, edit.engine.getDeviceManager().getBitDepth());
 
     ditherers.resize ((size_t) numChannels);
 
@@ -247,9 +247,9 @@ void WaveOutputDevice::setStereoPair (bool stereo)
     engine.getDeviceManager().setDeviceNumChannels (*this, stereo ? 2 : 1);
 }
 
-juce::PopupMenu WaveOutputDevice::createChannelGroupMenu (bool includeSetAllChannelsOptions)
+yup::PopupMenu WaveOutputDevice::createChannelGroupMenu (bool includeSetAllChannelsOptions)
 {
-    juce::PopupMenu m;
+    yup::PopupMenu m;
     auto& dm = engine.getDeviceManager();
     auto currentNumChannels = deviceDescription.getNumChannels();
     auto options = dm.getPossibleChannelGroupsForDevice (*this, DeviceManager::maxNumChannelsPerDevice);
@@ -262,7 +262,7 @@ juce::PopupMenu WaveOutputDevice::createChannelGroupMenu (bool includeSetAllChan
                        [this, &dm, num] { dm.setDeviceNumChannels (*this, num); });
     }
 
-    juce::PopupMenu otherMenu;
+    yup::PopupMenu otherMenu;
 
     for (uint32_t num = 1; num <= totalOptions; ++num)
         if (! shouldIncludeChannelCount (num, totalOptions))

@@ -13,7 +13,7 @@ namespace tracktion::inline engine {
 //==============================================================================
 //==============================================================================
 AudioFormatReaderWithTimeout::AudioFormatReaderWithTimeout()
-    : juce::AudioFormatReader (nullptr, "AudioFormatReaderWithTimeout")
+    : yup::AudioFormatReader (nullptr, "AudioFormatReaderWithTimeout")
 {
 }
 
@@ -24,7 +24,7 @@ static void clearSetOfChannels (int* const* channels, int numChannels, int offse
 {
     for (int i = 0; i < numChannels; ++i)
         if (auto chan = (float*) channels[i])
-            juce::FloatVectorOperations::clear (chan + offset, numSamples);
+            yup::FloatVectorOperations::clear (chan + offset, numSamples);
 }
 
 //==============================================================================
@@ -38,7 +38,7 @@ struct AudioFileCache::ScopedFileRead
 
     ~ScopedFileRead()
     {
-        const auto durationMs = juce::Time::getMillisecondCounterHiRes() - startTimeMs;
+        const auto durationMs = yup::Time::getMillisecondCounterHiRes() - startTimeMs;
 
         // We have to roll our own fetch_add until it's available on all platforms for atomic<double>
         auto expected = cache.blockDurationMs.load (std::memory_order_acquire);
@@ -54,7 +54,7 @@ struct AudioFileCache::ScopedFileRead
     }
 
     AudioFileCache& cache;
-    const double startTimeMs { juce::Time::getMillisecondCounterHiRes() };
+    const double startTimeMs { yup::Time::getMillisecondCounterHiRes() };
 };
 
 
@@ -76,11 +76,11 @@ public:
 
     void touchFiles()
     {
-        juce::Array<SampleCount> readPoints;
+        yup::Array<SampleCount> readPoints;
         readPoints.ensureStorageAllocated (64);
 
         {
-            const juce::ScopedReadLock sl (clientListLock);
+            const yup::ScopedReadLock sl (clientListLock);
 
             for (auto r : clients)
             {
@@ -98,7 +98,7 @@ public:
             }
         }
 
-        const juce::ScopedReadLock sl (readerLock);
+        const yup::ScopedReadLock sl (readerLock);
 
         for (auto pos : readPoints)
             touchAllReaders ({ pos, pos + 128 });
@@ -129,24 +129,24 @@ public:
     bool updateBlocks()
     {
         {
-            const juce::ScopedReadLock sl (readerLock);
+            const yup::ScopedReadLock sl (readerLock);
 
             if (mapEntireFile && readers.size() > 0)
                 return false;
         }
 
-        const juce::ScopedLock scl (blockUpdateLock);
+        const yup::ScopedLock scl (blockUpdateLock);
 
         if (mapEntireFile)
         {
             if (readers.isEmpty())
             {
                 if (failedToOpenFile
-                     && juce::Time::getApproximateMillisecondCounter()
+                     && yup::Time::getApproximateMillisecondCounter()
                             < lastFailedOpenAttempt + 4000 + (uint32_t) random.nextInt (3000))
                     return false;
 
-                const juce::ScopedWriteLock sl (readerLock);
+                const yup::ScopedWriteLock sl (readerLock);
 
                 if (auto r = createNewReader (nullptr))
                 {
@@ -155,7 +155,7 @@ public:
                 else
                 {
                     failedToOpenFile = true;
-                    lastFailedOpenAttempt = juce::Time::getMillisecondCounter();
+                    lastFailedOpenAttempt = yup::Time::getMillisecondCounter();
                 }
             }
 
@@ -166,10 +166,10 @@ public:
         bool needToPurgeUnusedClients = false;
         auto blockSize = cache.cacheSizeSamples;
         auto lastPossibleBlockIndex = (int) ((info.lengthInSamples - 1) / blockSize);
-        juce::Array<int> blocksNeeded;
+        yup::Array<int> blocksNeeded;
 
         {
-            const juce::ScopedReadLock sl (clientListLock);
+            const yup::ScopedReadLock sl (clientListLock);
 
             for (auto r : clients)
             {
@@ -209,17 +209,17 @@ public:
 
         if (blocksNeeded != currentBlocks)
         {
-            juce::OwnedArray<juce::MemoryMappedAudioFormatReader> newReaders;
+            yup::OwnedArray<yup::MemoryMappedAudioFormatReader> newReaders;
 
             {
-                const juce::ScopedReadLock sl (readerLock);
+                const yup::ScopedReadLock sl (readerLock);
 
                 for (int i = 0; i < blocksNeeded.size(); ++i)
                 {
                     const int block = blocksNeeded.getUnchecked(i);
                     const int existingIndex = currentBlocks.indexOf (block);
 
-                    juce::MemoryMappedAudioFormatReader* newReader;
+                    yup::MemoryMappedAudioFormatReader* newReader;
 
                     if (existingIndex >= 0)
                     {
@@ -241,7 +241,7 @@ public:
             }
 
             {
-                const juce::ScopedWriteLock sl (readerLock);
+                const yup::ScopedWriteLock sl (readerLock);
                 newReaders.swapWith (readers);
                 currentBlocks.swapWith (blocksNeeded);
 
@@ -257,7 +257,7 @@ public:
 
         if (needToPurgeUnusedClients)
         {
-            const juce::ScopedWriteLock sl (clientListLock);
+            const yup::ScopedWriteLock sl (clientListLock);
 
             for (int i = clients.size(); --i >= 0;)
                 if (clients.getObjectPointerUnchecked(i)->getReferenceCount() <= 1)
@@ -275,13 +275,13 @@ public:
                  << " - " << readers[i]->getMappedSection().getEnd());
     }
 
-    juce::MemoryMappedAudioFormatReader* createNewReader (const SampleRange* range)
+    yup::MemoryMappedAudioFormatReader* createNewReader (const SampleRange* range)
     {
-        juce::AudioFormat* af;
-        std::unique_ptr<juce::MemoryMappedAudioFormatReader> r (AudioFileUtils::createMemoryMappedReader (cache.engine, file.getFile(), af));
+        yup::AudioFormat* af;
+        std::unique_ptr<yup::MemoryMappedAudioFormatReader> r (AudioFileUtils::createMemoryMappedReader (cache.engine, file.getFile(), af));
 
         if (r != nullptr
-             && (range != nullptr ? r->mapSectionOfFile (juce::Range<juce::int64> (range->getStart(), range->getEnd()))
+             && (range != nullptr ? r->mapSectionOfFile (yup::Range<yup::int64> (range->getStart(), range->getEnd()))
                                   : r->mapEntireFile())
              && ! r->getMappedSection().isEmpty())
         {
@@ -297,7 +297,7 @@ public:
 
     void purgeOrphanReaders()
     {
-        const juce::ScopedWriteLock sl (clientListLock);
+        const yup::ScopedWriteLock sl (clientListLock);
 
         for (int i = clients.size(); --i >= 0;)
             if (clients.getObjectPointerUnchecked (i)->getReferenceCount() <= 1)
@@ -306,21 +306,21 @@ public:
 
     bool isUnused() const
     {
-        const juce::ScopedReadLock sl (clientListLock);
+        const yup::ScopedReadLock sl (clientListLock);
 
         return clients.isEmpty();
     }
 
     void releaseReader()
     {
-        const juce::ScopedWriteLock sl (readerLock);
+        const yup::ScopedWriteLock sl (readerLock);
         readers.clear();
         currentBlocks.clear();
     }
 
     void validateFile()
     {
-        const juce::ScopedLock scl (blockUpdateLock);
+        const yup::ScopedLock scl (blockUpdateLock);
         failedToOpenFile = false;
     }
 
@@ -355,7 +355,7 @@ public:
                 if (timeoutMs == 0)
                     break;
 
-                auto now = juce::Time::getMillisecondCounter();
+                auto now = yup::Time::getMillisecondCounter();
 
                 if (startTime == 0)
                     startTime = now;
@@ -366,7 +366,7 @@ public:
                     break;
 
                 if (elapsed > 0)
-                    juce::Thread::yield();
+                    yup::Thread::yield();
             }
 
             isLocked = false;
@@ -378,11 +378,11 @@ public:
                 lock.exitRead();
         }
 
-        juce::MemoryMappedAudioFormatReader* reader = nullptr;
-        juce::ReadWriteLock& lock;
+        yup::MemoryMappedAudioFormatReader* reader = nullptr;
+        yup::ReadWriteLock& lock;
         bool isLocked = true;
 
-        JUCE_DECLARE_NON_COPYABLE (LockedReaderFinder)
+        YUP_DECLARE_NON_COPYABLE (LockedReaderFinder)
     };
 
     bool read (SampleCount startSample, int* const* destSamples, int numDestChannels,
@@ -424,7 +424,7 @@ public:
             }
         }
 
-        lastReadTime = juce::Time::getApproximateMillisecondCounter();
+        lastReadTime = yup::Time::getApproximateMillisecondCounter();
         return allDataRead;
     }
 
@@ -473,13 +473,13 @@ public:
             }
         }
 
-        lastReadTime = juce::Time::getApproximateMillisecondCounter();
+        lastReadTime = yup::Time::getApproximateMillisecondCounter();
         return allDataRead;
     }
 
     void addClient (Reader* r)
     {
-        juce::ScopedWriteLock sl (clientListLock);
+        yup::ScopedWriteLock sl (clientListLock);
         clients.add (r);
     }
 
@@ -487,24 +487,24 @@ public:
     AudioFile file;
     AudioFileInfo info;
 
-    std::atomic<uint32_t> lastReadTime { juce::Time::getApproximateMillisecondCounter() };
+    std::atomic<uint32_t> lastReadTime { yup::Time::getApproximateMillisecondCounter() };
     std::atomic<int64_t> totalBytesInUse { 0 };
 
 private:
-    juce::OwnedArray<juce::MemoryMappedAudioFormatReader> readers;
-    juce::ReferenceCountedArray<Reader> clients;
+    yup::OwnedArray<yup::MemoryMappedAudioFormatReader> readers;
+    yup::ReferenceCountedArray<Reader> clients;
 
-    juce::CriticalSection blockUpdateLock;
-    juce::Array<int> currentBlocks;
+    yup::CriticalSection blockUpdateLock;
+    yup::Array<int> currentBlocks;
 
     bool mapEntireFile = false;
     std::atomic<bool> failedToOpenFile { false };
     uint32_t lastFailedOpenAttempt = 0;
-    juce::Random random;
+    yup::Random random;
 
-    juce::ReadWriteLock clientListLock, readerLock;
+    yup::ReadWriteLock clientListLock, readerLock;
 
-    juce::MemoryMappedAudioFormatReader* findReaderFor (SampleCount sample) const
+    yup::MemoryMappedAudioFormatReader* findReaderFor (SampleCount sample) const
     {
         for (auto r : readers)
             if (r != nullptr && r->getMappedSection().contains (sample))
@@ -513,15 +513,15 @@ private:
         return {};
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedFile)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedFile)
 };
 
 //==============================================================================
-class AudioFileCache::MapperThread   : public juce::Thread
+class AudioFileCache::MapperThread   : public yup::Thread
 {
 public:
     MapperThread (AudioFileCache& c)
-       : juce::Thread ("CacheMapper"), owner (c)
+       : yup::Thread ("CacheMapper"), owner (c)
     {
     }
 
@@ -532,7 +532,7 @@ public:
 
     void run()
     {
-        juce::FloatVectorOperations::disableDenormalisedNumberSupport();
+        yup::FloatVectorOperations::disableDenormalisedNumberSupport();
 
         uint32_t lastOldFlePurge = 0;
 
@@ -541,7 +541,7 @@ public:
             if (owner.serviceNextReader())
                 continue;
 
-            auto now = juce::Time::getApproximateMillisecondCounter();
+            auto now = yup::Time::getApproximateMillisecondCounter();
 
             if (now > lastOldFlePurge + 2000)
             {
@@ -560,10 +560,10 @@ public:
 };
 
 //==============================================================================
-class AudioFileCache::RefresherThread   : public juce::Thread
+class AudioFileCache::RefresherThread   : public yup::Thread
 {
 public:
-    RefresherThread (AudioFileCache& c)  : juce::Thread ("CacheRefresher"), owner (c)
+    RefresherThread (AudioFileCache& c)  : yup::Thread ("CacheRefresher"), owner (c)
     {
     }
 
@@ -574,7 +574,7 @@ public:
 
     void run()
     {
-        juce::FloatVectorOperations::disableDenormalisedNumberSupport();
+        yup::FloatVectorOperations::disableDenormalisedNumberSupport();
 
         while (! threadShouldExit())
         {
@@ -594,7 +594,7 @@ AudioFileCache::AudioFileCache (Engine& e)  : engine (e)
     const int defaultSize = 6 * 48000;
 
     // TODO: when we drop 32-bit support, delete the cache size and related code
-    setCacheSizeSamples (static_cast<juce::int64> (engine.getPropertyStorage().getProperty (SettingID::cacheSizeSamples, defaultSize)));
+    setCacheSizeSamples (static_cast<yup::int64> (engine.getPropertyStorage().getProperty (SettingID::cacheSizeSamples, defaultSize)));
 }
 
 AudioFileCache::~AudioFileCache()
@@ -624,7 +624,7 @@ void AudioFileCache::stopThreads()
 void AudioFileCache::setCacheSizeSamples (SampleCount samples)
 {
     CRASH_TRACER
-    samples = juce::jlimit ((SampleCount) 48000, (SampleCount) 48000 * 60, samples);
+    samples = yup::jlimit ((SampleCount) 48000, (SampleCount) 48000 * 60, samples);
 
     if (cacheSizeSamples != samples)
     {
@@ -634,17 +634,17 @@ void AudioFileCache::setCacheSizeSamples (SampleCount samples)
         engine.getPropertyStorage().setProperty (SettingID::cacheSizeSamples, (int) cacheSizeSamples);
 
         {
-            const juce::ScopedWriteLock sl (fileListLock);
+            const yup::ScopedWriteLock sl (fileListLock);
 
             purgeOrphanReaders();
             releaseAllFiles();
         }
 
         mapperThread = std::make_unique<MapperThread> (*this);
-        mapperThread->startThread (juce::Thread::Priority::normal);
+        mapperThread->startThread (yup::Thread::Priority::normal);
 
         refresherThread = std::make_unique<RefresherThread> (*this);
-        refresherThread->startThread (juce::Thread::Priority::high);
+        refresherThread->startThread (yup::Thread::Priority::high);
     }
 }
 
@@ -657,7 +657,7 @@ AudioFileCache::CachedFile* AudioFileCache::getOrCreateCachedFile (const AudioFi
 
     auto& manager = engine.getAudioFileFormatManager().memoryMappedFormatManager;
 
-    for (auto af : manager)
+    for (const auto& af : manager)
     {
         if (af->canHandleFile (f.getFile()))
         {
@@ -672,7 +672,7 @@ AudioFileCache::CachedFile* AudioFileCache::getOrCreateCachedFile (const AudioFi
 
 void AudioFileCache::releaseFile (const AudioFile& file)
 {
-    const juce::ScopedReadLock sl (fileListLock);
+    const yup::ScopedReadLock sl (fileListLock);
 
     for (auto f : activeFiles)
         if (f->file == file)
@@ -682,7 +682,7 @@ void AudioFileCache::releaseFile (const AudioFile& file)
 void AudioFileCache::releaseAllFiles()
 {
     CRASH_TRACER
-    const juce::ScopedReadLock sl (fileListLock);
+    const yup::ScopedReadLock sl (fileListLock);
 
     for (auto f : activeFiles)
         f->releaseReader();
@@ -690,7 +690,7 @@ void AudioFileCache::releaseAllFiles()
 
 void AudioFileCache::validateFile (const AudioFile& file)
 {
-    const juce::ScopedReadLock sl (fileListLock);
+    const yup::ScopedReadLock sl (fileListLock);
 
     for (auto f : activeFiles)
         if (f->file == file)
@@ -700,9 +700,9 @@ void AudioFileCache::validateFile (const AudioFile& file)
 void AudioFileCache::purgeOldFiles()
 {
     CRASH_TRACER
-    auto oldestAllowedTime = juce::Time::getApproximateMillisecondCounter() - 2000;
+    auto oldestAllowedTime = yup::Time::getApproximateMillisecondCounter() - 2000;
 
-    const juce::ScopedWriteLock sl (fileListLock);
+    const yup::ScopedWriteLock sl (fileListLock);
 
     for (auto f : activeFiles)
         f->purgeOrphanReaders();
@@ -718,7 +718,7 @@ void AudioFileCache::purgeOldFiles()
 
 bool AudioFileCache::serviceNextReader()
 {
-    const juce::ScopedReadLock sl (fileListLock);
+    const yup::ScopedReadLock sl (fileListLock);
 
     for (int i = activeFiles.size(); --i >= 0;)
     {
@@ -738,7 +738,7 @@ void AudioFileCache::touchReaders()
 {
     int64_t totalBytes = 0;
 
-    const juce::ScopedReadLock sl (fileListLock);
+    const yup::ScopedReadLock sl (fileListLock);
 
     for (auto f : activeFiles)
     {
@@ -775,7 +775,7 @@ void AudioFileCache::nextBlockStarted()
 
 bool AudioFileCache::hasMappedReader (const AudioFile& af, SampleCount c) const
 {
-    const juce::ScopedReadLock rl (fileListLock);
+    const yup::ScopedReadLock rl (fileListLock);
 
     for (auto s : activeFiles)
         if (s->info.hashCode == af.getHash())
@@ -794,7 +794,7 @@ AudioFileCache::Reader::Ptr AudioFileCache::createReader (const AudioFile& file)
     if (auto reader = engine.getAudioFileManager().createMemoryReader (file))
         return new Reader (*this, nullptr, std::move (reader));
 
-    const juce::ScopedWriteLock sl (fileListLock);
+    const yup::ScopedWriteLock sl (fileListLock);
 
     if (auto f = getOrCreateCachedFile (file))
     {
@@ -805,9 +805,9 @@ AudioFileCache::Reader::Ptr AudioFileCache::createReader (const AudioFile& file)
 
     if (auto reader = AudioFileUtils::createReaderFor (engine, file.getFile()))
     {
-        backgroundReaderThread.startThread (juce::Thread::Priority::low);
+        backgroundReaderThread.startThread (yup::Thread::Priority::low);
 
-        return new Reader (*this, nullptr, std::make_unique<BufferingAudioReaderWrapper> (std::make_unique<juce::BufferingAudioReader> (reader, backgroundReaderThread,
+        return new Reader (*this, nullptr, std::make_unique<BufferingAudioReaderWrapper> (std::make_unique<yup::BufferingAudioReader> (reader, backgroundReaderThread,
                                                                                                                                         48000 * 5)));
     }
 
@@ -815,12 +815,12 @@ AudioFileCache::Reader::Ptr AudioFileCache::createReader (const AudioFile& file)
 }
 
 AudioFileCache::Reader::Ptr AudioFileCache::createReader (const AudioFile& file,
-                                                          const std::function<std::unique_ptr<AudioFormatReaderWithTimeout> (juce::AudioFormatReader* sourceReader,
-                                                                                                               juce::TimeSliceThread& timeSliceThread,
+                                                          const std::function<std::unique_ptr<AudioFormatReaderWithTimeout> (yup::AudioFormatReader* sourceReader,
+                                                                                                               yup::TimeSliceThread& timeSliceThread,
                                                                                                                int samplesToBuffer)>& createAudioFormatReaderWithTimeout)
 {
     CRASH_TRACER
-    const juce::ScopedWriteLock sl (fileListLock);
+    const yup::ScopedWriteLock sl (fileListLock);
 
     if (auto f = getOrCreateCachedFile (file))
     {
@@ -831,7 +831,7 @@ AudioFileCache::Reader::Ptr AudioFileCache::createReader (const AudioFile& file,
 
     if (auto reader = AudioFileUtils::createReaderFor (engine, file.getFile()))
     {
-        backgroundReaderThread.startThread (juce::Thread::Priority::low);
+        backgroundReaderThread.startThread (yup::Thread::Priority::low);
         auto fallbackReader = createAudioFormatReaderWithTimeout (reader, backgroundReaderThread,
                                                     48000 * 5);
         return new Reader (*this, nullptr, std::move (fallbackReader));
@@ -840,11 +840,11 @@ AudioFileCache::Reader::Ptr AudioFileCache::createReader (const AudioFile& file,
     return {};
 }
 
-AudioFileCache::Reader::Ptr AudioFileCache::createAudioFormatReaderWithTimeout (const std::function<std::unique_ptr<AudioFormatReaderWithTimeout> (juce::TimeSliceThread& timeSliceThread,
+AudioFileCache::Reader::Ptr AudioFileCache::createAudioFormatReaderWithTimeout (const std::function<std::unique_ptr<AudioFormatReaderWithTimeout> (yup::TimeSliceThread& timeSliceThread,
                                                                                                                        int samplesToBuffer)>&
                                                                   createAudioFormatReaderWithTimeout)
 {
-    backgroundReaderThread.startThread (juce::Thread::Priority::low);
+    backgroundReaderThread.startThread (yup::Thread::Priority::low);
     auto fallbackReader = createAudioFormatReaderWithTimeout (backgroundReaderThread,
                                                 48000 * 5);
     return new Reader (*this, nullptr, std::move (fallbackReader));
@@ -881,7 +881,7 @@ void AudioFileCache::Reader::setReadPosition (SampleCount pos) noexcept
     else if (pos >= 0)
         readPos = localLoopStart + (pos % localLoopLength);
     else
-        readPos = localLoopStart + juce::negativeAwareModulo (pos, localLoopLength);
+        readPos = localLoopStart + yup::negativeAwareModulo (pos, localLoopLength);
 }
 
 int AudioFileCache::Reader::getNumChannels() const noexcept
@@ -903,13 +903,13 @@ void AudioFileCache::Reader::setLoopRange (SampleRange newRange)
 }
 
 bool AudioFileCache::Reader::readSamples (int numSamples,
-                                          juce::AudioBuffer<float>& destBuffer,
+                                          yup::AudioBuffer<float>& destBuffer,
                                           const ChannelConfiguration& destChannels,
                                           int startOffsetInDestBuffer,
                                           const ChannelConfiguration& sourceChannels,
                                           int timeoutMs)
 {
-    juce::ignoreUnused (destChannels);
+    yup::ignoreUnused (destChannels);
     jassert (numSamples < CachedFile::readAheadSamples);
     const auto numDestChans = destBuffer.getNumChannels();
 
@@ -930,12 +930,12 @@ bool AudioFileCache::Reader::readSamples (int numSamples,
             }
             else
             {
-                juce::FloatVectorOperations::clear (destBuffer.getWritePointer (d, startOffsetInDestBuffer), numSamples);
+                yup::FloatVectorOperations::clear (destBuffer.getWritePointer (d, startOffsetInDestBuffer), numSamples);
             }
         }
         else
         {
-            juce::FloatVectorOperations::clear (destBuffer.getWritePointer (d, startOffsetInDestBuffer), numSamples);
+            yup::FloatVectorOperations::clear (destBuffer.getWritePointer (d, startOffsetInDestBuffer), numSamples);
         }
     }
 
@@ -949,7 +949,7 @@ bool AudioFileCache::Reader::readSamples (int numSamples,
         if (! isFloatingPoint)
             for (int i = 0; i <= highestUsedSourceChan; ++i)
                 if (auto chan = chans[i])
-                    juce::FloatVectorOperations::convertFixedToFloat (chan, (const int*) chan, 1.0f / (float) 0x7fffffff, numSamples);
+                    yup::FloatVectorOperations::convertFixedToFloat (chan, (const int*) chan, 1.0f / (float) 0x7fffffff, numSamples);
 
         return true;
     }
@@ -970,7 +970,7 @@ bool AudioFileCache::Reader::readSamples (int* const* destSamples, int numDestCh
 
         for (int i = numDestChannels; --i >= 0;)
             if (destSamples[i] != nullptr)
-                juce::FloatVectorOperations::clear ((float*) destSamples[i], silence);
+                yup::FloatVectorOperations::clear ((float*) destSamples[i], silence);
 
         startOffsetInDestBuffer += silence;
         numSamples -= silence;
@@ -1001,7 +1001,7 @@ bool AudioFileCache::Reader::readSamples (int* const* destSamples, int numDestCh
     {
         while (numSamples > 0)
         {
-            jassert (juce::isPositiveAndBelow (readPos.load() - loopStart.load(), loopLength.load()));
+            jassert (yup::isPositiveAndBelow (readPos.load() - loopStart.load(), loopLength.load()));
 
             auto numToRead = (int) std::min ((SampleCount) numSamples, loopStart + loopLength - readPos);
 
@@ -1059,10 +1059,10 @@ bool AudioFileCache::Reader::getRange (int numSamples, float& lmax, float& lmin,
 }
 
 //==============================================================================
-struct CacheAudioFormatReader  :  public juce::AudioFormatReader
+struct CacheAudioFormatReader  :  public yup::AudioFormatReader
 {
     CacheAudioFormatReader (const AudioFile& file)
-        : juce::AudioFormatReader (nullptr, "Cache")
+        : yup::AudioFormatReader (nullptr, "Cache")
     {
         auto info = file.getInfo();
 
@@ -1076,9 +1076,9 @@ struct CacheAudioFormatReader  :  public juce::AudioFormatReader
         reader = file.engine->getAudioFileManager().cache.createReader (file);
     }
 
-    using juce::AudioFormatReader::readMaxLevels;
+    using yup::AudioFormatReader::readMaxLevels;
 
-    void readMaxLevels (juce::int64 startSample, juce::int64 numSamples,
+    void readMaxLevels (yup::int64 startSample, yup::int64 numSamples,
                         float& lowestLeft, float& highestLeft,
                         float& lowestRight, float& highestRight) override
     {
@@ -1087,7 +1087,7 @@ struct CacheAudioFormatReader  :  public juce::AudioFormatReader
     }
 
     bool readSamples (int* const* destSamples, int numDestChannels,
-                      int startOffsetInDestBuffer, juce::int64 startSampleInFile,
+                      int startOffsetInDestBuffer, yup::int64 startSampleInFile,
                       int numSamples) override
     {
         reader->setReadPosition (startSampleInFile);
@@ -1097,7 +1097,7 @@ struct CacheAudioFormatReader  :  public juce::AudioFormatReader
 private:
     AudioFileCache::Reader::Ptr reader;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CacheAudioFormatReader)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CacheAudioFormatReader)
 };
 
 } // namespace tracktion::inline engine

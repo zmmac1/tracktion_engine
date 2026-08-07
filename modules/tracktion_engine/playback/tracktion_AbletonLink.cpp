@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-struct AbletonLink::ImplBase  : public juce::Timer
+struct AbletonLink::ImplBase  : public yup::Timer
 {
     ImplBase (TransportControl& t)
         : transport (t)
@@ -67,7 +67,7 @@ struct AbletonLink::ImplBase  : public juce::Timer
         chaseProportion = offsetPhase;
 
         const auto offsetBeats = offsetPhase * numerator;
-        const auto timeNow = juce::Time::getMillisecondCounter();
+        const auto timeNow = yup::Time::getMillisecondCounter();
 
         // If we're out of sync by more than a beat, re-sync by jumping
         if (std::abs (offsetBeats) >= (numerator / 2.0) && timeNow > inhibitTimer)
@@ -91,11 +91,11 @@ struct AbletonLink::ImplBase  : public juce::Timer
     {
         bpm = getTempoInRange (bpm);
 
-        juce::MessageManager::callAsync ([this, editRef = makeSafeRef (transport.edit), bpm]
+        yup::MessageManager::callAsync ([this, editRef = makeSafeRef (transport.edit), bpm]
         {
             if (editRef != nullptr)
             {
-                inhibitTimer = juce::Time::getMillisecondCounter() + 100;
+                inhibitTimer = yup::Time::getMillisecondCounter() + 100;
                 listeners.call (&Listener::linkRequestedTempoChange, bpm);
             }
         });
@@ -103,11 +103,11 @@ struct AbletonLink::ImplBase  : public juce::Timer
 
     void setStartStopFromLink (bool isPlaying)
     {
-        juce::MessageManager::callAsync ([this, editRef = makeSafeRef (transport.edit), isPlaying]
+        yup::MessageManager::callAsync ([this, editRef = makeSafeRef (transport.edit), isPlaying]
         {
             if (editRef != nullptr)
             {
-                inhibitTimer = juce::Time::getMillisecondCounter() + 100;
+                inhibitTimer = yup::Time::getMillisecondCounter() + 100;
                 listeners.call (&Listener::linkRequestedStartStopChange, isPlaying);
             }
         });
@@ -115,7 +115,7 @@ struct AbletonLink::ImplBase  : public juce::Timer
 
     void callConnectionChanged()
     {
-        juce::MessageManager::callAsync ([this, editRef = makeSafeRef (transport.edit)]
+        yup::MessageManager::callAsync ([this, editRef = makeSafeRef (transport.edit)]
         {
             if (editRef != nullptr)
                 listeners.call (&AbletonLink::Listener::linkConnectionChanged);
@@ -132,7 +132,7 @@ struct AbletonLink::ImplBase  : public juce::Timer
         customOffsetMs = offsetMs;
     }
 
-    void setTempoConstraint (juce::Range<double> minMaxTempo)
+    void setTempoConstraint (yup::Range<double> minMaxTempo)
     {
         allowedTempos = minMaxTempo;
 
@@ -197,20 +197,20 @@ struct AbletonLink::ImplBase  : public juce::Timer
     }
 
     TransportControl& transport;
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
     std::atomic<size_t> numPeers { 0 };
     std::atomic<int> customOffsetMs { 0 };
     uint32_t inhibitTimer = 0;
     std::atomic<double> linkBarPhase { 0.0 }, chaseProportion { 0.0 };
 
-    juce::Range<double> allowedTempos { 0.0, 999.0 };
+    yup::Range<double> allowedTempos { 0.0, 999.0 };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImplBase)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ImplBase)
 };
 
 #if TRACKTION_ENABLE_ABLETON_LINK
 
-#if (JUCE_WINDOWS || JUCE_MAC || JUCE_LINUX || JUCE_ANDROID)
+#if (JUCE_WINDOWS || YUP_MAC || JUCE_LINUX || JUCE_ANDROID)
     //==========================================================================
     struct LinkImpl  : public AbletonLink::ImplBase
     {
@@ -265,7 +265,7 @@ struct AbletonLink::ImplBase  : public juce::Timer
 
         void numPeersCallback (std::size_t newNumPeers)
         {
-            jassert (! juce::MessageManager::existsAndIsCurrentThread());
+            jassert (! yup::MessageManager::existsAndIsCurrentThread());
             numPeers = newNumPeers;
             callConnectionChanged();
 
@@ -291,7 +291,7 @@ struct AbletonLink::ImplBase  : public juce::Timer
 
         double getTempoFromLink() override
         {
-            if (juce::MessageManager::existsAndIsCurrentThread())
+            if (yup::MessageManager::existsAndIsCurrentThread())
                 return link.captureAppSessionState().tempo();
 
             return link.captureAudioSessionState().tempo();
@@ -299,13 +299,13 @@ struct AbletonLink::ImplBase  : public juce::Timer
 
         double getBeatNow (double quantum) override
         {
-            jassert (! juce::MessageManager::existsAndIsCurrentThread());
+            jassert (! yup::MessageManager::existsAndIsCurrentThread());
             return link.captureAudioSessionState().beatAtTime (clock.micros(), quantum);
         }
 
         double getBarPhase (double quantum) override
         {
-            if (juce::MessageManager::existsAndIsCurrentThread())
+            if (yup::MessageManager::existsAndIsCurrentThread())
                 return link.captureAppSessionState().phaseAtTime (clock.micros(), quantum);
 
             return link.captureAudioSessionState().phaseAtTime (clock.micros(), quantum);
@@ -383,7 +383,7 @@ struct AbletonLink::ImplBase  : public juce::Timer
         {
             TRACKTION_ASSERT_MESSAGE_THREAD
             auto state = ABLLinkCaptureAppSessionState (link);
-            ABLLinkSetIsPlaying (state, isPlaying, (std::uint64_t) juce::Time::getHighResolutionTicks());
+            ABLLinkSetIsPlaying (state, isPlaying, (std::uint64_t) yup::Time::getHighResolutionTicks());
             ABLLinkCommitAppSessionState (link, state);
         }
 
@@ -391,30 +391,30 @@ struct AbletonLink::ImplBase  : public juce::Timer
         {
             TRACKTION_ASSERT_MESSAGE_THREAD
             auto state = ABLLinkCaptureAppSessionState (link);
-            ABLLinkSetTempo (state, bpm, (std::uint64_t) juce::Time::getHighResolutionTicks());
+            ABLLinkSetTempo (state, bpm, (std::uint64_t) yup::Time::getHighResolutionTicks());
             ABLLinkCommitAppSessionState (link, state);
         }
 
         double getTempoFromLink() override
         {
-            jassert (! juce::MessageManager::existsAndIsCurrentThread());
+            jassert (! yup::MessageManager::existsAndIsCurrentThread());
             return ABLLinkGetTempo (ABLLinkCaptureAudioSessionState (link));
         }
 
         double getBeatNow (double quantum) override
         {
-            jassert (! juce::MessageManager::existsAndIsCurrentThread());
+            jassert (! yup::MessageManager::existsAndIsCurrentThread());
             auto state = ABLLinkCaptureAudioSessionState (link);
-            return ABLLinkBeatAtTime (state, (std::uint64_t) juce::Time::getHighResolutionTicks(), quantum);
+            return ABLLinkBeatAtTime (state, (std::uint64_t) yup::Time::getHighResolutionTicks(), quantum);
         }
 
         double getBarPhase (double quantum) override
         {
-            auto state = juce::MessageManager::existsAndIsCurrentThread()
+            auto state = yup::MessageManager::existsAndIsCurrentThread()
                             ? ABLLinkCaptureAppSessionState (link)
                             : ABLLinkCaptureAudioSessionState (link);
 
-            return ABLLinkPhaseAtTime (state, (std::uint64_t) juce::Time::getHighResolutionTicks(), quantum);
+            return ABLLinkPhaseAtTime (state, (std::uint64_t) yup::Time::getHighResolutionTicks(), quantum);
         }
 
         static void tempoChangedCallback (double bpm, void *context)
@@ -474,7 +474,7 @@ AbletonLink::AbletonLink (TransportControl& t)
     implementation = std::make_unique<LinkImpl> (t);
    #endif
 
-    juce::ignoreUnused (t);
+    yup::ignoreUnused (t);
 }
 
 AbletonLink::~AbletonLink() {}
@@ -540,7 +540,7 @@ void AbletonLink::requestTempoChange (double newBpm)
         implementation->setTempoToLink (newBpm);
 }
 
-void AbletonLink::setTempoConstraint (juce::Range<double> minMaxTempo)
+void AbletonLink::setTempoConstraint (yup::Range<double> minMaxTempo)
 {
     if (implementation != nullptr)
         implementation->setTempoConstraint (minMaxTempo);

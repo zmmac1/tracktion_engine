@@ -26,14 +26,14 @@ struct WarpMarker
         : sourceTime (s), warpTime (w) {}
 
     /** Loads a WarpMarker from a saved state. */
-    WarpMarker (const juce::ValueTree& v)  : state (v)
+    WarpMarker (const yup::ValueTree& v)  : state (v)
     {
         updateFrom (v, IDs::sourceTime);
         updateFrom (v, IDs::warpTime);
     }
 
     /** Updates this WarpMarker from a ValueTree property. */
-    void updateFrom (const juce::ValueTree& v, const juce::Identifier& i)
+    void updateFrom (const yup::ValueTree& v, const yup::Identifier& i)
     {
         if (i == IDs::sourceTime)
             sourceTime = TimePosition::fromSeconds (double (v.getProperty (IDs::sourceTime)));
@@ -44,7 +44,7 @@ struct WarpMarker
     /** Returns a hash for this marker. */
     HashCode getHash() const noexcept;
 
-    juce::ValueTree state;
+    yup::ValueTree state;
     TimePosition sourceTime, warpTime;
 };
 
@@ -58,12 +58,12 @@ struct WarpMarker
     Once created this can be used to generate an AudioSegmentList to play the
     source material back warped.
 */
-class WarpTimeManager : public juce::SingleThreadedReferenceCountedObject,
+class WarpTimeManager : public yup::SingleThreadedReferenceCountedObject,
                         public RenderManager::Job::Listener
 {
 public:
     //==============================================================================
-    using Ptr = juce::ReferenceCountedObjectPtr<WarpTimeManager>;
+    using Ptr = yup::ReferenceCountedObjectPtr<WarpTimeManager>;
 
     /** Creates a WarpTimeManager to warp a clip. */
     WarpTimeManager (AudioClipBase&);
@@ -71,7 +71,7 @@ public:
     /** Creates a WarpTimeManager to warp an audio file.
         The WarpMarker state will get added to the parentTree as a child.
     */
-    WarpTimeManager (Edit&, const AudioFile& sourceFile, juce::ValueTree parentTree);
+    WarpTimeManager (Edit&, const AudioFile& sourceFile, yup::ValueTree parentTree);
 
     /** Destructor. */
     ~WarpTimeManager() override;
@@ -98,7 +98,7 @@ public:
     bool areEndMarkersLimited() const noexcept                  { return endMarkersLimited; }
 
     /** Returns a list of the current WarpMarkers. */
-    const juce::Array<WarpMarker*>& getMarkers() const          { return markers->objects; }
+    const yup::Array<WarpMarker*>& getMarkers() const          { return markers->objects; }
 
     /** Inserts a new WarpMarker. */
     int insertMarker (WarpMarker);
@@ -119,13 +119,13 @@ public:
 
     //==============================================================================
     /** Time region can be longer than the clip and the returned array will loop over the clip to match the length */
-    juce::Array<TimeRange> getWarpTimeRegions (TimeRange overallTimeRegion) const;
+    yup::Array<TimeRange> getWarpTimeRegions (TimeRange overallTimeRegion) const;
 
     /** Returns an array of transient times that have been detected from the source file.
         The bool here will be false if the detection job hasn't finished running yet so call it again peridically
         until it is true.
     */
-    std::pair<bool, juce::Array<TimePosition>> getTransientTimes() const    { return transientTimes; }
+    std::pair<bool, yup::Array<TimePosition>> getTransientTimes() const    { return transientTimes; }
 
     /** Converts a warp time (i.e. a linear time) to the time in the source file after warping has been applied. */
     TimePosition warpTimeToSourceTime (TimePosition warpTime) const;
@@ -149,12 +149,12 @@ public:
     void editFinishedLoading();
 
     Edit& edit;
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     struct WarpMarkerList   : public ValueTreeObjectList<WarpMarker>
     {
-        WarpMarkerList (const juce::ValueTree& v)
+        WarpMarkerList (const yup::ValueTree& v)
             : ValueTreeObjectList<WarpMarker> (v), state (v)
         {
             rebuildObjects();
@@ -165,30 +165,30 @@ private:
             freeObjects();
         }
 
-        bool isSuitableType (const juce::ValueTree& v) const override   { return v.hasType (IDs::WARPMARKER); }
-        WarpMarker* createNewObject (const juce::ValueTree& v) override { return new WarpMarker (v); }
+        bool isSuitableType (const yup::ValueTree& v) const override   { return v.hasType (IDs::WARPMARKER); }
+        WarpMarker* createNewObject (const yup::ValueTree& v) override { return new WarpMarker (v); }
         void deleteObject (WarpMarker* wm) override                     { delete wm; }
         void newObjectAdded (WarpMarker*) override                      {}
         void objectRemoved (WarpMarker*) override                       {}
         void objectOrderChanged() override                              {}
 
-        void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i) override
+        void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i) override
         {
             if (v.hasType (IDs::WARPMARKER))
                 if (auto wm = getWarpMarkerFor (v))
                     wm->updateFrom (v, i);
         }
 
-        juce::ValueTree state;
+        yup::ValueTree state;
 
     private:
-        WarpMarker* getWarpMarkerFor (const juce::ValueTree& v)
+        WarpMarker* getWarpMarkerFor (const yup::ValueTree& v)
         {
             jassert (v.hasType (IDs::WARPMARKER));
             return objects[v.getParent().indexOf (v)];
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpMarkerList)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpMarkerList)
     };
 
     friend class WarpTimeFactory;
@@ -199,13 +199,13 @@ private:
 
     std::unique_ptr<WarpMarkerList> markers;
     RenderManager::Job::Ptr transientDetectionJob;
-    std::pair<bool, juce::Array<TimePosition>> transientTimes { false, {} };
+    std::pair<bool, yup::Array<TimePosition>> transientTimes { false, {} };
     std::unique_ptr<Edit::LoadFinishedCallback<WarpTimeManager>> editLoadedCallback;
 
     juce::UndoManager* getUndoManager() const;
     void jobFinished (RenderManager::Job& job, bool completedOk) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpTimeManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpTimeManager)
 };
 
 
@@ -232,13 +232,13 @@ public:
 
 private:
     friend class WarpTimeManager;
-    juce::Array<WarpTimeManager*> warpTimeManagers;
-    juce::CriticalSection warpTimeLock;
+    yup::Array<WarpTimeManager*> warpTimeManagers;
+    yup::CriticalSection warpTimeLock;
 
     void addWarpTimeManager (WarpTimeManager&);
     void removeWarpTimeManager (WarpTimeManager&);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpTimeFactory)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpTimeFactory)
 };
 
 } // namespace tracktion::inline engine

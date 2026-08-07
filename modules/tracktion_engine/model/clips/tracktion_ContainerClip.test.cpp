@@ -23,8 +23,8 @@ namespace
         const auto sampleRange = toSamples (tr, data.sampleRate);
         const auto peak = data.buffer.getMagnitude (static_cast<int> (sampleRange.getStart()),
                                                     static_cast<int> (sampleRange.getLength()));
-        CHECK_MESSAGE (juce::isWithin (peak, expectedPeak, 0.001f),
-                       (juce::String ("Expected peak: ") + juce::String (expectedPeak, 4) + ", actual peak: " + juce::String (peak, 4)).toStdString());
+        CHECK_MESSAGE (yup::isWithin (peak, expectedPeak, 0.001f),
+                       (yup::String ("Expected peak: ") + yup::String (expectedPeak, 4) + ", actual peak: " + yup::String (peak, 4)).toStdString());
     }
 
     inline void containerClipExpectRMS (const test_utilities::BufferAndSampleRate& data, TimeRange tr, int channel, float expectedRMS)
@@ -49,7 +49,7 @@ TEST_CASE ("ContainerClip: Basic")
     Clipboard clipboard;
     auto edit = createTestEdit (engine);
     auto audioTrack = getAudioTracks (*edit)[0];
-    auto squareFile = getSquareFile<juce::WavAudioFormat> (44100.0, 1.0, 1, 220.0f);
+    auto squareFile = getSquareFile<yup::WavAudioFormat> (44100.0, 1.0, 1, 220.0f);
 
     // Adding child clip
     auto cc = dynamic_cast<ContainerClip*> (insertNewClip (*audioTrack, TrackItem::Type::container, { 0_tp, 5_tp }));
@@ -77,9 +77,9 @@ TEST_CASE ("ContainerClip")
     Clipboard clipboard;
     auto edit = createTestEdit (engine);
     auto audioTrack = getAudioTracks (*edit)[0];
-    audioTrack->getVolumePlugin()->setVolumeDb (juce::Decibels::gainToDecibels (0.5f));
-    auto squareFile1 = getSquareFile<juce::WavAudioFormat> (44100.0, 3.0, 1, 220.0f);
-    auto squareFile2 = getSquareFile<juce::WavAudioFormat> (44100.0, 2.0, 1, 220.0f);
+    audioTrack->getVolumePlugin()->setVolumeDb (yup::Decibels::gainToDecibels (0.5f));
+    auto squareFile1 = getSquareFile<yup::WavAudioFormat> (44100.0, 3.0, 1, 220.0f);
+    auto squareFile2 = getSquareFile<yup::WavAudioFormat> (44100.0, 2.0, 1, 220.0f);
 
     // Adding child clips
     auto cc = dynamic_cast<ContainerClip*> (insertNewClip (*audioTrack, TrackItem::Type::container, { 0_tp, 5_tp }));
@@ -400,11 +400,11 @@ namespace tracktion::inline engine {
 
 //==============================================================================
 //==============================================================================
-class ContainerClipBenchmarks   : public juce::UnitTest
+class ContainerClipBenchmarks   : public yup::UnitTest
 {
 public:
     ContainerClipBenchmarks()
-        : juce::UnitTest ("ContainerClip", "tracktion_benchmarks")
+        : yup::UnitTest ("ContainerClip", "tracktion_benchmarks")
     {}
 
     void runTest() override
@@ -449,7 +449,7 @@ private:
         // Use a real file so the Nodes don't get optomised away
         constexpr double sampleRate = 96'000.0;
         constexpr int bufferSize = 128;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (sampleRate, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (sampleRate, 1.0);
 
         auto insertClip = [cc, f = sinFile->getFile(), &ts] (BeatRange r)
                           {
@@ -512,8 +512,8 @@ private:
 
             const ScopedBenchmark sb (createBenchmarkDescription (
                 "Node",
-                juce::String ("Looping container clip").toStdString(),
-                juce::String ("Conatiner clip with 4 beat drum loop over max Edit length").toStdString()));
+                yup::String ("Looping container clip").toStdString(),
+                yup::String ("Conatiner clip with 4 beat drum loop over max Edit length").toStdString()));
             [[ maybe_unused ]] auto editNode = createNodeForEdit (*edit, cnp);
         }
     }

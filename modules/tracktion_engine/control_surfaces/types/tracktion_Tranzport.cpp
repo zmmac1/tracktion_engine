@@ -77,7 +77,7 @@ static const uint8_t rspButtonFootDown[]    = { 0x90, 0x67, 0x7f };
 //static const uint8_t rspButtonFootUp[]      = { 0x90, 0x67, 0x00 };
 
 template <int size>
-static inline bool matchesMessage (const juce::MidiMessage& m, const uint8_t (&data)[size])
+static inline bool matchesMessage (const yup::MidiMessage& m, const uint8_t (&data)[size])
 {
     return size == m.getRawDataSize() && memcmp (m.getRawData(), data, (size_t) size) == 0;
 }
@@ -133,7 +133,7 @@ void TranzportControlSurface::shutDownDevice()
     sendMidiArray (0, cmdLEDLoopOff);
 }
 
-void TranzportControlSurface::acceptMidiMessage (int, const juce::MidiMessage& m)
+void TranzportControlSurface::acceptMidiMessage (int, const yup::MidiMessage& m)
 {
     CRASH_TRACER
 
@@ -399,7 +399,7 @@ void TranzportControlSurface::recordStateChanged (bool isRecording)
     }
 }
 
-void TranzportControlSurface::faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames)
+void TranzportControlSurface::faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames)
 {
     if (init && currentTrack != newStartChannelNumber)
     {
@@ -407,7 +407,7 @@ void TranzportControlSurface::faderBankChanged (int newStartChannelNumber, const
         trackName = trackNames[0];
 
         if ((newStartChannelNumber + 1) == trackName.getIntValue() && trackName.containsOnly ("0123456789"))
-            trackName = TRANS("Track") + " " + juce::String (newStartChannelNumber + 1);
+            trackName = TRANS("Track") + " " + yup::String (newStartChannelNumber + 1);
 
         trackName = trackName.retainCharacters ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 ()! \"#$%&\'*+,-./:;<=>?@^_`{|}");
 
@@ -562,7 +562,7 @@ void TranzportControlSurface::updateTCDisplay (const char* text)
 void TranzportControlSurface::displayPrint (int pos, const char* text)
 {
     auto len = strlen (text);
-    juce::HeapBlock<uint8_t> buffer (len + 8);
+    yup::HeapBlock<uint8_t> buffer (len + 8);
     memcpy (buffer, cmdWrite, sizeof (cmdWrite));
     buffer[sizeof(cmdWrite)] = (uint8_t) pos;
     memcpy (buffer + sizeof (cmdWrite) + 1, text, len);

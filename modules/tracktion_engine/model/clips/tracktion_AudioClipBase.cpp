@@ -18,7 +18,7 @@ class AudioClipBase::TempoDetectTask   : public ThreadPoolJobWithProgress
 {
 public:
     /** Creates a task for a given file. */
-    TempoDetectTask (Engine& e, const juce::File& file)
+    TempoDetectTask (Engine& e, const yup::File& file)
         : ThreadPoolJobWithProgress (TRANS("Detecting tempo")),
           engine (e), sourceFile (file)
     {
@@ -34,7 +34,7 @@ public:
     /** Performs the actual detection. */
     JobStatus runJob() override
     {
-        std::unique_ptr<juce::AudioFormatReader> reader (AudioFileUtils::createReaderFor (engine, sourceFile));
+        std::unique_ptr<yup::AudioFormatReader> reader (AudioFileUtils::createReaderFor (engine, sourceFile));
 
         if (reader == nullptr)
             return jobHasFinished;
@@ -53,7 +53,7 @@ public:
             const bool useRightChan = numChannels > 1;
 
             // can't use an AudioScratchBuffer yet
-            juce::AudioBuffer<float> buffer (numChannels, blockSize);
+            yup::AudioBuffer<float> buffer (numChannels, blockSize);
 
             auto numLeft = numSamples;
             SampleCount startSample = 0;
@@ -85,12 +85,12 @@ public:
 private:
     //==============================================================================
     Engine& engine;
-    juce::File sourceFile;
+    yup::File sourceFile;
     float progress = 0;
     bool isSensible = false;
     float bpm = 12.0f;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoDetectTask)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoDetectTask)
 };
 
 
@@ -123,7 +123,7 @@ private:
         CRASH_TRACER
 
         AudioFile tempFile (engine, proxy.getFile()
-                                     .getSiblingFile ("temp_proxy_" + juce::String::toHexString (juce::Random().nextInt64()))
+                                     .getSiblingFile ("temp_proxy_" + yup::String::toHexString (yup::Random().nextInt64()))
                                      .withFileExtension (proxy.getFile().getFileExtension()));
 
         bool ok = render (tempFile);
@@ -156,7 +156,7 @@ private:
 
         // If the specific format is supported, fallback to a discrete layout for proxies which is always supported
         if (! wavFormat->isChannelLayoutSupported (sourceInfo.channelLayout))
-            sourceInfo.channelLayout = juce::AudioChannelSet::discreteChannels (sourceInfo.channelLayout.size());
+            sourceInfo.channelLayout = yup::AudioChannelSet::discreteChannels (sourceInfo.channelLayout.size());
 
         AudioFileWriter writer (tempFile, wavFormat,
                                 sourceInfo.numChannels, sourceInfo.sampleRate,
@@ -172,7 +172,7 @@ private:
     bool renderNormalSpeed (AudioFileWriter& writer)
     {
         CRASH_TRACER
-        std::unique_ptr<juce::AudioFormatReader> reader (AudioFileUtils::createReaderFor (engine, original.getFile()));
+        std::unique_ptr<yup::AudioFormatReader> reader (AudioFileUtils::createReaderFor (engine, original.getFile()));
 
         if (reader == nullptr)
             return false;
@@ -193,17 +193,17 @@ private:
             samplesToDo -= numThisTime;
             sourceSample += numThisTime;
 
-            progress = juce::jlimit (0.0f, 1.0f, float (double (sourceSample) / double (reader->lengthInSamples)));
+            progress = yup::jlimit (0.0f, 1.0f, float (double (sourceSample) / double (reader->lengthInSamples)));
         }
 
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProxyGeneratorJob)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProxyGeneratorJob)
 };
 
 //==============================================================================
-AudioClipBase::AudioClipBase (const juce::ValueTree& v, EditItemID id, Type t, ClipOwner& targetParent)
+AudioClipBase::AudioClipBase (const yup::ValueTree& v, EditItemID id, Type t, ClipOwner& targetParent)
     : Clip (v, targetParent, id, t),
       loopInfo (edit.engine, state.getOrCreateChildWithName (IDs::LOOPINFO, getUndoManager()), getUndoManager()),
       pluginList (edit),
@@ -245,7 +245,7 @@ AudioClipBase::AudioClipBase (const juce::ValueTree& v, EditItemID id, Type t, C
 
     // Keep this in to handle old edits..
     if (state.getProperty (IDs::timeStretch))
-        timeStretchMode = juce::VariantConverter<TimeStretcher::Mode>::fromVar (state.getProperty (IDs::stretchMode));
+        timeStretchMode = yup::VariantConverter<TimeStretcher::Mode>::fromVar (state.getProperty (IDs::stretchMode));
 
     timeStretchMode = TimeStretcher::checkModeIsAvailable (timeStretchMode);
 
@@ -256,7 +256,7 @@ AudioClipBase::AudioClipBase (const juce::ValueTree& v, EditItemID id, Type t, C
     isReversed.referTo (state, IDs::isReversed, um);
     autoDetectBeats.referTo (state, IDs::autoDetectBeats, um);
 
-    level->pan = juce::jlimit (-1.0f, 1.0f, static_cast<float> (level->pan.get()));
+    level->pan = yup::jlimit (-1.0f, 1.0f, static_cast<float> (level->pan.get()));
     checkFadeLengthsForOverrun();
 
     useClipLaunchQuantisation.referTo (state, IDs::useClipLaunchQuantisation, um);
@@ -410,7 +410,7 @@ void AudioClipBase::flushStateToValueTree()
 PatternGenerator* AudioClipBase::getPatternGenerator()
 {
     if (! state.getChildWithName (IDs::PATTERNGENERATOR).isValid())
-        state.addChild (juce::ValueTree (IDs::PATTERNGENERATOR), -1, &edit.getUndoManager());
+        state.addChild (yup::ValueTree (IDs::PATTERNGENERATOR), -1, &edit.getUndoManager());
 
     jassert (patternGenerator != nullptr);
     return patternGenerator.get();
@@ -422,7 +422,7 @@ void AudioClipBase::setParent (ClipOwner* co)
    #if TRACKTION_ENABLE_ARA
     if (co == nullptr && isUsingARA())
     {
-        juce::MessageManager::callAsync ([safeRef = SafeSelectable<AudioClipBase> (this)]
+        yup::MessageManager::callAsync ([safeRef = SafeSelectable<AudioClipBase> (this)]
         {
             if (auto clip = safeRef.get())
                 if (clip->getParent() == nullptr)
@@ -452,9 +452,9 @@ void AudioClipBase::changed()
         araProxy->sourceClipChanged();
 }
 
-juce::Colour AudioClipBase::getDefaultColour() const
+yup::Color AudioClipBase::getDefaultColor() const
 {
-    return juce::Colours::red.withHue (0.0f);
+    return yup::Colors::red.withHue (0.0f);
 }
 
 //==============================================================================
@@ -479,13 +479,13 @@ TimeDuration AudioClipBase::getMaximumLength()
 //==============================================================================
 void AudioClipBase::setGainDB (float g)
 {
-    level->dbGain = juce::jlimit (-100.0f, 24.0f, g);
+    level->dbGain = yup::jlimit (-100.0f, 24.0f, g);
 }
 
 void AudioClipBase::setPan (float p)
 {
     level->pan = std::abs (p) < 0.01 ? 0.0f
-                                     : juce::jlimit (-1.0f, 1.0f, p);
+                                     : yup::jlimit (-1.0f, 1.0f, p);
 }
 
 //==============================================================================
@@ -533,7 +533,7 @@ void AudioClipBase::setActiveChannelConfiguration (const ChannelConfiguration& c
     // Empty config means "all channels"
     if (config.isEmpty())
     {
-        channels = juce::String();
+        channels = yup::String();
         return;
     }
 
@@ -545,9 +545,9 @@ void AudioClipBase::setActiveChannelConfiguration (const ChannelConfiguration& c
         return;
 
     if (validated == sourceConfig)
-        channels = juce::String();
+        channels = yup::String();
     else
-        channels = validated.toString();
+        channels = yup::String(validated.toString());
 }
 
 ChannelConfiguration AudioClipBase::getOutputChannelConfiguration()
@@ -566,7 +566,7 @@ ChannelConfiguration AudioClipBase::getOutputChannelConfiguration()
 bool AudioClipBase::setFadeIn (TimeDuration in)
 {
     auto len = getPosition().getLength();
-    in = juce::jlimit (TimeDuration(), len, in);
+    in = yup::jlimit (TimeDuration(), len, in);
 
     // check the fades don't overrun
     if (in + fadeOut > len)
@@ -587,7 +587,7 @@ bool AudioClipBase::setFadeIn (TimeDuration in)
 bool AudioClipBase::setFadeOut (TimeDuration out)
 {
     auto len = getPosition().getLength();
-    out = juce::jlimit (TimeDuration(), len, out);
+    out = yup::jlimit (TimeDuration(), len, out);
 
     if (fadeIn + out > len)
     {
@@ -887,7 +887,7 @@ void AudioClipBase::copyFadeToAutomation (bool useFadeIn, bool removeClipFade)
             auto curveType = useFadeIn ? clip->getFadeInType() : clip->getFadeOutType();
             auto startValue = useFadeIn ? 0.0f : curve_oldCurve.getValueAt (fadeTime.getStart(), defaultValue);
             auto endValue   = useFadeIn ? curve_oldCurve.getValueAt (fadeTime.getEnd(), defaultValue) : 0.0f;
-            auto valueLimits = juce::Range<float>::between (startValue, endValue);
+            auto valueLimits = yup::Range<float>::between (startValue, endValue);
 
             switch (curveType)
             {
@@ -1080,8 +1080,8 @@ void AudioClipBase::setLoopRange (TimeRange newRange)
             // limits the number of times longer than the source file length the loop length can be
             const double maxMultiplesOfSourceLengthForLooping = 50.0;
 
-            auto newStart  = juce::jlimit (0_tp, toPosition (sourceLen) / getSpeedRatio(), newRange.getStart());
-            auto newLength = juce::jlimit (0_td, sourceLen * maxMultiplesOfSourceLengthForLooping / getSpeedRatio(), newRange.getLength());
+            auto newStart  = yup::jlimit (0_tp, toPosition (sourceLen) / getSpeedRatio(), newRange.getStart());
+            auto newLength = yup::jlimit (0_td, sourceLen * maxMultiplesOfSourceLengthForLooping / getSpeedRatio(), newRange.getLength());
 
             if (loopStart != newStart || loopLength != newLength)
             {
@@ -1094,8 +1094,8 @@ void AudioClipBase::setLoopRange (TimeRange newRange)
 
 void AudioClipBase::setLoopRangeBeats (BeatRange newRangeBeats)
 {
-    auto newStartBeat  = juce::jlimit (0_bp, BeatPosition::fromBeats (loopInfo.getNumBeats()), newRangeBeats.getStart());
-    auto newLengthBeat = juce::jlimit (0_bd, BeatDuration::fromBeats (loopInfo.getNumBeats() * 2), newRangeBeats.getLength());
+    auto newStartBeat  = yup::jlimit (0_bp, BeatPosition::fromBeats (loopInfo.getNumBeats()), newRangeBeats.getStart());
+    auto newLengthBeat = yup::jlimit (0_bd, BeatDuration::fromBeats (loopInfo.getNumBeats() * 2), newRangeBeats.getLength());
 
     if (loopStartBeats != newStartBeat || loopLengthBeats != newLengthBeat)
     {
@@ -1215,18 +1215,18 @@ void araConvertToMIDI (AudioClipBase& clip)
 {
     if (auto proxy = clip.getARAProxy())
     {
-        juce::MidiMessageSequence m (proxy->getAnalysedMIDISequence());
+        yup::MidiMessageSequence m (proxy->getAnalysedMIDISequence());
 
         if (m.getNumEvents() > 0)
         {
             juce::UndoManager* um = nullptr;
 
-            juce::ValueTree midiClip (IDs::MIDICLIP);
+            yup::ValueTree midiClip (IDs::MIDICLIP);
             midiClip.setProperty (IDs::name, clip.getName(), um);
             midiClip.setProperty (IDs::start, clip.getPosition().getStart().inSeconds(), um);
             midiClip.setProperty (IDs::length, clip.getPosition().getLength().inSeconds(), um);
 
-            juce::ValueTree ms (IDs::SEQUENCE);
+            yup::ValueTree ms (IDs::SEQUENCE);
             ms.setProperty (IDs::ver, 1, um);
             ms.setProperty (IDs::channelNumber, 1, um);
 
@@ -1240,7 +1240,7 @@ void araConvertToMIDI (AudioClipBase& clip)
 
                 if (e.noteOffObject != nullptr)
                 {
-                    juce::ValueTree note (IDs::NOTE);
+                    yup::ValueTree note (IDs::NOTE);
                     note.setProperty ("p", e.message.getNoteNumber(), um);
                     note.setProperty ("v", e.message.getVelocity(), um);
                     note.setProperty ("b", ts.toBeats (TimePosition::fromSeconds (e.message.getTimeStamp())).inBeats(), um);
@@ -1309,7 +1309,7 @@ LoopInfo AudioClipBase::autoDetectBeatMarkers (const LoopInfo& current, bool aut
 
     if (autoBeat)
     {
-        if (auto reader = std::unique_ptr<juce::AudioFormatReader> (AudioFileUtils::createReaderFor (edit.engine, getCurrentSourceFile())))
+        if (auto reader = std::unique_ptr<yup::AudioFormatReader> (AudioFileUtils::createReaderFor (edit.engine, getCurrentSourceFile())))
         {
             const auto start = loopInfo.getInMarker();
             const auto end = (loopInfo.getOutMarker() == -1) ? reader->lengthInSamples
@@ -1361,9 +1361,9 @@ bool AudioClipBase::performTempoDetect()
     return true;
 }
 
-juce::StringArray AudioClipBase::getRootNoteChoices (Engine& e)
+yup::StringArray AudioClipBase::getRootNoteChoices (Engine& e)
 {
-    juce::StringArray s;
+    yup::StringArray s;
     s.add ("<" + TRANS("None") + ">");
 
     for (int i = 0; i < 12; ++i)
@@ -1372,21 +1372,21 @@ juce::StringArray AudioClipBase::getRootNoteChoices (Engine& e)
     return s;
 }
 
-juce::StringArray AudioClipBase::getPitchChoices()
+yup::StringArray AudioClipBase::getPitchChoices()
 {
-    juce::StringArray s;
+    yup::StringArray s;
 
     const int numSemitones = isUsingARA() ? 12 : 24;
 
     if (loopInfo.getRootNote() == -1)
     {
         for (int i = numSemitones; i >= 1; i--)
-            s.add ("+" + juce::String (i));
+            s.add ("+" + yup::String (i));
 
         s.add ("0");
 
         for (int i = 1; i <= numSemitones; ++i)
-            s.add ("-" + juce::String (i));
+            s.add ("-" + yup::String (i));
     }
     else
     {
@@ -1394,12 +1394,12 @@ juce::StringArray AudioClipBase::getPitchChoices()
                                    : loopInfo.getRootNote();
 
         for (int i = numSemitones; i >= 1; i--)
-            s.add ("+" + juce::String (i) + " : " + Pitch::getPitchAsString (edit.engine, base + i));
+            s.add ("+" + yup::String (i) + " : " + Pitch::getPitchAsString (edit.engine, base + i));
 
         s.add ("0 : " + Pitch::getPitchAsString (edit.engine, base));
 
         for (int i = 1; i <= numSemitones; ++i)
-            s.add ("-" + juce::String (i) + " : " + Pitch::getPitchAsString (edit.engine, base - i));
+            s.add ("-" + yup::String (i) + " : " + Pitch::getPitchAsString (edit.engine, base - i));
     }
 
     return s;
@@ -1453,7 +1453,7 @@ void AudioClipBase::enableEffects (bool enable, bool warn)
     }
 }
 
-void AudioClipBase::addEffect (const juce::ValueTree& effectsTree)
+void AudioClipBase::addEffect (const yup::ValueTree& effectsTree)
 {
     auto v = state.getChildWithName (IDs::EFFECTS);
     jassert (v.isValid());
@@ -1513,8 +1513,8 @@ void AudioClipBase::moveMarkTo (TimePosition relCursorPos)
     {
         auto marks = sourceItem->getMarkedPoints();
 
-        juce::Array<TimePosition> rescaled;
-        juce::Array<int> index;
+        yup::Array<TimePosition> rescaled;
+        yup::Array<int> index;
         getRescaledMarkPoints (rescaled, index);
 
         int indexOfNearest = -1;
@@ -1545,8 +1545,8 @@ void AudioClipBase::deleteMark (TimePosition relCursorPos)
     {
         auto marks = sourceItem->getMarkedPoints();
 
-        juce::Array<TimePosition> rescaled;
-        juce::Array<int> index;
+        yup::Array<TimePosition> rescaled;
+        yup::Array<int> index;
         getRescaledMarkPoints (rescaled, index);
 
         int indexOfNearest = -1;
@@ -1573,13 +1573,13 @@ void AudioClipBase::deleteMark (TimePosition relCursorPos)
 
 bool AudioClipBase::canSnapToOriginalBWavTime()
 {
-    return getAudioFile().getMetadata()[juce::WavAudioFormat::bwavTimeReference].isNotEmpty();
+    return getAudioFile().getMetadata()[yup::WavAudioFormat::bwavTimeReference].isNotEmpty();
 }
 
 void AudioClipBase::snapToOriginalBWavTime()
 {
     auto f = getAudioFile();
-    juce::String bwavTime (f.getMetadata()[juce::WavAudioFormat::bwavTimeReference]);
+    yup::String bwavTime (f.getMetadata()[yup::WavAudioFormat::bwavTimeReference]);
 
     if (bwavTime.isNotEmpty())
     {
@@ -1590,7 +1590,7 @@ void AudioClipBase::snapToOriginalBWavTime()
 }
 
 //==============================================================================
-juce::Array<Exportable::ReferencedItem> AudioClipBase::getReferencedItems()
+yup::Array<Exportable::ReferencedItem> AudioClipBase::getReferencedItems()
 {
     auto results = Clip::getReferencedItems();
 
@@ -1675,7 +1675,7 @@ void AudioClipBase::reassignReferencedItem (const ReferencedItem& item,
     }
 }
 
-juce::Array<ProjectItemRef> AudioClipBase::getTakes() const
+yup::Array<ProjectItemRef> AudioClipBase::getTakes() const
 {
     jassert (! hasAnyTakes());
     return {};
@@ -1708,7 +1708,7 @@ FollowActions* AudioClipBase::getFollowActions()
 
 
 //==============================================================================
-juce::String AudioClipBase::canAddClipPlugin (const Plugin::Ptr& p) const
+yup::String AudioClipBase::canAddClipPlugin (const Plugin::Ptr& p) const
 {
     if (p != nullptr)
     {
@@ -1752,7 +1752,7 @@ bool AudioClipBase::setupARA (bool dontPopupErrorMessages)
     if (araReentrancyCheck)
         return true;
 
-    const juce::ScopedValueSetter<bool> svs (araReentrancyCheck, true);
+    const yup::ScopedValueSetter<bool> svs (araReentrancyCheck, true);
 
    #if TRACKTION_ENABLE_ARA
     if (isUsingARA())
@@ -1772,7 +1772,7 @@ bool AudioClipBase::setupARA (bool dontPopupErrorMessages)
             // restore the plugin's edits into the new proxy
             if (araProxy->isValid() && state.hasProperty (IDs::araArchive))
             {
-                juce::MemoryBlock araData;
+                yup::MemoryBlock araData;
                 araData.fromBase64Encoding (state.getProperty (IDs::araArchive).toString());
 
                 auto sourceID = state.getProperty (IDs::araArchiveSourceID).toString();
@@ -1822,7 +1822,7 @@ bool AudioClipBase::setupARA (bool dontPopupErrorMessages)
     }
    #endif
 
-    juce::ignoreUnused (dontPopupErrorMessages);
+    yup::ignoreUnused (dontPopupErrorMessages);
     return false;
 }
 
@@ -1922,15 +1922,15 @@ void AudioClipBase::renderComplete()
 }
 
 //==============================================================================
-juce::Array<TimePosition> AudioClipBase::getRescaledMarkPoints() const
+yup::Array<TimePosition> AudioClipBase::getRescaledMarkPoints() const
 {
-    juce::Array<TimePosition> rescaled;
-    juce::Array<int> index;
+    yup::Array<TimePosition> rescaled;
+    yup::Array<int> index;
     getRescaledMarkPoints (rescaled, index);
     return rescaled;
 }
 
-void AudioClipBase::getRescaledMarkPoints (juce::Array<TimePosition>& times, juce::Array<int>& index) const
+void AudioClipBase::getRescaledMarkPoints (yup::Array<TimePosition>& times, yup::Array<int>& index) const
 {
     if (auto sourceItem = sourceFileReference.getSourceProjectItem())
     {
@@ -2093,7 +2093,7 @@ struct StretchSegment
         : segment (s),
           fileInfo (file.getInfo()),
           crossfadeSamples ((int) tracktion::toSamples (info.audioSegmentList->getCrossfadeLength(), sampleRate)),
-          numChannelsToUse (juce::jlimit (1, maxNumChannels, fileInfo.numChannels))
+          numChannelsToUse (yup::jlimit (1, maxNumChannels, fileInfo.numChannels))
     {
         CRASH_TRACER
         reader = engine.getAudioFileManager().cache.createReader (file);
@@ -2121,7 +2121,7 @@ struct StretchSegment
         }
     }
 
-    void renderNextBlock (juce::AudioBuffer<float>& buffer, TimeRange editTime, int numSamples)
+    void renderNextBlock (yup::AudioBuffer<float>& buffer, TimeRange editTime, int numSamples)
     {
         if (reader == nullptr)
             return;
@@ -2141,7 +2141,7 @@ struct StretchSegment
 
         if (loopRange.getStart() > editTime.getStart())
         {
-            auto skip = juce::jlimit (0, numSamples, (int) (numSamples * (loopRange.getStart() - editTime.getStart()).inSeconds() / editTime.getLength().inSeconds()));
+            auto skip = yup::jlimit (0, numSamples, (int) (numSamples * (loopRange.getStart() - editTime.getStart()).inSeconds() / editTime.getLength().inSeconds()));
             start += skip;
             numSamples -= skip;
         }
@@ -2191,7 +2191,7 @@ struct StretchSegment
 
             if (needed > 0)
             {
-               #if JUCE_DEBUG
+               #if YUP_DEBUG
                 jassert (reader->readSamples (needed, scratch.buffer, bufferChannels, 0, sourceChannelsToUse, 5000));
                #else
                 reader->readSamples (needed, scratch.buffer, bufferChannels, 0, sourceChannelsToUse, 5000);
@@ -2277,9 +2277,9 @@ struct StretchSegment
     int readySamplesStart = 0, readySamplesEnd = 0;
     SampleCount readySampleOutputPos = 0;
     const int crossfadeSamples, numChannelsToUse;
-    juce::AudioBuffer<float> fifo { numChannelsToUse, outputBufferSize };
+    yup::AudioBuffer<float> fifo { numChannelsToUse, outputBufferSize };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchSegment)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StretchSegment)
 };
 
 //==============================================================================
@@ -2298,14 +2298,14 @@ std::unique_ptr<AudioClipBase::ProxyRenderingInfo> AudioClipBase::createProxyRen
 }
 
 bool AudioClipBase::ProxyRenderingInfo::render (Engine& engine, const AudioFile& sourceFile, AudioFileWriter& writer,
-                                                juce::ThreadPoolJob* const& job, std::atomic<float>& progress) const
+                                                yup::ThreadPoolJob* const& job, std::atomic<float>& progress) const
 {
     CRASH_TRACER
 
     if (audioSegmentList->getSegments().isEmpty() || ! sourceFile.isValid())
         return false;
 
-    juce::OwnedArray<StretchSegment> segments;
+    yup::OwnedArray<StretchSegment> segments;
 
     auto sampleRate = sourceFile.getSampleRate();
 
@@ -2313,7 +2313,7 @@ bool AudioClipBase::ProxyRenderingInfo::render (Engine& engine, const AudioFile&
         segments.add (new StretchSegment (engine, sourceFile, *this, sampleRate, segment));
 
     const int samplesPerBlock = 1024;
-    juce::AudioBuffer<float> buffer (sourceFile.getNumChannels(), samplesPerBlock);
+    yup::AudioBuffer<float> buffer (sourceFile.getNumChannels(), samplesPerBlock);
     double time = 0.0;
 
     auto numBlocks = 1 + (int) (clipTime.getLength().inSeconds() * sampleRate / samplesPerBlock);
@@ -2516,7 +2516,7 @@ void AudioClipBase::timerCallback()
     edit.restartPlayback();
 }
 
-void AudioClipBase::valueTreePropertyChanged (juce::ValueTree& tree, const juce::Identifier& id)
+void AudioClipBase::valueTreePropertyChanged (yup::ValueTree& tree, const yup::Identifier& id)
 {
     if (tree == state)
     {
@@ -2627,7 +2627,7 @@ void AudioClipBase::valueTreePropertyChanged (juce::ValueTree& tree, const juce:
     }
 }
 
-void AudioClipBase::valueTreeChildAdded (juce::ValueTree& parentState, juce::ValueTree& child)
+void AudioClipBase::valueTreeChildAdded (yup::ValueTree& parentState, yup::ValueTree& child)
 {
     if (parentState == state)
     {
@@ -2650,7 +2650,7 @@ void AudioClipBase::valueTreeChildAdded (juce::ValueTree& parentState, juce::Val
     }
 }
 
-void AudioClipBase::valueTreeChildRemoved (juce::ValueTree& parentState, juce::ValueTree& child, int oldIndex)
+void AudioClipBase::valueTreeChildRemoved (yup::ValueTree& parentState, yup::ValueTree& child, int oldIndex)
 {
     if (parentState == state)
     {
@@ -2673,12 +2673,12 @@ void AudioClipBase::valueTreeChildRemoved (juce::ValueTree& parentState, juce::V
     }
 }
 
-void AudioClipBase::valueTreeChildOrderChanged (juce::ValueTree& parentState, int oldIndex, int newIndex)
+void AudioClipBase::valueTreeChildOrderChanged (yup::ValueTree& parentState, int oldIndex, int newIndex)
 {
     Clip::valueTreeChildOrderChanged (parentState, oldIndex, newIndex);
 }
 
-void AudioClipBase::valueTreeParentChanged (juce::ValueTree& child)
+void AudioClipBase::valueTreeParentChanged (yup::ValueTree& child)
 {
     updateAutoCrossfadesAsync (true);
 

@@ -170,9 +170,9 @@ Container remove_if_nullptr (Container&& container)
     return std::forward<Container> (container);
 }
 
-/** Removes nullptrs from a juce::Array. */
+/** Removes nullptrs from a yup::Array. */
 template<class Type>
-juce::Array<Type> remove_if_nullptr (juce::Array<Type>&& container)
+yup::Array<Type> remove_if_nullptr (yup::Array<Type>&& container)
 {
     container.removeIf ([] (const auto& v) { return v == nullptr; });
 

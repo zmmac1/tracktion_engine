@@ -11,7 +11,7 @@
 namespace tracktion::inline engine {
 
 /** Some plugins fail with certain calls to their parameters so we'll just avoid adding those to the list. */
-static inline bool isParameterBlacklisted (ExternalPlugin& plugin, juce::AudioPluginInstance&, juce::AudioProcessorParameter& parameter)
+static inline bool isParameterBlacklisted (ExternalPlugin& plugin, yup::AudioPluginInstance&, yup::AudioProcessorParameter& parameter)
 {
     ignoreUnused (plugin);
     ignoreUnused (parameter);

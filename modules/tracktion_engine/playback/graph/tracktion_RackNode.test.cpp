@@ -18,47 +18,47 @@ using namespace tracktion::graph;
 using namespace tracktion::graph::test_utilities;
 
 //==============================================================================
-class MultiOutTestPlugin  : public juce::AudioPluginInstance
+class MultiOutTestPlugin  : public yup::AudioPluginInstance
 {
 public:
     MultiOutTestPlugin()
-        : juce::AudioPluginInstance (BusesProperties()
-                                        .withInput  ("Main",  juce::AudioChannelSet::stereo(), true)
-                                        .withOutput ("Main",  juce::AudioChannelSet::stereo(), true)
-                                        .withOutput ("Bus 2", juce::AudioChannelSet::stereo(), true)
-                                        .withOutput ("Bus 3", juce::AudioChannelSet::stereo(), true))
+        : yup::AudioPluginInstance (BusesProperties()
+                                        .withInput  ("Main",  yup::AudioChannelSet::stereo(), true)
+                                        .withOutput ("Main",  yup::AudioChannelSet::stereo(), true)
+                                        .withOutput ("Bus 2", yup::AudioChannelSet::stereo(), true)
+                                        .withOutput ("Bus 3", yup::AudioChannelSet::stereo(), true))
     {}
 
-    void fillInPluginDescription (juce::PluginDescription& d) const override
+    void fillInPluginDescription (yup::PluginDescription& d) const override
     {
         d.name = "MultiOutTestPlugin";
-        d.pluginFormatName = "Test";
+        d.name = "Test";
         d.fileOrIdentifier = "MultiOutTestPlugin";
         d.numInputChannels = getTotalNumInputChannels();
         d.numOutputChannels = getTotalNumOutputChannels();
         d.isInstrument = false;
     }
 
-    const juce::String getName() const override                         { return "MultiOutTestPlugin"; }
+    const yup::String getName() const override                         { return "MultiOutTestPlugin"; }
     void prepareToPlay (double, int) override                           {}
     void releaseResources() override                                    {}
-    using juce::AudioProcessor::processBlock;
-    void processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&) override
+    using yup::AudioProcessor::processBlock;
+    void processBlock (yup::AudioBuffer<float>& buffer, yup::MidiBuffer&) override
     {
         for (int ch = 0; ch < buffer.getNumChannels(); ++ch)
-            juce::FloatVectorOperations::fill (buffer.getWritePointer (ch), 0.5f, buffer.getNumSamples());
+            yup::FloatVectorOperations::fill (buffer.getWritePointer (ch), 0.5f, buffer.getNumSamples());
     }
     double getTailLengthSeconds() const override                        { return 0.0; }
     bool acceptsMidi() const override                                   { return false; }
     bool producesMidi() const override                                  { return false; }
-    juce::AudioProcessorEditor* createEditor() override                 { return nullptr; }
+    yup::AudioProcessorEditor* createEditor() override                 { return nullptr; }
     bool hasEditor() const override                                     { return false; }
     int getNumPrograms() override                                       { return 1; }
     int getCurrentProgram() override                                    { return 0; }
     void setCurrentProgram (int) override                               {}
-    const juce::String getProgramName (int) override                    { return {}; }
-    void changeProgramName (int, const juce::String&) override          {}
-    void getStateInformation (juce::MemoryBlock&) override              {}
+    const yup::String getProgramName (int) override                    { return {}; }
+    void changeProgramName (int, const yup::String&) override          {}
+    void getStateInformation (yup::MemoryBlock&) override              {}
     void setStateInformation (const void*, int) override                {}
 };
 
@@ -219,7 +219,7 @@ namespace racknode_test_helpers
             Plugin::Ptr pluginPtr = edit->getPluginCache().createNewPlugin (ToneGeneratorPlugin::xmlTypeName, {});
             track->pluginList.insertPlugin (pluginPtr, 0, nullptr);
             auto tonePlugin = dynamic_cast<ToneGeneratorPlugin*> (pluginPtr.get());
-            tonePlugin->levelParam->setParameter (0.5f, juce::dontSendNotification);
+            tonePlugin->levelParam->setParameter (0.5f, yup::dontSendNotification);
             CHECK (tonePlugin != nullptr);
 
             Plugin::Array plugins;
@@ -228,7 +228,7 @@ namespace racknode_test_helpers
             CHECK (rack != nullptr);
 
             Plugin::Ptr secondToneGen = edit->getPluginCache().createNewPlugin (ToneGeneratorPlugin::xmlTypeName, {});
-            dynamic_cast<ToneGeneratorPlugin*> (secondToneGen.get())->levelParam->setParameter (0.5f, juce::dontSendNotification);
+            dynamic_cast<ToneGeneratorPlugin*> (secondToneGen.get())->levelParam->setParameter (0.5f, yup::dontSendNotification);
             rack->addPlugin (secondToneGen, {}, false);
             rack->addConnection ({}, 0, secondToneGen->itemID, 0);
             rack->addConnection ({}, 1, secondToneGen->itemID, 1);
@@ -265,7 +265,7 @@ namespace racknode_test_helpers
             Plugin::Ptr pluginPtr = edit->getPluginCache().createNewPlugin (ToneGeneratorPlugin::xmlTypeName, {});
             track->pluginList.insertPlugin (pluginPtr, 0, nullptr);
             auto tonePlugin = dynamic_cast<ToneGeneratorPlugin*> (pluginPtr.get());
-            tonePlugin->levelParam->setParameter (0.5f, juce::dontSendNotification);
+            tonePlugin->levelParam->setParameter (0.5f, yup::dontSendNotification);
             CHECK (tonePlugin != nullptr);
 
             Plugin::Array plugins;
@@ -274,7 +274,7 @@ namespace racknode_test_helpers
             CHECK (rack != nullptr);
 
             Plugin::Ptr secondToneGen = edit->getPluginCache().createNewPlugin (ToneGeneratorPlugin::xmlTypeName, {});
-            dynamic_cast<ToneGeneratorPlugin*> (secondToneGen.get())->levelParam->setParameter (0.5f, juce::dontSendNotification);
+            dynamic_cast<ToneGeneratorPlugin*> (secondToneGen.get())->levelParam->setParameter (0.5f, yup::dontSendNotification);
 
             Plugin::Ptr latencyPlugin = edit->getPluginCache().createNewPlugin (LatencyPlugin::xmlTypeName, {});
             const double latencyTimeInSeconds = 0.5f;
@@ -307,7 +307,7 @@ namespace racknode_test_helpers
                 auto rackProcessor = std::make_unique<RackNodePlayer<NodePlayerType>> (std::move (rackNode), testSetup.sampleRate, testSetup.blockSize);
 
                 auto testContext = createTestContext (std::move (rackProcessor), testSetup, 2, 5.0);
-                const int latencyNumSamples = juce::roundToInt (latencyTimeInSeconds * testSetup.sampleRate);
+                const int latencyNumSamples = yup::roundToInt (latencyTimeInSeconds * testSetup.sampleRate);
                 expectAudioBuffer (testContext->buffer, 0, latencyNumSamples, 0.0f, 0.0f, 1.0f, 0.707f);
                 expectAudioBuffer (testContext->buffer, 1, latencyNumSamples, 0.0f, 0.0f, 1.0f, 0.707f);
             }
@@ -335,7 +335,7 @@ namespace racknode_test_helpers
             rack->addConnection (vol2Plugin->itemID, 1, {}, 1);
             CHECK_EQ (rack->getConnections().size(), 4);
 
-            dynamic_cast<ToneGeneratorPlugin*> (tonePlugin.get())->levelParam->setParameter (0.5f, juce::dontSendNotification);
+            dynamic_cast<ToneGeneratorPlugin*> (tonePlugin.get())->levelParam->setParameter (0.5f, yup::dontSendNotification);
 
             // Process Rack
             {
@@ -414,7 +414,7 @@ namespace racknode_test_helpers
 
                     Plugin::Ptr latencyPlugin = edit->getPluginCache().createNewPlugin (LatencyPlugin::xmlTypeName, {});
                     const double latencyTimeInSeconds = 0.5f;
-                    const int latencyNumSamples = juce::roundToInt (latencyTimeInSeconds * testSetup.sampleRate);
+                    const int latencyNumSamples = yup::roundToInt (latencyTimeInSeconds * testSetup.sampleRate);
                     dynamic_cast<LatencyPlugin*> (latencyPlugin.get())->latencyTimeSeconds = latencyTimeInSeconds;
 
                     rack->addPlugin (latencyPlugin, {}, false);
@@ -534,10 +534,10 @@ namespace racknode_test_helpers
             CHECK (rack->getPlugins().getFirst() == pluginPtr.get());
             CHECK_EQ (rack->getConnections().size(), 6);
 
-            auto modifier = rack->getModifierList().insertModifier (juce::ValueTree (IDs::LFO), 0, nullptr);
+            auto modifier = rack->getModifierList().insertModifier (yup::ValueTree (IDs::LFO), 0, nullptr);
             auto lfoModifier = dynamic_cast<LFOModifier*> (modifier.get());
-            lfoModifier->depthParam->setParameter (0.0f, juce::dontSendNotification);
-            lfoModifier->offsetParam->setParameter (0.5f, juce::dontSendNotification);
+            lfoModifier->depthParam->setParameter (0.0f, yup::dontSendNotification);
+            lfoModifier->offsetParam->setParameter (0.5f, yup::dontSendNotification);
             CHECK (std::abs (lfoModifier->depthParam->getCurrentValue() - 0.0f) <= 0.001f);
             CHECK (std::abs (lfoModifier->offsetParam->getCurrentValue() - 0.5f) <= 0.001f);
 
@@ -586,10 +586,10 @@ namespace racknode_test_helpers
             CHECK (rack->getPlugins().getFirst() == pluginPtr.get());
             CHECK_EQ (rack->getConnections().size(), 6);
 
-            auto modifier = rack->getModifierList().insertModifier (juce::ValueTree (IDs::ENVELOPEFOLLOWER), 0, nullptr);
+            auto modifier = rack->getModifierList().insertModifier (yup::ValueTree (IDs::ENVELOPEFOLLOWER), 0, nullptr);
             auto envelopeModifier = dynamic_cast<EnvelopeFollowerModifier*> (modifier.get());
-            envelopeModifier->attackParam->setParameter (envelopeModifier->attackParam->valueRange.start, juce::dontSendNotification);
-            envelopeModifier->releaseParam->setParameter (envelopeModifier->releaseParam->valueRange.end, juce::dontSendNotification);
+            envelopeModifier->attackParam->setParameter (envelopeModifier->attackParam->valueRange.start, yup::dontSendNotification);
+            envelopeModifier->releaseParam->setParameter (envelopeModifier->releaseParam->valueRange.end, yup::dontSendNotification);
             CHECK (std::abs (envelopeModifier->attackParam->getCurrentValue() - 1.0f) <= 0.001f);
             CHECK (std::abs (envelopeModifier->releaseParam->getCurrentValue() - 5000.0f) <= 0.001f);
 
@@ -630,7 +630,7 @@ namespace racknode_test_helpers
                #if 0
                 ignoreUnused (testContext);
                 // Trim the first 0.1s as the envelope ramps up
-                const juce::Range<int> sampleRange (roundToInt (0.5 * ts.sampleRate), roundToInt (5.0 * ts.sampleRate));
+                const yup::Range<int> sampleRange (roundToInt (0.5 * ts.sampleRate), roundToInt (5.0 * ts.sampleRate));
                 expectAudioBuffer (testContext->buffer, 0, sampleRange, 0.5f, 0.353f);
                #endif
             }
@@ -650,9 +650,9 @@ namespace racknode_test_helpers
 
         for (auto setup : getTestSetups())
         {
-            MESSAGE (juce::String ("Test setup: sample rate SR, block size BS, random blocks RND")
-                        .replace ("SR", juce::String (setup.sampleRate))
-                        .replace ("BS", juce::String (setup.blockSize))
+            MESSAGE (yup::String ("Test setup: sample rate SR, block size BS, random blocks RND")
+                        .replace ("SR", yup::String (setup.sampleRate))
+                        .replace ("BS", yup::String (setup.blockSize))
                         .replace ("RND", setup.randomiseBlockSizes ? "Y" : "N").toRawUTF8());
 
             // Rack tests
@@ -662,8 +662,8 @@ namespace racknode_test_helpers
         }
 
         auto elapsed = std::chrono::high_resolution_clock::now() - start;
-        MESSAGE (juce::String ("Tests for ") * juce::String (typeid (NodePlayerType).name()) * " - "
-                 * juce::String (std::chrono::duration_cast<std::chrono::milliseconds> (elapsed).count()) * "ms");
+        MESSAGE (yup::String ("Tests for ") * yup::String (typeid (NodePlayerType).name()) * " - "
+                 * yup::String (std::chrono::duration_cast<std::chrono::milliseconds> (elapsed).count()) * "ms");
     }
 } // namespace racknode_test_helpers
 
@@ -691,8 +691,8 @@ TEST_CASE ("RackNode: ExternalPlugin multi-bus outputs all route correctly")
     auto prevCallback = pm.createPluginInstance;
 
     pm.createPluginInstance =
-        [&] (const juce::PluginDescription& d, double, int, juce::String&)
-        -> std::unique_ptr<juce::AudioPluginInstance>
+        [&] (const yup::PluginDescription& d, double, int, yup::String&)
+        -> std::unique_ptr<yup::AudioPluginInstance>
         {
             if (d.name == "MultiOutTestPlugin")
                 return std::make_unique<MultiOutTestPlugin>();

@@ -20,18 +20,18 @@ public:
     static const char* getPluginName()                  { return NEEDS_TRANS("Chorus"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return TRANS("Chorus"); }
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getShortName (int) override            { return getName(); }
+    yup::String getName() const override               { return TRANS("Chorus"); }
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getShortName (int) override            { return getName(); }
 
-    int getNumOutputChannelsGivenInputs (int numInputChannels) override { return juce::jmin (numInputChannels, 2); }
+    int getNumOutputChannelsGivenInputs (int numInputChannels) override { return yup::jmin (numInputChannels, 2); }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
-    juce::String getSelectableDescription() override    { return TRANS("Chorus Plugin"); }
+    yup::String getSelectableDescription() override    { return TRANS("Chorus Plugin"); }
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     juce::CachedValue<float> depthMs, width, mixProportion, speedHz;
 
@@ -40,7 +40,7 @@ private:
     DelayBufferBase delayBuffer;
     float phase = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChorusPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChorusPlugin)
 };
 
 } // namespace tracktion::inline engine

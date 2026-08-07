@@ -37,7 +37,7 @@ public:
 
     void prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo&) override;
     bool isReadyToProcess() override;
-    void prefetchBlock (juce::Range<int64_t>) override;
+    void prefetchBlock (yup::Range<int64_t>) override;
     void process (ProcessContext&) override;
 
 private:

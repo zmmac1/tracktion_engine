@@ -24,22 +24,22 @@ public:
     static const char* getPluginName()              { return NEEDS_TRANS("4-Band Equaliser"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override                 { return TRANS("4-Band Equaliser"); }
-    juce::String getPluginType() override           { return xmlTypeName; }
-    juce::String getShortName (int) override        { return "EQ"; }
-    juce::String getTooltip() override;
+    yup::String getName() const override                 { return TRANS("4-Band Equaliser"); }
+    yup::String getPluginType() override           { return xmlTypeName; }
+    yup::String getShortName (int) override        { return "EQ"; }
+    yup::String getTooltip() override;
 
-    int getNumOutputChannelsGivenInputs (int numInputChannels) override { return juce::jmin (numInputChannels, (int) EQ_CHANS); }
+    int getNumOutputChannelsGivenInputs (int numInputChannels) override { return yup::jmin (numInputChannels, (int) EQ_CHANS); }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
 
-    juce::String getSelectableDescription() override    { return TRANS("4-Band Equaliser Plugin"); }
+    yup::String getSelectableDescription() override    { return TRANS("4-Band Equaliser Plugin"); }
 
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
 
     void resetToDefault();
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     static constexpr float minFreq = 20.0f;
     static constexpr float maxFreq = 20000.0f;
@@ -48,18 +48,18 @@ public:
     static constexpr float minQ = 0.1f;
     static constexpr float maxQ = 4.0f;
 
-    void setLowGain  (float v)  { loGain  ->setParameter (juce::jlimit (minGain, maxGain, v), juce::sendNotification); }
-    void setLowFreq  (float v)  { loFreq  ->setParameter (juce::jlimit (minFreq, maxFreq, v), juce::sendNotification); }
-    void setLowQ     (float v)  { loQ     ->setParameter (juce::jlimit (minQ, maxQ, v), juce::sendNotification); }
-    void setMidGain1 (float v)  { midGain1->setParameter (juce::jlimit (minGain, maxGain, v), juce::sendNotification); }
-    void setMidFreq1 (float v)  { midFreq1->setParameter (juce::jlimit (minFreq, maxFreq, v), juce::sendNotification); }
-    void setMidQ1    (float v)  { midQ1   ->setParameter (juce::jlimit (minQ, maxQ, v), juce::sendNotification); }
-    void setMidGain2 (float v)  { midGain2->setParameter (juce::jlimit (minGain, maxGain, v), juce::sendNotification); }
-    void setMidFreq2 (float v)  { midFreq2->setParameter (juce::jlimit (minFreq, maxFreq, v), juce::sendNotification); }
-    void setMidQ2    (float v)  { midQ2   ->setParameter (juce::jlimit (minQ, maxQ, v), juce::sendNotification); }
-    void setHighGain (float v)  { hiGain  ->setParameter (juce::jlimit (minGain, maxGain, v), juce::sendNotification); }
-    void setHighFreq (float v)  { hiFreq  ->setParameter (juce::jlimit (minFreq, maxFreq, v), juce::sendNotification); }
-    void setHighQ    (float v)  { hiQ     ->setParameter (juce::jlimit (minQ, maxQ, v), juce::sendNotification); }
+    void setLowGain  (float v)  { loGain  ->setParameter (yup::jlimit (minGain, maxGain, v), yup::sendNotification); }
+    void setLowFreq  (float v)  { loFreq  ->setParameter (yup::jlimit (minFreq, maxFreq, v), yup::sendNotification); }
+    void setLowQ     (float v)  { loQ     ->setParameter (yup::jlimit (minQ, maxQ, v), yup::sendNotification); }
+    void setMidGain1 (float v)  { midGain1->setParameter (yup::jlimit (minGain, maxGain, v), yup::sendNotification); }
+    void setMidFreq1 (float v)  { midFreq1->setParameter (yup::jlimit (minFreq, maxFreq, v), yup::sendNotification); }
+    void setMidQ1    (float v)  { midQ1   ->setParameter (yup::jlimit (minQ, maxQ, v), yup::sendNotification); }
+    void setMidGain2 (float v)  { midGain2->setParameter (yup::jlimit (minGain, maxGain, v), yup::sendNotification); }
+    void setMidFreq2 (float v)  { midFreq2->setParameter (yup::jlimit (minFreq, maxFreq, v), yup::sendNotification); }
+    void setMidQ2    (float v)  { midQ2   ->setParameter (yup::jlimit (minQ, maxQ, v), yup::sendNotification); }
+    void setHighGain (float v)  { hiGain  ->setParameter (yup::jlimit (minGain, maxGain, v), yup::sendNotification); }
+    void setHighFreq (float v)  { hiFreq  ->setParameter (yup::jlimit (minFreq, maxFreq, v), yup::sendNotification); }
+    void setHighQ    (float v)  { hiQ     ->setParameter (yup::jlimit (minQ, maxQ, v), yup::sendNotification); }
 
     juce::CachedValue<float> loFreqValue, loGainValue, loQValue,
                              hiFreqValue, hiGainValue, hiQValue,
@@ -81,18 +81,18 @@ private:
     bool curveNeedsUpdating = true;
 
     enum { EQ_CHANS = 2 };
-    juce::IIRFilter low[EQ_CHANS], mid1[EQ_CHANS], mid2[EQ_CHANS], high[EQ_CHANS];
+    yup::IIRFilter low[EQ_CHANS], mid1[EQ_CHANS], mid2[EQ_CHANS], high[EQ_CHANS];
 
     enum { fftOrder = 10 };
-    juce::dsp::FFT fft { fftOrder };
+    yup::dsp::FFT fft { fftOrder };
 
     void updateIIRFilters();
     std::atomic<bool> needToUpdateFilters[4];
-    juce::CriticalSection filterLock;
+    yup::CriticalSection filterLock;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EqualiserPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EqualiserPlugin)
 };
 
 } // namespace tracktion::inline engine

@@ -37,10 +37,10 @@ using BeatRange = RangeType<BeatPosition>;
 
 //==============================================================================
 /** Converts a TimeRange to a range of samples. */
-[[ nodiscard ]] juce::Range<int64_t> toSamples (TimeRange, double sampleRate);
+[[ nodiscard ]] yup::Range<int64_t> toSamples (TimeRange, double sampleRate);
 
 /** Creates a TimeRange from a range of samples. */
-[[ nodiscard ]] TimeRange timeRangeFromSamples (juce::Range<int64_t> sampleRange, double sampleRate);
+[[ nodiscard ]] TimeRange timeRangeFromSamples (yup::Range<int64_t> sampleRange, double sampleRate);
 
 /** Creates a TimeRange from a range of seconds. */
 template<typename SourceRangeType>
@@ -211,7 +211,7 @@ template<> inline BeatDuration fromUnderlyingType<BeatDuration> (double t) { ret
 inline double toUnderlyingType (BeatPosition t) { return t.inBeats(); }
 inline double toUnderlyingType (BeatDuration t) { return t.inBeats(); }
 
-inline TimeRange timeRangeFromSamples (juce::Range<int64_t> r, double sampleRate)
+inline TimeRange timeRangeFromSamples (yup::Range<int64_t> r, double sampleRate)
 {
     return { TimePosition::fromSamples (r.getStart(), sampleRate),
              TimePosition::fromSamples (r.getEnd(), sampleRate) };
@@ -261,7 +261,7 @@ template<typename PositionType> inline constexpr typename RangeType<PositionType
 template<typename PositionType> inline constexpr typename RangeType<PositionType>::Position RangeType<PositionType>::getEnd() const                            { return end; }
 template<typename PositionType> inline constexpr typename RangeType<PositionType>::Duration RangeType<PositionType>::getLength() const                         { return end - start; }
 template<typename PositionType> inline constexpr typename RangeType<PositionType>::Position RangeType<PositionType>::getCentre() const                         { return fromUnderlyingType<Position> ((toUnderlyingType (start) + toUnderlyingType (end)) * 0.5); }
-template<typename PositionType> inline typename RangeType<PositionType>::Position RangeType<PositionType>::clipPosition (Position position) const    { return juce::jlimit (start, end, position); }
+template<typename PositionType> inline typename RangeType<PositionType>::Position RangeType<PositionType>::clipPosition (Position position) const    { return yup::jlimit (start, end, position); }
 
 template<typename PositionType> inline bool RangeType<PositionType>::isEmpty() const                                          { return end <= start; }
 template<typename PositionType> inline bool RangeType<PositionType>::overlaps (const RangeType& other) const                  { return other.start < end && start < other.end; }
@@ -300,7 +300,7 @@ inline RangeType<PositionType> RangeType<PositionType>::constrainRange (RangeTyp
 
     return getLength() <= otherLen
             ? *this
-            : rangeToConstrain.movedToStartAt (juce::jlimit (start, end - otherLen,
+            : rangeToConstrain.movedToStartAt (yup::jlimit (start, end - otherLen,
                                                              rangeToConstrain.getStart()));
 }
 
@@ -359,7 +359,7 @@ inline void RangeType<PositionType>::checkInvariants() const
     jassert (end >= start);
 }
 
-inline juce::Range<int64_t> toSamples (TimeRange r, double sampleRate)
+inline yup::Range<int64_t> toSamples (TimeRange r, double sampleRate)
 {
     return { toSamples (r.getStart(), sampleRate),
              toSamples (r.getEnd(), sampleRate) };

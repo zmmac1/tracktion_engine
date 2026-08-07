@@ -18,10 +18,10 @@ class MidiClip  : public Clip
 public:
     //==============================================================================
     MidiClip() = delete;
-    MidiClip (const juce::ValueTree&, EditItemID, ClipOwner&);
+    MidiClip (const yup::ValueTree&, EditItemID, ClipOwner&);
     ~MidiClip() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<MidiClip>;
+    using Ptr = yup::ReferenceCountedObjectPtr<MidiClip>;
 
     void cloneFrom (Clip*) override;
 
@@ -75,18 +75,18 @@ public:
     QuantisationType& getQuantisation() const noexcept              { return *quantisation; }
     void setQuantisation (const QuantisationType& newType);
 
-    juce::String getGrooveTemplate() const noexcept                 { return grooveTemplate; }
-    void setGrooveTemplate (const juce::String& templateName)       { grooveTemplate = templateName; }
+    yup::String getGrooveTemplate() const noexcept                 { return grooveTemplate; }
+    void setGrooveTemplate (const yup::String& templateName)       { grooveTemplate = templateName; }
 
     bool usesGrooveStrength() const;
 
     float getGrooveStrength() const                                 { return grooveStrength; }
-    void setGrooveStrength (float g)                                { grooveStrength = juce::jlimit (0.0f, 1.0f, g); }
+    void setGrooveStrength (float g)                                { grooveStrength = yup::jlimit (0.0f, 1.0f, g); }
 
     //==============================================================================
-    void mergeInMidiSequence (juce::MidiMessageSequence&, MidiList::NoteAutomationType);
+    void mergeInMidiSequence (yup::MidiMessageSequence&, MidiList::NoteAutomationType);
 
-    void addTake (juce::MidiMessageSequence&, MidiList::NoteAutomationType);
+    void addTake (yup::MidiMessageSequence&, MidiList::NoteAutomationType);
 
     /** This will extend the start time backwards, moving the notes along if this takes the offset below 0.0 */
     void extendStart (TimePosition newStartTime);
@@ -98,12 +98,12 @@ public:
 
         @note notesToUse must be in ascending note start order.
     */
-    void legatoNote (MidiNote& note, const juce::Array<MidiNote*>& notesToUse,
+    void legatoNote (MidiNote& note, const yup::Array<MidiNote*>& notesToUse,
                      BeatPosition maxEndBeat, juce::UndoManager&);
 
     //==============================================================================
     float getVolumeDb() const                       { return level->dbGain.get(); }
-    void setVolumeDb (float v)                      { level->dbGain = juce::jlimit (-100.0f, 0.0f, v); }
+    void setVolumeDb (float v)                      { level->dbGain = yup::jlimit (-100.0f, 0.0f, v); }
 
     bool isSendingBankChanges() const noexcept      { return sendBankChange; }
     void setSendingBankChanges (bool sendBank);
@@ -118,13 +118,13 @@ public:
     bool isMidi() const override                    { return true; }
     void rescale (TimePosition pivotTimeInEdit, double factor) override;
     bool canBeAddedTo (ClipOwner&) override;
-    juce::String getSelectableDescription() override;
-    juce::Colour getDefaultColour() const override;
+    yup::String getSelectableDescription() override;
+    yup::Color getDefaultColor() const override;
 
     void clearTakes() override;
     bool hasAnyTakes() const override               { return channelSequence.size() > 1; }
     int getNumTakes (bool includeComps) override;
-    juce::StringArray getTakeDescriptions() const override;
+    yup::StringArray getTakeDescriptions() const override;
     void setCurrentTake (int takeIndex) override;
     int getCurrentTake() const override             { return currentTake; }
     bool isCurrentTakeComp() override;
@@ -167,20 +167,20 @@ public:
 
     private:
         MidiClip& clip;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedEventsList)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedEventsList)
     };
 
 protected:
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
 
 private:
     //==============================================================================
     friend class MidiNote;
 
     //==============================================================================
-    juce::OwnedArray<MidiList> channelSequence;
+    yup::OwnedArray<MidiList> channelSequence;
     std::shared_ptr<ClipLevel> level { std::make_shared<ClipLevel>() };
     std::shared_ptr<LaunchHandle> launchHandle;
     juce::CachedValue<bool> useClipLaunchQuantisation;
@@ -193,7 +193,7 @@ private:
     juce::CachedValue<BeatDuration> loopLengthBeats, originalLength;
     std::unique_ptr<QuantisationType> quantisation;
     juce::CachedValue<bool> sendPatch, sendBankChange, mpeMode;
-    juce::CachedValue<juce::String> grooveTemplate;
+    juce::CachedValue<yup::String> grooveTemplate;
 
     bool shouldWarnAboutMultiChannel = false;
     SelectedMidiEvents* selectedEvents = nullptr;
@@ -205,11 +205,11 @@ private:
     void setSelectedEvents (SelectedMidiEvents* events)     { selectedEvents = events; }
 
     //==============================================================================
-    MidiList* getMidiListForState (const juce::ValueTree&);
+    MidiList* getMidiListForState (const yup::ValueTree&);
     void clearCachedLoopSequence();
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiClip)
 };
 
 
@@ -222,13 +222,13 @@ private:
     @param offsetToApply        An offset to apply to all MIDI message timestamps
     @param NoteAutomationType   Whether to use standard MIDI or MPE
 */
-void mergeInMidiSequence (MidiClip&, juce::MidiMessageSequence, TimeDuration offsetToApply,
+void mergeInMidiSequence (MidiClip&, yup::MidiMessageSequence, TimeDuration offsetToApply,
                           MidiList::NoteAutomationType);
 
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::MidiClip::LoopedSequenceType>

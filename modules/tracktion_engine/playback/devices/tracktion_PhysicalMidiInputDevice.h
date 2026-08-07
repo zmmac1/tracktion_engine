@@ -13,7 +13,7 @@ namespace tracktion::inline engine {
 class PhysicalMidiInputDevice  : public MidiInputDevice
 {
 public:
-    PhysicalMidiInputDevice (Engine&, juce::MidiDeviceInfo);
+    PhysicalMidiInputDevice (Engine&, yup::MidiDeviceInfo);
     ~PhysicalMidiInputDevice() override;
 
     InputDeviceInstance* createInstance (EditPlaybackContext&) override;
@@ -33,13 +33,13 @@ public:
     bool isUsedForExternalControl() const           { return externalController != nullptr; }
 
     using MidiInputDevice::handleIncomingMidiMessage;
-    void handleIncomingMidiMessage (const juce::MidiMessage&, MPESourceID) override;
+    void handleIncomingMidiMessage (const yup::MidiMessage&, MPESourceID) override;
 
     void loadProps() override;
     void saveProps() override;
 
     DeviceType getDeviceType() const override               { return InputDevice::physicalMidiDevice; }
-    juce::String getDeviceTypeDescription() const override  { return TRANS("MIDI Input"); }
+    yup::String getDeviceTypeDescription() const override  { return TRANS("MIDI Input"); }
 
     bool isTakingControllerMessages = true;
 
@@ -48,7 +48,7 @@ public:
     public:
         virtual ~Listener() {}
 
-        virtual void handleIncomingMidiMessage (const juce::MidiMessage&) {}
+        virtual void handleIncomingMidiMessage (const yup::MidiMessage&) {}
     };
 
     void addListener (Listener* l)
@@ -63,28 +63,28 @@ public:
         listeners.remove (l);
     }
 
-    juce::String openDevice() override;
+    yup::String openDevice() override;
     void closeDevice() override;
 
 private:
-    void handleIncomingMidiMessageInt (const juce::MidiMessage&, MPESourceID);
+    void handleIncomingMidiMessageInt (const yup::MidiMessage&, MPESourceID);
 
     friend struct PhysicalMidiInputDeviceInstance;
-    juce::MidiDeviceInfo deviceInfo;
-    std::unique_ptr<juce::MidiInput> inputDevice;
+    yup::MidiDeviceInfo deviceInfo;
+    std::unique_ptr<yup::MidiInput> inputDevice;
 
     std::unique_ptr<MidiControllerParser> controllerParser;
     ExternalController* externalController = nullptr;
     bool isReadingMidiTimecode = false, isAcceptingMMC = false, ignoreHours = false;
 
-    bool tryToSendTimecode (const juce::MidiMessage&);
+    bool tryToSendTimecode (const yup::MidiMessage&);
 
     ActiveNoteList activeNotes;
 
     RealTimeSpinLock listenerLock;
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PhysicalMidiInputDevice)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PhysicalMidiInputDevice)
 };
 
 } // namespace tracktion::inline engine

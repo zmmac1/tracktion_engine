@@ -36,8 +36,8 @@ void Clipboard::setContent (std::unique_ptr<ContentType> newContent)
 const Clipboard::ContentType* Clipboard::getContent() const     { return content.get(); }
 bool Clipboard::isEmpty() const                                 { return content == nullptr; }
 
-void Clipboard::addListener (juce::ChangeListener* l)      { broadcaster.addChangeListener (l); }
-void Clipboard::removeListener (juce::ChangeListener* l)   { broadcaster.removeChangeListener (l); }
+void Clipboard::addListener (yup::ChangeListener* l)      { broadcaster.addChangeListener (l); }
+void Clipboard::removeListener (yup::ChangeListener* l)   { broadcaster.removeChangeListener (l); }
 
 Clipboard::ContentType::EditPastingOptions::EditPastingOptions (Edit& e, EditInsertPoint& ip, SelectionManager* sm)
     : edit (e), insertPoint (ip), selectionManager (sm)
@@ -95,16 +95,16 @@ AudioTrack* getOrInsertAudioTrackNearestIndex (Edit& edit, int trackIndex)
     return edit.insertNewAudioTrack (TrackInsertPoint (nullptr, getAllTracks (edit).getLast()), nullptr).get();
 }
 
-static TimePosition doPasteMIDIFileIntoEdit (Edit& edit, const juce::File& midiFile,
+static TimePosition doPasteMIDIFileIntoEdit (Edit& edit, const yup::File& midiFile,
                                               int& targetTrackIndex, int& targetSlotIndex,
                                               TimePosition startTime, bool importTempoChanges,
                                               bool importAsNoteExpression)
 {
     CRASH_TRACER
-    juce::OwnedArray<MidiList> lists;
-    juce::Array<BeatPosition> tempoChangeBeatNumbers;
-    juce::Array<double> bpms;
-    juce::Array<int> numerators, denominators;
+    yup::OwnedArray<MidiList> lists;
+    yup::Array<BeatPosition> tempoChangeBeatNumbers;
+    yup::Array<double> bpms;
+    yup::Array<int> numerators, denominators;
 
     auto newClipEndTime = startTime;
     BeatDuration len;
@@ -145,8 +145,8 @@ static TimePosition doPasteMIDIFileIntoEdit (Edit& edit, const juce::File& midiF
                      || origTimeSig.numerator != numerators.getUnchecked (i))
                 {
                     if (auto timeSig = tempoSequence.insertTimeSig (insertTime))
-                        timeSig->setStringTimeSig (juce::String (numerators.getUnchecked (i))
-                                                    + "/" + juce::String (denominators.getUnchecked (i)));
+                        timeSig->setStringTimeSig (yup::String (numerators.getUnchecked (i))
+                                                    + "/" + yup::String (denominators.getUnchecked (i)));
                 }
             }
         }
@@ -166,7 +166,7 @@ static TimePosition doPasteMIDIFileIntoEdit (Edit& edit, const juce::File& midiF
 
             lastTrackEndTime = listBeatEnd;
 
-            juce::ValueTree clipState (IDs::MIDICLIP);
+            yup::ValueTree clipState (IDs::MIDICLIP);
             clipState.setProperty (IDs::channel, list->getMidiChannel(), nullptr);
 
             if (list->state.isValid())
@@ -227,7 +227,7 @@ static TimePosition doPasteMIDIFileIntoEdit (Edit& edit, const juce::File& midiF
     return newClipEndTime;
 }
 
-inline void pasteMIDIFileIntoEdit (Edit& edit, const juce::File& midiFile,
+inline void pasteMIDIFileIntoEdit (Edit& edit, const yup::File& midiFile,
                                     int targetTrackIndex, int targetSlotIndex,
                                     TimePosition startTime, bool importTempoChanges,
                                     std::function<void (TimePosition, int, int)> callback)
@@ -272,9 +272,9 @@ struct ProjectItemPastingOptions
 // where no persistent ProjectItem exists).
 struct ResolvedSourceItem
 {
-    juce::File file;
-    juce::String name;
-    juce::String type;
+    yup::File file;
+    yup::String name;
+    yup::String type;
     double length = 0.0;
     ProjectItemRef refForClip;
     ProjectItem::Ptr sourceItem;
@@ -300,7 +300,7 @@ static std::optional<ResolvedSourceItem> resolveSourceItem (Engine& engine, cons
 
     if (ref.isAbsolutePath())
     {
-        r.file = juce::File (ref.toString());
+        r.file = yup::File (ref.toString());
 
         if (! r.file.existsAsFile())
             return {};
@@ -343,7 +343,7 @@ static void askUserAboutProjectItemPastingOptions (Engine& engine,
             {
                 ++numAudioClips;
 
-                if (AudioFile (engine, source->file).getMetadata()[juce::WavAudioFormat::bwavTimeReference].isNotEmpty())
+                if (AudioFile (engine, source->file).getMetadata()[yup::WavAudioFormat::bwavTimeReference].isNotEmpty())
                     ++numAudioClipsWithBWAV;
             }
         }
@@ -475,7 +475,7 @@ static void doProjectItemsPaste (const Clipboard::ProjectItems& items,
     int targetTrackIndex = insertPointTrack->getIndexInEditTrackList();
     SelectableList itemsAdded;
 
-    for (auto [index, item] : juce::enumerate (items.itemIDs))
+    for (auto [index, item] : yup::enumerate (items.itemIDs))
     {
         if (auto source = resolveSourceItem (e, item.itemID))
         {
@@ -570,7 +570,7 @@ static void doProjectItemsPaste (const Clipboard::ProjectItems& items,
                 {
                     if (pastingInToClipLauncher)
                     {
-                        if (juce::ModifierKeys::currentModifiers.isCommandDown() || options.preferredLayout == FileDragList::consecutiveTracks)
+                        if (yup::ModifierKeys::getCurrentModifiers().isCommandDown() || options.preferredLayout == FileDragList::consecutiveTracks)
                         {
                             ++targetTrackIndex;
                             auto newTrack = getOrInsertAudioTrackNearestIndex (options.edit, targetTrackIndex);
@@ -663,7 +663,7 @@ bool Clipboard::ProjectItems::pasteIntoProject (Project& project) const
 Clipboard::Clips::Clips() {}
 Clipboard::Clips::~Clips() {}
 
-void Clipboard::Clips::addClip (int trackOffset, const juce::ValueTree& state)
+void Clipboard::Clips::addClip (int trackOffset, const yup::ValueTree& state)
 {
     ClipInfo ci;
     ci.trackOffset = trackOffset;
@@ -724,12 +724,12 @@ void Clipboard::Clips::addSelectedClips (const SelectableList& selectedObjects,
             info.state = clip->state.createCopy();
 
             // Resolve relative source paths to absolute so cross-project paste works
-            auto resolveSourceToAbsolute = [&ed] (juce::ValueTree& v)
+            auto resolveSourceToAbsolute = [&ed] (yup::ValueTree& v)
             {
                 auto sourceStr = v[IDs::source].toString();
 
                 if (sourceStr.isNotEmpty()
-                    && ! juce::File::isAbsolutePath (sourceStr)
+                    && ! yup::File::isAbsolutePath (sourceStr)
                     && ! ProjectItemRef (sourceStr).isProjectItemID())
                 {
                     auto resolved = SourceFileReference::findFileFromString (ed, sourceStr);
@@ -780,7 +780,7 @@ void Clipboard::Clips::addSelectedClips (const SelectableList& selectedObjects,
                 // Also flush these properties so the defaults aren't picked up
                 addValueTreeProperties (info.state,
                                         IDs::proxyAllowed, acb->canUseProxy(),
-                                        IDs::resamplingQuality, juce::VariantConverter<ResamplingQuality>::toVar (acb->getResamplingQuality()));
+                                        IDs::resamplingQuality, yup::VariantConverter<ResamplingQuality>::toVar (acb->getResamplingQuality()));
 
                 // Store ARA plugin state (e.g. Melodyne note edits) so it survives copy/paste
                 if (auto proxy = acb->getARAProxy(); proxy != nullptr && proxy->isValid())
@@ -826,7 +826,7 @@ void Clipboard::Clips::addSelectedClips (const SelectableList& selectedObjects,
         addAutomation (TrackSection::findSections (clipsToPaste), range);
 }
 
-void Clipboard::Clips::addAutomation (const juce::Array<TrackSection>& trackSections, TimeRange range)
+void Clipboard::Clips::addAutomation (const yup::Array<TrackSection>& trackSections, TimeRange range)
 {
     if (range.isEmpty() || trackSections.isEmpty())
         return;
@@ -900,7 +900,7 @@ void Clipboard::Clips::addAutomation (const juce::Array<TrackSection>& trackSect
     }
 }
 
-static void fixClipTimes (juce::ValueTree& state, const Clipboard::Clips::ClipInfo& clip,
+static void fixClipTimes (yup::ValueTree& state, const Clipboard::Clips::ClipInfo& clip,
                           const std::vector<Clipboard::Clips::ClipInfo>& otherClips,
                           TempoSequence& tempoSequence, TimePosition startOffset)
 {
@@ -946,8 +946,8 @@ static void fixClipTimes (juce::ValueTree& state, const Clipboard::Clips::ClipIn
     state.removeProperty (IDs::key, nullptr);
 }
 
-static bool pastePointsToCurve (const std::vector<AutomationCurve::AutomationPoint>& points, juce::Range<float> sourceValueRange,
-                                AutomationCurve& targetCurve, juce::Range<float> targetValueRange,  float defaultValue,
+static bool pastePointsToCurve (const std::vector<AutomationCurve::AutomationPoint>& points, yup::Range<float> sourceValueRange,
+                                AutomationCurve& targetCurve, yup::Range<float> targetValueRange,  float defaultValue,
                                 std::optional<EditTimeRange> targetRange)
 {
     AutomationCurve newCurve (targetCurve.edit, targetCurve.timeBase);
@@ -993,7 +993,7 @@ static bool pastePointsToCurve (const std::vector<AutomationCurve::AutomationPoi
     return false;
 }
 
-static bool pastePointsToCurve (const std::vector<AutomationCurve::AutomationPoint>& points, juce::Range<float> sourceValueRange,
+static bool pastePointsToCurve (const std::vector<AutomationCurve::AutomationPoint>& points, yup::Range<float> sourceValueRange,
                                 AutomatableParameter& targetParameter, AutomationCurve& targetCurve, TimeRange targetRange)
 {
     return pastePointsToCurve (points, sourceValueRange,
@@ -1033,15 +1033,15 @@ bool Clipboard::Clips::pasteIntoEdit (const EditPastingOptions& options) const
         auto newClipState = clip.state.createCopy();
 
         // Re-relativize absolute source paths for the destination edit
-        auto adjustSourcePath = [&options] (juce::ValueTree& v)
+        auto adjustSourcePath = [&options] (yup::ValueTree& v)
         {
             auto sourceStr = v[IDs::source].toString();
 
             if (sourceStr.isNotEmpty()
-                && juce::File::isAbsolutePath (sourceStr)
+                && yup::File::isAbsolutePath (sourceStr)
                 && ! ProjectItemRef (sourceStr).isProjectItemID())
             {
-                juce::File sourceFile (sourceStr);
+                yup::File sourceFile (sourceStr);
 
                 if (sourceFile.existsAsFile())
                     v.setProperty (IDs::source,
@@ -1197,7 +1197,7 @@ bool Clipboard::Clips::pasteIntoEdit (const EditPastingOptions& options) const
 
                     if (auto proxy = acb->getARAProxy(); proxy != nullptr && proxy->isValid())
                     {
-                        juce::MemoryBlock data;
+                        yup::MemoryBlock data;
                         data.fromBase64Encoding (archiveData);
 
                         proxy->restoreARAArchiveForPaste (data, archivedSourceID, archivedModID, docArchiveID);
@@ -1284,7 +1284,7 @@ bool Clipboard::Clips::pasteAfterSelected (Edit& edit, EditInsertPoint& insertPo
     return pasteIntoEdit (options);
 }
 
-static juce::Array<ClipTrack*> findTracksToInsertInto (Edit& edit, EditInsertPoint& insertPoint, SelectionManager& sm)
+static yup::Array<ClipTrack*> findTracksToInsertInto (Edit& edit, EditInsertPoint& insertPoint, SelectionManager& sm)
 {
     auto tracks = sm.getItemsOfType<ClipTrack>();
     bool noFolders = true;
@@ -1338,7 +1338,7 @@ bool Clipboard::Clips::pasteInsertingAtCursorPos (Edit& edit, EditInsertPoint& i
 
     auto cursorPos = edit.getTransport().getPosition();
 
-    juce::Array<Track*> tracksToInsertInto;
+    yup::Array<Track*> tracksToInsertInto;
     for (auto t : tracks)
         tracksToInsertInto.add (t);
 
@@ -1386,7 +1386,7 @@ bool Clipboard::Scenes::pasteIntoEdit (const EditPastingOptions& options) const
 
             options.edit.ensureNumberOfAudioTracks (int (info.clips.size()));
             auto tracks = getAudioTracks (options.edit);
-            for (auto [idx, clip] : juce::enumerate (info.clips))
+            for (auto [idx, clip] : yup::enumerate (info.clips))
             {
                 auto track = tracks[int (idx)];
                 auto slot  = track->getClipSlotList().getClipSlots()[insertIndex];
@@ -1423,7 +1423,7 @@ bool Clipboard::Tracks::pasteIntoEdit (const EditPastingOptions& options) const
 {
     CRASH_TRACER
 
-    juce::Array<Track::Ptr> newTracks;
+    yup::Array<Track::Ptr> newTracks;
     std::map<EditItemID, EditItemID> remappedIDs;
 
     auto targetTrack = options.startTrack;
@@ -1544,12 +1544,12 @@ Clipboard::TempoChanges::TempoChanges (const TempoSequence& ts, TimeRange range)
         changes.insert (changes.begin(),
                         { BeatPosition(),
                           ts.getBpmAt (ts.toTime (startBeat)),
-                          ts.getTempoAt (BeatPosition::fromBeats (juce::roundToInt (startBeat.inBeats()))).getCurve() });
+                          ts.getTempoAt (BeatPosition::fromBeats (yup::roundToInt (startBeat.inBeats()))).getCurve() });
 
     if (! pointAtEnd)
         changes.push_back ({ toPosition (endBeat - startBeat),
                              ts.getBpmAt (ts.toTime (endBeat)),
-                             ts.getTempoAt (BeatPosition::fromBeats (juce::roundToInt (endBeat.inBeats()))).getCurve() });
+                             ts.getTempoAt (BeatPosition::fromBeats (yup::roundToInt (endBeat.inBeats()))).getCurve() });
 }
 
 Clipboard::TempoChanges::~TempoChanges() {}
@@ -1580,7 +1580,7 @@ bool Clipboard::TempoChanges::pasteTempoSequence (TempoSequence& ts, TimeRange t
     ts.insertTempo (ts.toTime (startBeat));
 
     for (auto& tc : changes)
-        ts.insertTempo (BeatPosition::fromBeats (juce::roundToInt ((tc.beat.inBeats() / lengthInBeats.inBeats()) * (endBeat - startBeat).inBeats() + startBeat.inBeats())),
+        ts.insertTempo (BeatPosition::fromBeats (yup::roundToInt ((tc.beat.inBeats() / lengthInBeats.inBeats()) * (endBeat - startBeat).inBeats() + startBeat.inBeats())),
                         tc.bpm, tc.curve);
 
     ts.insertTempo (ts.toTime (endBeat));
@@ -1654,7 +1654,7 @@ TEST_SUITE ("tracktion_engine")
             insertSpaceIntoEdit (*edit, TimeRange (timeToInsertAt, toDuration (lengthInTimeToInsert)));
 
             const auto numBeatsInserted = beatRangeToInsert.getLength();
-            const int numBarsInserted = juce::roundToInt (numBeatsInserted.inBeats() / tempoAtInsertionPoint.getMatchingTimeSig().denominator);
+            const int numBarsInserted = yup::roundToInt (numBeatsInserted.inBeats() / tempoAtInsertionPoint.getMatchingTimeSig().denominator);
             CHECK (std::abs (numBeatsInserted.inBeats() - 8.0) <= 0.0001);
             CHECK (numBarsInserted == 2);
 
@@ -1709,7 +1709,7 @@ TEST_SUITE ("tracktion_engine")
             insertSpaceIntoEditFromBeatRange (*edit, beatRangeToInsert);
 
             const auto numBeatsInserted = beatRangeToInsert.getLength();
-            const int numBarsInserted = juce::roundToInt (numBeatsInserted.inBeats() / tempoAtInsertionPoint.getMatchingTimeSig().denominator);
+            const int numBarsInserted = yup::roundToInt (numBeatsInserted.inBeats() / tempoAtInsertionPoint.getMatchingTimeSig().denominator);
             CHECK (std::abs (numBeatsInserted.inBeats() - 8.0) <= 0.0001);
             CHECK (numBarsInserted == 2);
 
@@ -1761,12 +1761,12 @@ TEST_SUITE ("tracktion_engine")
             {
                 auto tracks = getAudioTracks(*edit);
                 CHECK_EQ (tracks.size(), 6);
-                CHECK_EQ (tracks[0]->getName(), juce::String ("First Original"));
-                CHECK_EQ (tracks[1]->getName(), juce::String ("Second Original"));
-                CHECK_EQ (tracks[2]->getName(), juce::String ("Third Original"));
-                CHECK_EQ (tracks[3]->getName(), juce::String ("First"));
-                CHECK_EQ (tracks[4]->getName(), juce::String ("Second"));
-                CHECK_EQ (tracks[5]->getName(), juce::String ("Third"));
+                CHECK_EQ (tracks[0]->getName(), yup::String ("First Original"));
+                CHECK_EQ (tracks[1]->getName(), yup::String ("Second Original"));
+                CHECK_EQ (tracks[2]->getName(), yup::String ("Third Original"));
+                CHECK_EQ (tracks[3]->getName(), yup::String ("First"));
+                CHECK_EQ (tracks[4]->getName(), yup::String ("Second"));
+                CHECK_EQ (tracks[5]->getName(), yup::String ("Third"));
             }
         }
 
@@ -1806,12 +1806,12 @@ TEST_SUITE ("tracktion_engine")
             {
                 auto tracks = getAudioTracks (*edit);
                 CHECK_EQ (tracks.size(), 6);
-                CHECK_EQ (tracks[0]->getName(), juce::String ("First Original"));
-                CHECK_EQ (tracks[1]->getName(), juce::String ("Second Original"));
-                CHECK_EQ (tracks[2]->getName(), juce::String ("Third Original"));
-                CHECK_EQ (tracks[3]->getName(), juce::String ("First"));
-                CHECK_EQ (tracks[4]->getName(), juce::String ("Second"));
-                CHECK_EQ (tracks[5]->getName(), juce::String ("Third"));
+                CHECK_EQ (tracks[0]->getName(), yup::String ("First Original"));
+                CHECK_EQ (tracks[1]->getName(), yup::String ("Second Original"));
+                CHECK_EQ (tracks[2]->getName(), yup::String ("Third Original"));
+                CHECK_EQ (tracks[3]->getName(), yup::String ("First"));
+                CHECK_EQ (tracks[4]->getName(), yup::String ("Second"));
+                CHECK_EQ (tracks[5]->getName(), yup::String ("Third"));
             }
         }
 
@@ -1840,9 +1840,9 @@ TEST_SUITE ("tracktion_engine")
             {
                 auto subTracks = ft->getInputTracks();
                 CHECK_EQ (subTracks.size(), 3);
-                CHECK_EQ (subTracks[0]->getName(), juce::String ("First"));
-                CHECK_EQ (subTracks[1]->getName(), juce::String ("Second"));
-                CHECK_EQ (subTracks[2]->getName(), juce::String ("Third"));
+                CHECK_EQ (subTracks[0]->getName(), yup::String ("First"));
+                CHECK_EQ (subTracks[1]->getName(), yup::String ("Second"));
+                CHECK_EQ (subTracks[2]->getName(), yup::String ("Third"));
             }
 
             {
@@ -1866,12 +1866,12 @@ TEST_SUITE ("tracktion_engine")
             {
                 auto subTracks = ft->getInputTracks();
                 CHECK_EQ (subTracks.size(), 6);
-                CHECK_EQ (subTracks[0]->getName(), juce::String ("First Original"));
-                CHECK_EQ (subTracks[1]->getName(), juce::String ("Second Original"));
-                CHECK_EQ (subTracks[2]->getName(), juce::String ("Third Original"));
-                CHECK_EQ (subTracks[3]->getName(), juce::String ("First"));
-                CHECK_EQ (subTracks[4]->getName(), juce::String ("Second"));
-                CHECK_EQ (subTracks[5]->getName(), juce::String ("Third"));
+                CHECK_EQ (subTracks[0]->getName(), yup::String ("First Original"));
+                CHECK_EQ (subTracks[1]->getName(), yup::String ("Second Original"));
+                CHECK_EQ (subTracks[2]->getName(), yup::String ("Third Original"));
+                CHECK_EQ (subTracks[3]->getName(), yup::String ("First"));
+                CHECK_EQ (subTracks[4]->getName(), yup::String ("Second"));
+                CHECK_EQ (subTracks[5]->getName(), yup::String ("Third"));
             }
         }
     }
@@ -1948,7 +1948,7 @@ Clipboard::AutomationPoints::AutomationPoints (AutomatableParameter& param, cons
     }
 }
 
-Clipboard::AutomationPoints::AutomationPoints (const AutomationCurve& curve, juce::Range<float> limits, EditTimeRange range, float defaultValue)
+Clipboard::AutomationPoints::AutomationPoints (const AutomationCurve& curve, yup::Range<float> limits, EditTimeRange range, float defaultValue)
     : sourceDuration (toTime (range, getTempoSequence (curve.edit)).getLength())
 {
     CurveSection section;
@@ -1984,7 +1984,7 @@ Clipboard::AutomationPoints::AutomationPoints (const AutomationCurve& curve, juc
 
 Clipboard::AutomationPoints::~AutomationPoints() {}
 
-Clipboard::AutomationPoints::AutomationPoints (const juce::Array<Track*>& tracks, TimeRange range)
+Clipboard::AutomationPoints::AutomationPoints (const yup::Array<Track*>& tracks, TimeRange range)
     : sourceDuration (range.getLength())
 {
     if (tracks.isEmpty())
@@ -2024,7 +2024,7 @@ static int findParameterIndex (AutomatableParameter& param)
     return -1;
 }
 
-Clipboard::AutomationPoints::AutomationPoints (const juce::Array<AutomatableParameter*>& params, TimeRange range)
+Clipboard::AutomationPoints::AutomationPoints (const yup::Array<AutomatableParameter*>& params, TimeRange range)
     : sourceDuration (range.getLength())
 {
     if (params.isEmpty())
@@ -2057,7 +2057,7 @@ bool Clipboard::AutomationPoints::pasteIntoEdit (const EditPastingOptions&) cons
     return false;
 }
 
-bool Clipboard::AutomationPoints::pasteAutomationCurve (AutomationCurve& targetCurve, juce::Range<float> targetValueRange, float targetDefaultValue,
+bool Clipboard::AutomationPoints::pasteAutomationCurve (AutomationCurve& targetCurve, yup::Range<float> targetValueRange, float targetDefaultValue,
                                                         std::optional<EditTimeRange> targetRange) const
 {
     if (curves.empty())
@@ -2086,7 +2086,7 @@ bool Clipboard::AutomationPoints::pasteAutomationCurveAtIndex (AutomatableParame
     return pastePointsToCurve (curveSection.points, curveSection.valueRange, param, targetCurve, targetRange);
 }
 
-bool Clipboard::AutomationPoints::pasteIntoTracks (const juce::Array<Track*>& targetTracks, TimePosition pasteStartTime) const
+bool Clipboard::AutomationPoints::pasteIntoTracks (const yup::Array<Track*>& targetTracks, TimePosition pasteStartTime) const
 {
     if (curves.empty() || targetTracks.isEmpty())
         return false;
@@ -2125,7 +2125,7 @@ bool Clipboard::AutomationPoints::pasteIntoTracks (const juce::Array<Track*>& ta
             continue; // Skip curves for tracks that don't exist in target selection
 
         // Match parameters by index order within each plugin
-        std::map<juce::String, std::vector<const CurveSection*>> curvesByPlugin;
+        std::map<yup::String, std::vector<const CurveSection*>> curvesByPlugin;
 
         for (auto curve : trackCurves)
             curvesByPlugin[curve->pluginName].push_back (curve);
@@ -2165,9 +2165,9 @@ bool Clipboard::AutomationPoints::pasteIntoTracks (const juce::Array<Track*>& ta
 Clipboard::MIDIEvents::MIDIEvents() {}
 Clipboard::MIDIEvents::~MIDIEvents() {}
 
-std::pair<juce::Array<MidiNote*>, juce::Array<MidiControllerEvent*>> Clipboard::MIDIEvents::pasteIntoClip (MidiClip& clip,
-                                                                                                           const juce::Array<MidiNote*>& selectedNotes,
-                                                                                                           const juce::Array<MidiControllerEvent*>& selectedEvents,
+std::pair<yup::Array<MidiNote*>, yup::Array<MidiControllerEvent*>> Clipboard::MIDIEvents::pasteIntoClip (MidiClip& clip,
+                                                                                                           const yup::Array<MidiNote*>& selectedNotes,
+                                                                                                           const yup::Array<MidiControllerEvent*>& selectedEvents,
                                                                                                            TimePosition cursorPosition, const std::function<BeatPosition (BeatPosition)>& snapBeat,
                                                                                                            int destController) const
 {
@@ -2177,13 +2177,13 @@ std::pair<juce::Array<MidiNote*>, juce::Array<MidiControllerEvent*>> Clipboard::
     return { notesAdded, controllersAdded };
 }
 
-juce::Array<MidiNote*> Clipboard::MIDIEvents::pasteNotesIntoClip (MidiClip& clip, const juce::Array<MidiNote*>& selectedNotes,
+yup::Array<MidiNote*> Clipboard::MIDIEvents::pasteNotesIntoClip (MidiClip& clip, const yup::Array<MidiNote*>& selectedNotes,
                                                                   TimePosition cursorPosition, const std::function<BeatPosition (BeatPosition)>& snapBeat) const
 {
     if (notes.empty())
         return {};
 
-    juce::Array<MidiNote> midiNotes;
+    yup::Array<MidiNote> midiNotes;
 
     for (auto& n : notes)
         midiNotes.add (MidiNote (n));
@@ -2232,7 +2232,7 @@ juce::Array<MidiNote*> Clipboard::MIDIEvents::pasteNotesIntoClip (MidiClip& clip
 
     auto& sequence = clip.getSequence();
     auto um = &clip.edit.getUndoManager();
-    juce::Array<MidiNote*> notesAdded;
+    yup::Array<MidiNote*> notesAdded;
 
     for (auto& n : midiNotes)
     {
@@ -2245,16 +2245,16 @@ juce::Array<MidiNote*> Clipboard::MIDIEvents::pasteNotesIntoClip (MidiClip& clip
     return notesAdded;
 }
 
-juce::Array<MidiControllerEvent*> Clipboard::MIDIEvents::pasteControllersIntoClip (MidiClip& clip,
-                                                                                   const juce::Array<MidiNote*>& selectedNotes,
-                                                                                   const juce::Array<MidiControllerEvent*>& selectedEvents,
+yup::Array<MidiControllerEvent*> Clipboard::MIDIEvents::pasteControllersIntoClip (MidiClip& clip,
+                                                                                   const yup::Array<MidiNote*>& selectedNotes,
+                                                                                   const yup::Array<MidiControllerEvent*>& selectedEvents,
                                                                                    TimePosition cursorPosition, const std::function<BeatPosition (BeatPosition)>& snapBeat,
                                                                                    int destController) const
 {
     if (controllers.empty())
         return {};
 
-    juce::Array<MidiControllerEvent> midiEvents;
+    yup::Array<MidiControllerEvent> midiEvents;
 
     for (auto& e : controllers)
         midiEvents.add (MidiControllerEvent (e));
@@ -2262,7 +2262,7 @@ juce::Array<MidiControllerEvent*> Clipboard::MIDIEvents::pasteControllersIntoCli
     if (notes.size() > 0)
         destController = -1;
 
-    juce::Array<int> controllerTypes;
+    yup::Array<int> controllerTypes;
     for (auto& e : midiEvents)
         controllerTypes.addIfNotAlreadyThere (e.getType());
 
@@ -2332,9 +2332,9 @@ juce::Array<MidiControllerEvent*> Clipboard::MIDIEvents::pasteControllersIntoCli
 
     auto& sequence = clip.getSequence();
     auto um = &clip.edit.getUndoManager();
-    juce::Array<MidiControllerEvent*> eventsAdded;
+    yup::Array<MidiControllerEvent*> eventsAdded;
 
-    std::vector<juce::ValueTree> itemsToRemove;
+    std::vector<yup::ValueTree> itemsToRemove;
 
     for (auto evt : sequence.getControllerEvents())
         if (controllerTypes.contains (evt->getType()) && evt->getBeatPosition() >= beatRange.getStart() + deltaBeats && evt->getBeatPosition() <= beatRange.getEnd() + deltaBeats)
@@ -2395,7 +2395,7 @@ bool Clipboard::Pitches::pasteIntoEdit (const EditPastingOptions& options) const
             jassert (pitch->state.getNumChildren() == 0); // this would need handling
 
             copyValueTreeProperties (pitch->state, state, um,
-                                     [] (const juce::Identifier& name) { return name != IDs::startBeat; });
+                                     [] (const yup::Identifier& name) { return name != IDs::startBeat; });
 
             if (options.selectionManager != nullptr)
                 options.selectionManager->addToSelection (*pitch);
@@ -2431,7 +2431,7 @@ bool Clipboard::TimeSigs::pasteIntoEdit (const EditPastingOptions& options) cons
         {
             jassert (timeSig->state.getNumChildren() == 0); // this would need handling
             copyValueTreeProperties (timeSig->state, state, um,
-                                     [] (const juce::Identifier& name) { return name != IDs::startBeat; });
+                                     [] (const yup::Identifier& name) { return name != IDs::startBeat; });
 
             if (options.selectionManager != nullptr)
                 options.selectionManager->addToSelection (*timeSig);
@@ -2521,7 +2521,7 @@ static bool pastePluginIntoTrack (const Plugin::Ptr& newPlugin, EditInsertPoint&
     return false;
 }
 
-static EditItemID::IDMap pasteRackTypesInToEdit (Edit& edit, const std::vector<std::pair<SafeSelectable<Edit>, juce::ValueTree>>& editAndTypeStates)
+static EditItemID::IDMap pasteRackTypesInToEdit (Edit& edit, const std::vector<std::pair<SafeSelectable<Edit>, yup::ValueTree>>& editAndTypeStates)
 {
     EditItemID::IDMap reassignedIDs;
 

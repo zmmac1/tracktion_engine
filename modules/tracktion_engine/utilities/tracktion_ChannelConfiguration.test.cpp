@@ -25,7 +25,7 @@ TEST_SUITE ("tracktion_engine")
                 auto mono = ChannelConfiguration::mono (5);
                 CHECK_EQ (mono.getNumChannels(), 1);
                 CHECK_EQ (mono[0].indexInDevice, 5);
-                CHECK (mono[0].channel == juce::AudioChannelSet::centre);
+                CHECK (mono[0].channel == yup::AudioChannelSet::centre);
             }
 
             {
@@ -33,19 +33,19 @@ TEST_SUITE ("tracktion_engine")
                 CHECK_EQ (stereo.getNumChannels(), 2);
                 CHECK_EQ (stereo[0].indexInDevice, 2);
                 CHECK_EQ (stereo[1].indexInDevice, 3);
-                CHECK (stereo[0].channel == juce::AudioChannelSet::left);
-                CHECK (stereo[1].channel == juce::AudioChannelSet::right);
+                CHECK (stereo[0].channel == yup::AudioChannelSet::left);
+                CHECK (stereo[1].channel == yup::AudioChannelSet::right);
             }
 
             {
                 auto surround = ChannelConfiguration::surround5_1 (0);
                 CHECK_EQ (surround.getNumChannels(), 6);
-                CHECK (surround[0].channel == juce::AudioChannelSet::left);
-                CHECK (surround[1].channel == juce::AudioChannelSet::right);
-                CHECK (surround[2].channel == juce::AudioChannelSet::centre);
-                CHECK (surround[3].channel == juce::AudioChannelSet::LFE);
-                CHECK (surround[4].channel == juce::AudioChannelSet::leftSurround);
-                CHECK (surround[5].channel == juce::AudioChannelSet::rightSurround);
+                CHECK (surround[0].channel == yup::AudioChannelSet::left);
+                CHECK (surround[1].channel == yup::AudioChannelSet::right);
+                CHECK (surround[2].channel == yup::AudioChannelSet::centre);
+                CHECK (surround[3].channel == yup::AudioChannelSet::LFE);
+                CHECK (surround[4].channel == yup::AudioChannelSet::leftSurround);
+                CHECK (surround[5].channel == yup::AudioChannelSet::rightSurround);
             }
 
             {
@@ -100,8 +100,8 @@ TEST_SUITE ("tracktion_engine")
                 CHECK_EQ (restored.getNumChannels(), 2);
                 CHECK_EQ (restored[0].indexInDevice, 2);
                 CHECK_EQ (restored[1].indexInDevice, 3);
-                CHECK (restored[0].channel == juce::AudioChannelSet::left);
-                CHECK (restored[1].channel == juce::AudioChannelSet::right);
+                CHECK (restored[0].channel == yup::AudioChannelSet::left);
+                CHECK (restored[1].channel == yup::AudioChannelSet::right);
             }
 
             {
@@ -188,8 +188,8 @@ TEST_SUITE ("tracktion_engine")
             CHECK_EQ (rev[0].indexInDevice, 1);
             CHECK_EQ (rev[1].indexInDevice, 0);
             // Channel types should be preserved in original order
-            CHECK (rev[0].channel == juce::AudioChannelSet::left);
-            CHECK (rev[1].channel == juce::AudioChannelSet::right);
+            CHECK (rev[0].channel == yup::AudioChannelSet::left);
+            CHECK (rev[1].channel == yup::AudioChannelSet::right);
         }
 
         SUBCASE ("Reversal - 4-channel discrete")
@@ -211,7 +211,7 @@ TEST_SUITE ("tracktion_engine")
 
             CHECK_EQ (rev.getNumChannels(), 1);
             CHECK_EQ (rev[0].indexInDevice, 5);
-            CHECK (rev[0].channel == juce::AudioChannelSet::centre);
+            CHECK (rev[0].channel == yup::AudioChannelSet::centre);
         }
 
         SUBCASE ("Reversal - empty is empty")
@@ -234,12 +234,12 @@ TEST_SUITE ("tracktion_engine")
             auto rev = surround.reversed();
 
             // Channel types should stay in same positions
-            CHECK (rev[0].channel == juce::AudioChannelSet::left);
-            CHECK (rev[1].channel == juce::AudioChannelSet::right);
-            CHECK (rev[2].channel == juce::AudioChannelSet::centre);
-            CHECK (rev[3].channel == juce::AudioChannelSet::LFE);
-            CHECK (rev[4].channel == juce::AudioChannelSet::leftSurround);
-            CHECK (rev[5].channel == juce::AudioChannelSet::rightSurround);
+            CHECK (rev[0].channel == yup::AudioChannelSet::left);
+            CHECK (rev[1].channel == yup::AudioChannelSet::right);
+            CHECK (rev[2].channel == yup::AudioChannelSet::centre);
+            CHECK (rev[3].channel == yup::AudioChannelSet::LFE);
+            CHECK (rev[4].channel == yup::AudioChannelSet::leftSurround);
+            CHECK (rev[5].channel == yup::AudioChannelSet::rightSurround);
 
             // Device indices should be reversed
             CHECK_EQ (rev[0].indexInDevice, 5);
@@ -259,8 +259,8 @@ TEST_SUITE ("tracktion_engine")
             CHECK_EQ (restored.getNumChannels(), 2);
             CHECK_EQ (restored[0].indexInDevice, 1);
             CHECK_EQ (restored[1].indexInDevice, 0);
-            CHECK (restored[0].channel == juce::AudioChannelSet::left);
-            CHECK (restored[1].channel == juce::AudioChannelSet::right);
+            CHECK (restored[0].channel == yup::AudioChannelSet::left);
+            CHECK (restored[1].channel == yup::AudioChannelSet::right);
         }
 
         SUBCASE ("Reversal - non-zero start index")

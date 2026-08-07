@@ -66,7 +66,7 @@ void EditInsertPoint::setNextInsertPointAfterSelected()
     nextInsertIsAfterSelected = true;
 }
 
-void EditInsertPoint::chooseInsertPoint (juce::ReferenceCountedObjectPtr<Track>& track,
+void EditInsertPoint::chooseInsertPoint (yup::ReferenceCountedObjectPtr<Track>& track,
                                          TimePosition& start, bool pasteAfterSelection, SelectionManager* sm)
 {
     return chooseInsertPoint (track, start, pasteAfterSelection, sm,

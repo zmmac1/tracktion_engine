@@ -19,30 +19,30 @@ class SceneList;
     to iterate through each Track's SlotList finding the relevant ClipSlot index.
 */
 class Scene : public Selectable,
-              private juce::ValueTree::Listener
+              private yup::ValueTree::Listener
 {
 public:
     /** Creates a Scene for a given state. */
-    Scene (const juce::ValueTree&, SceneList&);
+    Scene (const yup::ValueTree&, SceneList&);
 
     /** Destructor. */
     ~Scene() override;
 
     int getIndex();
 
-    juce::ValueTree state;
+    yup::ValueTree state;
     Edit& edit;
 
-    juce::CachedValue<juce::String> name;
-    juce::CachedValue<juce::Colour> colour;
+    juce::CachedValue<yup::String> name;
+    juce::CachedValue<yup::Color> colour;
 
     SceneList& sceneList;
 
     /** @internal */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
 private:
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 };
 
 //==============================================================================
@@ -50,15 +50,15 @@ private:
 /**
     Notifies UI components of changes to the scenes and clips
 */
-class SceneWatcher : private juce::ValueTree::Listener,
-                     private juce::Timer
+class SceneWatcher : private yup::ValueTree::Listener,
+                     private yup::Timer
 {
 public:
     /** Creates a SceneWatcher.
         You don't need to create one of these manually, use the instance in SceneList
         @see SceneList::sceneWatcher
     */
-    SceneWatcher (const juce::ValueTree& scenesState, Edit&);
+    SceneWatcher (const yup::ValueTree& scenesState, Edit&);
 
     /** A listener interface. */
     struct Listener
@@ -77,7 +77,7 @@ public:
     void removeListener (Listener*);
 
 private:
-    juce::ValueTree scenesState;
+    yup::ValueTree scenesState;
     Edit& edit;
     uint32_t callback = 0;
 
@@ -98,17 +98,17 @@ private:
 
     std::map<std::pair<int, int>, Value> lastStates;
 
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 
     void checkForScenes();
     RecordingState getRecordingState (ClipSlot& slot);
 
     void timerCallback() override;
 
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SceneWatcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SceneWatcher)
 };
 
 //==============================================================================
@@ -120,7 +120,7 @@ class SceneList : private ValueTreeObjectList<Scene>
 {
 public:
     /** Creates a SceneList for an Edit with a given state. */
-    SceneList (const juce::ValueTree&, Edit&);
+    SceneList (const yup::ValueTree&, Edit&);
 
     /** Destructor. */
     ~SceneList() override;
@@ -129,7 +129,7 @@ public:
     int getNumScenes() { return size(); }
 
     /** Returns the Scenes in the Edit. */
-    juce::Array<Scene*> getScenes();
+    yup::Array<Scene*> getScenes();
 
     //==============================================================================
     /** Adds Scenes to ensure numScenes are preset in the list.
@@ -146,7 +146,7 @@ public:
     /** Deletes a specific Scene. */
     void deleteScene (Scene&);
 
-    juce::ValueTree state;  /**< The state of this SceneList. */
+    yup::ValueTree state;  /**< The state of this SceneList. */
     Edit& edit;             /**< The Edit this SceneList belongs to. */
 
     /** A SceneWatcher you can listen to in order to be notified of changes to Slots. */
@@ -155,9 +155,9 @@ public:
 private:
     //==============================================================================
     /** @internal */
-    bool isSuitableType (const juce::ValueTree&) const override;
+    bool isSuitableType (const yup::ValueTree&) const override;
     /** @internal */
-    Scene* createNewObject (const juce::ValueTree&) override;
+    Scene* createNewObject (const yup::ValueTree&) override;
     /** @internal */
     void deleteObject (Scene*) override;
 

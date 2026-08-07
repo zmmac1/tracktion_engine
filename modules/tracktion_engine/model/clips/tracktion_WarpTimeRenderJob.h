@@ -17,8 +17,8 @@ class WarpTimeRenderJob :   public RenderManager::Job
 {
 public:
     static Ptr getOrCreateRenderJob (AudioClipBase& clip,
-                                     const juce::File& source,
-                                     const juce::File& destination)
+                                     const yup::File& source,
+                                     const yup::File& destination)
     {
         AudioFile targetFile (clip.edit.engine, destination);
 
@@ -48,7 +48,7 @@ protected:
 
             AudioFileWriter writer (proxy, engine.getAudioFileFormatManager().getWavFormat(),
                                     sourceInfo.numChannels, sourceInfo.sampleRate,
-                                    juce::jmax (16, sourceInfo.bitsPerSample),
+                                    yup::jmax (16, sourceInfo.bitsPerSample),
                                     sourceInfo.metadata, 0);
 
             success = writer.isOpen() && proxyInfo->render (engine, source, writer, this, progress);
@@ -67,7 +67,7 @@ protected:
     bool completeRender() override                  { return true; }
 
 private:
-    WarpTimeRenderJob (AudioClipBase& clip, const juce::File& sourceFile, const AudioFile& destination)
+    WarpTimeRenderJob (AudioClipBase& clip, const yup::File& sourceFile, const AudioFile& destination)
         : Job (clip.edit.engine, destination), source (clip.edit.engine, sourceFile)
     {
         auto tm = clip.getTimeStretchMode();
@@ -83,7 +83,7 @@ private:
     bool success = false;
     std::unique_ptr<AudioClipBase::ProxyRenderingInfo> proxyInfo;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpTimeRenderJob)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpTimeRenderJob)
 };
 
 } // namespace tracktion::inline engine

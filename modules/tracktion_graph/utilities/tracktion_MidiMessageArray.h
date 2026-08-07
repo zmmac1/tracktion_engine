@@ -40,23 +40,23 @@ struct MidiMessageArray
         messages.clearQuick();
     }
 
-    void addMidiMessage (const juce::MidiMessage& m, MPESourceID mpeSourceID)
+    void addMidiMessage (const yup::MidiMessage& m, MPESourceID mpeSourceID)
     {
         messages.add ({ m, mpeSourceID });
     }
 
-    void addMidiMessage (juce::MidiMessage&& m, MPESourceID mpeSourceID)
+    void addMidiMessage (yup::MidiMessage&& m, MPESourceID mpeSourceID)
     {
         messages.add ({ std::move (m), mpeSourceID });
     }
 
-    void addMidiMessage (const juce::MidiMessage& m, double time, MPESourceID mpeSourceID)
+    void addMidiMessage (const yup::MidiMessage& m, double time, MPESourceID mpeSourceID)
     {
         messages.add ({ m, mpeSourceID });
         messages.getReference (messages.size() - 1).setTimeStamp (time);
     }
 
-    void addMidiMessage (juce::MidiMessage&& m, double time, MPESourceID mpeSourceID)
+    void addMidiMessage (yup::MidiMessage&& m, double time, MPESourceID mpeSourceID)
     {
         messages.add ({ std::move (m), mpeSourceID });
         messages.getReference (messages.size() - 1).setTimeStamp (time);
@@ -179,7 +179,7 @@ struct MidiMessageArray
         source.messages.removeRange (0, numItemsToTake);
     }
 
-    void mergeFromAndClear (juce::Array<juce::MidiMessage>& source, MPESourceID mpeSourceID)
+    void mergeFromAndClear (yup::Array<yup::MidiMessage>& source, MPESourceID mpeSourceID)
     {
         messages.ensureStorageAllocated (messages.size() + source.size());
 
@@ -223,7 +223,7 @@ struct MidiMessageArray
 
     void sortByTimestamp()
     {
-        choc::sorting::stable_sort (messages.begin(), messages.end(), [] (const juce::MidiMessage& a, const juce::MidiMessage& b)
+        choc::sorting::stable_sort (messages.begin(), messages.end(), [] (const yup::MidiMessage& a, const yup::MidiMessage& b)
         {
             auto t1 = a.getTimeStamp();
             auto t2 = b.getTimeStamp();
@@ -246,7 +246,7 @@ struct MidiMessageArray
 
 
     //==============================================================================
-   #if ! JUCE_GCC
+   #if ! YUP_GCC
     using MidiMessageWithSource [[ deprecated("This type has moved into the parent namespace") ]] = tracktion::engine::MidiMessageWithSource;
    #endif
     using MPESourceID [[ deprecated("This type has moved into the parent namespace") ]] = tracktion::engine::MPESourceID;
@@ -254,7 +254,7 @@ struct MidiMessageArray
     [[ deprecated("Just use a default-constructed MPESourceID instead of this") ]] static constexpr tracktion::engine::MPESourceID notMPE = {};
 
 private:
-    juce::Array<tracktion::engine::MidiMessageWithSource> messages;
+    yup::Array<tracktion::engine::MidiMessageWithSource> messages;
 };
 
 } // namespace tracktion::inline graph

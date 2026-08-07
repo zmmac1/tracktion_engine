@@ -20,17 +20,17 @@ class LAMEManager
 public:
     //==============================================================================
     /** Returns the current LAME file. */
-    static juce::File getLameEncoderExe();
+    static yup::File getLameEncoderExe();
 
     /** Returns the current FFmpeg file. */
-    static juce::File getFFmpegExe();
+    static yup::File getFFmpegExe();
 
     /** Returns the LAME shared library to load when TRACKTION_ENABLE_LIBLAME is set.
         This can be a full path or a bare library name, in which case the platform's
         usual library search path is used.
         @see LibLameEncoderAudioFormat
     */
-    static juce::String getLameSharedLibrary();
+    static yup::String getLameSharedLibrary();
 
     /** Add the LAMEAudioFormat to the AudioFileFormatManager */
     static void registerAudioFormat (AudioFileFormatManager&);
@@ -39,7 +39,7 @@ public:
     static bool lameIsAvailable();
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LAMEManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LAMEManager)
 };
 
 } // namespace tracktion::inline engine

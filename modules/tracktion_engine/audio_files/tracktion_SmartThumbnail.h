@@ -17,8 +17,8 @@ namespace tracktion::inline engine {
     Additionally, if this file is a wav proxy file that's being generated, you can
     use this to find out about its progress.
 */
-class SmartThumbnail   : public juce::AudioThumbnailBase,
-                         private juce::Timer
+class SmartThumbnail   : public yup::AudioThumbnailBase,
+                         private yup::Timer
 {
 public:
     //==============================================================================
@@ -27,7 +27,7 @@ public:
         You can optionally supply an Edit to use its temporary directory for the
         thumbnail file storage.
     */
-    SmartThumbnail (Engine&, const AudioFile&, juce::Component& componentToRepaint, Edit*);
+    SmartThumbnail (Engine&, const AudioFile&, yup::Component& componentToRepaint, Edit*);
 
     /** Creates a SmartThumbnail for an AudioFile which will automatically repaint a
         Component as it it loaded.
@@ -35,8 +35,8 @@ public:
         thumbnail file storage.
         @param thumbnailToUse   The thumbnail instance to use if you want custom thumbs
     */
-    SmartThumbnail (Engine&, const AudioFile&, juce::Component& componentToRepaint, Edit*,
-                    std::unique_ptr<juce::AudioThumbnailBase> thumbnailToUse);
+    SmartThumbnail (Engine&, const AudioFile&, yup::Component& componentToRepaint, Edit*,
+                    std::unique_ptr<yup::AudioThumbnailBase> thumbnailToUse);
 
     /** Destructor. */
     ~SmartThumbnail() override;
@@ -62,11 +62,11 @@ public:
 
     //==============================================================================
     /** Draws one of the channels, optionally using a hi-res algorithm. */
-    void drawChannel (juce::Graphics&, juce::Rectangle<int>,
+    void drawChannel (yup::Graphics&, yup::Rectangle<int>,
                       TimeRange, int channelNum, float verticalZoomFactor);
 
     /** Draws all of the channels, optionally using a hi-res algorithm. */
-    void drawChannels (juce::Graphics&, juce::Rectangle<int>,
+    void drawChannels (yup::Graphics&, yup::Rectangle<int>,
                        TimeRange, float verticalZoomFactor);
 
     /** Returns the proportion of the thumbnail that has been generated. */
@@ -76,13 +76,13 @@ public:
     /** @internal. */
     void clear() override;
     /** @internal. */
-    bool setSource (juce::InputSource*) override;
+    bool setSource (yup::InputSource*) override;
     /** @internal. */
-    void setReader (juce::AudioFormatReader*, juce::int64 hashCode) override;
+    void setReader (yup::AudioFormatReader*, yup::int64 hashCode) override;
     /** @internal. */
-    bool loadFrom (juce::InputStream&) override;
+    bool loadFrom (yup::InputStream&) override;
     /** @internal. */
-    void saveTo (juce::OutputStream&) const override;
+    void saveTo (yup::OutputStream&) const override;
     /** @internal. */
     int getNumChannels() const noexcept override;
     /** @internal. */
@@ -90,18 +90,18 @@ public:
     /** @internal. */
     bool isFullyLoaded() const noexcept override;
     /** @internal. */
-    juce::int64 getNumSamplesFinished() const noexcept override;
+    yup::int64 getNumSamplesFinished() const noexcept override;
     /** @internal. */
     float getApproximatePeak() const override;
     /** @internal. */
     void getApproximateMinMax (double startTime, double endTime, int channelIndex,
                                float& minValue, float& maxValue) const noexcept override;
     /** @internal. */
-    juce::int64 getHashCode() const override;
+    yup::int64 getHashCode() const override;
     /** @internal. */
-    void reset (int numChannels, double sampleRate, juce::int64 totalSamplesInSource) override;
+    void reset (int numChannels, double sampleRate, yup::int64 totalSamplesInSource) override;
     /** @internal. */
-    void addBlock (juce::int64 sampleNumberInSource, const juce::AudioBuffer<float>&,
+    void addBlock (yup::int64 sampleNumberInSource, const yup::AudioBuffer<float>&,
                    int startOffsetInBuffer, int numSamples) override;
 
     //==============================================================================
@@ -117,8 +117,8 @@ public:
 
 private:
     //==============================================================================
-    std::unique_ptr<juce::AudioThumbnailBase> thumbnail;
-    juce::Component& component;
+    std::unique_ptr<yup::AudioThumbnailBase> thumbnail;
+    yup::Component& component;
     bool wasGeneratingProxy = false;
     std::atomic<bool> thumbnailIsInvalid { true };
     float lastProgress = 0.0f;
@@ -130,21 +130,21 @@ private:
     static bool enabled;
 
     /** @internal. */
-    void drawChannel (juce::Graphics&,
-                      const juce::Rectangle<int>&,
+    void drawChannel (yup::Graphics&,
+                      const yup::Rectangle<int>&,
                       double startTimeSeconds,
                       double endTimeSeconds,
                       int channelNum,
                       float verticalZoomFactor) override;
     /** @internal. */
-    void drawChannels (juce::Graphics&,
-                       const juce::Rectangle<int>&,
+    void drawChannels (yup::Graphics&,
+                       const yup::Rectangle<int>&,
                        double startTimeSeconds,
                        double endTimeSeconds,
                        float verticalZoomFactor) override;
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE(SmartThumbnail)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SmartThumbnail)
+    YUP_DECLARE_WEAK_REFERENCEABLE(SmartThumbnail)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SmartThumbnail)
 };
 
 } // namespace tracktion::inline engine

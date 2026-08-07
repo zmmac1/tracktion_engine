@@ -10,18 +10,18 @@
 
 namespace tracktion::inline engine {
 
-PatchBayPlugin::Wire::Wire (const juce::ValueTree& v, juce::UndoManager* um)  : state (v)
+PatchBayPlugin::Wire::Wire (const yup::ValueTree& v, juce::UndoManager* um)  : state (v)
 {
     sourceChannelIndex.referTo (state, IDs::srcChan, um);
     destChannelIndex.referTo (state, IDs::dstChan, um);
     gainDb.referTo (state, IDs::gainDb, um);
 }
 
-struct PatchBayPlugin::WireList  : public ValueTreeObjectList<PatchBayPlugin::Wire, juce::CriticalSection>,
-                                   private juce::AsyncUpdater
+struct PatchBayPlugin::WireList  : public ValueTreeObjectList<PatchBayPlugin::Wire, yup::CriticalSection>,
+                                   private yup::AsyncUpdater
 {
-    WireList (PatchBayPlugin& pb, const juce::ValueTree& parentTree)
-        : ValueTreeObjectList<Wire, juce::CriticalSection> (parentTree), patchbay (pb)
+    WireList (PatchBayPlugin& pb, const yup::ValueTree& parentTree)
+        : ValueTreeObjectList<Wire, yup::CriticalSection> (parentTree), patchbay (pb)
     {
         rebuildObjects();
     }
@@ -31,14 +31,14 @@ struct PatchBayPlugin::WireList  : public ValueTreeObjectList<PatchBayPlugin::Wi
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override { return v.hasType (IDs::CONNECTION); }
-    Wire* createNewObject (const juce::ValueTree& v) override     { return new Wire (v, patchbay.getUndoManager()); }
+    bool isSuitableType (const yup::ValueTree& v) const override { return v.hasType (IDs::CONNECTION); }
+    Wire* createNewObject (const yup::ValueTree& v) override     { return new Wire (v, patchbay.getUndoManager()); }
     void deleteObject (Wire* w) override                          { delete w; }
 
     void newObjectAdded (Wire*) override                    { triggerAsyncUpdate(); }
     void objectRemoved (Wire*) override                     { triggerAsyncUpdate(); }
     void objectOrderChanged() override                      {}
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override  { triggerAsyncUpdate(); }
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override  { triggerAsyncUpdate(); }
 
     void handleAsyncUpdate() override
     {
@@ -73,7 +73,7 @@ int PatchBayPlugin::getNumOutputChannelsGivenInputs (int numInputChannels)
 {
     int maxChan = numInputChannels;
 
-    const juce::ScopedLock sl (list->arrayLock);
+    const yup::ScopedLock sl (list->arrayLock);
 
     for (auto w : list->objects)
         if (w->sourceChannelIndex < numInputChannels)
@@ -149,10 +149,10 @@ int PatchBayPlugin::getNumOutputChannelsFromChain() const
     return numInputChans;
 }
 
-void PatchBayPlugin::getChannelNames (juce::StringArray* ins,
-                                      juce::StringArray* outs)
+void PatchBayPlugin::getChannelNames (yup::StringArray* ins,
+                                      yup::StringArray* outs)
 {
-    auto addNames = [] (juce::StringArray* arr, int count)
+    auto addNames = [] (yup::StringArray* arr, int count)
     {
         if (arr == nullptr)
             return;
@@ -169,7 +169,7 @@ void PatchBayPlugin::getChannelNames (juce::StringArray* ins,
         else
         {
             for (int i = 0; i < count; ++i)
-                arr->add (TRANS("Channel") + " " + juce::String (i + 1));
+                arr->add (TRANS("Channel") + " " + yup::String (i + 1));
         }
     };
 
@@ -197,7 +197,7 @@ void PatchBayPlugin::applyToBuffer (const PluginRenderContext& fc)
         int numOutputChans = numInputChans;
 
         {
-            const juce::ScopedLock sl (list->arrayLock);
+            const yup::ScopedLock sl (list->arrayLock);
 
             for (auto w : list->objects)
                 numOutputChans = std::max (numOutputChans, w->destChannelIndex.get() + 1);
@@ -208,7 +208,7 @@ void PatchBayPlugin::applyToBuffer (const PluginRenderContext& fc)
         outputBuffer.clear();
 
         {
-            const juce::ScopedLock sl (list->arrayLock);
+            const yup::ScopedLock sl (list->arrayLock);
 
             for (auto w : list->objects)
             {
@@ -255,7 +255,7 @@ void PatchBayPlugin::breakConnection (int inputChannel, int outputChannel)
     }
 }
 
-void PatchBayPlugin::valueTreeParentChanged (juce::ValueTree& v)
+void PatchBayPlugin::valueTreeParentChanged (yup::ValueTree& v)
 {
     ValueTreeAllEventListener::valueTreeParentChanged (v);
 

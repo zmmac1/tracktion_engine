@@ -24,18 +24,18 @@ namespace node_rendering_benchmark_helpers
     struct EditTestContext
     {
         std::unique_ptr<Edit> edit;
-        std::vector<std::unique_ptr<juce::TemporaryFile>> files;
+        std::vector<std::unique_ptr<yup::TemporaryFile>> files;
     };
 
-    static EditTestContext createBenchmarkEditContext (Engine& engine, int numTracks, int numFilesPerTrack, double durationOfFile, double sampleRate, juce::Random& r, bool useSingleFile)
+    static EditTestContext createBenchmarkEditContext (Engine& engine, int numTracks, int numFilesPerTrack, double durationOfFile, double sampleRate, yup::Random& r, bool useSingleFile)
     {
         auto edit = Edit::createSingleTrackEdit (engine);
-        std::vector<std::unique_ptr<juce::TemporaryFile>> files;
+        std::vector<std::unique_ptr<yup::TemporaryFile>> files;
 
         edit->ensureNumberOfAudioTracks (numTracks);
 
         if (useSingleFile)
-            files.push_back (tracktion::graph::test_utilities::getSinFile<juce::WavAudioFormat> (sampleRate, durationOfFile, 2, 220.0f));
+            files.push_back (tracktion::graph::test_utilities::getSinFile<yup::WavAudioFormat> (sampleRate, durationOfFile, 2, 220.0f));
 
         for (auto t : getAudioTracks (*edit))
         {
@@ -44,7 +44,7 @@ namespace node_rendering_benchmark_helpers
                 if (! useSingleFile)
                 {
                     const float frequency = (float) r.nextInt ({ 110, 880 });
-                    auto file = tracktion::graph::test_utilities::getSinFile<juce::WavAudioFormat> (sampleRate, durationOfFile, 2, frequency);
+                    auto file = tracktion::graph::test_utilities::getSinFile<yup::WavAudioFormat> (sampleRate, durationOfFile, 2, frequency);
                     files.push_back (std::move (file));
                 }
 
@@ -69,7 +69,7 @@ namespace node_rendering_benchmark_helpers
         using namespace tracktion::graph::test_utilities;
         auto& engine = *tracktion::engine::Engine::getEngines()[0];
         const auto description = benchmark_utilities::getDescription (opts)
-                                    + juce::String (useSingleFile ? ", single file" : ", multiple files");
+                                    + yup::String (useSingleFile ? ", single file" : ", multiple files");
 
         tracktion::graph::PlayHead playHead;
         tracktion::graph::PlayHeadState playHeadState { playHead };
@@ -121,7 +121,7 @@ TEST_CASE ("Node Benchmarks")
         runWaveRendering (fileDuration, 20, 12, singleFile, opts);
 
         {
-            const juce::ScopedValueSetter svs (opts.shareNodeMemory, ShareNodeMemory::yes);
+            const yup::ScopedValueSetter svs (opts.shareNodeMemory, ShareNodeMemory::yes);
             runWaveRendering (fileDuration, 20, 12, singleFile, opts);
         }
 
@@ -173,7 +173,7 @@ TEST_SUITE ("tracktion_engine")
 
 TEST_CASE ("Resampling Benchmarks")
 {
-    auto runResamplingRendering = [] (juce::String qualityName, ResamplingQuality quality)
+    auto runResamplingRendering = [] (yup::String qualityName, ResamplingQuality quality)
     {
         constexpr double fileSampleRate = 96000.0;
         constexpr double playbackSampleRate = 44100.0;
@@ -187,7 +187,7 @@ TEST_CASE ("Resampling Benchmarks")
         auto t = getAudioTracks (*edit)[0];
 
         const auto durationOfFile = 30s;
-        auto sinFile = getSinFile<juce::WavAudioFormat> (fileSampleRate, 30.0, 2, 220.0f);
+        auto sinFile = getSinFile<yup::WavAudioFormat> (fileSampleRate, 30.0, 2, 220.0f);
         const auto timeRange = TimeRange (0s, TimePosition (durationOfFile));
         auto waveClip = t->insertWaveClip (sinFile->getFile().getFileName(), sinFile->getFile(),
                                            {{ timeRange }}, false);

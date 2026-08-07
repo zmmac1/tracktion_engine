@@ -88,14 +88,14 @@ void NovationRemoteSl::shutDownDevice()
 
 void NovationRemoteSl::setRightMode (RightMode rm)
 {
-    auto m = juce::MidiMessage::controllerEvent (1, 0x55, 0);
+    auto m = yup::MidiMessage::controllerEvent (1, 0x55, 0);
 
     switch (rightMode)
     {
-        case rmVol:  m = juce::MidiMessage::controllerEvent (1, 0x55, 0); break;
-        case rmPan:  m = juce::MidiMessage::controllerEvent (1, 0x55, 0); break;
-        case rmMute: m = juce::MidiMessage::controllerEvent (1, 0x56, 0); break;
-        case rmSolo: m = juce::MidiMessage::controllerEvent (1, 0x57, 0); break;
+        case rmVol:  m = yup::MidiMessage::controllerEvent (1, 0x55, 0); break;
+        case rmPan:  m = yup::MidiMessage::controllerEvent (1, 0x55, 0); break;
+        case rmMute: m = yup::MidiMessage::controllerEvent (1, 0x56, 0); break;
+        case rmSolo: m = yup::MidiMessage::controllerEvent (1, 0x57, 0); break;
     }
 
     sendMidiCommandToController (0, m);
@@ -104,10 +104,10 @@ void NovationRemoteSl::setRightMode (RightMode rm)
 
     switch (rightMode)
     {
-        case rmVol:  m = juce::MidiMessage::controllerEvent (1, 0x55, 1); break;
-        case rmPan:  m = juce::MidiMessage::controllerEvent (1, 0x55, 1); break;
-        case rmMute: m = juce::MidiMessage::controllerEvent (1, 0x56, 1); break;
-        case rmSolo: m = juce::MidiMessage::controllerEvent (1, 0x57, 1); break;
+        case rmVol:  m = yup::MidiMessage::controllerEvent (1, 0x55, 1); break;
+        case rmPan:  m = yup::MidiMessage::controllerEvent (1, 0x55, 1); break;
+        case rmMute: m = yup::MidiMessage::controllerEvent (1, 0x56, 1); break;
+        case rmSolo: m = yup::MidiMessage::controllerEvent (1, 0x57, 1); break;
     }
 
     sendMidiCommandToController (0, m);
@@ -118,8 +118,8 @@ void NovationRemoteSl::setLeftMode (LeftMode lm)
 {
     switch (leftMode)
     {
-        case lmParam1: sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x51, 0)); break;
-        case lmParam2: sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x53, 0)); break;
+        case lmParam1: sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x51, 0)); break;
+        case lmParam2: sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x53, 0)); break;
         default: break;
     }
 
@@ -139,8 +139,8 @@ void NovationRemoteSl::setLeftMode (LeftMode lm)
 
     switch (leftMode)
     {
-        case lmParam1: sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x51, 1)); break;
-        case lmParam2: sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x53, 1)); break;
+        case lmParam1: sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x51, 1)); break;
+        case lmParam2: sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x53, 1)); break;
         default: break;
     }
 
@@ -151,7 +151,7 @@ void NovationRemoteSl::updateMiscFeatures()
 {
 }
 
-void NovationRemoteSl::acceptMidiMessage (int, const juce::MidiMessage& m)
+void NovationRemoteSl::acceptMidiMessage (int, const yup::MidiMessage& m)
 {
     CRASH_TRACER
 
@@ -172,7 +172,7 @@ void NovationRemoteSl::acceptMidiMessage (int, const juce::MidiMessage& m)
                 if (online)
                 {
                     for (int i = 0; i < 4; ++i)
-                        screenContents[i] = juce::String::repeatedString ("*", 8 * 9);
+                        screenContents[i] = yup::String::repeatedString ("*", 8 * 9);
 
                     refreshLeft (true);
                     refreshRight (true);
@@ -325,7 +325,7 @@ void NovationRemoteSl::acceptMidiMessage (int, const juce::MidiMessage& m)
 
                 if (std::strlen (param[cn - 0x00].label) > 0)
                 {
-                    param[cn - 0x00].value = juce::jlimit (0.0f, 1.0f,
+                    param[cn - 0x00].value = yup::jlimit (0.0f, 1.0f,
                                                            param[cn - 0x00].value + static_cast<float> (m.getControllerValue() - 64) / 150.0f);
 
                     userMovedParameterControl (cn - 0x00, param[cn - 0x00].value);
@@ -467,13 +467,13 @@ void NovationRemoteSl::playStateChanged (bool) {}
 void NovationRemoteSl::recordStateChanged (bool isRecording)
 {
     if (online)
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x4C, isRecording ? 1 : 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x4C, isRecording ? 1 : 0));
 }
 
 void NovationRemoteSl::automationReadModeChanged (bool) {}
 void NovationRemoteSl::automationWriteModeChanged (bool) {}
 
-void NovationRemoteSl::faderBankChanged (int, const juce::StringArray& newNames)
+void NovationRemoteSl::faderBankChanged (int, const yup::StringArray& newNames)
 {
     for (int i = 0; i < 8; ++i)
         trackNames[i] = newNames[i];
@@ -502,7 +502,7 @@ void NovationRemoteSl::clearParameter (int parameterNumber)
         refreshRight (false);
 }
 
-bool NovationRemoteSl::wantsMessage (int, const juce::MidiMessage& m)
+bool NovationRemoteSl::wantsMessage (int, const yup::MidiMessage& m)
 {
     if (m.isController())
     {
@@ -534,7 +534,7 @@ bool NovationRemoteSl::canChangeSelectedPlugin()
     return ! isLocked;
 }
 
-void NovationRemoteSl::currentSelectionChanged (juce::String)
+void NovationRemoteSl::currentSelectionChanged (yup::String)
 {
     if (online)
     {
@@ -566,7 +566,7 @@ void NovationRemoteSl::setLock (bool l, bool w)
     if (isLocked != l || wasLocked != w)
     {
         if (online)
-            sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x50, (l || w) ? 1 : 0));
+            sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x50, (l || w) ? 1 : 0));
 
         isLocked  = l;
         wasLocked = w;
@@ -578,8 +578,8 @@ void NovationRemoteSl::clearLeft()
     if (online)
         sendMidiArray (0, NovationRemoteSL::cmdClearLeft);
 
-    screenContents[0] = juce::String::repeatedString (" ", 8 * 9);
-    screenContents[2] = juce::String::repeatedString (" ", 8 * 9);
+    screenContents[0] = yup::String::repeatedString (" ", 8 * 9);
+    screenContents[2] = yup::String::repeatedString (" ", 8 * 9);
 }
 
 void NovationRemoteSl::clearRight()
@@ -587,23 +587,23 @@ void NovationRemoteSl::clearRight()
     if (online)
         sendMidiArray (0, NovationRemoteSL::cmdClearRight);
 
-    screenContents[1] = juce::String::repeatedString (" ", 8 * 9);
-    screenContents[3] = juce::String::repeatedString (" ", 8 * 9);
+    screenContents[1] = yup::String::repeatedString (" ", 8 * 9);
+    screenContents[3] = yup::String::repeatedString (" ", 8 * 9);
 }
 
 void NovationRemoteSl::clearAllLights()
 {
     if (online)
     {
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x4C, 0));
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x50, 0));
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x51, 0));
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x52, 0));
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x53, 0));
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x54, 0));
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x55, 0));
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x56, 0));
-        sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (1, 0x57, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x4C, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x50, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x51, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x52, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x53, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x54, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x55, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x56, 0));
+        sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (1, 0x57, 0));
     }
 }
 
@@ -637,7 +637,7 @@ void NovationRemoteSl::handleAsyncUpdate()
     {
         if (leftTopDirty)
         {
-            juce::String s;
+            yup::String s;
 
             if (leftMode == lmTracks)
             {
@@ -666,20 +666,20 @@ void NovationRemoteSl::handleAsyncUpdate()
                 }
                 else
                 {
-                    s = juce::String::repeatedString (" ", 9 * 8);
+                    s = yup::String::repeatedString (" ", 9 * 8);
                 }
             }
 
             if (leftMode == lmParam1)
             {
                 for (int i = 0; i < 8; ++i)
-                    s += padAndLimit (juce::String::fromUTF8 (param[i].label), 9);
+                    s += padAndLimit (yup::String::fromUTF8 (param[i].label), 9);
             }
 
             if (leftMode == lmParam2)
             {
                 for (int i = 0; i < 8; ++i)
-                    s += padAndLimit (juce::String::fromUTF8 (param[i + 8].label), 9);
+                    s += padAndLimit (yup::String::fromUTF8 (param[i + 8].label), 9);
             }
 
             drawString(s, 1);
@@ -687,29 +687,29 @@ void NovationRemoteSl::handleAsyncUpdate()
 
         if (leftBottomDirty)
         {
-            juce::String s;
+            yup::String s;
 
             if (leftMode == lmParam1)
             {
                 for (int i = 0; i < 8; ++i)
-                    s += padAndLimit (juce::String::fromUTF8 (param[i].valueDescription), 9);
+                    s += padAndLimit (yup::String::fromUTF8 (param[i].valueDescription), 9);
             }
 
             if (leftMode == lmParam2)
             {
                 for (int i = 0; i < 8; ++i)
-                    s += padAndLimit (juce::String::fromUTF8 (param[i + 8].valueDescription), 9);
+                    s += padAndLimit (yup::String::fromUTF8 (param[i + 8].valueDescription), 9);
             }
 
             if (leftMode == lmTracks || leftMode == lmPlugins)
-                s = juce::String::repeatedString (" ", 9 * 8);
+                s = yup::String::repeatedString (" ", 9 * 8);
 
             drawString(s, 3);
         }
 
         if (rightTopDirty)
         {
-            juce::String s;
+            yup::String s;
 
             for (int i = 0; i < 8; ++i)
                 s += padAndLimit (trackNames[i], 9);
@@ -719,7 +719,7 @@ void NovationRemoteSl::handleAsyncUpdate()
 
         if (rightBottomDirty)
         {
-            juce::String s;
+            yup::String s;
 
             for (int i = 0; i < 8; ++i)
             {
@@ -728,12 +728,12 @@ void NovationRemoteSl::handleAsyncUpdate()
                     switch (rightMode)
                     {
                         case rmVol:
-                            s += padAndLimit (juce::String::formatted ("%.2f db", level[i]), 9);
+                            s += padAndLimit (yup::String::formatted ("%.2f db", level[i]), 9);
                             break;
 
                         case rmPan:
-                            s += padAndLimit (juce::String (std::abs (pan[i]), 2)
-                                                + " " + juce::String (NovationRemoteSL::panLetter (pan[i])), 9);
+                            s += padAndLimit (yup::String (std::abs (pan[i]), 2)
+                                                + " " + yup::String (NovationRemoteSL::panLetter (pan[i])), 9);
                             break;
 
                         case rmSolo:
@@ -766,7 +766,7 @@ void NovationRemoteSl::handleAsyncUpdate()
     rightBottomDirty  = false;
 }
 
-void NovationRemoteSl::drawString (const juce::String& s, int panel)
+void NovationRemoteSl::drawString (const yup::String& s, int panel)
 {
     jassert (s.length() == 9 * 8);
 
@@ -795,7 +795,7 @@ void NovationRemoteSl::drawString (const juce::String& s, int panel)
     auto prnt = s.substring (startMatch, s.length() - endMatch);
 
     auto len = sizeof (NovationRemoteSL::cmdWrite) + 3 + (size_t) prnt.length() + 1;
-    juce::HeapBlock<uint8_t> buffer (len);
+    yup::HeapBlock<uint8_t> buffer (len);
 
     memcpy (buffer, NovationRemoteSL::cmdWrite, sizeof (NovationRemoteSL::cmdWrite));
     buffer[sizeof (NovationRemoteSL::cmdWrite) + 0] = (uint8_t) startMatch;
@@ -812,7 +812,7 @@ void NovationRemoteSl::drawString (const juce::String& s, int panel)
     screenContents[panel - 1] = s;
 }
 
-juce::String NovationRemoteSl::padAndLimit (const juce::String& s, int max)
+yup::String NovationRemoteSl::padAndLimit (const yup::String& s, int max)
 {
     if (s.length() == max)
         return s;
@@ -825,8 +825,8 @@ juce::String NovationRemoteSl::padAndLimit (const juce::String& s, int max)
         int start = (max - s.length()) / 2;
         int end   = (max - s.length()) / 2 + (max - s.length()) % 2;
 
-        return juce::String::repeatedString(" ", start)
-                + s + juce::String::repeatedString(" ", end);
+        return yup::String::repeatedString(" ", start)
+                + s + yup::String::repeatedString(" ", end);
     }
 
     return {};

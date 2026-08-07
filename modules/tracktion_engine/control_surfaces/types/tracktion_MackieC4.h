@@ -13,8 +13,8 @@ namespace tracktion::inline engine {
 class C4Translator;
 
 class MackieC4  : public ControlSurface,
-                  private juce::AsyncUpdater,
-                  private juce::Timer
+                  private yup::AsyncUpdater,
+                  private yup::Timer
 {
 public:
     //==============================================================================
@@ -25,13 +25,13 @@ public:
     void initialiseDevice (bool connect) override;
     void shutDownDevice() override;
     void updateMiscFeatures() override;
-    void acceptMidiMessage (int, const juce::MidiMessage&) override;
-    void currentSelectionChanged (juce::String) override;
+    void acceptMidiMessage (int, const yup::MidiMessage&) override;
+    void currentSelectionChanged (yup::String) override;
     void parameterChanged (int parameterNumber, const ParameterSetting& newValue) override;
     void clearParameter (int parameterNumber) override;
     void moveFader (int channelNum, float newSliderPos) override;
     void movePanPot (int channelNum, float newPan) override;
-    void faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames) override;
+    void faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames) override;
     void moveAux (int channelNum, int auxNum, const char* bus, float newPos) override;
     void clearAux (int channel, int auxNum) override;
     void channelLevelChanged (int channel, std::span<const float> levels) override;
@@ -96,10 +96,10 @@ private:
     void turnOffPanPotLights();
     void setPotPosition (int potNumber, float value);
     void lightUpPotButton (int buttonNum, bool);
-    void setDisplayText (int potNumber, int row, juce::String);
+    void setDisplayText (int potNumber, int row, yup::String);
     void lightUpButton (int buttonNum, bool on);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MackieC4)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MackieC4)
 };
 
 } // namespace tracktion::inline engine

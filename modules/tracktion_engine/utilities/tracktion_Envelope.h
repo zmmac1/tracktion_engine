@@ -10,7 +10,7 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-// An ADSR Envelope with exponential curves with the same API as the juce::ADSR
+// An ADSR Envelope with exponential curves with the same API as the yup::ADSR
 class ExpEnvelope
 {
 public:
@@ -140,7 +140,7 @@ public:
         @see getNextSample
      */
     template<typename FloatType>
-    void applyEnvelopeToBuffer (juce::AudioBuffer<FloatType>& buffer, int startSample, int numSamples)
+    void applyEnvelopeToBuffer (yup::AudioBuffer<FloatType>& buffer, int startSample, int numSamples)
     {
         jassert (startSample + numSamples <= buffer.getNumSamples());
 
@@ -236,7 +236,7 @@ private:
 };
 
 //==============================================================================
-// An ADSR Envelope with linear curves with the same API as the juce::ADSR
+// An ADSR Envelope with linear curves with the same API as the yup::ADSR
 class LinEnvelope
 {
 public:
@@ -385,7 +385,7 @@ public:
         @see getNextSample
      */
     template<typename FloatType>
-    void applyEnvelopeToBuffer (juce::AudioBuffer<FloatType>& buffer, int startSample, int numSamples)
+    void applyEnvelopeToBuffer (yup::AudioBuffer<FloatType>& buffer, int startSample, int numSamples)
     {
         jassert (startSample + numSamples <= buffer.getNumSamples());
 

@@ -18,7 +18,7 @@ TEST_SUITE ("tracktion_engine")
     {
         SUBCASE ("Odd/even tests")
         {
-            juce::ValueTree state ("TREE");
+            yup::ValueTree state ("TREE");
             ConstrainedCachedValue<int> value;
             value.setConstrainer ([] (int v) { return v % 2 == 0 ? v : v + 1; });
             value.referTo (state, "value", nullptr);
@@ -34,7 +34,7 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("ceil/floor tests")
         {
-            juce::ValueTree state ("TREE");
+            yup::ValueTree state ("TREE");
             ConstrainedCachedValue<float> value;
             bool useCeil = true;
             value.setConstrainer ([&useCeil] (float v) { return useCeil ? std::ceil (v) : std::floor (v); });

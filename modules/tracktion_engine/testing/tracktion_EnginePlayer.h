@@ -46,20 +46,20 @@ public:
         assert (! engine.getDeviceManager().isHostedAudioDeviceInterfaceInUse());
     }
 
-    juce::AudioBuffer<float> process (std::integral auto numSamples)
+    yup::AudioBuffer<float> process (std::integral auto numSamples)
     {
-        juce::AudioBuffer<float> inputAudio (params.inputChannels, static_cast<int> (numSamples));
+        yup::AudioBuffer<float> inputAudio (params.inputChannels, static_cast<int> (numSamples));
         inputAudio.clear();
         return process (inputAudio);
     }
 
-    juce::AudioBuffer<float> process (juce::AudioBuffer<float>& inputAudio)
+    yup::AudioBuffer<float> process (yup::AudioBuffer<float>& inputAudio)
     {
-        juce::MidiBuffer inputMidi;
+        yup::MidiBuffer inputMidi;
         return process (inputAudio, inputMidi);
     }
 
-    juce::AudioBuffer<float> process (juce::AudioBuffer<float>& inputAudio, juce::MidiBuffer& inputMidi)
+    yup::AudioBuffer<float> process (yup::AudioBuffer<float>& inputAudio, yup::MidiBuffer& inputMidi)
     {
         assert (inputAudio.getNumChannels() == params.inputChannels);
 
@@ -85,7 +85,7 @@ public:
 
         numSamplesProcessed += static_cast<int> (totalNumFrames);
 
-        juce::AudioBuffer<float> outputBlock;
+        yup::AudioBuffer<float> outputBlock;
         outputBlock.makeCopyOf (toAudioBuffer (processBuffer.getChannelRange ({ 0, static_cast<choc::buffer::ChannelCount> (params.outputChannels) })));
 
         for (auto chan : nano::iota_view (static_cast<choc::buffer::ChannelCount> (0),
@@ -126,7 +126,7 @@ private:
 //==============================================================================
 //==============================================================================
 /** Process a duration. */
-inline juce::AudioBuffer<float> process (EnginePlayer& player, TimeDuration td)
+inline yup::AudioBuffer<float> process (EnginePlayer& player, TimeDuration td)
 {
     auto numSamples = toSamples (td, player.getParams().sampleRate);
     return player.process (numSamples);

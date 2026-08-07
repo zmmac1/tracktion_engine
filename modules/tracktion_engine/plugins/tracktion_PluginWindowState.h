@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-struct PluginWindowState  : private juce::Timer
+struct PluginWindowState  : private yup::Timer
 {
     PluginWindowState (Edit&);
 
@@ -45,20 +45,20 @@ struct PluginWindowState  : private juce::Timer
     // Attempts to use either the last saved bounds from this state,
     // or pick a default position for a newly created window that is
     // going  to hold this plugin's UI
-    juce::Point<int> choosePositionForPluginWindow();
+    yup::Point<int> choosePositionForPluginWindow();
 
     /// Can be used to manually fire a mouse event into the window
-    void pluginClicked (const juce::MouseEvent&);
+    void pluginClicked (const yup::MouseEvent&);
 
     //==============================================================================
     Edit& edit;
     Engine& engine;
-    std::unique_ptr<juce::Component> pluginWindow;
+    std::unique_ptr<yup::Component> pluginWindow;
     int windowShowerCount = 0;
     bool temporarilyHidden = false;
     bool wasExplicitlyClosed = false;
-    std::optional<juce::Rectangle<int>> lastWindowBounds;
-    juce::Time windowOpenTime;
+    std::optional<yup::Rectangle<int>> lastWindowBounds;
+    yup::Time windowOpenTime;
 
 private:
     void timerCallback() override;
@@ -66,8 +66,8 @@ private:
     void showWindow();
     void deleteWindow();
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (PluginWindowState)
-    JUCE_DECLARE_NON_COPYABLE (PluginWindowState)
+    YUP_DECLARE_WEAK_REFERENCEABLE (PluginWindowState)
+    YUP_DECLARE_NON_COPYABLE (PluginWindowState)
 };
 
 } // namespace tracktion::inline engine

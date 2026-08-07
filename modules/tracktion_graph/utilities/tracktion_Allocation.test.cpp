@@ -169,7 +169,7 @@ TEST_SUITE ("tracktion_graph")
                 pool.emplace_back ([&shouldExit]
                                    {
                                        const size_t maxSize = 100'000;
-                                       juce::Random r;
+                                       yup::Random r;
                                        std::vector<int, rpallocator<int>> vec;
 
                                        while (! shouldExit)

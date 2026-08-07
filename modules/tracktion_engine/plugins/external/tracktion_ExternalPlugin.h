@@ -12,14 +12,14 @@ namespace tracktion::inline engine {
 
 // JUCE Changed the format of PluginDescription::createIdentifierString
 // breaking all our saved files. This reverts to the old format
-juce::String createIdentifierString (const juce::PluginDescription&);
+yup::String createIdentifierString (const yup::PluginDescription&);
 
 #if TRACKTION_ENABLE_ARA
 class ARAPluginBinding;
 #endif
 
 
-/** Wraps a juce::AudioPluginInstance (VST2, VST3, AU, etc.) as a tracktion Plugin.
+/** Wraps a yup::AudioPluginInstance (VST2, VST3, AU, etc.) as a tracktion Plugin.
 
     Handles lifecycle (async loading, state persistence), parameter bridging,
     bus layout management, and dry/wet mixing for hosted third-party plugins.
@@ -30,14 +30,14 @@ public:
     ExternalPlugin (PluginCreationInfo);
     ~ExternalPlugin() override;
 
-    juce::String getIdentifierString() override { return createIdentifierString (desc); }
+    yup::String getIdentifierString() override { return createIdentifierString (desc); }
 
-    using Ptr = juce::ReferenceCountedObjectPtr<ExternalPlugin>;
+    using Ptr = yup::ReferenceCountedObjectPtr<ExternalPlugin>;
 
     void selectableAboutToBeDeleted() override;
 
     /** Creates the ValueTree state for inserting an ExternalPlugin into an Edit. */
-    static juce::ValueTree create (Engine&, const juce::PluginDescription&);
+    static yup::ValueTree create (Engine&, const yup::PluginDescription&);
 
     void processingChanged() override;
 
@@ -48,7 +48,7 @@ public:
     void forceFullReinitialise();
 
     /// Returns an error message if the plugin failed to load
-    juce::String getLoadError();
+    yup::String getLoadError();
 
     /** Returns true if the plugin has started initialising but not completed yet.
         This happens in the case of some external formats like AUv3. You can use
@@ -64,12 +64,12 @@ public:
     void flushPluginStateToValueTree() override;
 
     /** Writes the current bus layout to the plugin's ValueTree state. */
-    void flushBusesLayoutToValueTree();
+    void flushAudioBusLayoutToValueTree();
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     /** Extracts the raw plugin state blob from the ValueTree. */
-    void getPluginStateFromTree (juce::MemoryBlock&);
+    void getPluginStateFromTree (yup::MemoryBlock&);
 
     //==============================================================================
     // Processing & runtime overrides
@@ -82,7 +82,7 @@ public:
     void midiPanic() override;
     void setEnabled (bool enabled) override;
 
-    juce::Array<Exportable::ReferencedItem> getReferencedItems() override;
+    yup::Array<Exportable::ReferencedItem> getReferencedItems() override;
     void reassignReferencedItem (const ReferencedItem&, ProjectItemRef newRef, double newStartTime) override;
 
     void applyToBuffer (const PluginRenderContext&) override;
@@ -96,15 +96,15 @@ public:
     bool producesAudioWhenNoAudioInput() override   { return isAutomationNeeded() || isSynth() || ! noTail(); }
     int getNumOutputChannelsGivenInputs (int numInputs) override;
     BusLayout getBusses() const override;
-    void getChannelNames (juce::StringArray* ins, juce::StringArray* outs) override;
+    void getChannelNames (yup::StringArray* ins, yup::StringArray* outs) override;
 
-    bool isVST() const noexcept             { return desc.pluginFormatName == "VST"; }
-    bool isVST3() const noexcept            { return desc.pluginFormatName == "VST3"; }
-    bool isAU() const noexcept              { return desc.pluginFormatName == "AudioUnit"; }
-    juce::String getName() const override   { return desc.name; }
-    juce::String getVendor() override       { return desc.manufacturerName; }
-    juce::String getTooltip() override      { return getName() + "$vstfilter"; }
-    juce::String getPluginType() override   { return xmlTypeName; }
+    bool isVST() const noexcept             { return desc.name == "VST"; }
+    bool isVST3() const noexcept            { return desc.name == "VST3"; }
+    bool isAU() const noexcept              { return desc.name == "AudioUnit"; }
+    yup::String getName() const override   { return desc.name; }
+    yup::String getVendor() override       { return desc.vendor; }
+    yup::String getTooltip() override      { return getName() + "$vstfilter"; }
+    yup::String getPluginType() override   { return xmlTypeName; }
     bool isSynth() override                 { return desc.isInstrument; }
     bool takesMidiInput() override;
     bool takesAudioInput() override         { return (! isSynth()) || (dryGain->getCurrentValue() > 0.0f); }
@@ -115,16 +115,16 @@ public:
     double getTailLength() const override;
     void trackPropertiesChanged() override;
 
-    juce::AudioProcessor* getWrappedAudioProcessor() const override     { return getAudioPluginInstance(); }
+    yup::AudioProcessor* getWrappedAudioProcessor() const override     { return getAudioPluginInstance(); }
     void deleteFromParent() override;
 
     //==============================================================================
     // selectable stuff
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     //==============================================================================
-    juce::File getFile() const;
-    juce::String getPluginUID() const           { return juce::String::toHexString (desc.deprecatedUid); }
+    yup::File getFile() const;
+    yup::String getPluginUID() const           { return yup::String::toHexString (desc.deprecatedUid); }
 
     const char* getDebugName() const noexcept   { return debugName.toUTF8(); }
 
@@ -133,21 +133,21 @@ public:
 
     /** Attempts to change the full bus layout of the wrapped plugin.
         Temporarily stops playback to safely reconfigure. */
-    bool setBusesLayout (juce::AudioProcessor::BusesLayout);
+    bool setAudioBusLayout (yup::AudioProcessor::AudioBusLayout);
 
     /** Attempts to change a single bus layout. */
-    bool setBusLayout (juce::AudioChannelSet, bool isInput, int busIndex);
+    bool setBusLayout (yup::AudioChannelSet, bool isInput, int busIndex);
 
     //==============================================================================
     int getNumPrograms() const;
     int getCurrentProgram() const;
-    juce::String getProgramName (int index);
-    juce::String getNumberedProgramName (int i);
-    juce::String getCurrentProgramName();
+    yup::String getProgramName (int index);
+    yup::String getNumberedProgramName (int i);
+    yup::String getCurrentProgramName();
     void setCurrentProgram (int index, bool sendChangeMessage);
-    void setCurrentProgramName (const juce::String& name);
-    bool hasNameForMidiProgram (int programNum, int bank, juce::String& name) override;
-    bool hasNameForMidiNoteNumber (int note, int midiChannel, juce::String& name) override;
+    void setCurrentProgramName (const yup::String& name);
+    bool hasNameForMidiProgram (int programNum, int bank, yup::String& name) override;
+    bool hasNameForMidiNoteNumber (int note, int midiChannel, yup::String& name) override;
 
     //==============================================================================
     const VSTXML* getVSTXML() const noexcept        { return vstXML.get(); }
@@ -155,10 +155,10 @@ public:
     //==============================================================================
     // Plugin instance access
 
-    /** Returns the underlying juce::AudioPluginInstance, or nullptr if not yet loaded. */
-    juce::AudioPluginInstance* getAudioPluginInstance() const;
+    /** Returns the underlying yup::AudioPluginInstance, or nullptr if not yet loaded. */
+    yup::AudioPluginInstance* getAudioPluginInstance() const;
 
-    /** If enabled, the wrapped juce::AudioPluginInstance is destroyed synchronously when
+    /** If enabled, the wrapped yup::AudioPluginInstance is destroyed synchronously when
         this plugin is deleted rather than via the shared asynchronous deleter. ARA-bound
         instances need this: the ARA spec requires a bound plugin instance to be destroyed
         before the document controller it is bound to. */
@@ -181,7 +181,7 @@ public:
    #endif
 
     /** The plugin's description (format, name, manufacturer, file path, etc.). */
-    juce::PluginDescription desc;
+    yup::PluginDescription desc;
 
     /** Dry/wet mix values and their automatable parameters. */
     juce::CachedValue<float> dryValue, wetValue;
@@ -201,8 +201,8 @@ public:
 
 private:
     //==============================================================================
-    juce::CriticalSection processMutex;
-    juce::String debugName, identiferString, loadError;
+    yup::CriticalSection processMutex;
+    yup::String debugName, identiferString, loadError;
 
     class ProcessorChangedManager;
     class LoadedInstance;
@@ -221,7 +221,7 @@ private:
     double lastSampleRate = 0.0;
     int lastBlockSizeSamples = 0;
 
-    juce::MidiBuffer midiBuffer;
+    yup::MidiBuffer midiBuffer;
     MPESourceID midiSourceID = createUniqueMPESourceID();
     std::atomic<bool> midiPanicNeeded { false };
 
@@ -237,33 +237,33 @@ private:
 
     void prepareIncomingMidiMessages (MidiMessageArray& incoming, int numSamples, bool isPlaying);
 
-    juce::Array<ExternalAutomatableParameter*> autoParamForParamNumbers;
+    yup::Array<ExternalAutomatableParameter*> autoParamForParamNumbers;
 
     //==============================================================================
-    void startPluginInstanceCreation (const juce::PluginDescription&);
-    void completePluginInstanceCreation (std::unique_ptr<juce::AudioPluginInstance>);
+    void startPluginInstanceCreation (const yup::PluginDescription&);
+    void completePluginInstanceCreation (std::unique_ptr<yup::AudioPluginInstance>);
     void deletePluginInstance();
 
     //==============================================================================
     void buildParameterTree() const override;
-    void buildParameterTree (const VSTXML::Group*, AutomatableParameterTree::TreeNode*, juce::SortedSet<int>&) const;
+    void buildParameterTree (const VSTXML::Group*, AutomatableParameterTree::TreeNode*, yup::SortedSet<int>&) const;
 
     //==============================================================================
     void doFullInitialisation();
     void buildParameterList();
     void refreshParameterValues();
     void updateDebugName();
-    void processPluginBlock (juce::AudioPluginInstance&, const PluginRenderContext&, bool processedBypass);
+    void processPluginBlock (yup::AudioPluginInstance&, const PluginRenderContext&, bool processedBypass);
 
-    std::unique_ptr<juce::PluginDescription> findMatchingPlugin() const;
+    std::unique_ptr<yup::PluginDescription> findMatchingPlugin() const;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-
-    //==============================================================================
-    static bool requiresAsyncInstantiation (Engine&, const juce::PluginDescription&);
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExternalPlugin)
+    static bool requiresAsyncInstantiation (Engine&, const yup::PluginDescription&);
+
+    //==============================================================================
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExternalPlugin)
 };
 
 //==============================================================================
@@ -272,14 +272,14 @@ private:
  */
 struct PluginWetDryAutomatableParam  : public AutomatableParameter
 {
-    PluginWetDryAutomatableParam (const juce::String& xmlTag, const juce::String& name, Plugin&);
+    PluginWetDryAutomatableParam (const yup::String& xmlTag, const yup::String& name, Plugin&);
     ~PluginWetDryAutomatableParam() override;
 
-    juce::String valueToString (float value) override;
-    float stringToValue (const juce::String& s) override;
+    yup::String valueToString (float value) override;
+    float stringToValue (const yup::String& s) override;
 
     PluginWetDryAutomatableParam() = delete;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginWetDryAutomatableParam)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginWetDryAutomatableParam)
 };
 
 } // namespace tracktion::inline engine

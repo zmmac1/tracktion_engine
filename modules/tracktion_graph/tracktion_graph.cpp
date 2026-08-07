@@ -18,7 +18,7 @@
 #endif
 
 //==============================================================================
-#include <juce_audio_formats/juce_audio_formats.h>
+#include <yup_audio_formats/yup_audio_formats.h>
 #include <tracktion_core/tracktion_TestConfig.h>
 
 //==============================================================================

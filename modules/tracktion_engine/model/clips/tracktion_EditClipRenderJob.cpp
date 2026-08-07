@@ -74,15 +74,15 @@ EditRenderJob::~EditRenderJob()
             editDeleter->getTransport().editHasChanged();
 }
 
-juce::String EditRenderJob::getLastError() const
+yup::String EditRenderJob::getLastError() const
 {
-    const juce::ScopedLock sl (errorLock);
+    const yup::ScopedLock sl (errorLock);
     return lastError;
 }
 
-void EditRenderJob::setLastError (const juce::String& e)
+void EditRenderJob::setLastError (const yup::String& e)
 {
-    const juce::ScopedLock sl (errorLock);
+    const yup::ScopedLock sl (errorLock);
     lastError = e;
 }
 
@@ -103,7 +103,7 @@ bool EditRenderJob::setUpRender()
                                                   if (context.shouldExit)
                                                       break;
 
-                                                  juce::Thread::sleep (100);
+                                                  yup::Thread::sleep (100);
                                               }
                                           });
 
@@ -174,7 +174,7 @@ bool EditRenderJob::completeRender()
 
     if (result.items.size() > 0
          || (params.category == ProjectItem::Category::none && proxy.getFile().existsAsFile()))
-        result.result = juce::Result::ok();
+        result.result = yup::Result::ok();
 
     return result.result.wasOk();
 }
@@ -182,9 +182,9 @@ bool EditRenderJob::completeRender()
 //==============================================================================
 EditRenderJob::RenderPass::RenderPass (EditRenderJob& j,
                                        Renderer::Parameters& renderParams,
-                                       const juce::String& description)
+                                       const yup::String& description)
     : owner (j), r (renderParams), desc (description), originalCategory (r.category),
-      tempFile (r.destFile, juce::TemporaryFile::useHiddenFile)
+      tempFile (r.destFile, yup::TemporaryFile::useHiddenFile)
 {
     r.category = ProjectItem::Category::none;
     r.destFile = tempFile.getFile();
@@ -192,7 +192,7 @@ EditRenderJob::RenderPass::RenderPass (EditRenderJob& j,
 
 EditRenderJob::RenderPass::~RenderPass()
 {
-    auto errorMessage (task != nullptr ? task->errorMessage : juce::String());
+    auto errorMessage (task != nullptr ? task->errorMessage : yup::String());
     owner.setLastError (errorMessage);
     const bool completedOk = task != nullptr ? task->getCurrentTaskProgress() == 1.0f : false;
     task = nullptr;
@@ -224,7 +224,7 @@ EditRenderJob::RenderPass::~RenderPass()
     // reverse if needed
     if (owner.reverse)
     {
-        juce::TemporaryFile tempReverseFile (r.destFile);
+        yup::TemporaryFile tempReverseFile (r.destFile);
 
         if (r.destFile.existsAsFile())
             if (AudioFileUtils::reverse (owner.engine, r.destFile, tempReverseFile.getFile(), owner.progress, nullptr))
@@ -263,9 +263,9 @@ EditRenderJob::RenderPass::~RenderPass()
 
             if (ok)
             {
-                juce::String newItemDesc;
+                yup::String newItemDesc;
                 newItemDesc << TRANS("Rendered from edit") << r.edit->getName().quoted() << " " << TRANS("On") << " "
-                            << juce::Time::getCurrentTime().toString (true, true);
+                            << yup::Time::getCurrentTime().toString (true, true);
 
                 if (auto item = proj->createNewItem (r.destFile,
                                                      r.createMidiFile ? ProjectItem::midiItemType()
@@ -365,7 +365,7 @@ void EditRenderJob::renderSeparateTracks()
 
     jassert (params.separateTracks);
     auto originalTracksToDo = params.tracksToDo;
-    juce::Array<juce::File> createdFiles;
+    yup::Array<yup::File> createdFiles;
 
     for (int i = 0; i <= originalTracksToDo.getHighestBit(); ++i)
     {
@@ -382,7 +382,7 @@ void EditRenderJob::renderSeparateTracks()
                 if (ft == nullptr && at == nullptr)
                     continue;
 
-                juce::BigInteger tracksToDo;
+                yup::BigInteger tracksToDo;
                 tracksToDo.setBit (i);
 
                 if (ft != nullptr)
@@ -401,8 +401,8 @@ void EditRenderJob::renderSeparateTracks()
 
                 auto getDescription = [at, ft]
                 {
-                    return ft != nullptr ? TRANS("Rendering Submix Track") + " " + juce::String (ft->getFolderTrackNumber()) + "..."
-                                         : TRANS("Rendering Track") + " " + juce::String (at->getAudioTrackNumber()) + "...";
+                    return ft != nullptr ? TRANS("Rendering Submix Track") + " " + yup::String (ft->getFolderTrackNumber()) + "..."
+                                         : TRANS("Rendering Track") + " " + yup::String (at->getAudioTrackNumber()) + "...";
                 };
 
                 auto file = proxy.getFile();
@@ -411,7 +411,7 @@ void EditRenderJob::renderSeparateTracks()
                                                        + " " + TRANS("Render") + " 0"
                                                        + file.getFileExtension());
 
-                params.destFile = juce::File (juce::File::createLegalPathName (getNonExistentSiblingWithIncrementedNumberSuffix (trackFile, false)
+                params.destFile = yup::File (yup::File::createLegalPathName (getNonExistentSiblingWithIncrementedNumberSuffix (trackFile, false)
                                                                                 .getFullPathName()));
                 params.tracksToDo = tracksToDo;
 
@@ -436,11 +436,11 @@ void EditRenderJob::renderSeparateTracks()
     params.tracksToDo = originalTracksToDo;
 }
 
-bool EditRenderJob::generateSilence (const juce::File& fileToWriteTo)
+bool EditRenderJob::generateSilence (const yup::File& fileToWriteTo)
 {
     CRASH_TRACER
 
-    std::unique_ptr<juce::OutputStream> os (fileToWriteTo.createOutputStream());
+    std::unique_ptr<yup::OutputStream> os (fileToWriteTo.createOutputStream());
 
     if (os == nullptr || params.audioFormat == nullptr)
         return false;
@@ -448,8 +448,8 @@ bool EditRenderJob::generateSilence (const juce::File& fileToWriteTo)
     const int numChans = params.mustRenderInMono ? 1
                                                   : (! params.channelConfig.isEmpty() ? params.channelConfig.getNumChannels()
                                                                                       : 2);
-    std::unique_ptr<juce::AudioFormatWriter> writer (params.audioFormat->createWriterFor (os,
-                                                                                          juce::AudioFormatWriterOptions()
+    std::unique_ptr<yup::AudioFormatWriter> writer (params.audioFormat->createWriterFor (os,
+                                                                                          yup::WriteOptions()
                                                                                             .withSampleRate (params.sampleRateForAudio)
                                                                                             .withNumChannels (numChans)
                                                                                             .withBitsPerSample (params.bitDepth)));
@@ -463,7 +463,7 @@ bool EditRenderJob::generateSilence (const juce::File& fileToWriteTo)
     SampleCount numDone = 0;
 
     // should probably use an AudioScratchBuffer here
-    juce::AudioBuffer<float> buffer (numChans, blockSize);
+    yup::AudioBuffer<float> buffer (numChans, blockSize);
     buffer.clear();
 
     while (numDone < numToDo)

@@ -23,7 +23,7 @@ struct StepModifier::StepModifierTimer : public ModifierTimer
         modifier.setEditTime (editTime);
         modifier.updateParameterStreams (editTime);
 
-        const auto syncTypeThisBlock = juce::roundToInt (modifier.syncTypeParam->getCurrentValue());
+        const auto syncTypeThisBlock = yup::roundToInt (modifier.syncTypeParam->getCurrentValue());
         const auto rateTypeThisBlock = getTypedParamValue<ModifierCommon::RateType> (*modifier.rateTypeParam);
 
         const float numStepsThisBlock = modifier.numStepsParam->getCurrentValue();
@@ -81,7 +81,7 @@ struct StepModifier::StepModifierTimer : public ModifierTimer
 
     void resync (double duration)
     {
-        const auto type = juce::roundToInt (modifier.syncTypeParam->getCurrentValue());
+        const auto type = yup::roundToInt (modifier.syncTypeParam->getCurrentValue());
 
         if (type == ModifierCommon::note)
         {
@@ -99,7 +99,7 @@ struct StepModifier::StepModifierTimer : public ModifierTimer
 };
 
 //==============================================================================
-StepModifier::StepModifier (Edit& e, const juce::ValueTree& v)
+StepModifier::StepModifier (Edit& e, const yup::ValueTree& v)
     : Modifier (e, v)
 {
     auto um = &edit.getUndoManager();
@@ -112,9 +112,9 @@ StepModifier::StepModifier (Edit& e, const juce::ValueTree& v)
     rateType.referTo (state, IDs::rateType, um, float (ModifierCommon::bar));
     depth.referTo (state, IDs::depth, um, 1.0f);
 
-    auto addDiscreteParam = [this] (const juce::String& paramID, const juce::String& name,
-                                    juce::Range<float> valueRange, juce::CachedValue<float>& val,
-                                    const juce::StringArray& labels) -> AutomatableParameter*
+    auto addDiscreteParam = [this] (const yup::String& paramID, const yup::String& name,
+                                    yup::Range<float> valueRange, juce::CachedValue<float>& val,
+                                    const yup::StringArray& labels) -> AutomatableParameter*
     {
         auto* p = new DiscreteLabelledParameter (paramID, name, *this, valueRange, labels.size(), labels);
         addAutomatableParameter (p);
@@ -123,9 +123,9 @@ StepModifier::StepModifier (Edit& e, const juce::ValueTree& v)
         return p;
     };
 
-    auto addParam = [this] (const juce::String& paramID, const juce::String& name,
-                            juce::NormalisableRange<float> valueRange, float centreVal,
-                            juce::CachedValue<float>& val, const juce::String& suffix) -> AutomatableParameter*
+    auto addParam = [this] (const yup::String& paramID, const yup::String& name,
+                            yup::NormalisableRange<float> valueRange, float centreVal,
+                            juce::CachedValue<float>& val, const yup::String& suffix) -> AutomatableParameter*
     {
         valueRange.setSkewForCentre (centreVal);
         auto* p = new SuffixedParameter (paramID, name, *this, valueRange, suffix);
@@ -181,16 +181,16 @@ float StepModifier::getCurrentValue()
 //==============================================================================
 float StepModifier::getStep (int step) const
 {
-    jassert (juce::isPositiveAndBelow (step, maxNumSteps));
-    return juce::jlimit (-1.0f, 1.0f, steps[step]);
+    jassert (yup::isPositiveAndBelow (step, maxNumSteps));
+    return yup::jlimit (-1.0f, 1.0f, steps[step]);
 }
 
 void StepModifier::setStep (int step, float value)
 {
-    if (! juce::isPositiveAndBelow (step, maxNumSteps) || steps[step] == value)
+    if (! yup::isPositiveAndBelow (step, maxNumSteps) || steps[step] == value)
         return;
 
-    steps[step] = juce::jlimit (-1.0f, 1.0f, value);
+    steps[step] = yup::jlimit (-1.0f, 1.0f, value);
     flushStepsToProperty();
 }
 
@@ -199,7 +199,7 @@ int StepModifier::getCurrentStep() const noexcept
     return currentStep.load (std::memory_order_acquire);
 }
 
-AutomatableParameter::ModifierAssignment* StepModifier::createAssignment (const juce::ValueTree& v)
+AutomatableParameter::ModifierAssignment* StepModifier::createAssignment (const yup::ValueTree& v)
 {
     return new Assignment (v, *this);
 }
@@ -215,7 +215,7 @@ void StepModifier::applyToBuffer (const PluginRenderContext& prc)
 }
 
 //==============================================================================
-StepModifier::Assignment::Assignment (const juce::ValueTree& v, const StepModifier& sm)
+StepModifier::Assignment::Assignment (const yup::ValueTree& v, const StepModifier& sm)
     : AutomatableParameter::ModifierAssignment (sm.edit, v),
       stepModifierID (sm.itemID)
 {
@@ -238,7 +238,7 @@ StepModifier::Ptr StepModifier::Assignment::getStepModifier() const
 }
 
 //==============================================================================
-juce::String StepModifier::getSelectableDescription()
+yup::String StepModifier::getSelectableDescription()
 {
     return TRANS("Step Modifier");
 }
@@ -246,7 +246,7 @@ juce::String StepModifier::getSelectableDescription()
 //==============================================================================
 void StepModifier::flushStepsToProperty()
 {
-    juce::MemoryOutputStream stream;
+    yup::MemoryOutputStream stream;
 
     for (int i = 0; i < maxNumSteps; ++i)
         stream.writeFloat (steps[i]);
@@ -257,11 +257,11 @@ void StepModifier::flushStepsToProperty()
 
 void StepModifier::restoreStepsFromProperty()
 {
-    std::fill_n (steps, juce::numElementsInArray (steps), 0.0f);
+    std::fill_n (steps, yup::numElementsInArray (steps), 0.0f);
 
     if (auto mb = state[IDs::stepData].getBinaryData())
     {
-        juce::MemoryInputStream stream (*mb, false);
+        yup::MemoryInputStream stream (*mb, false);
         int index = 0;
 
         while (! stream.isExhausted())
@@ -276,7 +276,7 @@ void StepModifier::valueTreeChanged()
         changedTimer.startTimerHz (30);
 }
 
-void StepModifier::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void StepModifier::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v == state && i == IDs::stepData)
         restoreStepsFromProperty();

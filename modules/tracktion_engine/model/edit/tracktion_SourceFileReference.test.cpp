@@ -20,13 +20,13 @@ TEST_SUITE ("tracktion_engine")
     TEST_CASE ("SourceFileReference: relative path heuristic")
     {
         auto& engine = *Engine::getEngines()[0];
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
         REQUIRE (sinFile != nullptr);
 
         // Helper: creates edit at editPath, inserts clip pointing to audioFile,
         // returns whether the stored source path is relative
-        auto isStoredPathRelative = [&] (const juce::File& editFile,
-                                         const juce::File& audioFile,
+        auto isStoredPathRelative = [&] (const yup::File& editFile,
+                                         const yup::File& audioFile,
                                          bool alwaysRelative = false) -> bool
         {
             auto edit = createEmptyEdit (engine, editFile);
@@ -38,10 +38,10 @@ TEST_SUITE ("tracktion_engine")
                                         { .time = { 0_tp, 1_tp } },
                                         DeleteExistingClips::no);
             REQUIRE (clip != nullptr);
-            return ! juce::File::isAbsolutePath (clip->getSourceFileReference().source.get());
+            return ! yup::File::isAbsolutePath (clip->getSourceFileReference().source.get());
         };
 
-        auto homeDir = juce::File::getSpecialLocation (juce::File::userHomeDirectory);
+        auto homeDir = yup::File::getSpecialLocation (yup::File::userHomeDirectory);
 
         SUBCASE ("Same user workspace: relative")
         {
@@ -71,7 +71,7 @@ TEST_SUITE ("tracktion_engine")
         SUBCASE ("Temp folder audio: absolute")
         {
             auto editFile = homeDir.getChildFile ("Music/SFRTest_Project/edit.tracktionedit");
-            auto tempAudio = juce::File::getSpecialLocation (juce::File::tempDirectory)
+            auto tempAudio = yup::File::getSpecialLocation (yup::File::tempDirectory)
                                  .getChildFile ("sfr_test_audio.wav");
             sinFile->getFile().copyFileTo (tempAudio);
             CHECK (! isStoredPathRelative (editFile, tempAudio));
@@ -82,7 +82,7 @@ TEST_SUITE ("tracktion_engine")
         SUBCASE ("alwaysUseRelativePaths forces relative")
         {
             auto editFile = homeDir.getChildFile ("Music/SFRTest_Project/edit.tracktionedit");
-            auto tempAudio = juce::File::getSpecialLocation (juce::File::tempDirectory)
+            auto tempAudio = yup::File::getSpecialLocation (yup::File::tempDirectory)
                                  .getChildFile ("sfr_test_audio.wav");
             sinFile->getFile().copyFileTo (tempAudio);
             CHECK (isStoredPathRelative (editFile, tempAudio, true));

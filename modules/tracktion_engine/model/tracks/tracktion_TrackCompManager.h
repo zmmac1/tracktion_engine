@@ -19,30 +19,30 @@ public:
     TrackCompManager (Edit&);
     ~TrackCompManager();
 
-    void initialise (const juce::ValueTree&);
+    void initialise (const yup::ValueTree&);
     int getNumGroups() const;
 
-    juce::StringArray getCompNames() const;
-    juce::String getCompName (int index);
-    void setCompName (int index, const juce::String& name);
+    yup::StringArray getCompNames() const;
+    yup::String getCompName (int index);
+    void setCompName (int index, const yup::String& name);
 
-    int addGroup (const juce::String& name);
+    int addGroup (const yup::String& name);
     void removeGroup (int index);
 
-    juce::Array<Track*> getTracksInComp (int index);
+    yup::Array<Track*> getTracksInComp (int index);
 
     //==============================================================================
-    struct CompSection  : public juce::ReferenceCountedObject
+    struct CompSection  : public yup::ReferenceCountedObject
     {
-        CompSection (const juce::ValueTree&);
+        CompSection (const yup::ValueTree&);
         ~CompSection();
 
-        using Ptr = juce::ReferenceCountedObjectPtr<CompSection>;
-        static CompSection* createAndIncRefCount (const juce::ValueTree& v);
+        using Ptr = yup::ReferenceCountedObjectPtr<CompSection>;
+        static CompSection* createAndIncRefCount (const yup::ValueTree& v);
 
-        void updateFrom (juce::ValueTree&, const juce::Identifier&);
+        void updateFrom (yup::ValueTree&, const yup::Identifier&);
 
-        juce::ValueTree state;
+        yup::ValueTree state;
 
         EditItemID getTrack() const      { return track; }
         double getEnd() const      { return end; }
@@ -54,13 +54,13 @@ public:
         void updateTrack();
         void updateEnd();
 
-        JUCE_DECLARE_WEAK_REFERENCEABLE (CompSection)
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CompSection)
+        YUP_DECLARE_WEAK_REFERENCEABLE (CompSection)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CompSection)
     };
 
     //==============================================================================
     struct TrackComp    : public Selectable,
-                          public juce::ReferenceCountedObject,
+                          public yup::ReferenceCountedObject,
                           public ValueTreeObjectList<CompSection>
     {
         enum TimeFormat
@@ -69,26 +69,26 @@ public:
             beats
         };
 
-        TrackComp (Edit&, const juce::ValueTree&);
+        TrackComp (Edit&, const yup::ValueTree&);
         ~TrackComp() override;
 
-        using Ptr = juce::ReferenceCountedObjectPtr<TrackComp>;
-        static TrackComp* createAndIncRefCount (Edit&, const juce::ValueTree&);
+        using Ptr = yup::ReferenceCountedObjectPtr<TrackComp>;
+        static TrackComp* createAndIncRefCount (Edit&, const yup::ValueTree&);
 
-        juce::String getSelectableDescription() override;
+        yup::String getSelectableDescription() override;
 
         TimeFormat getTimeFormat() const noexcept       { return timeFormat; }
 
         void setTimeFormat (TimeFormat);
 
-        static juce::Array<TimeRange> getMuteTimes (const juce::Array<TimeRange>& nonMuteTimes);
-        juce::Array<TimeRange> getNonMuteTimes (Track&, TimeDuration crossfadeTime) const;
+        static yup::Array<TimeRange> getMuteTimes (const yup::Array<TimeRange>& nonMuteTimes);
+        yup::Array<TimeRange> getNonMuteTimes (Track&, TimeDuration crossfadeTime) const;
         TimeRange getTimeRange() const;
 
-        void setName (const juce::String&);
+        void setName (const yup::String&);
 
-        static EditItemID getSourceTrackID (const juce::ValueTree&);
-        static void setSourceTrackID (juce::ValueTree&, EditItemID, juce::UndoManager*);
+        static EditItemID getSourceTrackID (const yup::ValueTree&);
+        static void setSourceTrackID (yup::ValueTree&, EditItemID, juce::UndoManager*);
 
         void setSectionTrack (CompSection&, const Track::Ptr&);
         void removeSection (CompSection&);
@@ -97,44 +97,44 @@ public:
         CompSection* moveSection (CompSection*, double timeDelta);
         CompSection* moveSectionEndTime (CompSection*, double newTime);
 
-        int removeSectionsWithinRange (juce::Range<double>, CompSection* sectionToKeep);
-        juce::ValueTree addSection (EditItemID trackID, double endTime, juce::UndoManager*);
+        int removeSectionsWithinRange (yup::Range<double>, CompSection* sectionToKeep);
+        yup::ValueTree addSection (EditItemID trackID, double endTime, juce::UndoManager*);
         CompSection* addSection (Track::Ptr, double endTime);
         CompSection* splitSectionAtTime (double);
 
-        CompSection* findSectionWithEdgeTimeWithin (const Track::Ptr&, juce::Range<double>, bool& startEdge) const;
+        CompSection* findSectionWithEdgeTimeWithin (const Track::Ptr&, yup::Range<double>, bool& startEdge) const;
         CompSection* findSectionAtTime (const Track::Ptr&, double) const;
 
         struct Section
         {
             CompSection* compSection;
-            juce::Range<double> timeRange;
+            yup::Range<double> timeRange;
         };
 
-        juce::Array<Section> getSectionsForTrack (const Track::Ptr&) const;
-        bool isSuitableType (const juce::ValueTree&) const override;
-        CompSection* createNewObject (const juce::ValueTree&) override;
+        yup::Array<Section> getSectionsForTrack (const Track::Ptr&) const;
+        bool isSuitableType (const yup::ValueTree&) const override;
+        CompSection* createNewObject (const yup::ValueTree&) override;
         void deleteObject (CompSection*) override;
         void newObjectAdded (CompSection*) override;
         void objectRemoved (CompSection*) override;
         void objectOrderChanged() override;
-        void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+        void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
-        juce::ValueTree state;
+        yup::ValueTree state;
         Edit& edit;
 
-        juce::CachedValue<juce::String> name;
-        juce::CachedValue<juce::Colour> includedColour, excludedColour;
+        juce::CachedValue<yup::String> name;
+        juce::CachedValue<yup::Color> includedColor, excludedColor;
 
     private:
         juce::CachedValue<TimeFormat> timeFormat;
 
-        CompSection* getCompSectionFor (const juce::ValueTree&);
+        CompSection* getCompSectionFor (const yup::ValueTree&);
         void convertFromSecondsToBeats();
         void convertFromBeatsToSeconds();
         void convertTimes (TimeFormat, TimeFormat);
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackComp)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackComp)
     };
 
     TrackComp::Ptr getTrackComp (AudioTrack*);
@@ -143,15 +143,15 @@ private:
     struct TrackCompList;
 
     Edit& edit;
-    juce::ValueTree state;
+    yup::ValueTree state;
     std::unique_ptr<TrackCompList> trackCompList;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackCompManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackCompManager)
 };
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::TrackCompManager::TrackComp::TimeFormat>

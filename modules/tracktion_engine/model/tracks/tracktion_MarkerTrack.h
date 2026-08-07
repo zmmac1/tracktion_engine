@@ -14,16 +14,16 @@ namespace tracktion::inline engine {
 class MarkerTrack  : public ClipTrack
 {
 public:
-    MarkerTrack (Edit&, const juce::ValueTree&);
+    MarkerTrack (Edit&, const yup::ValueTree&);
     ~MarkerTrack() override;
 
     bool isMarkerTrack() const override;
-    juce::String getSelectableDescription() override;
-    juce::String getName() const override;
+    yup::String getSelectableDescription() override;
+    yup::String getName() const override;
     bool canContainPlugin (Plugin*) const override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MarkerTrack)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MarkerTrack)
 };
 
 } // namespace tracktion::inline engine

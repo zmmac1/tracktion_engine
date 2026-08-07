@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-MarkerClip::MarkerClip (const juce::ValueTree& v, EditItemID id, ClipOwner& targetParent)
+MarkerClip::MarkerClip (const yup::ValueTree& v, EditItemID id, ClipOwner& targetParent)
    : Clip (v, targetParent, id, Type::marker)
 {
 }
@@ -30,28 +30,28 @@ void MarkerClip::initialise()
         markerID = edit.getMarkerManager().getNextUniqueID();
 
     if (clipName == TRANS("New Marker"))
-        clipName = TRANS("Marker") + " " + juce::String (markerID);
+        clipName = TRANS("Marker") + " " + yup::String (markerID);
 
     speedRatio = 1.0; // not used
 }
 
-juce::String MarkerClip::getSelectableDescription()
+yup::String MarkerClip::getSelectableDescription()
 {
     return TRANS("Marker Clip") + " - \"" + getName() + "\"";
 }
 
-juce::Colour MarkerClip::getDefaultColour() const
+yup::Color MarkerClip::getDefaultColor() const
 {
-    if (isSyncAbsolute())   return juce::Colours::red.withHue (0.0f);
-    if (isSyncBarsBeats())  return juce::Colours::red.withHue (1.0f / 9.0f);
+    if (isSyncAbsolute())   return yup::Colors::red.withHue (0.0f);
+    if (isSyncBarsBeats())  return yup::Colors::red.withHue (1.0f / 9.0f);
 
-    return MarkerClip::getDefaultColour();
+    return MarkerClip::getDefaultColor();
 }
 
 void MarkerClip::setMarkerID (int newID)
 {
-    if (getName() == (TRANS("Marker") + " " + juce::String (markerID)))
-        setName (TRANS("Marker") + " " + juce::String (newID));
+    if (getName() == (TRANS("Marker") + " " + yup::String (markerID)))
+        setName (TRANS("Marker") + " " + yup::String (newID));
 
     markerID = newID;
 }
@@ -62,7 +62,7 @@ bool MarkerClip::canBeAddedTo (ClipOwner& co)
     return isMarkerTrack (co);
 }
 
-void MarkerClip::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void MarkerClip::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v == state)
     {

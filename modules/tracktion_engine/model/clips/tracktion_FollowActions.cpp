@@ -17,12 +17,12 @@ namespace tracktion::inline engine
 {
 
 //==============================================================================
-std::optional<FollowAction> followActionFromString (juce::String s)
+std::optional<FollowAction> followActionFromString (yup::String s)
 {
     return magic_enum::enum_cast<FollowAction> (s.toStdString());
 }
 
-juce::String toString (FollowAction fa)
+yup::String toString (FollowAction fa)
 {
     return std::string (magic_enum::enum_name (fa));
 }
@@ -39,7 +39,7 @@ struct ClipContext
     std::vector<std::shared_ptr<LaunchHandle>> validSceneHandles;
     std::vector<std::vector<std::shared_ptr<LaunchHandle>>> groups;
     size_t sceneIndex = 0, groupIndex = 0, indexInGroup = 0;
-    juce::Random random;
+    yup::Random random;
 
     size_t getIndexInValidHandles() const
     {
@@ -433,7 +433,7 @@ std::function<void (MonotonicBeat)> createFollowAction (Clip& c)
 
     struct FollowActionContainer
     {
-        juce::Range<double> probabilityRange;
+        yup::Range<double> probabilityRange;
         std::function<void (MonotonicBeat)> action;
     };
 
@@ -473,7 +473,7 @@ std::function<void (MonotonicBeat)> createFollowAction (Clip& c)
 class FollowActions::List : public ValueTreeObjectList<Action>
 {
 public:
-    List (FollowActions& fa, juce::ValueTree listState)
+    List (FollowActions& fa, yup::ValueTree listState)
         : ValueTreeObjectList<Action> (std::move (listState)),
           followActions (fa)
     {
@@ -485,12 +485,12 @@ public:
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return v.hasType (IDs::ACTION);
     }
 
-    Action* createNewObject (const juce::ValueTree& newState) override
+    Action* createNewObject (const yup::ValueTree& newState) override
     {
         auto a = new Action();
 
@@ -527,7 +527,7 @@ private:
 };
 
 //==============================================================================
-FollowActions::FollowActions (juce::ValueTree v, juce::UndoManager* um)
+FollowActions::FollowActions (yup::ValueTree v, juce::UndoManager* um)
     : state (std::move (v)), undoManager (um)
 {
       list = std::make_unique<List> (*this, state);

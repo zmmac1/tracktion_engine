@@ -14,19 +14,19 @@ namespace tracktion::inline engine {
 class FolderTrack  : public Track
 {
 public:
-    FolderTrack (Edit&, const juce::ValueTree&);
+    FolderTrack (Edit&, const yup::ValueTree&);
     ~FolderTrack() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<FolderTrack>;
+    using Ptr = yup::ReferenceCountedObjectPtr<FolderTrack>;
 
     //==============================================================================
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     bool isFolderTrack() const override;
 
     void initialise() override;
 
     void sanityCheckName() override;
-    juce::String getName() const override;
+    yup::String getName() const override;
 
     // not an index - values start from 1
     int getFolderTrackNumber() const noexcept;
@@ -37,7 +37,7 @@ public:
     /** Returns the output if this track is a submix folder. */
     TrackOutput* getOutput() const noexcept;
 
-    juce::Array<Track*> getInputTracks() const override;
+    yup::Array<Track*> getInputTracks() const override;
 
     //==============================================================================
     bool isFrozen (FreezeType) const override;
@@ -81,21 +81,21 @@ public:
 private:
     friend class Edit;
 
-    juce::ReferenceCountedArray<CollectionClip> collectionClips;
+    yup::ReferenceCountedArray<CollectionClip> collectionClips;
     juce::CachedValue<bool> muted, soloed, soloIsolated;
     bool dirtyClips = true;
 
     std::mutex pluginMutex;
-    juce::ReferenceCountedObjectPtr<VCAPlugin> vcaPlugin;
-    juce::ReferenceCountedObjectPtr<VolumeAndPanPlugin> volumePlugin;
+    yup::ReferenceCountedObjectPtr<VCAPlugin> vcaPlugin;
+    yup::ReferenceCountedObjectPtr<VolumeAndPanPlugin> volumePlugin;
     AsyncCaller pluginUpdater;
 
     void updatePlugins();
     TimeRange getClipExtendedBounds (Clip&);
 
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override;
 };
 
 } // namespace tracktion::inline engine

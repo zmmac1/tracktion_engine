@@ -23,20 +23,20 @@ using EditBeatDuration = double;
 using ClipBeatDuration = double;
 using BlockBeatDuration = double;
 
-using EditBeatRange = juce::Range<double>;
-using ClipBeatRange = juce::Range<double>;
-using SequenceBeatRange = juce::Range<double>;
-using BlockBeatRange = juce::Range<double>;
+using EditBeatRange = yup::Range<double>;
+using ClipBeatRange = yup::Range<double>;
+using SequenceBeatRange = yup::Range<double>;
+using BlockBeatRange = yup::Range<double>;
 
 namespace chocMidiHelpers
 {
     //==============================================================================
     struct PitchWheel
     {
-        void addToBuffer (int channel, juce::Array<juce::MidiMessage>& dest) const
+        void addToBuffer (int channel, yup::Array<yup::MidiMessage>& dest) const
         {
             if (value)
-                dest.add (juce::MidiMessage::pitchWheel (channel, static_cast<int> (*value)));
+                dest.add (yup::MidiMessage::pitchWheel (channel, static_cast<int> (*value)));
         }
 
         void update (uint32_t v)
@@ -50,13 +50,13 @@ namespace chocMidiHelpers
 
     struct ControllerValues
     {
-        void addToBuffer (int channel, juce::Array<juce::MidiMessage>& dest) const
+        void addToBuffer (int channel, yup::Array<yup::MidiMessage>& dest) const
         {
             std::for_each (std::begin (values), std::end (values),
                            [&, index = 0] (const auto& v) mutable
                            {
                                if (v)
-                                   dest.add (juce::MidiMessage::controllerEvent (channel, index, *v));
+                                   dest.add (yup::MidiMessage::controllerEvent (channel, index, *v));
 
                                ++index;
                            });
@@ -73,18 +73,18 @@ namespace chocMidiHelpers
 
     struct ProgramChange
     {
-        void addToBuffer (int channel, double time, juce::Array<juce::MidiMessage>& dest) const
+        void addToBuffer (int channel, double time, yup::Array<yup::MidiMessage>& dest) const
         {
             if (! value)
                 return;
 
             if (bankLSB && bankMSB)
             {
-                dest.add (juce::MidiMessage::controllerEvent (channel, 0x00, *bankMSB).withTimeStamp (time));
-                dest.add (juce::MidiMessage::controllerEvent (channel, 0x20, *bankLSB).withTimeStamp (time));
+                dest.add (yup::MidiMessage::controllerEvent (channel, 0x00, *bankMSB).withTimeStamp (time));
+                dest.add (yup::MidiMessage::controllerEvent (channel, 0x20, *bankLSB).withTimeStamp (time));
             }
 
-            dest.add (juce::MidiMessage::programChange (channel, *value).withTimeStamp (time));
+            dest.add (yup::MidiMessage::programChange (channel, *value).withTimeStamp (time));
         }
 
         // Returns true if this is a bank number change, and false otherwise.
@@ -114,7 +114,7 @@ namespace chocMidiHelpers
         // this will emit the current parameter in full (MSB and LSB).
         // This should be called before each data message (entry, increment, decrement: 0x06, 0x26, 0x60, 0x61)
         // to ensure that the data message operates on the correct parameter number.
-        void sendIfNecessary (int channel, double time, juce::Array<juce::MidiMessage>& dest)
+        void sendIfNecessary (int channel, double time, yup::Array<yup::MidiMessage>& dest)
         {
             const auto newestMsb = newestKind == Kind::rpn ? newestRpnMsb : newestNrpnMsb;
             const auto newestLsb = newestKind == Kind::rpn ? newestRpnLsb : newestNrpnLsb;
@@ -125,8 +125,8 @@ namespace chocMidiHelpers
             if (lastSent == newest || ! newestMsb || ! newestLsb)
                 return;
 
-            dest.add (juce::MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x65 : 0x63, *newestMsb).withTimeStamp (time));
-            dest.add (juce::MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x64 : 0x62, *newestLsb).withTimeStamp (time));
+            dest.add (yup::MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x65 : 0x63, *newestMsb).withTimeStamp (time));
+            dest.add (yup::MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x64 : 0x62, *newestLsb).withTimeStamp (time));
 
             lastSent = newest;
         }
@@ -154,7 +154,7 @@ namespace chocMidiHelpers
 
     inline void createControllerUpdatesForTime (const choc::midi::Sequence& sequence,
                                                 uint8_t channel, double time,
-                                                juce::Array<juce::MidiMessage>& dest)
+                                                yup::Array<yup::MidiMessage>& dest)
     {
         ProgramChange programChange;
         ControllerValues controllerValues;
@@ -220,10 +220,10 @@ namespace chocMidiHelpers
 namespace MidiHelpers
 {
     /** Snips out a section of a sequence adding note on/off events for notes at the loop boundries. */
-    inline juce::MidiMessageSequence createLoopSection (juce::MidiMessageSequence sourceSequence,
-                                                        juce::Range<double> loopRange)
+    inline yup::MidiMessageSequence createLoopSection (yup::MidiMessageSequence sourceSequence,
+                                                        yup::Range<double> loopRange)
     {
-        juce::MidiMessageSequence res;
+        yup::MidiMessageSequence res;
 
         jassert (! loopRange.isEmpty());
         sourceSequence.updateMatchedPairs();
@@ -235,7 +235,7 @@ namespace MidiHelpers
                 if (meh->noteOffObject != nullptr
                     && meh->message.isNoteOn())
                 {
-                    juce::Range<double> noteRange (meh->message.getTimeStamp(),
+                    yup::Range<double> noteRange (meh->message.getTimeStamp(),
                                                    meh->noteOffObject->message.getTimeStamp());
 
                     // Note before loop start
@@ -282,10 +282,10 @@ namespace MidiHelpers
     }
 
     /** Snips out a section of a set of sequences adding note on/off events for notes at the loop boundries. */
-    inline std::vector<juce::MidiMessageSequence> createLoopSection (const std::vector<juce::MidiMessageSequence>& sourceSequences,
-                                                                     juce::Range<double> loopRange)
+    inline std::vector<yup::MidiMessageSequence> createLoopSection (const std::vector<yup::MidiMessageSequence>& sourceSequences,
+                                                                     yup::Range<double> loopRange)
     {
-        std::vector<juce::MidiMessageSequence> res;
+        std::vector<yup::MidiMessageSequence> res;
         jassert (! loopRange.isEmpty());
 
         for (auto& seq : sourceSequences)
@@ -294,7 +294,7 @@ namespace MidiHelpers
         return res;
     }
 
-    inline void applyQuantisationToSequence (const QuantisationType& q, juce::MidiMessageSequence& ms, bool canQuantiseNoteOffs)
+    inline void applyQuantisationToSequence (const QuantisationType& q, yup::MidiMessageSequence& ms, bool canQuantiseNoteOffs)
     {
         if (! q.isEnabled())
             return;
@@ -341,7 +341,7 @@ namespace MidiHelpers
         }
     }
 
-    inline void applyGrooveToSequence (const GrooveTemplate& groove, float grooveStrength, juce::MidiMessageSequence& ms)
+    inline void applyGrooveToSequence (const GrooveTemplate& groove, float grooveStrength, yup::MidiMessageSequence& ms)
     {
         for (auto mh : ms)
         {
@@ -352,7 +352,7 @@ namespace MidiHelpers
         }
     }
 
-    inline choc::midi::Sequence& addSequence (choc::midi::Sequence& dest, const juce::MidiMessageSequence& src, double timeStampOffset)
+    inline choc::midi::Sequence& addSequence (choc::midi::Sequence& dest, const yup::MidiMessageSequence& src, double timeStampOffset)
     {
         for (auto meh : src)
         {
@@ -502,10 +502,10 @@ namespace MidiHelpers
                                        const choc::midi::Sequence& sourceSequence,
                                        const std::vector<std::pair<size_t, size_t>>& noteOffMap,
                                        double time,
-                                       juce::Range<int> channelNumbers,
+                                       yup::Range<int> channelNumbers,
                                        LiveClipLevel& clipLevel,
                                        bool useMPEChannelMode, MPESourceID midiSourceID,
-                                       juce::Array<juce::MidiMessage>& controllerMessagesScratchBuffer)
+                                       yup::Array<yup::MidiMessage>& controllerMessagesScratchBuffer)
     {
         if (useMPEChannelMode)
         {
@@ -561,7 +561,7 @@ namespace MidiHelpers
                         if (noteOffEvent->timeStamp > time + 0.0001)
                         {
                             auto data = m.data();
-                            juce::MidiMessage m2 ((int) data[0], (int) data[1], (int) data[2], e.timeStamp);
+                            yup::MidiMessage m2 ((int) data[0], (int) data[1], (int) data[2], e.timeStamp);
                             m2.multiplyVelocity (volScale);
 
                             // give these a tiny offset to make sure they're played after the controller updates
@@ -576,7 +576,7 @@ namespace MidiHelpers
     inline ActiveNoteList getNotesOnAtTime (const choc::midi::Sequence& sourceSequence,
                                             const std::vector<std::pair<size_t, size_t>>& noteOffMap,
                                             double time,
-                                            juce::Range<int> channelNumbers, LiveClipLevel& clipLevel)
+                                            yup::Range<int> channelNumbers, LiveClipLevel& clipLevel)
     {
         ActiveNoteList noteList;
 
@@ -608,7 +608,7 @@ namespace MidiHelpers
         return noteList;
     }
 
-    inline void clipSequenceToRange (choc::midi::Sequence& sequence, const juce::Range<double> clipRange,
+    inline void clipSequenceToRange (choc::midi::Sequence& sequence, const yup::Range<double> clipRange,
                                      std::vector<std::pair<size_t, size_t>>& noteOffMap)
     {
         if (clipRange.isEmpty())
@@ -651,7 +651,7 @@ namespace MidiHelpers
 
         // Finally, erase any events with the flagged timestamp
         sequence.events.erase (std::remove_if (sequence.events.begin(), sequence.events.end(),
-                                               [timeStampToRemoveFlag] (const auto& e) { return juce::approximatelyEqual (e.timeStamp, timeStampToRemoveFlag); }),
+                                               [timeStampToRemoveFlag] (const auto& e) { return yup::approximatelyEqual (e.timeStamp, timeStampToRemoveFlag); }),
                                sequence.events.end());
     }
 }
@@ -668,28 +668,28 @@ public:
     virtual void createMessagesForTime (MidiMessageArray& destBuffer,
                                         double time,
                                         ActiveNoteList&,
-                                        juce::Range<int> channelNumbers,
+                                        yup::Range<int> channelNumbers,
                                         LiveClipLevel&,
                                         bool useMPEChannelMode, MPESourceID,
-                                        juce::Array<juce::MidiMessage>& controllerMessagesScratchBuffer)
+                                        yup::Array<yup::MidiMessage>& controllerMessagesScratchBuffer)
     {
-        juce::ignoreUnused (destBuffer, time, channelNumbers, useMPEChannelMode, controllerMessagesScratchBuffer);
+        yup::ignoreUnused (destBuffer, time, channelNumbers, useMPEChannelMode, controllerMessagesScratchBuffer);
     }
 
-    virtual ActiveNoteList getNotesOnAtTime (double /*time*/, juce::Range<int> /*channelNumbers*/, LiveClipLevel&)
+    virtual ActiveNoteList getNotesOnAtTime (double /*time*/, yup::Range<int> /*channelNumbers*/, LiveClipLevel&)
     {
         jassertfalse; // You shouldn't be calling the default implementation of this!
         return {};
     }
 
     //==============================================================================
-    virtual void cacheSequence (double /*offset*/, std::optional<juce::Range<double>> /*clipRange*/) {}
+    virtual void cacheSequence (double /*offset*/, std::optional<yup::Range<double>> /*clipRange*/) {}
 
     virtual void setTime (double) = 0;
     virtual bool advance() = 0;
 
     virtual bool exhausted() = 0;
-    virtual juce::MidiMessage getEvent() = 0;
+    virtual yup::MidiMessage getEvent() = 0;
 };
 
 
@@ -705,10 +705,10 @@ struct EventGenerator   : public MidiGenerator
     void createMessagesForTime (MidiMessageArray& destBuffer,
                                 SequenceBeatPosition time,
                                 ActiveNoteList& activeNoteList,
-                                juce::Range<int> channelNumbers,
+                                yup::Range<int> channelNumbers,
                                 LiveClipLevel& clipLevel,
                                 bool useMPEChannelMode, MPESourceID midiSourceID,
-                                juce::Array<juce::MidiMessage>& controllerMessagesScratchBuffer) override
+                                yup::Array<yup::MidiMessage>& controllerMessagesScratchBuffer) override
     {
         thread_local MidiMessageArray scratchBuffer, cleanedBufferToMerge;
         scratchBuffer.clear();
@@ -750,7 +750,7 @@ struct EventGenerator   : public MidiGenerator
         destBuffer.mergeFrom (cleanedBufferToMerge);
     }
 
-    ActiveNoteList getNotesOnAtTime (SequenceBeatPosition time, juce::Range<int> channelNumbers, LiveClipLevel& clipLevel) override
+    ActiveNoteList getNotesOnAtTime (SequenceBeatPosition time, yup::Range<int> channelNumbers, LiveClipLevel& clipLevel) override
     {
         return MidiHelpers::getNotesOnAtTime (sequence, noteOffMap,
                                               time,
@@ -780,7 +780,7 @@ struct EventGenerator   : public MidiGenerator
         }
     }
 
-    juce::MidiMessage getEvent() override
+    yup::MidiMessage getEvent() override
     {
         [[ maybe_unused ]] auto numEvents = sequence.events.size();
         jassert (currentIndex < numEvents);
@@ -810,7 +810,7 @@ struct EventGenerator   : public MidiGenerator
 class CachingMidiEventGenerator : public MidiGenerator
 {
 public:
-    CachingMidiEventGenerator (std::vector<juce::MidiMessageSequence> seq,
+    CachingMidiEventGenerator (std::vector<yup::MidiMessageSequence> seq,
                                QuantisationType qt,
                                const GrooveTemplate& grooveTemplate, float grooveStrength_)
         : sequences (std::move (seq)),
@@ -847,10 +847,10 @@ public:
     void createMessagesForTime (MidiMessageArray& destBuffer,
                                 EditBeatPosition editBeatPosition,
                                 ActiveNoteList& noteList,
-                                juce::Range<int> channelNumbers,
+                                yup::Range<int> channelNumbers,
                                 LiveClipLevel& clipLevel,
                                 bool useMPEChannelMode, MPESourceID midiSourceID,
-                                juce::Array<juce::MidiMessage>& controllerMessagesScratchBuffer) override
+                                yup::Array<yup::MidiMessage>& controllerMessagesScratchBuffer) override
     {
         generator.createMessagesForTime (destBuffer,
                                          editBeatPosition,
@@ -861,7 +861,7 @@ public:
                                          controllerMessagesScratchBuffer);
     }
 
-    ActiveNoteList getNotesOnAtTime (EditBeatPosition time, juce::Range<int> channelNumbers, LiveClipLevel& clipLevel) override
+    ActiveNoteList getNotesOnAtTime (EditBeatPosition time, yup::Range<int> channelNumbers, LiveClipLevel& clipLevel) override
     {
         return MidiHelpers::getNotesOnAtTime (currentSequence, noteOffMap,
                                               time,
@@ -874,7 +874,7 @@ public:
         generator.setTime (editBeatPosition);
     }
 
-    void cacheSequence (double offsetBeats, std::optional<juce::Range<double>> clipRange) override
+    void cacheSequence (double offsetBeats, std::optional<yup::Range<double>> clipRange) override
     {
         // Create a new sequence by:
         // - Iterating the current sequence
@@ -915,7 +915,7 @@ public:
         cachedSequenceOffset = offsetBeats;
     }
 
-    juce::MidiMessage getEvent() override
+    yup::MidiMessage getEvent() override
     {
         auto e = generator.getEvent();
         e.addToTimeStamp (-cachedSequenceOffset);
@@ -933,7 +933,7 @@ public:
     }
 
 private:
-    std::vector<juce::MidiMessageSequence> sequences;
+    std::vector<yup::MidiMessageSequence> sequences;
 
     choc::midi::Sequence currentSequence;
     std::vector<std::pair<size_t, size_t>> noteOffMap;
@@ -967,10 +967,10 @@ public:
     void createMessagesForTime (MidiMessageArray& destBuffer,
                                 EditBeatPosition editBeatPosition,
                                 ActiveNoteList& noteList,
-                                juce::Range<int> channelNumbers,
+                                yup::Range<int> channelNumbers,
                                 LiveClipLevel& clipLevel,
                                 bool useMPEChannelMode, MPESourceID midiSourceID,
-                                juce::Array<juce::MidiMessage>& controllerMessagesScratchBuffer) override
+                                yup::Array<yup::MidiMessage>& controllerMessagesScratchBuffer) override
     {
         // Ensure the correct sequence is cached
         setTime (editBeatPosition);
@@ -984,7 +984,7 @@ public:
                                           controllerMessagesScratchBuffer);
     }
 
-    ActiveNoteList getNotesOnAtTime (EditBeatPosition editBeatPosition, juce::Range<int> channelNumbers, LiveClipLevel& clipLevel) override
+    ActiveNoteList getNotesOnAtTime (EditBeatPosition editBeatPosition, yup::Range<int> channelNumbers, LiveClipLevel& clipLevel) override
     {
         return generator->getNotesOnAtTime (editBeatPositionToSequenceBeatPosition (editBeatPosition),
                                             channelNumbers,
@@ -1008,7 +1008,7 @@ public:
         }
     }
 
-    juce::MidiMessage getEvent() override
+    yup::MidiMessage getEvent() override
     {
         const auto offsetBeats = clipRange.getStart() - loopTimes.getStart() + (loopIndex * loopTimes.getLength());
 
@@ -1083,10 +1083,10 @@ public:
     void createMessagesForTime (MidiMessageArray& destBuffer,
                                 EditBeatPosition editBeatPosition,
                                 ActiveNoteList& noteList,
-                                juce::Range<int> channelNumbers,
+                                yup::Range<int> channelNumbers,
                                 LiveClipLevel& clipLevel,
                                 bool useMPEChannelMode, MPESourceID midiSourceID,
-                                juce::Array<juce::MidiMessage>& controllerMessagesScratchBuffer) override
+                                yup::Array<yup::MidiMessage>& controllerMessagesScratchBuffer) override
     {
         generator->createMessagesForTime (destBuffer,
                                           editBeatPosition + getOffset(),
@@ -1097,7 +1097,7 @@ public:
                                           controllerMessagesScratchBuffer);
     }
 
-    ActiveNoteList getNotesOnAtTime (EditBeatPosition editBeatPosition, juce::Range<int> channelNumbers, LiveClipLevel& clipLevel) override
+    ActiveNoteList getNotesOnAtTime (EditBeatPosition editBeatPosition, yup::Range<int> channelNumbers, LiveClipLevel& clipLevel) override
     {
         return generator->getNotesOnAtTime (editBeatPosition + getOffset(),
                                             channelNumbers,
@@ -1109,7 +1109,7 @@ public:
         generator->setTime (editBeatPosition + getOffset());
     }
 
-    juce::MidiMessage getEvent() override
+    yup::MidiMessage getEvent() override
     {
         auto e = generator->getEvent();
         e.addToTimeStamp (-getOffset());
@@ -1143,7 +1143,7 @@ private:
 class GeneratorAndNoteList
 {
 public:
-    GeneratorAndNoteList (std::vector<juce::MidiMessageSequence> sequencesToUse,
+    GeneratorAndNoteList (std::vector<yup::MidiMessageSequence> sequencesToUse,
                           BeatRange editRangeToUse,
                           BeatRange loopRangeToUse,
                           BeatDuration offsetToUse,
@@ -1180,7 +1180,7 @@ public:
         if (! loopRangeRaw.isEmpty())
             sequences = MidiHelpers::createLoopSection (std::move (sequences), loopRangeRaw);
 
-        sequencesHash = std::hash<std::vector<juce::MidiMessageSequence>>{} (sequences);
+        sequencesHash = std::hash<std::vector<yup::MidiMessageSequence>>{} (sequences);
 
         if (sequencesHash != lastSequencesHash || clipPropertiesHaveChanged)
             shouldSendNoteOffsForNotesNoLongerPlaying = true;
@@ -1205,7 +1205,7 @@ public:
                          BeatRange sectionEditBeatRange,
                          TimeRange sectionEditTimeRange,
                          LiveClipLevel& clipLevel,
-                         juce::Range<int> channelNumbers,
+                         yup::Range<int> channelNumbers,
                          bool useMPEChannelMode,
                          MPESourceID midiSourceID,
                          bool isPlaying,
@@ -1251,7 +1251,7 @@ public:
                                              if (currentlyPlayingNoteList.isNoteActive (chan, note))
                                                  return;
 
-                                             destBuffer.addMidiMessage (juce::MidiMessage::noteOff (chan, note), 0.0, midiSourceID);
+                                             destBuffer.addMidiMessage (yup::MidiMessage::noteOff (chan, note), 0.0, midiSourceID);
                                              activeNoteList->clearNote (chan, note);
                                          });
 
@@ -1307,7 +1307,7 @@ public:
                 blockBeatPosition = std::max (blockBeatPosition, 0.0);
 
                 // Note-offs that are on the end boundry need to be nudged back by 1 sample so they're not lost (which leads to stuck notes)
-                if (e.isNoteOff() && juce::isWithin (editBeatPosition, clipIntersection.getEnd().inBeats(), beatDurationOfOneSample))
+                if (e.isNoteOff() && yup::isWithin (editBeatPosition, clipIntersection.getEnd().inBeats(), beatDurationOfOneSample))
                     blockBeatPosition = blockBeatPosition - beatDurationOfOneSample;
 
                 e.multiplyVelocity (volScale);
@@ -1371,7 +1371,7 @@ private:
     std::unique_ptr<MidiGenerator> generator;
     std::shared_ptr<BeatDuration> dynamicOffsetBeats;
 
-    std::vector<juce::MidiMessageSequence> sequences;
+    std::vector<yup::MidiMessageSequence> sequences;
     size_t sequencesHash = 0;
     const BeatRange editRange, loopRange;
     const BeatDuration offset;
@@ -1381,14 +1381,14 @@ private:
     bool initialised = false;
 
     bool shouldCreateMessagesForTime = false, shouldSendNoteOffsForNotesNoLongerPlaying = false;
-    juce::Array<juce::MidiMessage> controllerMessagesScratchBuffer;
+    yup::Array<yup::MidiMessage> controllerMessagesScratchBuffer;
 };
 
 
 //==============================================================================
 //==============================================================================
-LoopingMidiNode::LoopingMidiNode (std::vector<juce::MidiMessageSequence> sequences,
-                                  juce::Range<int> midiChannelNumbers,
+LoopingMidiNode::LoopingMidiNode (std::vector<yup::MidiMessageSequence> sequences,
+                                  yup::Range<int> midiChannelNumbers,
                                   bool useMPE,
                                   BeatRange editTimeRange,
                                   BeatRange sequenceLoopRange,
@@ -1432,7 +1432,7 @@ const std::shared_ptr<ActiveNoteList>& LoopingMidiNode::getActiveNoteList() cons
 //==============================================================================
 void LoopingMidiNode::setDynamicOffsetBeats (BeatDuration newOffset)
 {
-    if (juce::approximatelyEqual (dynamicOffsetBeats->inBeats(), newOffset.inBeats()))
+    if (yup::approximatelyEqual (dynamicOffsetBeats->inBeats(), newOffset.inBeats()))
         return;
 
     (*dynamicOffsetBeats) = newOffset;

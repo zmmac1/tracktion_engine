@@ -55,7 +55,7 @@ tracktion::graph::NodeProperties ModifierNode::getNodeProperties()
 {
     auto props = input->getNodeProperties();
 
-    props.numberOfChannels = juce::jmax (props.numberOfChannels, modifier->getAudioInputNames().size());
+    props.numberOfChannels = yup::jmax (props.numberOfChannels, modifier->getAudioInputNames().size());
     props.hasAudio = props.hasAudio || modifier->getAudioInputNames().size() > 0;
     props.hasMidi  = props.hasMidi || modifier->getMidiInputNames().size() > 0;
     props.nodeID = (size_t) modifier->itemID.getRawID();
@@ -65,7 +65,7 @@ tracktion::graph::NodeProperties ModifierNode::getNodeProperties()
 
 void ModifierNode::prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo& info)
 {
-    juce::ignoreUnused (info);
+    yup::ignoreUnused (info);
     jassert (sampleRate == info.sampleRate);
 
     auto props = getNodeProperties();
@@ -144,7 +144,7 @@ void ModifierNode::initialiseModifier (double sampleRateToUse, int blockSizeToUs
     isInitialised = true;
 }
 
-PluginRenderContext ModifierNode::getPluginRenderContext (juce::Range<int64_t> referenceSampleRange, juce::AudioBuffer<float>& destBuffer)
+PluginRenderContext ModifierNode::getPluginRenderContext (yup::Range<int64_t> referenceSampleRange, yup::AudioBuffer<float>& destBuffer)
 {
     if (audioRenderContextProvider != nullptr)
     {

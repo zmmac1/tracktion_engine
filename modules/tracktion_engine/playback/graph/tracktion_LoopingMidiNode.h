@@ -26,8 +26,8 @@ class LoopingMidiNode final : public tracktion::graph::Node,
                               public DynamicallyOffsettableNodeBase
 {
 public:
-    LoopingMidiNode (std::vector<juce::MidiMessageSequence> sequences,
-                     juce::Range<int> midiChannelNumbers,
+    LoopingMidiNode (std::vector<yup::MidiMessageSequence> sequences,
+                     yup::Range<int> midiChannelNumbers,
                      bool useMPE,
                      BeatRange editRange,
                      BeatRange loopRange,
@@ -71,7 +71,7 @@ public:
 private:
     //==============================================================================
     std::unique_ptr<GeneratorAndNoteList> generatorAndNoteList;
-    juce::Range<int> channelNumbers;
+    yup::Range<int> channelNumbers;
     bool useMPEChannelMode;
     const BeatRange editRange;
     LiveClipLevel clipLevel;

@@ -231,7 +231,7 @@ public:
     void initialise (const PlaybackInitialisationInfo&);
 
     /** Call before processing the next block, used to reset the process status. */
-    void prepareForNextBlock (juce::Range<int64_t> referenceSampleRange);
+    void prepareForNextBlock (yup::Range<int64_t> referenceSampleRange);
 
     /** Call to process the node, which will in turn call the process method with the
         buffers to fill.
@@ -243,7 +243,7 @@ public:
                                     N.B. the length of this may be different to the number of
                                     samples to be processed so don't rely on them being the same!
     */
-    void process (choc::buffer::FrameCount numSamples, juce::Range<int64_t> referenceSampleRange);
+    void process (choc::buffer::FrameCount numSamples, yup::Range<int64_t> referenceSampleRange);
 
     /** Returns true if this node has processed and its outputs can be retrieved. */
     bool hasProcessed() const;
@@ -322,7 +322,7 @@ public:
     struct ProcessContext
     {
         choc::buffer::FrameCount numSamples;
-        juce::Range<int64_t> referenceSampleRange;
+        yup::Range<int64_t> referenceSampleRange;
         AudioAndMidiBuffer buffers;
     };
 
@@ -358,7 +358,7 @@ protected:
     /** Called before once on all Nodes before they are processed.
         This can be used to prefetch audio data or update mute statuses etc..
     */
-    virtual void prefetchBlock (juce::Range<int64_t> /*referenceSampleRange*/) {}
+    virtual void prefetchBlock (yup::Range<int64_t> /*referenceSampleRange*/) {}
 
     /** Called when the node is to be processed.
         This should add in to the buffers available making sure not to change their size at all.
@@ -370,7 +370,7 @@ protected:
         optimisations like steal input buffers from source if appropriate.
     */
     virtual void preProcess (choc::buffer::FrameCount /*numSamples*/,
-                             juce::Range<int64_t> /*referenceSampleRange*/)
+                             yup::Range<int64_t> /*referenceSampleRange*/)
     {}
 
     //==============================================================================
@@ -407,7 +407,7 @@ private:
     std::function<NodeBuffer (choc::buffer::Size)> allocateAudioBuffer = nullptr;
     std::function<void (NodeBuffer&&)> deallocateAudioBuffer = nullptr;
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     std::atomic<bool> isBeingProcessed { false };
    #endif
 };
@@ -503,7 +503,7 @@ inline void Node::initialise (const PlaybackInitialisationInfo& info)
     directInputNodes = getDirectInputNodes();
 }
 
-inline void Node::prepareForNextBlock (juce::Range<int64_t> referenceSampleRange)
+inline void Node::prepareForNextBlock (yup::Range<int64_t> referenceSampleRange)
 {
     // Only do this once as prepare may be called multiple times
     if (retainCount == 0)
@@ -520,9 +520,9 @@ inline void Node::prepareForNextBlock (juce::Range<int64_t> referenceSampleRange
     prefetchBlock (referenceSampleRange);
 }
 
-inline void Node::process (choc::buffer::FrameCount numSamples, juce::Range<int64_t> referenceSampleRange)
+inline void Node::process (choc::buffer::FrameCount numSamples, yup::Range<int64_t> referenceSampleRange)
 {
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     assert (! isBeingProcessed);
     isBeingProcessed = true;
 
@@ -549,7 +549,7 @@ inline void Node::process (choc::buffer::FrameCount numSamples, juce::Range<int6
 
     const auto numChannelsBeforeProcessing = audioBuffer.getNumChannels();
     const auto numSamplesBeforeProcessing = audioBuffer.getNumFrames();
-    juce::ignoreUnused (numChannelsBeforeProcessing, numSamplesBeforeProcessing);
+    yup::ignoreUnused (numChannelsBeforeProcessing, numSamplesBeforeProcessing);
 
     jassert (numSamples > 0); // This must be a valid number of samples to process
     jassert (numChannelsBeforeProcessing == 0 || numSamples <= audioBuffer.getNumFrames());
@@ -585,7 +585,7 @@ inline void Node::process (choc::buffer::FrameCount numSamples, juce::Range<int6
     // If you've set a new view with setAudioOutput, they must be the same size!
     jassert (destAudioView.getSize() == audioView.getSize());
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     isBeingProcessed = false;
    #endif
 
@@ -602,7 +602,7 @@ inline Node::AudioAndMidiBuffer Node::getProcessedOutput()
 {
     jassert (hasProcessed());
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     if ([[ maybe_unused ]] auto node = nodeToRelease.load (std::memory_order_acquire))
         jassert (node->hasProcessed());
    #endif

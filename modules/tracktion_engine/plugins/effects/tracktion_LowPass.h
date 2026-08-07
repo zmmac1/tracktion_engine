@@ -20,32 +20,32 @@ public:
     static const char* getPluginName()                  { return NEEDS_TRANS("Low/High-Pass Filter"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return "LPF/HPF"; }
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getShortName (int) override            { return "HP/LP"; }
-    juce::String getSelectableDescription() override    { return TRANS("Low/High-Pass Filter"); }
+    yup::String getName() const override               { return "LPF/HPF"; }
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getShortName (int) override            { return "HP/LP"; }
+    yup::String getSelectableDescription() override    { return TRANS("Low/High-Pass Filter"); }
 
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
 
-    int getNumOutputChannelsGivenInputs (int numInputChannels) override  { return juce::jmin (numInputChannels, 2); }
+    int getNumOutputChannelsGivenInputs (int numInputChannels) override  { return yup::jmin (numInputChannels, 2); }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
     void applyToBuffer (const PluginRenderContext&) override;
 
     bool isLowPass() const noexcept                     { return mode.get() != "highpass"; }
 
     juce::CachedValue<float> frequencyValue;
-    juce::CachedValue<juce::String> mode;
+    juce::CachedValue<yup::String> mode;
     AutomatableParameter::Ptr frequency;
 
 private:
-    juce::IIRFilter filter[2];
+    yup::IIRFilter filter[2];
     float currentFilterFreq = 0;
     bool isCurrentlyLowPass = false;
 
     void updateFilters();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowPassPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LowPassPlugin)
 };
 
 } // namespace tracktion::inline engine

@@ -22,17 +22,17 @@ public:
 
     AutomationCurve (Edit&, TimeBase);
     AutomationCurve (Edit&, TimeBase,
-                     const juce::ValueTree& parent, const juce::ValueTree& state);
+                     const yup::ValueTree& parent, const yup::ValueTree& state);
     AutomationCurve (const AutomationCurve&);
 
-    void setState (const juce::ValueTree&);
-    void setParentState (const juce::ValueTree&);
+    void setState (const yup::ValueTree&);
+    void setParentState (const yup::ValueTree&);
 
     /** Sets the paramID to store in the state. */
-    void setParameterID (juce::String);
+    void setParameterID (yup::String);
 
     /** Returns the parameter ID set or an empty string. */
-    juce::String getParameterID() const;
+    yup::String getParameterID() const;
 
     //==============================================================================
     /** If set to true, this curve is disabled, having no effect on the AutomatableParameter. */
@@ -50,7 +50,7 @@ public:
             jassert (toUnderlying (t) >= 0.0);
         }
 
-        juce::ValueTree toValueTree() const;
+        yup::ValueTree toValueTree() const;
 
         EditPosition time;
         float value = 0, curve = 0;
@@ -92,10 +92,10 @@ public:
     void removePointsAndCloseGap (AutomatableParameter&, EditTimeRange, juce::UndoManager*);
     void removeRedundantPoints (EditTimeRange, juce::UndoManager*);
 
-    juce::Array<AutomationPoint> getPointsInRegion (EditTimeRange) const;
+    yup::Array<AutomationPoint> getPointsInRegion (EditTimeRange) const;
 
     // returns the new index of the point, which may have changed
-    int movePoint (int index, EditPosition, float newValue, std::optional<juce::Range<float>> valueLimits,
+    int movePoint (int index, EditPosition, float newValue, std::optional<yup::Range<float>> valueLimits,
                    bool removeInterveningPoints, juce::UndoManager*);
 
     void setPointValue (int index, float newValue, juce::UndoManager*);
@@ -103,8 +103,8 @@ public:
 
     //==============================================================================
     void rescaleAllPositions (double factor, juce::UndoManager*);
-    void rescaleValues (float factor, EditTimeRange, juce::Range<float> valueRange, juce::UndoManager*);
-    void addToValues (float valueDelta, EditTimeRange, juce::Range<float> valueRange, juce::UndoManager*);
+    void rescaleValues (float factor, EditTimeRange, yup::Range<float> valueRange, juce::UndoManager*);
+    void addToValues (float valueDelta, EditTimeRange, yup::Range<float> valueRange, juce::UndoManager*);
 
     void simplify (EditTimeRange, EditDuration minTimeDifference, float minValueDifference, juce::UndoManager*);
 
@@ -112,12 +112,12 @@ public:
     void insertSpace (AutomatableParameter&, TimePosition, TimeDuration);
 
     //==============================================================================
-    static void removeAllAutomationCurvesRecursively (const juce::ValueTree&);
+    static void removeAllAutomationCurvesRecursively (const yup::ValueTree&);
 
     //==============================================================================
     Edit& edit;
     const TimeBase timeBase;
-    juce::ValueTree parentState, state;
+    yup::ValueTree parentState, state;
 
     //==============================================================================
     // Deprecated Time based functions, prefer the generic ones above
@@ -131,9 +131,9 @@ public:
     void removePointsInRegion (TimeRange, juce::UndoManager*);
     void removeRegionAndCloseGap (AutomatableParameter&, TimeRange, juce::UndoManager*);
     void removeRedundantPoints (TimeRange, juce::UndoManager*);
-    juce::Array<AutomationPoint> getPointsInRegion (TimeRange) const;
-    void rescaleValues (float factor, TimeRange, juce::Range<float> valueRange, juce::UndoManager*);
-    void addToValues (float valueDelta, TimeRange, juce::Range<float> valueRange, juce::UndoManager*);
+    yup::Array<AutomationPoint> getPointsInRegion (TimeRange) const;
+    void rescaleValues (float factor, TimeRange, yup::Range<float> valueRange, juce::UndoManager*);
+    void addToValues (float valueDelta, TimeRange, yup::Range<float> valueRange, juce::UndoManager*);
     int movePoint (AutomatableParameter&, int index, TimePosition, float newValue,
                    bool removeInterveningPoints, juce::UndoManager*);
     void simplify (TimeRange, double minTimeDifference, float minValueDifference, juce::UndoManager*);
@@ -143,20 +143,20 @@ public:
 
 private:
     EditPosition createPosition (double) const;
-    EditPosition getPosition (const juce::ValueTree&) const;
+    EditPosition getPosition (const yup::ValueTree&) const;
     EditPosition convertPositionToBase (EditPosition) const;
     void setPointTime (int index, TimePosition, juce::UndoManager*);
     void addPointAtIndex (int index, EditPosition, float v, float c, juce::UndoManager*);
     void addPointAtIndex (int index, TimePosition, float v, float c, juce::UndoManager*);
     void checkParenthoodStatus (juce::UndoManager*);
 
-    JUCE_LEAK_DETECTOR (AutomationCurve)
+    YUP_LEAK_DETECTOR (AutomationCurve)
 };
 
 //==============================================================================
 /** Removes points from the curve to simplify it and returns the number of points removed. */
 int simplify (AutomationCurve&, int strength,
-              EditTimeRange, juce::Range<float> valueRange,
+              EditTimeRange, yup::Range<float> valueRange,
               juce::UndoManager*);
 
 void mergeCurve (AutomationCurve& dest,

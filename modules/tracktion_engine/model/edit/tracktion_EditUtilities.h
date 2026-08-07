@@ -21,7 +21,7 @@ Project::Ptr getProjectForEdit (const Edit&);
 ProjectItem::Ptr getProjectItemForEdit (const Edit&);
 
 /** Uses the ProjectManager to look up the file for an Edit. */
-juce::File getEditFileFromProjectManager (Edit&);
+yup::File getEditFileFromProjectManager (Edit&);
 
 /** Returns true if the ProjectItemRef is being used for any of the Edit's elements. */
 bool referencesProjectItem (Edit&, ProjectItemRef);
@@ -37,7 +37,7 @@ void convertAllSourcePaths (Edit&, bool useRelativePaths);
 /// Inserts blank space in to an Edit, splitting clips if necessary.
 /// If onlyTheseTracks is provided, only those tracks are affected; otherwise all tracks are.
 void insertSpaceIntoEdit (Edit&, TimeRange timeRangeToInsert,
-                          const juce::Array<Track*>& onlyTheseTracks = {});
+                          const yup::Array<Track*>& onlyTheseTracks = {});
 
 /// Inserts a number of blank beats in to the Edit.
 void insertSpaceIntoEditFromBeatRange (Edit&, BeatRange);
@@ -50,20 +50,20 @@ EditItem* findEditItemForID (Edit&, EditItemID);
 //==============================================================================
 
 /** Returns all the tracks in an Edit. */
-juce::Array<Track*> getAllTracks (const Edit&);
+yup::Array<Track*> getAllTracks (const Edit&);
 
 /** Returns all of the non-foldered tracks in an Edit. */
-juce::Array<Track*> getTopLevelTracks (const Edit&);
+yup::Array<Track*> getTopLevelTracks (const Edit&);
 
 /** Returns the tracks of a given type in an Edit. */
 template<typename TrackType>
-juce::Array<TrackType*> getTracksOfType (const Edit&, bool recursive);
+yup::Array<TrackType*> getTracksOfType (const Edit&, bool recursive);
 
 /** Returns all the AudioTracks in an Edit. */
-juce::Array<AudioTrack*> getAudioTracks (const Edit&);
+yup::Array<AudioTrack*> getAudioTracks (const Edit&);
 
 /** Returns all the ClipTracks in an Edit. */
-juce::Array<ClipTrack*> getClipTracks (const Edit&);
+yup::Array<ClipTrack*> getClipTracks (const Edit&);
 
 /** Returns the total number of Tracks in an Edit. */
 int getTotalNumTracks (const Edit&);
@@ -75,16 +75,16 @@ Track* findTrackForID (const Edit&, EditItemID);
 AudioTrack* findAudioTrackForID (const Edit&, EditItemID);
 
 /** Returns the Tracks for the given IDs in the Edit. */
-juce::Array<Track*> findTracksForIDs (const Edit&, const juce::Array<EditItemID>&);
+yup::Array<Track*> findTracksForIDs (const Edit&, const yup::Array<EditItemID>&);
 
 /** Returns the Track with a given state if contained in the Edit. */
-Track* findTrackForState (const Edit&, const juce::ValueTree&);
+Track* findTrackForState (const Edit&, const yup::ValueTree&);
 
 /** Returns the first audio track in an Edit. */
 AudioTrack* getFirstAudioTrack (const Edit&);
 
 /** Returns all the tracks containing the selected tracks or TrackItems. */
-juce::Array<Track*> findAllTracksContainingSelectedItems (const SelectableList&);
+yup::Array<Track*> findAllTracksContainingSelectedItems (const SelectableList&);
 
 /** Returns the first ClipTrack from the selected tracks or clips. */
 ClipTrack* findFirstClipTrackFromSelection (const SelectableList&);
@@ -98,15 +98,15 @@ TrackOutput* getTrackOutput (Track&);
 /** Returns the set of tracks as a BigInteger with each bit corresponding to the
     array of all tracks in an Edit. Used in Renderer.
 */
-juce::BigInteger toBitSet (const juce::Array<Track*>&);
+yup::BigInteger toBitSet (const yup::Array<Track*>&);
 
 /** Returns an Array of Track[s] corresponding to the set bits of all
     tracks in an Edit. Used in Renderer.
 */
-juce::Array<Track*> toTrackArray (Edit&, const juce::BigInteger&);
+yup::Array<Track*> toTrackArray (Edit&, const yup::BigInteger&);
 
 template<typename TrackItemType>
-[[ nodiscard ]] juce::Array<TrackItemType*> getTrackItemsOfType (const Track&);
+[[ nodiscard ]] yup::Array<TrackItemType*> getTrackItemsOfType (const Track&);
 
 /** Returns the ClipOwner with a given ID if it can be found in the Edit. */
 ClipOwner* findClipOwnerForID (const Edit&, EditItemID);
@@ -130,7 +130,7 @@ int findClipSlotIndex (ClipSlot&);
 Clip* findClipForID (const Edit&, EditItemID);
 
 /** Returns the Clip for a given state if contained in the Edit. */
-Clip* findClipForState (const Edit&, const juce::ValueTree&);
+Clip* findClipForState (const Edit&, const yup::ValueTree&);
 
 /** Returns true if an Edit contains a given clip. */
 bool containsClip (const Edit&, Clip*);
@@ -180,26 +180,26 @@ void moveSelectedClips (const SelectableList&, Edit&, MoveClipAction mode, bool 
 SelectableList getClipSelectionWithCollectionClipContents (const SelectableList&);
 
 /** Returns all clip effects */
-juce::Array<ClipEffect*> getAllClipEffects (Edit& edit);
+yup::Array<ClipEffect*> getAllClipEffects (Edit& edit);
 
 //==============================================================================
 // MIDI
 //==============================================================================
 
 /** Returns the MidiNote with a given state. */
-MidiNote* findNoteForState (const Edit&, const juce::ValueTree&);
+MidiNote* findNoteForState (const Edit&, const yup::ValueTree&);
 
 /** Merges a set of MIDI clips in to one new one. */
-juce::Result mergeMidiClips (juce::Array<MidiClip*>, SelectionManager* sm = nullptr);
+yup::Result mergeMidiClips (yup::Array<MidiClip*>, SelectionManager* sm = nullptr);
 
 /** Helper function to read a file to a number of MidiLists. */
-juce::OwnedArray<MidiList> readFileToMidiList (juce::File midiFile, bool importAsNoteExpression);
+yup::OwnedArray<MidiList> readFileToMidiList (yup::File midiFile, bool importAsNoteExpression);
 
 /** Helper function to read a MIDI file and create a MidiClip from it.
     N.B. This will only use the first track in the file, any other tracks will be discarded.
     The clip will be positioned at 0 with a beat length the duration of the imported list.
 */
-MidiClip::Ptr createClipFromFile (juce::File midiFile, ClipOwner&, bool importAsNoteExpression);
+MidiClip::Ptr createClipFromFile (yup::File midiFile, ClipOwner&, bool importAsNoteExpression);
 
 
 //==============================================================================
@@ -210,7 +210,7 @@ MidiClip::Ptr createClipFromFile (juce::File midiFile, ClipOwner&, bool importAs
 Plugin::Array getAllPlugins (const Edit&, bool includeMasterVolume);
 
 /** Returns the plugin with given state. */
-Plugin::Ptr findPluginForState (const Edit&, const juce::ValueTree&);
+Plugin::Ptr findPluginForState (const Edit&, const yup::ValueTree&);
 
 /** Returns the plugin with given EditItemID. */
 Plugin::Ptr findPluginForID (const Edit&, EditItemID);
@@ -222,7 +222,7 @@ Track* getTrackContainingPlugin (const Edit&, const Plugin*);
 bool areAnyPluginsMissing (const Edit&);
 
 /** Returns all of the instances of a specific RackType in an Edit. */
-juce::Array<RackInstance*> getRackInstancesInEditForType (const RackType&);
+yup::Array<RackInstance*> getRackInstancesInEditForType (const RackType&);
 
 /** Toggles the enabled state of all plugins in an Edit. */
 void muteOrUnmuteAllPlugins (const Edit&);
@@ -235,7 +235,7 @@ void midiPanic (Edit&, bool resetPlugins);
 
 /** Adds a new instance of the given plugin to the track's plugin list at the specified index. */
 template<typename PluginType>
-juce::ReferenceCountedObjectPtr<PluginType> insertNewPlugin (Track&, int index = 0);
+yup::ReferenceCountedObjectPtr<PluginType> insertNewPlugin (Track&, int index = 0);
 
 //==============================================================================
 // Automation and parameters
@@ -252,10 +252,10 @@ void deleteAutomation (const SelectableList& selectedClips);
 //==============================================================================
 
 /** Returns all the ModifierSources in an Edit. */
-juce::Array<AutomatableParameter::ModifierSource*> getAllModifierSources (const Edit&);
+yup::Array<AutomatableParameter::ModifierSource*> getAllModifierSources (const Edit&);
 
 /** Returns all the Modifiers in an Edit. */
-juce::ReferenceCountedArray<Modifier> getAllModifiers (const Edit&);
+yup::ReferenceCountedArray<Modifier> getAllModifiers (const Edit&);
 
 /** Returns the Modifier with a given type and ID. */
 template<typename ModifierType>
@@ -281,10 +281,10 @@ Track* getTrackShowingParameter (AutomatableParameter&);
 //==============================================================================
 
 /** Returns all the MacroParameterLists in an Edit. */
-juce::Array<MacroParameterList*> getAllMacroParameterLists (const Edit&);
+yup::Array<MacroParameterList*> getAllMacroParameterLists (const Edit&);
 
 /** Returns all the MacroParameterElement in an Edit. */
-juce::Array<MacroParameterElement*> getAllMacroParameterElements (const Edit&);
+yup::Array<MacroParameterElement*> getAllMacroParameterElements (const Edit&);
 
 
 //==============================================================================
@@ -302,12 +302,12 @@ InputDeviceInstance::RecordingParameters getDefaultRecordingParameters (const Ed
 /** Starts an InputDeviceInstance recording to the given target without any count-in etc.
     N.B. The input must already be assigned to the target and armed for the punch to start.
 */
-juce::Result prepareAndPunchRecord (InputDeviceInstance&, EditItemID);
+yup::Result prepareAndPunchRecord (InputDeviceInstance&, EditItemID);
 
 /** If the instance is currently recording, this will stop it and return any
     created clips or an error message.
 */
-tl::expected<Clip::Array, juce::String> punchOutRecording (InputDeviceInstance&);
+tl::expected<Clip::Array, yup::String> punchOutRecording (InputDeviceInstance&);
 
 /** Returns true if any inputs are currently recording. */
 bool isRecording (EditPlaybackContext&);
@@ -344,7 +344,7 @@ juce::UndoManager* getUndoManager_p (auto& type)    { return &getUndoManager (ty
 //==============================================================================
 /** @internal */
 template<typename PluginType>
-inline juce::ReferenceCountedObjectPtr<PluginType> insertNewPlugin (Track& track, int index)
+inline yup::ReferenceCountedObjectPtr<PluginType> insertNewPlugin (Track& track, int index)
 {
     if (auto p = track.edit.getPluginCache().createNewPlugin (PluginType::create()))
     {
@@ -360,9 +360,9 @@ inline juce::ReferenceCountedObjectPtr<PluginType> insertNewPlugin (Track& track
 
 /** @internal */
 template<typename TrackType>
-inline juce::Array<TrackType*> getTracksOfType (const Edit& edit, bool recursive)
+inline yup::Array<TrackType*> getTracksOfType (const Edit& edit, bool recursive)
 {
-    juce::Array<TrackType*> result;
+    yup::Array<TrackType*> result;
     result.ensureStorageAllocated (32);
 
     edit.visitAllTracks ([&] (Track& t)
@@ -378,9 +378,9 @@ inline juce::Array<TrackType*> getTracksOfType (const Edit& edit, bool recursive
 
 /** @internal */
 template<typename TrackItemType>
-inline juce::Array<TrackItemType*> getTrackItemsOfType (const Track& track)
+inline yup::Array<TrackItemType*> getTrackItemsOfType (const Track& track)
 {
-    juce::Array<TrackItemType*> items;
+    yup::Array<TrackItemType*> items;
     const int numItems = track.getNumTrackItems();
 
     for (int i = 0; i < numItems; ++i)

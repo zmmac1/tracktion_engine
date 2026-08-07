@@ -12,10 +12,10 @@ namespace tracktion::inline engine {
 
 #if TRACKTION_ENABLE_FFMPEG
 
-static juce::String readOutputFromSystem (juce::String cmd)
+static yup::String readOutputFromSystem (yup::String cmd)
 {
-    juce::TemporaryFile tmpFile;
-    juce::TemporaryFile batFile (".bat");
+    yup::TemporaryFile tmpFile;
+    yup::TemporaryFile batFile (".bat");
     
    #if JUCE_WINDOWS
     STARTUPINFO si;
@@ -35,12 +35,12 @@ static juce::String readOutputFromSystem (juce::String cmd)
 
     batFile.getFile ().replaceWithText (cmd);
 
-    juce::String params = "/c " + batFile.getFile().getFullPathName().quoted();
+    yup::String params = "/c " + batFile.getFile().getFullPathName().quoted();
 
-    juce::HeapBlock<char> commandLine (params.getNumBytesAsUTF8() + 1);
+    yup::HeapBlock<char> commandLine (params.getNumBytesAsUTF8() + 1);
     strcpy (commandLine.get(), params.toRawUTF8());
 
-    juce::File cmdExe = juce::File::getSpecialLocation (juce::File::windowsSystemDirectory).getChildFile ("cmd.exe");
+    yup::File cmdExe = yup::File::getSpecialLocation (yup::File::windowsSystemDirectory).getChildFile ("cmd.exe");
     jassert (cmdExe.existsAsFile());
 
     if (! CreateProcessA (cmdExe.getFullPathName().toRawUTF8(), commandLine.get(), nullptr, nullptr, 
@@ -54,20 +54,20 @@ static juce::String readOutputFromSystem (juce::String cmd)
    #else
     cmd << " > " << tmpFile.getFile().getFullPathName().quoted();
     auto result = std::system (cmd.toRawUTF8());
-    juce::ignoreUnused (result);
+    yup::ignoreUnused (result);
    #endif
 
     auto contents = tmpFile.getFile().loadFileAsString();
     return contents;
 }
 
-class FFmpegEncoderAudioFormat::Writer : public juce::AudioFormatWriter
+class FFmpegEncoderAudioFormat::Writer : public yup::AudioFormatWriter
 {
 public:
-    Writer (std::unique_ptr<juce::OutputStream>& destStream,
-            const juce::String& formatName,
-            const juce::File& exe, int vbr, int cbr,
-            const juce::AudioFormatWriterOptions& options)
+    Writer (std::unique_ptr<yup::OutputStream>& destStream,
+            const yup::String& formatName,
+            const yup::File& exe, int vbr, int cbr,
+            const yup::WriteOptions& options)
         : AudioFormatWriter (destStream.release(), formatName,
                              options.getSampleRate(),
                              (unsigned int) options.getNumChannels(),
@@ -76,8 +76,8 @@ public:
     {
         metadata.addUnorderedMap (options.getMetadataValues());
 
-        if (auto out = std::unique_ptr<juce::OutputStream> (tempWav.getFile().createOutputStream()))
-            writer = juce::WavAudioFormat().createWriterFor (out, options);
+        if (auto out = std::unique_ptr<yup::OutputStream> (tempWav.getFile().createOutputStream()))
+            writer = yup::WavAudioFormat().createWriterFor (out, options);
     }
 
     ~Writer() override
@@ -98,12 +98,12 @@ public:
     
 private:
     int vbrLevel, cbrBitrate;
-    juce::TemporaryFile tempWav { ".wav" };
+    yup::TemporaryFile tempWav { ".wav" };
     std::unique_ptr<AudioFormatWriter> writer;
 
-    bool runFFmpegChildProcess (const juce::TemporaryFile& tempMP3, const juce::StringArray& processArgs) const
+    bool runFFmpegChildProcess (const yup::TemporaryFile& tempMP3, const yup::StringArray& processArgs) const
     {
-        juce::ChildProcess cp;
+        yup::ChildProcess cp;
 
         DBG(processArgs.joinIntoString (" "));
 
@@ -115,9 +115,9 @@ private:
     
     bool convertToMP3() const
     {
-        juce::TemporaryFile tempMP3 (".mp3");
+        yup::TemporaryFile tempMP3 (".mp3");
 
-        juce::StringArray args;
+        yup::StringArray args;
 
         args.add (ffmpeg.getFullPathName().quoted());
         args.add ("-i");
@@ -128,12 +128,12 @@ private:
         if (cbrBitrate == 0)
         {
             args.add ("-q:a");
-            args.add (juce::String (vbrLevel));
+            args.add (yup::String (vbrLevel));
         }
         else
         {
             args.add ("-b:a");
-            args.add (juce::String::formatted ("%dk", cbrBitrate));
+            args.add (yup::String::formatted ("%dk", cbrBitrate));
         }
 
         addMetadataArg (args, "id3title",       "title");
@@ -148,7 +148,7 @@ private:
 
         if (runFFmpegChildProcess (tempMP3, args))
         {
-            juce::FileInputStream fis (tempMP3.getFile());
+            yup::FileInputStream fis (tempMP3.getFile());
 
             if (fis.openedOk() && output->writeFromInputStream (fis, -1) > 0)
             {
@@ -160,25 +160,25 @@ private:
         return false;
     }
 
-    void addMetadataArg (juce::StringArray& args, const char* key, const char* ffmpegFlag) const
+    void addMetadataArg (yup::StringArray& args, const char* key, const char* ffmpegFlag) const
     {
         auto value = metadata.getValue (key, {});
 
         if (value.isNotEmpty())
         {
             args.add ("-metadata");
-            args.add (juce::String (ffmpegFlag) + "=" + value.quoted());
+            args.add (yup::String (ffmpegFlag) + "=" + value.quoted());
         }
     }
 
-    const juce::File ffmpeg;
-    juce::StringPairArray metadata;
+    const yup::File ffmpeg;
+    yup::StringPairArray metadata;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Writer)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Writer)
 };
 
 //==============================================================================
-FFmpegEncoderAudioFormat::FFmpegEncoderAudioFormat (const juce::File& ffmpeg)
+FFmpegEncoderAudioFormat::FFmpegEncoderAudioFormat (const yup::File& ffmpeg)
     : AudioFormat ("MP3 file", ".mp3"), ffmpegExe (ffmpeg)
 {
 }
@@ -187,17 +187,17 @@ FFmpegEncoderAudioFormat::~FFmpegEncoderAudioFormat()
 {
 }
 
-bool FFmpegEncoderAudioFormat::canHandleFile (const juce::File&)
+bool FFmpegEncoderAudioFormat::canHandleFile (const yup::File&)
 {
     return false;
 }
 
-juce::Array<int> FFmpegEncoderAudioFormat::getPossibleSampleRates()
+yup::Array<int> FFmpegEncoderAudioFormat::getPossibleSampleRates()
 {
     return { 32000, 44100, 48000 };
 }
 
-juce::Array<int> FFmpegEncoderAudioFormat::getPossibleBitDepths()
+yup::Array<int> FFmpegEncoderAudioFormat::getPossibleBitDepths()
 {
     return { 16 };
 }
@@ -206,29 +206,29 @@ bool FFmpegEncoderAudioFormat::canDoStereo()      { return true; }
 bool FFmpegEncoderAudioFormat::canDoMono()        { return true; }
 bool FFmpegEncoderAudioFormat::isCompressed()     { return true; }
 
-juce::StringArray FFmpegEncoderAudioFormat::getQualityOptions()
+yup::StringArray FFmpegEncoderAudioFormat::getQualityOptions()
 {
     static const char* vbrOptions[] = { "VBR quality 0 (best)", "VBR quality 1", "VBR quality 2", "VBR quality 3",
         "VBR quality 4 (normal)", "VBR quality 5", "VBR quality 6", "VBR quality 7",
         "VBR quality 8", "VBR quality 9 (smallest)", nullptr };
 
-    juce::StringArray opts (vbrOptions);
+    yup::StringArray opts (vbrOptions);
 
     const int cbrRates[] = { 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
     
     for (int i = 0; i < std::ssize (cbrRates); ++i)
-        opts.add (juce::String (cbrRates[i]) + " Kb/s CBR");
+        opts.add (yup::String (cbrRates[i]) + " Kb/s CBR");
 
     return opts;
 }
 
-juce::AudioFormatReader* FFmpegEncoderAudioFormat::createReaderFor (juce::InputStream*, const bool)
+yup::AudioFormatReader* FFmpegEncoderAudioFormat::createReaderFor (yup::InputStream*, const bool)
 {
     return nullptr;
 }
 
-std::unique_ptr<juce::AudioFormatWriter> FFmpegEncoderAudioFormat::createWriterFor (std::unique_ptr<juce::OutputStream>& streamToWriteTo,
-                                                                                    const juce::AudioFormatWriterOptions& options)
+std::unique_ptr<yup::AudioFormatWriter> FFmpegEncoderAudioFormat::createWriterFor (std::unique_ptr<yup::OutputStream>& streamToWriteTo,
+                                                                                    const yup::WriteOptions& options)
 {
     if (! streamToWriteTo)
         return {};
@@ -236,14 +236,14 @@ std::unique_ptr<juce::AudioFormatWriter> FFmpegEncoderAudioFormat::createWriterF
     int vbr = 4;
     int cbr = 0;
     
-    const juce::String qual (getQualityOptions() [options.getQualityOptionIndex()]);
+    const yup::String qual (getQualityOptions() [options.getQualityOptionIndex()]);
 
     if (qual.contains ("VBR"))
         vbr = qual.retainCharacters ("0123456789").getIntValue();
     else
         cbr = qual.getIntValue();
 
-    juce::StringPairArray metadata;
+    yup::StringPairArray metadata;
     metadata.addUnorderedMap (options.getMetadataValues());
 
     return std::make_unique<Writer> (streamToWriteTo,

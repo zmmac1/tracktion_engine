@@ -41,13 +41,13 @@ enum class LaunchQType
 
 //==============================================================================
 /** Returns a list of quantisation type options in the order of LaunchQType. */
-juce::StringArray getLaunchQTypeChoices();
+yup::StringArray getLaunchQTypeChoices();
 
 /** Returns a the launch Q from a string returned from getLaunchQTypeChoices(). */
-std::optional<LaunchQType> launchQTypeFromName (const juce::String&);
+std::optional<LaunchQType> launchQTypeFromName (const yup::String&);
 
 /** Retuns the name of a LaunchQType for display purposes. */
-juce::String getName (LaunchQType);
+yup::String getName (LaunchQType);
 
 /** Returns the fraction of a bar to be used for a given rate type. */
 double toBarFraction (LaunchQType) noexcept;
@@ -73,7 +73,7 @@ public:
     /** Creates a LaunchQuantisation property on a given state tree.
         The Edit is used to find the TempoSequence and UndoManager.
     */
-    LaunchQuantisation (juce::ValueTree&, Edit&);
+    LaunchQuantisation (yup::ValueTree&, Edit&);
 
     /** Returns the next beat quantised to the current type. */
     BeatPosition getNext (BeatPosition) const noexcept;
@@ -88,12 +88,12 @@ public:
 
 //==============================================================================
 //==============================================================================
-namespace juce
+namespace yup
 {
 template <>
 struct VariantConverter<tracktion::engine::LaunchQType>
 {
-    static tracktion::engine::LaunchQType fromVar (const juce::var& v)   { return tracktion::engine::fromBarFraction (v); }
-    static juce::var toVar (const tracktion::engine::LaunchQType& v)     { return tracktion::engine::toBarFraction (v); }
+    static tracktion::engine::LaunchQType fromVar (const yup::var& v)   { return tracktion::engine::fromBarFraction (v); }
+    static yup::var toVar (const tracktion::engine::LaunchQType& v)     { return tracktion::engine::toBarFraction (v); }
 };
 }

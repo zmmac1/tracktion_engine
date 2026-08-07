@@ -27,13 +27,13 @@ TEST_SUITE ("tracktion_engine")
 
         auto headerSizeBytes = static_cast<size_t> (5'888);
         auto totalSizeBytes = headerSizeBytes + static_cast<size_t> (numChannels * numSamples) * sizeof (int16_t);
-        auto mb = juce::MemoryBlock (totalSizeBytes);
-        auto os = std::unique_ptr<juce::OutputStream> (std::make_unique<juce::MemoryOutputStream> (mb, false));
-        auto w = juce::WavAudioFormat().createWriterFor (os,
-                                                         juce::AudioFormatWriterOptions().withSampleRate (sampleRate)
+        auto mb = yup::MemoryBlock (totalSizeBytes);
+        auto os = std::unique_ptr<yup::OutputStream> (std::make_unique<yup::MemoryOutputStream> (mb, false));
+        auto w = yup::WavAudioFormat().createWriterFor (os,
+                                                         yup::WriteOptions().withSampleRate (sampleRate)
                                                                                          .withNumChannels (numChannels));
         auto blockSize = 2048 * 4;
-        juce::AudioBuffer<float> temp (numChannels, blockSize);
+        yup::AudioBuffer<float> temp (numChannels, blockSize);
         temp.clear();
 
         for (int64_t i = 0; i < numSamples;)
@@ -48,8 +48,8 @@ TEST_SUITE ("tracktion_engine")
         }
 
         w.reset();
-        auto is = std::make_unique<juce::MemoryInputStream> (mb, false);
-        auto reader = std::unique_ptr<juce::AudioFormatReader> (juce::WavAudioFormat().createReaderFor (is.release(), true));
+        auto is = std::make_unique<yup::MemoryInputStream> (mb, false);
+        auto reader = std::unique_ptr<yup::AudioFormatReader> (yup::WavAudioFormat().createReaderFor (is.release(), true));
         CHECK_EQ(reader->lengthInSamples, numSamples);
         CHECK_EQ(reader->numChannels, numChannels);
         CHECK_EQ(reader->sampleRate, sampleRate);
@@ -60,11 +60,11 @@ TEST_SUITE ("tracktion_engine")
     {
         auto& engine = *Engine::getEngines().getFirst();
 
-        juce::WavAudioFormat format;
-        juce::TemporaryFile tempFile (format.getFileExtensions()[0]);
+        yup::WavAudioFormat format;
+        yup::TemporaryFile tempFile (format.getFileExtensions()[0]);
 
         AudioFile audioFile (engine, tempFile.getFile());
-        auto channelLayout = juce::AudioChannelSet::create5point1();
+        auto channelLayout = yup::AudioChannelSet::create5point1();
         auto numChannels = channelLayout.size();
         auto sampleRate = 44100.0;
         auto bitDepth = 16;
@@ -74,7 +74,7 @@ TEST_SUITE ("tracktion_engine")
             AudioFileWriter writer (audioFile, &format, numChannels, sampleRate, bitDepth, {}, 0, channelLayout);
             REQUIRE(writer.isOpen());
 
-            juce::AudioBuffer<float> buffer (numChannels, 512);
+            yup::AudioBuffer<float> buffer (numChannels, 512);
             buffer.clear();
             writer.appendBuffer (buffer, buffer.getNumSamples());
         }
@@ -91,8 +91,8 @@ TEST_SUITE ("tracktion_engine")
     {
         auto& engine = *Engine::getEngines().getFirst();
 
-        juce::WavAudioFormat format;
-        juce::TemporaryFile tempFile (format.getFileExtensions()[0]);
+        yup::WavAudioFormat format;
+        yup::TemporaryFile tempFile (format.getFileExtensions()[0]);
 
         AudioFile audioFile (engine, tempFile.getFile());
         auto numChannels = 4;
@@ -104,7 +104,7 @@ TEST_SUITE ("tracktion_engine")
             AudioFileWriter writer (audioFile, &format, numChannels, sampleRate, bitDepth, {}, 0);
             REQUIRE(writer.isOpen());
 
-            juce::AudioBuffer<float> buffer (numChannels, 512);
+            yup::AudioBuffer<float> buffer (numChannels, 512);
             buffer.clear();
             writer.appendBuffer (buffer, buffer.getNumSamples());
         }
@@ -114,8 +114,8 @@ TEST_SUITE ("tracktion_engine")
             auto info = audioFile.getInfo();
             CHECK_EQ(info.numChannels, numChannels);
             // Without explicit layout, WAV reader returns discreteChannels or a default set
-            auto isDiscrete = info.channelLayout == juce::AudioChannelSet::discreteChannels (numChannels);
-            auto isCanonical = info.channelLayout == juce::AudioChannelSet::canonicalChannelSet (numChannels);
+            auto isDiscrete = info.channelLayout == yup::AudioChannelSet::discreteChannels (numChannels);
+            auto isCanonical = info.channelLayout == yup::AudioChannelSet::canonicalChannelSet (numChannels);
             CHECK((isDiscrete || isCanonical));
         }
     }
@@ -124,13 +124,13 @@ TEST_SUITE ("tracktion_engine")
     {
         auto& engine = *Engine::getEngines().getFirst();
 
-        juce::WavAudioFormat format;
-        juce::TemporaryFile srcTempFile (format.getFileExtensions()[0]);
-        juce::TemporaryFile dstTempFile (format.getFileExtensions()[0]);
+        yup::WavAudioFormat format;
+        yup::TemporaryFile srcTempFile (format.getFileExtensions()[0]);
+        yup::TemporaryFile dstTempFile (format.getFileExtensions()[0]);
 
         AudioFile srcAudioFile (engine, srcTempFile.getFile());
         AudioFile dstAudioFile (engine, dstTempFile.getFile());
-        auto channelLayout = juce::AudioChannelSet::create5point1();
+        auto channelLayout = yup::AudioChannelSet::create5point1();
         auto numChannels = channelLayout.size();
         auto sampleRate = 44100.0;
         auto bitDepth = 16;
@@ -141,7 +141,7 @@ TEST_SUITE ("tracktion_engine")
             AudioFileWriter writer (srcAudioFile, &format, numChannels, sampleRate, bitDepth, {}, 0, channelLayout);
             REQUIRE(writer.isOpen());
 
-            juce::AudioBuffer<float> buffer (numChannels, numSamples);
+            yup::AudioBuffer<float> buffer (numChannels, numSamples);
             buffer.clear();
             writer.appendBuffer (buffer, buffer.getNumSamples());
         }
@@ -157,7 +157,7 @@ TEST_SUITE ("tracktion_engine")
             REQUIRE(writer.isOpen());
 
             // Copy audio data through
-            auto reader = std::unique_ptr<juce::AudioFormatReader> (
+            auto reader = std::unique_ptr<yup::AudioFormatReader> (
                 AudioFileUtils::createReaderFor (engine, srcAudioFile.getFile()));
             REQUIRE(reader != nullptr);
             writer.writeFromAudioReader (*reader, 0, reader->lengthInSamples);
@@ -186,8 +186,8 @@ TEST_SUITE ("tracktion_engine")
 
         auto& engine = *Engine::getEngines().getFirst();
 
-        juce::WavAudioFormat format;
-        juce::TemporaryFile tempFile (format.getFileExtensions()[0]);
+        yup::WavAudioFormat format;
+        yup::TemporaryFile tempFile (format.getFileExtensions()[0]);
 
         AudioFile audioFile (engine, tempFile.getFile());
         const int numChannels = 2;
@@ -211,7 +211,7 @@ TEST_SUITE ("tracktion_engine")
 
             if (writer.isOpen())
             {
-                juce::AudioBuffer<float> buffer (numChannels, numSamplesToWrite);
+                yup::AudioBuffer<float> buffer (numChannels, numSamplesToWrite);
                 buffer.clear();
                 writer.appendBuffer (buffer, buffer.getNumSamples());
             }

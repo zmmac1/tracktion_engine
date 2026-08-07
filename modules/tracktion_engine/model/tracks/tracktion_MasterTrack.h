@@ -18,21 +18,21 @@ class MasterTrack   : public Track
 {
 public:
     /** Create the MasterTrack for an Edit with a given state. */
-    MasterTrack (Edit&, const juce::ValueTree&);
+    MasterTrack (Edit&, const yup::ValueTree&);
 
     /** Destructor. */
     ~MasterTrack() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<MasterTrack>;
+    using Ptr = yup::ReferenceCountedObjectPtr<MasterTrack>;
 
     /** @internal */
     void initialise() override;
     /** @internal */
     bool isMasterTrack() const override;
     /** @internal */
-    juce::String getName() const override;
+    yup::String getName() const override;
     /** @internal */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     /** @internal */
     bool canContainPlugin (Plugin*) const override;
@@ -41,7 +41,7 @@ public:
     ChannelConfiguration getChannelConfiguration() const;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MasterTrack)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MasterTrack)
 };
 
 } // namespace tracktion::inline engine

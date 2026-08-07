@@ -12,7 +12,7 @@ namespace tracktion::inline engine {
 
 namespace IDs
 {
-    #define DECLARE_ID(name)  const juce::Identifier name (#name);
+    #define DECLARE_ID(name)  const yup::Identifier name (#name);
 
     DECLARE_ID (ROOT)
     DECLARE_ID (ACTIVE)
@@ -343,8 +343,8 @@ namespace IDs
     DECLARE_ID (TRACKCOMP)
     DECLARE_ID (track)
     DECLARE_ID (end)
-    DECLARE_ID (includedColour)
-    DECLARE_ID (excludedColour)
+    DECLARE_ID (includedColor)
+    DECLARE_ID (excludedColor)
     DECLARE_ID (previewIndex)
     DECLARE_ID (crossfadeLength)
     DECLARE_ID (gain)
@@ -452,7 +452,7 @@ namespace IDs
     DECLARE_ID (pres)
     DECLARE_ID (bend)
     DECLARE_ID (lift)
-    DECLARE_ID (copyColour)
+    DECLARE_ID (copyColor)
     DECLARE_ID (trimToMarker)
     DECLARE_ID (renderEnabled)
     DECLARE_ID (RENDER)

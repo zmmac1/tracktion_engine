@@ -56,33 +56,33 @@ public:
         @param folderToAddTo    The ValueTree folder node to insert into.
         @param insertIndex      Position within the folder (-1 to append).
     */
-    Project::Ptr addProjectToList (const juce::File& projectFile,
+    Project::Ptr addProjectToList (const yup::File& projectFile,
                                    bool shouldSaveList,
-                                   juce::ValueTree folderToAddTo,
+                                   yup::ValueTree folderToAddTo,
                                    int insertIndex = -1);
 
     /** Removes the project for the given file from the list.
         Closes any edits belonging to the project and adds the file to the
         recent-projects list.
     */
-    void removeProjectFromList (const juce::File&);
+    void removeProjectFromList (const yup::File&);
 
     /** Removes all projects from the list and clears the open-project array. */
     void clearProjects();
 
     //==============================================================================
     /** Returns the "Active Projects" ValueTree folder. */
-    juce::ValueTree getActiveProjectsFolder();
+    yup::ValueTree getActiveProjectsFolder();
 
     /** Returns the "Library Projects" ValueTree folder. */
-    juce::ValueTree getLibraryProjectsFolder();
+    yup::ValueTree getLibraryProjectsFolder();
 
     //==============================================================================
     /** Returns the Project object cached in a PROJECT ValueTree node.
         If createIfNotFound is true and the node represents a valid project
         file on disk, the project is opened and cached in the tree.
     */
-    Project::Ptr getProjectFrom (const juce::ValueTree&, bool createIfNotFound = true);
+    Project::Ptr getProjectFrom (const yup::ValueTree&, bool createIfNotFound = true);
 
     /** Looks up a project by its ID.
         Checks open projects first, then searches the entire folder tree.
@@ -92,17 +92,17 @@ public:
     /** Looks up a project by its file or folder path.
         Checks open projects first, then searches the entire folder tree.
     */
-    Project::Ptr getProject (const juce::File&);
+    Project::Ptr getProject (const yup::File&);
 
     /** Returns every project in the entire folder tree. */
-    juce::ReferenceCountedArray<Project> getAllProjects();
+    yup::ReferenceCountedArray<Project> getAllProjects();
 
     /** Returns every project under the given folder subtree. */
-    juce::ReferenceCountedArray<Project> getAllProjects (const juce::ValueTree& folder);
+    yup::ReferenceCountedArray<Project> getAllProjects (const yup::ValueTree& folder);
 
     //==============================================================================
     /** Extracts a .trkx archive into destDir and adds any contained projects to the list. */
-    void unpackArchiveAndAddToList (const juce::File& archiveFile, const juce::File& destDir, juce::ValueTree folder);
+    void unpackArchiveAndAddToList (const yup::File& archiveFile, const yup::File& destDir, yup::ValueTree folder);
 
     //==============================================================================
     /** Finds the project containing the given ref and returns the matching ProjectItem. */
@@ -120,15 +120,15 @@ public:
     Project::Ptr getProject (const Edit&);
 
     /** Returns the source file for the given project item ref. */
-    juce::File findSourceFile (const ProjectItemRef&);
+    yup::File findSourceFile (const ProjectItemRef&);
 
     /** Returns the source file for the given project item ID.
         Prefer the ProjectItemRef overload for new code.
     */
-    juce::File findSourceFile (ProjectItemID);
+    yup::File findSourceFile (ProjectItemID);
 
     /** Returns the ProjectItem for the a given file. */
-    ProjectItem::Ptr getProjectItem (juce::File);
+    ProjectItem::Ptr getProjectItem (yup::File);
 
     //==============================================================================
     /** Saves every project in the folder tree. */
@@ -138,36 +138,36 @@ public:
     /** Returns a list of recently-opened project files not currently in the list.
         @param printableFormat  If true, returns display names instead of full paths.
     */
-    juce::StringArray getRecentProjects (bool printableFormat);
+    yup::StringArray getRecentProjects (bool printableFormat);
 
     /** Adds a file to the recent-projects list if it isn't already tracked. */
-    void addFileToRecentProjectsList (const juce::File&);
+    void addFileToRecentProjectsList (const yup::File&);
 
     /** Returns the parent ValueTree folder node containing the given project. */
-    juce::ValueTree findFolderContaining (const Project&) const;
+    yup::ValueTree findFolderContaining (const Project&) const;
 
     /** Returns the parent ValueTree folder node containing the project with the given ID. */
-    juce::ValueTree findFolderContaining (ProjectID projectId) const;
+    yup::ValueTree findFolderContaining (ProjectID projectId) const;
 
     /** Returns the PROJECT ValueTree node for the given project. */
-    juce::ValueTree getFolderItemFor (const Project&) const;
+    yup::ValueTree getFolderItemFor (const Project&) const;
 
     /** Returns the index of the project within its parent folder, or -1 if not found. */
     int getFolderIndexFor (const Project&) const;
 
     /** Creates a new organisational sub-folder inside the given parent and saves the list. */
-    void createNewProjectFolder (juce::ValueTree parent, const juce::String& name);
+    void createNewProjectFolder (yup::ValueTree parent, const yup::String& name);
 
     /** Removes a folder node from the tree. */
-    void deleteProjectFolder (juce::ValueTree folder);
+    void deleteProjectFolder (yup::ValueTree folder);
 
     /** Updates the file path stored in the ValueTree for the given project. */
-    void updateProjectFile (Project& p, const juce::File&);
+    void updateProjectFile (Project& p, const yup::File&);
 
     /** Creates a new Project object for the given file or folder.
         This is a low-level method — the project is not added to the list.
     */
-    Project::Ptr createNewProject (const juce::File& projectFile);
+    Project::Ptr createNewProject (const yup::File& projectFile);
 
     /** Creates a project with a new ID, a default edit, and adds it to the list.
         Also creates default media folders and refreshes the folder structure.
@@ -175,31 +175,31 @@ public:
         so for ProjectType::folderBased the caller must create the directory first.
         projectFile is asserted to match the given ProjectType.
     */
-    Project::Ptr createNewProject (const juce::File& projectFile,
-                                    juce::ValueTree folderToAddTo,
+    Project::Ptr createNewProject (const yup::File& projectFile,
+                                    yup::ValueTree folderToAddTo,
                                     ProjectType projectType);
 
     /** Shows UI dialogs to let the user create a project in a chosen location.
         Handles directory creation, non-empty directory warnings, and naming.
     */
-    void createNewProjectInteractively (const juce::String& suggestedName,
-                                        const juce::File& lastPath,
-                                        juce::ValueTree folderToAddTo,
+    void createNewProjectInteractively (const yup::String& suggestedName,
+                                        const yup::File& lastPath,
+                                        yup::ValueTree folderToAddTo,
                                         ProjectType projectType,
                                         std::function<void (Project::Ptr)> callback);
 
     /** Extracts a template archive, remaps IDs, and adds the resulting project to the list. */
-    Project::Ptr createNewProjectFromTemplate (const juce::String& suggestedName,
-                                               const juce::File& lastPath,
-                                               const juce::File& templateArchiveFile,
-                                               juce::ValueTree folderToAddTo,
+    Project::Ptr createNewProjectFromTemplate (const yup::String& suggestedName,
+                                               const yup::File& lastPath,
+                                               const yup::File& templateArchiveFile,
+                                               yup::ValueTree folderToAddTo,
                                                ProjectType projectType);
 
     /** Recursively searches a folder subtree for a project matching the given ID. */
-    Project::Ptr findProjectWithId (const juce::ValueTree& folder, ProjectID pid);
+    Project::Ptr findProjectWithId (const yup::ValueTree& folder, ProjectID pid);
 
     /** Recursively searches a folder subtree for a project matching the given file path. */
-    Project::Ptr findProjectWithFile (const juce::ValueTree& folder, const juce::File&);
+    Project::Ptr findProjectWithFile (const yup::ValueTree& folder, const yup::File&);
 
     //==============================================================================
     /** Loads the project list from persistent storage. */
@@ -212,7 +212,7 @@ public:
     Engine& engine;
 
     /** The root ValueTree holding the entire project folder hierarchy. */
-    juce::ValueTree folders;
+    yup::ValueTree folders;
 
     //==============================================================================
     /** Helper struct that creates a temporary project (won't be persisted in the list).
@@ -221,7 +221,7 @@ public:
     */
     struct TempProject
     {
-        TempProject (ProjectManager& pm, const juce::File& f, bool createNewProjectID,
+        TempProject (ProjectManager& pm, const yup::File& f, bool createNewProjectID,
                      ProjectType projectType = ProjectType::fileBased)
         {
             const bool created = f.exists() || (projectType == ProjectType::folderBased
@@ -244,16 +244,16 @@ public:
         }
 
         Project::Ptr project;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempProject)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempProject)
     };
 
 private:
     friend class Project;
 
-    mutable juce::CriticalSection lock;
-    juce::Array<Project*, juce::CriticalSection> openProjects;
+    mutable yup::CriticalSection lock;
+    yup::Array<Project*, yup::CriticalSection> openProjects;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectManager)
 };
 
 } // namespace tracktion::inline engine

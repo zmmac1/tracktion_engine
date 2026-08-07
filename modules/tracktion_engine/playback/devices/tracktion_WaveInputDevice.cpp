@@ -10,13 +10,13 @@
 
 namespace tracktion::inline engine {
 
-class DiskSpaceCheckTask  : public juce::ThreadPoolJob,
-                            private juce::Timer,
-                            private juce::AsyncUpdater
+class DiskSpaceCheckTask  : public yup::ThreadPoolJob,
+                            private yup::Timer,
+                            private yup::AsyncUpdater
 {
 public:
-    DiskSpaceCheckTask (Engine& e, const juce::File& f)
-        : juce::ThreadPoolJob ("SpaceCheck"), engine (e), file (f)
+    DiskSpaceCheckTask (Engine& e, const yup::File& f)
+        : yup::ThreadPoolJob ("SpaceCheck"), engine (e), file (f)
     {
         startTimer (1000);
     }
@@ -50,9 +50,9 @@ public:
     }
 
     Engine& engine;
-    juce::File file;
+    yup::File file;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DiskSpaceCheckTask)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DiskSpaceCheckTask)
 };
 
 //==============================================================================
@@ -63,25 +63,25 @@ static const char* datePattern     = "%date%";
 static const char* timePattern     = "%time%";
 static const char* takePattern     = "%take%";
 
-static juce::String expandPatterns (Edit& ed, juce::String s, Track* track, int take)
+static yup::String expandPatterns (Edit& ed, yup::String s, Track* track, int take)
 {
     {
         auto editName = ed.getName();
 
         if (editName.isEmpty())
-            s = s.replace (juce::String (editPattern) + "_", {}, true);
+            s = s.replace (yup::String (editPattern) + "_", {}, true);
 
         s = s.replace (editPattern, editName, true);
     }
 
     {
-        juce::String trackName;
+        yup::String trackName;
 
         if (track != nullptr)
             trackName = track->getName();
 
         if (trackName.isEmpty())
-            s = s.replace (juce::String (trackPattern) + "_", {}, true);
+            s = s.replace (yup::String (trackPattern) + "_", {}, true);
 
         s = s.replace (trackPattern, trackName, true);
     }
@@ -97,39 +97,39 @@ static juce::String expandPatterns (Edit& ed, juce::String s, Track* track, int 
         {
             auto editFile = ed.editFileRetriever();
 
-            if (editFile != juce::File() && editFile.getParentDirectory().isDirectory())
+            if (editFile != yup::File() && editFile.getParentDirectory().isDirectory())
                 projDir = editFile.getParentDirectory();
 
             if (! projDir.isDirectory())
-                projDir = juce::File::getCurrentWorkingDirectory();
+                projDir = yup::File::getCurrentWorkingDirectory();
         }
 
         s = s.replace (projDirPattern, projDir.getFullPathName(), true);
     }
 
-    auto now = juce::Time::getCurrentTime();
+    auto now = yup::Time::getCurrentTime();
 
     {
-        juce::String date;
+        yup::String date;
 
         date << now.getDayOfMonth()
-            << juce::Time::getMonthName (now.getMonth(), true)
+            << yup::Time::getMonthName (now.getMonth(), true)
             << now.getYear();
 
         s = s.replace (datePattern, date, true);
     }
 
-    s = s.replace (timePattern, juce::String::formatted ("%d%02d%02d",
+    s = s.replace (timePattern, yup::String::formatted ("%d%02d%02d",
                                                          now.getHours(),
                                                          now.getMinutes(),
                                                          now.getSeconds()), true);
 
     if (! s.contains (takePattern))
-        s += "_" + juce::String (takePattern);
+        s += "_" + yup::String (takePattern);
 
-    s = s.replace (takePattern, juce::String (take), true);
+    s = s.replace (takePattern, yup::String (take), true);
 
-    return juce::File::createLegalPathName (s.trim());
+    return yup::File::createLegalPathName (s.trim());
 }
 
 
@@ -143,7 +143,7 @@ struct RetrospectiveRecordBuffer
 
     void updateSizeIfNeeded (int newNumChannels, double newSampleRate)
     {
-        int newNumSamples = juce::roundToInt (lengthInSeconds * newSampleRate);
+        int newNumSamples = yup::roundToInt (lengthInSeconds * newSampleRate);
 
         if (newNumChannels != numChannels || newNumSamples != numSamples || newSampleRate != sampleRate)
         {
@@ -156,7 +156,7 @@ struct RetrospectiveRecordBuffer
         }
     }
 
-    void processBuffer (double streamTime, const juce::AudioBuffer<float>& inputBuffer, int numSamplesIn)
+    void processBuffer (double streamTime, const yup::AudioBuffer<float>& inputBuffer, int numSamplesIn)
     {
         if (numSamplesIn < numSamples)
         {
@@ -169,7 +169,7 @@ struct RetrospectiveRecordBuffer
 
     void syncToEdit (Edit& edit, EditPlaybackContext& context, double streamTime, int numSamplesIn)
     {
-        const juce::SpinLock::ScopedLockType sl (editInfoLock);
+        const yup::SpinLock::ScopedLockType sl (editInfoLock);
         auto& pei = editInfo[edit.getProjectItemRef()];
 
         if (context.isPlaying())
@@ -185,7 +185,7 @@ struct RetrospectiveRecordBuffer
 
     bool wasRecentlyPlaying (Edit& edit)
     {
-        const juce::SpinLock::ScopedLockType sl (editInfoLock);
+        const yup::SpinLock::ScopedLockType sl (editInfoLock);
         auto& pei = editInfo[edit.getProjectItemRef()];
 
         return (pei.lastEditTime >= 0s && pei.pausedTime < 20s);
@@ -193,7 +193,7 @@ struct RetrospectiveRecordBuffer
 
     void removeEditSync (Edit& edit)
     {
-        const juce::SpinLock::ScopedLockType sl (editInfoLock);
+        const yup::SpinLock::ScopedLockType sl (editInfoLock);
         auto itr = editInfo.find (edit.getProjectItemRef());
 
         if (itr != editInfo.end())
@@ -216,9 +216,9 @@ struct RetrospectiveRecordBuffer
     };
 
     std::map<ProjectItemRef, PerEditInfo> editInfo;
-    juce::SpinLock editInfoLock;
+    yup::SpinLock editInfoLock;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RetrospectiveRecordBuffer)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RetrospectiveRecordBuffer)
 };
 
 
@@ -297,13 +297,13 @@ public:
         return false;
     }
 
-    juce::AudioFormat* getFormatToUse() const
+    yup::AudioFormat* getFormatToUse() const
     {
         return edit.engine.getAudioFileFormatManager().getNamedFormat (getWaveInput().outputFormat);
     }
 
-    static juce::File getDestinationRecordingFileToTry (Edit& ed, EditItemID targetID,
-                                                        const juce::AudioFormat& format, juce::String filenameMask)
+    static yup::File getDestinationRecordingFileToTry (Edit& ed, EditItemID targetID,
+                                                        const yup::AudioFormat& format, yup::String filenameMask)
     {
         auto track = findTrackForID (ed, targetID);
 
@@ -317,21 +317,21 @@ public:
         {
             auto file = ed.engine.getEngineBehaviour().getFileForNewAudioRecording (*track, fileExtension);
 
-            if (file != juce::File())
+            if (file != yup::File())
                 return file;
         }
 
         for (int take = 0;;)
         {
-            auto file = juce::File (expandPatterns (ed, filenameMask, track, ++take) + fileExtension);
+            auto file = yup::File (expandPatterns (ed, filenameMask, track, ++take) + fileExtension);
 
             if (! file.exists())
                return file;
         }
     }
 
-    static tl::expected<juce::File, juce::String> getDestinationRecordingFile (Edit& ed, EditItemID targetID,
-                                                                               const juce::AudioFormat& format, juce::String filenameMask)
+    static tl::expected<yup::File, yup::String> getDestinationRecordingFile (Edit& ed, EditItemID targetID,
+                                                                               const yup::AudioFormat& format, yup::String filenameMask)
     {
         auto targetFile = getDestinationRecordingFileToTry (ed, targetID, format, filenameMask);
 
@@ -361,7 +361,7 @@ public:
         return targetFile;
     }
 
-    tl::expected<std::unique_ptr<RecordingContext>, juce::String> prepareToRecordTarget (EditItemID targetID, TimeRange punchRange)
+    tl::expected<std::unique_ptr<RecordingContext>, yup::String> prepareToRecordTarget (EditItemID targetID, TimeRange punchRange)
     {
         CRASH_TRACER
         TRACKTION_ASSERT_MESSAGE_THREAD
@@ -385,7 +385,7 @@ public:
             auto rc = std::make_unique<WaveRecordingContext> (context, targetID, recordedFile);
             rc->sampleRate = edit.engine.getDeviceManager().getSampleRate();
 
-            juce::StringPairArray metadata;
+            yup::StringPairArray metadata;
             AudioFileUtils::addBWAVStartToMetadata (metadata, (SampleCount) tracktion::toSamples (punchRange.getStart(), rc->sampleRate));
             auto& wi = getWaveInput();
 
@@ -457,13 +457,13 @@ public:
         return tl::unexpected (TRANS("Unable to start recording"));
     }
 
-    std::vector<tl::expected<std::unique_ptr<RecordingContext>, juce::String>> prepareToRecord (RecordingParameters params) override
+    std::vector<tl::expected<std::unique_ptr<RecordingContext>, yup::String>> prepareToRecord (RecordingParameters params) override
     {
         CRASH_TRACER
         TRACKTION_ASSERT_MESSAGE_THREAD
         assert (params.punchRange.getEnd() < TimePosition::fromSeconds (std::numeric_limits<double>::max()));
 
-        std::vector<tl::expected<std::unique_ptr<RecordingContext>, juce::String>> results;
+        std::vector<tl::expected<std::unique_ptr<RecordingContext>, yup::String>> results;
 
         if (params.targets.empty())
             for (auto dest : destinations)
@@ -553,7 +553,7 @@ public:
         }
     }
 
-    tl::expected<Clip::Array, juce::String> stopRecording (StopRecordingParameters params) override
+    tl::expected<Clip::Array, yup::String> stopRecording (StopRecordingParameters params) override
     {
         TRACKTION_ASSERT_MESSAGE_THREAD
         // Reserve to avoid allocating whilst
@@ -587,7 +587,7 @@ public:
 
         // Now apply those stop contexts whilst not holding the lock
         Clip::Array clips;
-        juce::String error;
+        yup::String error;
 
         for (auto& recContext : contextsToStop)
         {
@@ -615,7 +615,7 @@ public:
     }
 
     void stopRecording (StopRecordingParameters params,
-                        std::function<void (tl::expected<Clip::Array, juce::String>)> callback) override
+                        std::function<void (tl::expected<Clip::Array, yup::String>)> callback) override
     {
         TRACKTION_ASSERT_MESSAGE_THREAD
         // Reserve to avoid allocating whilst
@@ -668,7 +668,7 @@ public:
             getRecordStopper().addTargetToStop (targetID);
     }
 
-    juce::File getRecordingFile (EditItemID targetID) const override
+    yup::File getRecordingFile (EditItemID targetID) const override
     {
         const std::shared_lock sl (contextLock);
 
@@ -680,14 +680,14 @@ public:
 
     struct WaveRecordingContext : public RecordingContext
     {
-        WaveRecordingContext (EditPlaybackContext& epc, EditItemID targetID_, const juce::File& f)
+        WaveRecordingContext (EditPlaybackContext& epc, EditItemID targetID_, const yup::File& f)
             : RecordingContext (targetID_),
               editPlaybackContext (epc), file (f)
         {}
 
         EditPlaybackContext& editPlaybackContext;
         Engine& engine { editPlaybackContext.edit.engine };
-        juce::File file;
+        yup::File file;
         double sampleRate = 44100.0;
         TimeRange punchTimes;           /**< The Edit time range that the recorded clip should start/stop. */
         TimeRange muteTimes;            /**< The Edit time range that the destination track should be muted for. */
@@ -709,10 +709,10 @@ public:
         WaveInputRecordingThread::ScopedInitialiser threadInitialiser { engine.getWaveInputRecordingThread() };
         const detail::ScopedActiveRecordingDevice scopedActiveRecordingDevice { editPlaybackContext };
 
-        std::function<void (tl::expected<Clip::Array, juce::String>)> stopCallback;
+        std::function<void (tl::expected<Clip::Array, yup::String>)> stopCallback;
         StopRecordingParameters stopParams;
 
-        void addBlockToRecord (const juce::AudioBuffer<float>& buffer, int start, int numSamples)
+        void addBlockToRecord (const yup::AudioBuffer<float>& buffer, int start, int numSamples)
         {
             if (isWaitingToClose.load (std::memory_order_acquire))
                 return;
@@ -749,7 +749,7 @@ public:
         }
     };
 
-    tl::expected<Clip::Array, juce::String> applyRecording (std::unique_ptr<WaveRecordingContext> rc,
+    tl::expected<Clip::Array, yup::String> applyRecording (std::unique_ptr<WaveRecordingContext> rc,
                                                             TimePosition unloopedEndTime,
                                                             bool isLooping, TimeRange loopRange,
                                                             bool discardRecordings)
@@ -795,7 +795,7 @@ public:
                                    wasLoopRecording, wasPunchRecording, loopRange.getEnd());
     }
 
-    tl::expected<Clip::Array, juce::String> applyLastRecording (const WaveRecordingContext& rc,
+    tl::expected<Clip::Array, yup::String> applyLastRecording (const WaveRecordingContext& rc,
                                                                 const AudioFile& recordedFile, ClipOwner& destClipOwner,
                                                                 TimeRange recordedRange,
                                                                 bool isLooping, bool isPunching, TimePosition loopEnd)
@@ -816,7 +816,7 @@ public:
         if (newClipLen <= 0.01s)
         {
             CRASH_TRACER
-            juce::String s;
+            yup::String s;
 
             if (! rc.hasHitThreshold)
                 s = TRANS("The device \"XZZX\" \nnever reached the trigger threshold set for recording (THRX).")
@@ -853,7 +853,7 @@ public:
                                     recordedFileLength, newClipLen, isLooping, isPunching, loopEnd);
     }
 
-    tl::expected<Clip::Array, juce::String> applyLastRecording (const WaveRecordingContext& rc, const ProjectItem::Ptr projectItem,
+    tl::expected<Clip::Array, yup::String> applyLastRecording (const WaveRecordingContext& rc, const ProjectItem::Ptr projectItem,
                                                                 const AudioFile& recordedFile, ClipOwner& destClipOwner,
                                                                 TimeDuration recordedFileLength, TimeDuration newClipLen,
                                                                 bool isLooping, bool isPunching, TimePosition loopEnd)
@@ -863,8 +863,8 @@ public:
         auto& engine = edit.engine;
         auto& afm = engine.getAudioFileManager();
 
-        juce::ReferenceCountedArray<ProjectItem> extraTakes;
-        juce::Array<juce::File> filesCreated;
+        yup::ReferenceCountedArray<ProjectItem> extraTakes;
+        yup::Array<yup::File> filesCreated;
         filesCreated.add (recordedFile.getFile());
 
         if (isLooping)
@@ -874,7 +874,7 @@ public:
         auto endPos = rc.punchTimes.getStart() + newClipLen;
 
         if (isPunching || isLooping)
-            endPos = juce::jlimit (rc.punchTimes.getStart() + 0.5s, loopEnd, endPos);
+            endPos = yup::jlimit (rc.punchTimes.getStart() + 0.5s, loopEnd, endPos);
 
         Clip::Ptr newClip;
         bool replaceOldClips = getWaveInput().mergeMode == 1;
@@ -906,7 +906,7 @@ public:
 
         if (newClip == nullptr)
         {
-            juce::String s ("Couldn't insert new clip after recording: ");
+            yup::String s ("Couldn't insert new clip after recording: ");
             s << rc.punchTimes.getStart() << " " << rc.punchTimes.getStart()
               << " " << endPos << " " << getWaveInput().getAdjustmentSeconds()
               << " " << recordedFileLength;
@@ -958,8 +958,8 @@ public:
                                                  const AudioFile& recordedFile,
                                                  const ProjectItem::Ptr& projectItem,
                                                  TimeDuration recordedFileLength,
-                                                 juce::ReferenceCountedArray<ProjectItem>& extraTakes,
-                                                 juce::Array<juce::File>& filesCreated)
+                                                 yup::ReferenceCountedArray<ProjectItem>& extraTakes,
+                                                 yup::Array<yup::File>& filesCreated)
     {
         auto& edit = epc.edit;
         auto& afm = edit.engine.getAudioFileManager();
@@ -983,7 +983,7 @@ public:
             const auto takeRange = TimeRange (takeStart, takeEnd);
             auto takeFile = recordedFile.getFile()
                              .getSiblingFile (recordedFile.getFile().getFileNameWithoutExtension()
-                                                + "_take_" + juce::String (take + 1))
+                                                + "_take_" + yup::String (take + 1))
                              .withFileExtension (recordedFile.getFile().getFileExtension())
                              .getNonexistentSibling (false);
 
@@ -996,7 +996,7 @@ public:
             {
                 if (auto takeObject = projectItem->getProject()->createNewItem (takeFile, ProjectItem::waveItemType(),
                                                                                 recordedFile.getFile().getFileNameWithoutExtension()
-                                                                                  + " #" + juce::String (take + 1),
+                                                                                  + " #" + yup::String (take + 1),
                                                                                 {},
                                                                                 ProjectItem::Category::recorded, true))
                 {
@@ -1031,9 +1031,9 @@ public:
         return false;
     }
 
-    juce::Array<Clip*> applyRetrospectiveRecord (bool armedOnly) override
+    yup::Array<Clip*> applyRetrospectiveRecord (bool armedOnly) override
     {
-        juce::Array<Clip*> clips;
+        yup::Array<Clip*> clips;
 
         for (auto dstTrack : getTargetTracks (*this))
         {
@@ -1054,7 +1054,7 @@ public:
                 return {};
 
             const auto recordedFile = res.value();
-            juce::StringPairArray metadata;
+            yup::StringPairArray metadata;
 
             {
                 AudioFileWriter writer (AudioFile (dstTrack->edit.engine, recordedFile), format,
@@ -1065,7 +1065,7 @@ public:
                 if (writer.isOpen())
                 {
                     int numReady;
-                    juce::AudioBuffer<float> scratchBuffer (recordBuffer->numChannels, 1000);
+                    yup::AudioBuffer<float> scratchBuffer (recordBuffer->numChannels, 1000);
 
                     while ((numReady = recordBuffer->fifo.getNumReady()) > 0)
                     {
@@ -1186,10 +1186,10 @@ public:
 
         for (const auto& ci : wi.getChannels())
         {
-            if (juce::isPositiveAndBelow (ci.indexInDevice, numChannels))
+            if (yup::isPositiveAndBelow (ci.indexInDevice, numChannels))
             {
                 auto inputIndex = channelSet.getChannelIndexForType (ci.channel);
-                juce::FloatVectorOperations::copy (inputBuffer.getWritePointer (inputIndex),
+                yup::FloatVectorOperations::copy (inputBuffer.getWritePointer (inputIndex),
                                                    allChannels[ci.indexInDevice], numSamples);
             }
             else
@@ -1227,7 +1227,7 @@ public:
         }
 
         {
-            const juce::ScopedLock sl (consumerLock);
+            const yup::ScopedLock sl (consumerLock);
 
             for (auto n : consumers)
                 n->acceptInputBuffer (choc::buffer::createChannelArrayView (inputBuffer.getArrayOfWritePointers(),
@@ -1312,7 +1312,7 @@ protected:
     std::vector<std::unique_ptr<WaveRecordingContext>> recordingContexts;
     std::unique_ptr<RecordStopper> recordStopper;
 
-    juce::AudioBuffer<float> inputBuffer;
+    yup::AudioBuffer<float> inputBuffer;
 
     WaveRecordingContext* getContextForID (EditItemID targetID) const
     {
@@ -1360,27 +1360,27 @@ protected:
     WaveInputDevice& getWaveInput() const noexcept    { return static_cast<WaveInputDevice&> (owner); }
 
     //==============================================================================
-    juce::Array<Consumer*> consumers;
-    juce::CriticalSection consumerLock;
+    yup::Array<Consumer*> consumers;
+    yup::CriticalSection consumerLock;
 
     void addConsumer (Consumer* consumer) override
     {
-        const juce::ScopedLock sl (consumerLock);
+        const yup::ScopedLock sl (consumerLock);
         consumers.addIfNotAlreadyThere (consumer);
     }
 
     void removeConsumer (Consumer* consumer) override
     {
-        const juce::ScopedLock sl (consumerLock);
+        const yup::ScopedLock sl (consumerLock);
         consumers.removeAllInstancesOf (consumer);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveInputDeviceInstance)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveInputDeviceInstance)
 };
 
 //==============================================================================
 WaveInputDevice::WaveInputDevice (Engine& e, const WaveDeviceDescription& desc, DeviceType t)
-    : InputDevice (e, desc.name, "wavein_" + juce::String::toHexString (desc.name.hashCode())),
+    : InputDevice (e, desc.name, "wavein_" + yup::String::toHexString (desc.name.hashCode())),
       deviceDescription (desc),
       deviceType (t),
       channelSet (desc.channels.toChannelSet())
@@ -1401,7 +1401,7 @@ void WaveInputDevice::setChannelConfiguration (const ChannelConfiguration& newCo
     channelSet = newConfig.toChannelSet();
 }
 
-juce::String WaveInputDevice::getDeviceTypeDescription() const
+yup::String WaveInputDevice::getDeviceTypeDescription() const
 {
     if (deviceType == trackWaveDevice)
         return TRANS("Track Wave Input");
@@ -1409,9 +1409,9 @@ juce::String WaveInputDevice::getDeviceTypeDescription() const
     return TRANS("Wave Audio Input");
 }
 
-juce::StringArray WaveInputDevice::getMergeModes()
+yup::StringArray WaveInputDevice::getMergeModes()
 {
-    juce::StringArray s;
+    yup::StringArray s;
     s.add (TRANS("Overlay newly recorded clips onto edit"));
     s.add (TRANS("Replace old clips in edit with new ones"));
     s.add (TRANS("Don't make recordings from this device"));
@@ -1419,9 +1419,9 @@ juce::StringArray WaveInputDevice::getMergeModes()
     return s;
 }
 
-juce::StringArray WaveInputDevice::getRecordFormatNames()
+yup::StringArray WaveInputDevice::getRecordFormatNames()
 {
-    juce::StringArray s;
+    yup::StringArray s;
 
     auto& afm = engine.getAudioFileFormatManager();
     s.add (afm.getWavFormat()->getFormatName());
@@ -1441,7 +1441,7 @@ InputDeviceInstance* WaveInputDevice::createInstance (EditPlaybackContext& ed)
 
 void WaveInputDevice::resetToDefault()
 {
-    juce::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
+    yup::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
     engine.getPropertyStorage().removePropertyItem (SettingID::wavein, propName);
     loadProps();
 }
@@ -1466,7 +1466,7 @@ void WaveInputDevice::setEnabled (bool b)
     }
 }
 
-juce::String WaveInputDevice::openDevice()
+yup::String WaveInputDevice::openDevice()
 {
     return {};
 }
@@ -1488,7 +1488,7 @@ void WaveInputDevice::loadProps()
     bitDepth = 24;
     recordAdjustMs = 0;
 
-    juce::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
+    yup::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
 
     if (auto n = engine.getPropertyStorage().getXmlPropertyItem (SettingID::wavein, propName))
     {
@@ -1511,7 +1511,7 @@ void WaveInputDevice::loadProps()
         recordAdjustMs = n->getDoubleAttribute ("adjustMs", recordAdjustMs);
 
         if (recordAdjustMs != 0)
-            TRACKTION_LOG ("Manual record adjustment: " + juce::String (recordAdjustMs) + "ms");
+            TRACKTION_LOG ("Manual record adjustment: " + yup::String (recordAdjustMs) + "ms");
     }
 
     checkBitDepth();
@@ -1519,7 +1519,7 @@ void WaveInputDevice::loadProps()
 
 void WaveInputDevice::saveProps()
 {
-    juce::XmlElement n ("SETTINGS");
+    yup::XmlElement n ("SETTINGS");
 
     if (filenameMask.isNotEmpty())
         n.setAttribute ("filename", filenameMask);
@@ -1532,7 +1532,7 @@ void WaveInputDevice::saveProps()
     n.setAttribute ("mode", mergeMode);
     n.setAttribute ("adjustMs", recordAdjustMs);
 
-    juce::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
+    yup::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
 
     engine.getPropertyStorage().setXmlPropertyItem (SettingID::wavein, propName, n);
 }
@@ -1564,7 +1564,7 @@ static bool shouldIncludeChannelCount (uint32_t num, uint32_t totalOptions)
     return false;
 }
 
-static juce::String getChannelCountLabel (uint32_t num)
+static yup::String getChannelCountLabel (uint32_t num)
 {
     auto canonical = ChannelConfiguration::canonical ((int) num);
 
@@ -1572,13 +1572,13 @@ static juce::String getChannelCountLabel (uint32_t num)
         if (preset.config == canonical)
             return preset.name;
 
-    return juce::String (num) + " " + TRANS("channels");
+    return yup::String (num) + " " + TRANS("channels");
 }
 
 
-juce::PopupMenu WaveInputDevice::createChannelGroupMenu (bool includeSetAllChannelsOptions)
+yup::PopupMenu WaveInputDevice::createChannelGroupMenu (bool includeSetAllChannelsOptions)
 {
-    juce::PopupMenu m;
+    yup::PopupMenu m;
     auto& dm = engine.getDeviceManager();
     auto currentNumChannels = deviceDescription.getNumChannels();
     auto options = dm.getPossibleChannelGroupsForDevice (*this, DeviceManager::maxNumChannelsPerDevice);
@@ -1591,7 +1591,7 @@ juce::PopupMenu WaveInputDevice::createChannelGroupMenu (bool includeSetAllChann
                        [this, &dm, num] { dm.setDeviceNumChannels (*this, num); });
     }
 
-    juce::PopupMenu otherMenu;
+    yup::PopupMenu otherMenu;
 
     for (uint32_t num = 1; num <= totalOptions; ++num)
         if (! shouldIncludeChannelCount (num, totalOptions))
@@ -1621,7 +1621,7 @@ void WaveInputDevice::setRecordAdjustment (TimeDuration d)
 
 void WaveInputDevice::setRecordAdjustmentMs (double ms)
 {
-    recordAdjustMs = juce::jlimit (-500.0, 500.0, ms);
+    recordAdjustMs = yup::jlimit (-500.0, 500.0, ms);
     changed();
     saveProps();
 }
@@ -1654,7 +1654,7 @@ void WaveInputDevice::setMeterGateClosed (bool shouldBeClosed)
 
 bool WaveInputDevice::isAnyRecordingActive() const
 {
-    const juce::ScopedLock sl (instanceLock);
+    const yup::ScopedLock sl (instanceLock);
 
     for (auto i : instances)
         if (i->isRecording())
@@ -1663,7 +1663,7 @@ bool WaveInputDevice::isAnyRecordingActive() const
     return false;
 }
 
-void WaveInputDevice::feedLevelMeasurerThroughGate (juce::AudioBuffer<float>& buf, int start, int numSamples)
+void WaveInputDevice::feedLevelMeasurerThroughGate (yup::AudioBuffer<float>& buf, int start, int numSamples)
 {
     if (meterGateClosed.load (std::memory_order_relaxed))
     {
@@ -1678,7 +1678,7 @@ void WaveInputDevice::feedLevelMeasurerThroughGate (juce::AudioBuffer<float>& bu
     levelMeasurer.processBuffer (buf, start, numSamples);
 }
 
-juce::String WaveInputDevice::getFilenameMask() const
+yup::String WaveInputDevice::getFilenameMask() const
 {
     if (filenameMask.isNotEmpty())
         return filenameMask;
@@ -1686,7 +1686,7 @@ juce::String WaveInputDevice::getFilenameMask() const
     return engine.getEngineBehaviour().getDefaultAudioRecordingFilePattern();
 }
 
-void WaveInputDevice::setFilenameMask (const juce::String& newMask)
+void WaveInputDevice::setFilenameMask (const yup::String& newMask)
 {
     if (filenameMask != newMask)
     {
@@ -1721,17 +1721,17 @@ void WaveInputDevice::checkBitDepth()
         bitDepth = getAvailableBitDepths().getLast();
 }
 
-juce::Array<int> WaveInputDevice::getAvailableBitDepths() const
+yup::Array<int> WaveInputDevice::getAvailableBitDepths() const
 {
     return getFormatToUse()->getPossibleBitDepths();
 }
 
-juce::AudioFormat* WaveInputDevice::getFormatToUse() const
+yup::AudioFormat* WaveInputDevice::getFormatToUse() const
 {
     return engine.getAudioFileFormatManager().getNamedFormat (outputFormat);
 }
 
-void WaveInputDevice::setOutputFormat (const juce::String& newFormat)
+void WaveInputDevice::setOutputFormat (const yup::String& newFormat)
 {
     if (outputFormat != newFormat)
     {
@@ -1742,12 +1742,12 @@ void WaveInputDevice::setOutputFormat (const juce::String& newFormat)
     }
 }
 
-juce::String WaveInputDevice::getMergeMode() const
+yup::String WaveInputDevice::getMergeMode() const
 {
     return getMergeModes() [mergeMode];
 }
 
-void WaveInputDevice::setMergeMode (const juce::String& newMode)
+void WaveInputDevice::setMergeMode (const yup::String& newMode)
 {
     int newIndex = getMergeModes().indexOf (newMode);
 
@@ -1764,19 +1764,19 @@ TimeDuration WaveInputDevice::getAdjustmentSeconds()
     auto& dm = engine.getDeviceManager();
     const double autoAdjustMs = isTrackDevice() ? 0.0 : dm.getRecordAdjustmentMs();
 
-    return TimeDuration::fromSeconds (juce::jlimit (-3.0, 3.0, 0.001 * (recordAdjustMs + autoAdjustMs)));
+    return TimeDuration::fromSeconds (yup::jlimit (-3.0, 3.0, 0.001 * (recordAdjustMs + autoAdjustMs)));
 }
 
 //==============================================================================
 void WaveInputDevice::addInstance (WaveInputDeviceInstance* i)
 {
-    const juce::ScopedLock sl (instanceLock);
+    const yup::ScopedLock sl (instanceLock);
     instances.addIfNotAlreadyThere (i);
 }
 
 void WaveInputDevice::removeInstance (WaveInputDeviceInstance* i)
 {
-    const juce::ScopedLock sl (instanceLock);
+    const yup::ScopedLock sl (instanceLock);
     instances.removeAllInstancesOf (i);
 }
 
@@ -1785,17 +1785,17 @@ void WaveInputDevice::consumeNextAudioBlock (const float* const* allChannels, in
 {
     if (enabled)
     {
-        const juce::ScopedLock sl (instanceLock);
+        const yup::ScopedLock sl (instanceLock);
 
         if (instances.isEmpty())
         {
             auto& groupChannelSet = getChannelSet();
-            juce::AudioBuffer<float> buf (groupChannelSet.size(), numSamples);
+            yup::AudioBuffer<float> buf (groupChannelSet.size(), numSamples);
             buf.clear();
 
             for (const auto& ci : getChannels())
-                if (juce::isPositiveAndBelow (ci.indexInDevice, numChannels))
-                    juce::FloatVectorOperations::copy (buf.getWritePointer (groupChannelSet.getChannelIndexForType (ci.channel)),
+                if (yup::isPositiveAndBelow (ci.indexInDevice, numChannels))
+                    yup::FloatVectorOperations::copy (buf.getWritePointer (groupChannelSet.getChannelIndexForType (ci.channel)),
                                                        allChannels[ci.indexInDevice], numSamples);
 
             if (inputGainDb > 0.01f || inputGainDb < -0.01f)
@@ -1839,7 +1839,7 @@ struct WaveInputRecordingThread::BlockQueue
     {
         QueuedBlock() = default;
 
-        void load (AudioFileWriter& w, const juce::AudioBuffer<float>& newBuffer,
+        void load (AudioFileWriter& w, const yup::AudioBuffer<float>& newBuffer,
                    int start, int numSamples, const RecordingThumbnailManager::Thumbnail::Ptr& thumb)
         {
             buffer.setSize (newBuffer.getNumChannels(), numSamples);
@@ -1853,13 +1853,13 @@ struct WaveInputRecordingThread::BlockQueue
 
         std::atomic<AudioFileWriter*> writer { nullptr };
         QueuedBlock* next = nullptr;
-        juce::AudioBuffer<float> buffer { 2, 512 };
+        yup::AudioBuffer<float> buffer { 2, 512 };
         RecordingThumbnailManager::Thumbnail::Ptr thumbnail;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QueuedBlock)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (QueuedBlock)
     };
 
-    juce::CriticalSection freeQueueLock, pendingQueueLock;
+    yup::CriticalSection freeQueueLock, pendingQueueLock;
     QueuedBlock* firstPending = nullptr;
     QueuedBlock* lastPending = nullptr;
     QueuedBlock* firstFree = nullptr;
@@ -1868,7 +1868,7 @@ struct WaveInputRecordingThread::BlockQueue
 
     QueuedBlock* findFreeBlock()
     {
-        const juce::ScopedLock sl (freeQueueLock);
+        const yup::ScopedLock sl (freeQueueLock);
 
         if (firstFree == nullptr)
             return new QueuedBlock();
@@ -1882,7 +1882,7 @@ struct WaveInputRecordingThread::BlockQueue
     void addToFreeQueue (QueuedBlock* b) noexcept
     {
         jassert (b != nullptr);
-        const juce::ScopedLock sl (freeQueueLock);
+        const yup::ScopedLock sl (freeQueueLock);
         b->writer = nullptr;
         b->next = firstFree;
         firstFree = b;
@@ -1892,7 +1892,7 @@ struct WaveInputRecordingThread::BlockQueue
     {
         jassert (b != nullptr);
         b->next = nullptr;
-        const juce::ScopedLock sl (pendingQueueLock);
+        const yup::ScopedLock sl (pendingQueueLock);
 
         if (lastPending != nullptr)
             lastPending->next = b;
@@ -1905,7 +1905,7 @@ struct WaveInputRecordingThread::BlockQueue
 
     QueuedBlock* removeFirstPending() noexcept
     {
-        const juce::ScopedLock sl (pendingQueueLock);
+        const yup::ScopedLock sl (pendingQueueLock);
 
         if (auto b = firstPending)
         {
@@ -1932,7 +1932,7 @@ struct WaveInputRecordingThread::BlockQueue
 
     bool isWriterInQueue (AudioFileWriter& writer) const
     {
-        const juce::ScopedLock sl (pendingQueueLock);
+        const yup::ScopedLock sl (pendingQueueLock);
 
         for (auto b = firstPending; b != nullptr; b = b->next)
             if (b->writer == &writer)
@@ -1982,7 +1982,7 @@ void WaveInputRecordingThread::removeUser()
 }
 
 //==============================================================================
-void WaveInputRecordingThread::addBlockToRecord (AudioFileWriter& writer, const juce::AudioBuffer<float>& buffer,
+void WaveInputRecordingThread::addBlockToRecord (AudioFileWriter& writer, const yup::AudioBuffer<float>& buffer,
                                                  int start, int numSamples, const RecordingThumbnailManager::Thumbnail::Ptr& thumbnail)
 {
     if (! threadShouldExit())
@@ -2012,7 +2012,7 @@ void WaveInputRecordingThread::waitForWriterToFinish (AudioFileWriter& writer)
 void WaveInputRecordingThread::run()
 {
     CRASH_TRACER
-    juce::FloatVectorOperations::disableDenormalisedNumberSupport();
+    yup::FloatVectorOperations::disableDenormalisedNumberSupport();
 
     for (;;)
     {
@@ -2077,7 +2077,7 @@ void WaveInputRecordingThread::prepareToStart()
     flushAndStop();
     sleep (2);
     jassert (! isThreadRunning());
-    startThread (juce::Thread::Priority::normal);
+    startThread (yup::Thread::Priority::normal);
 }
 
 void WaveInputRecordingThread::flushAndStop()

@@ -17,7 +17,7 @@ inline constexpr HertzTag HertzTag_t{};
 
 //==============================================================================
 //==============================================================================
-class SharedTimer : public juce::Timer
+class SharedTimer : public yup::Timer
 {
 public:
     //==============================================================================
@@ -69,7 +69,7 @@ public:
 private:
     //==============================================================================
     int frequencyHz;
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
     std::mutex mutex;
 
     //==============================================================================
@@ -79,7 +79,7 @@ private:
         listeners.call (&Listener::sharedTimerCallback);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SharedTimer)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SharedTimer)
 };
 
 } // namespace tracktion::inline engine

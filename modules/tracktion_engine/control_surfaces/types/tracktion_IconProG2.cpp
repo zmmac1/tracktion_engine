@@ -19,7 +19,7 @@ IconProG2::~IconProG2()
 {
 }
 
-void IconProG2::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& m)
+void IconProG2::acceptMidiMessageInt (int deviceIndex, const yup::MidiMessage& m)
 {
     const unsigned char* const d = m.getRawData();
     const unsigned char d1 = d[1];
@@ -38,7 +38,7 @@ void IconProG2::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& 
             if ((d[2] & 0x40) != 0)
                 diff = -diff;
 
-            panPos[chan] = juce::jlimit (-1.0f, 1.0f, panPos[chan] + diff);
+            panPos[chan] = yup::jlimit (-1.0f, 1.0f, panPos[chan] + diff);
 
             if (flipped)
             {
@@ -66,7 +66,7 @@ void IconProG2::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& 
     else if (d[0] >= 0xe0 && d[0] <= 0xe8)
     {
         // fader
-        const float pos = juce::jlimit (0.0f, 1.0f, static_cast<float> (((((int)d[2]) << 7) + d[1])) * (1.0f / 0x3f70));
+        const float pos = yup::jlimit (0.0f, 1.0f, static_cast<float> (((((int)d[2]) << 7) + d[1])) * (1.0f / 0x3f70));
 
         // send it back to the MCU
         sendMidiCommandToController (deviceIndex, d, 3);
@@ -397,10 +397,10 @@ void IconProG2::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& 
             else if (d1 == 0x66 || d1 == 0x67)
             {
                 // user switch A or B
-                juce::KeyPress key (d1 == 0x66 ? mcuFootswitch1Key
+                yup::KeyPress key (d1 == 0x66 ? mcuFootswitch1Key
                                                : mcuFootswitch2Key);
 
-                if (auto focused = juce::Component::getCurrentlyFocusedComponent())
+                if (auto focused = yup::Component::getCurrentlyFocusedComponent())
                     focused->keyPressed (key);
             }
         }

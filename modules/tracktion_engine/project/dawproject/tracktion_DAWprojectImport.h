@@ -23,72 +23,72 @@ public:
     DAWprojectImporter (Engine& engine, const ParseOptions& options);
 
     /** Imports from a .dawproject ZIP file. */
-    std::unique_ptr<Edit> importFromFile (const juce::File& file);
+    std::unique_ptr<Edit> importFromFile (const yup::File& file);
 
     /** Imports from parsed XML elements. */
-    std::unique_ptr<Edit> importFromXml (const juce::XmlElement& projectXml,
-                                         const juce::File& audioFileDirectory);
+    std::unique_ptr<Edit> importFromXml (const yup::XmlElement& projectXml,
+                                         const yup::File& audioFileDirectory);
 
 private:
     //==============================================================================
     // Structure parsing
-    void parseStructure (const juce::XmlElement& structureElement, Edit& edit);
-    void parseTrack (const juce::XmlElement& trackElement, Edit& edit, Track* parentTrack);
-    void parseChannel (const juce::XmlElement& channelElement, Edit& edit, Track* track);
+    void parseStructure (const yup::XmlElement& structureElement, Edit& edit);
+    void parseTrack (const yup::XmlElement& trackElement, Edit& edit, Track* parentTrack);
+    void parseChannel (const yup::XmlElement& channelElement, Edit& edit, Track* track);
 
     // Transport/tempo parsing
-    void parseTransport (const juce::XmlElement& transportElement, Edit& edit);
-    void parseTempoAutomation (const juce::XmlElement& tempoAutomation, Edit& edit);
-    void parseTimeSignatureAutomation (const juce::XmlElement& timeSigAutomation, Edit& edit);
+    void parseTransport (const yup::XmlElement& transportElement, Edit& edit);
+    void parseTempoAutomation (const yup::XmlElement& tempoAutomation, Edit& edit);
+    void parseTimeSignatureAutomation (const yup::XmlElement& timeSigAutomation, Edit& edit);
 
     // Arrangement parsing
-    void parseArrangement (const juce::XmlElement& arrangementElement, Edit& edit);
-    void parseLanes (const juce::XmlElement& lanesElement, Edit& edit, Track* track, bool positionIsBeats = false);
-    void parseClips (const juce::XmlElement& clipsElement, Edit& edit, ClipOwner& target, bool positionIsBeats = false);
-    void parseMarkers (const juce::XmlElement& markersElement, Edit& edit);
+    void parseArrangement (const yup::XmlElement& arrangementElement, Edit& edit);
+    void parseLanes (const yup::XmlElement& lanesElement, Edit& edit, Track* track, bool positionIsBeats = false);
+    void parseClips (const yup::XmlElement& clipsElement, Edit& edit, ClipOwner& target, bool positionIsBeats = false);
+    void parseMarkers (const yup::XmlElement& markersElement, Edit& edit);
 
     // Scenes / clip-launcher parsing
-    void parseScenes (const juce::XmlElement& scenesElement, Edit& edit);
-    void parseSceneContent (const juce::XmlElement& contentElement, Edit& edit, int sceneIndex);
+    void parseScenes (const yup::XmlElement& scenesElement, Edit& edit);
+    void parseSceneContent (const yup::XmlElement& contentElement, Edit& edit, int sceneIndex);
 
     // Clip parsing
-    Clip::Ptr parseClip (const juce::XmlElement& clipElement, Edit& edit, ClipOwner& target, bool positionIsBeats = false);
-    void parseAudioClip (const juce::XmlElement& clipElement, WaveAudioClip& clip);
-    void parseMidiClip (const juce::XmlElement& clipElement, MidiClip& clip);
-    void parseNotes (const juce::XmlElement& notesElement, MidiClip& clip);
-    void parseControllerPoints (const juce::XmlElement& lanesElement, MidiClip& clip);
+    Clip::Ptr parseClip (const yup::XmlElement& clipElement, Edit& edit, ClipOwner& target, bool positionIsBeats = false);
+    void parseAudioClip (const yup::XmlElement& clipElement, WaveAudioClip& clip);
+    void parseMidiClip (const yup::XmlElement& clipElement, MidiClip& clip);
+    void parseNotes (const yup::XmlElement& notesElement, MidiClip& clip);
+    void parseControllerPoints (const yup::XmlElement& lanesElement, MidiClip& clip);
 
     // Plugin parsing
-    void parseDevices (const juce::XmlElement& devicesElement, Edit& edit, Track& track);
-    Plugin::Ptr parsePlugin (const juce::XmlElement& pluginElement, Edit& edit);
+    void parseDevices (const yup::XmlElement& devicesElement, Edit& edit, Track& track);
+    Plugin::Ptr parsePlugin (const yup::XmlElement& pluginElement, Edit& edit);
 
     // Automation parsing
-    void parseAutomationPoints (const juce::XmlElement& pointsElement, AutomatableParameter& param);
+    void parseAutomationPoints (const yup::XmlElement& pointsElement, AutomatableParameter& param);
 
     // Audio file handling
-    juce::File resolveAudioFile (const juce::String& path, bool external);
-    void extractAudioFiles (juce::ZipFile& zipFile, const juce::File& destDir);
+    yup::File resolveAudioFile (const yup::String& path, bool external);
+    void extractAudioFiles (yup::ZipFile& zipFile, const yup::File& destDir);
 
     //==============================================================================
     // Utility functions
-    TimePosition parseTime (const juce::XmlElement& element, const char* attrName, bool isBeats) const;
-    TimeDuration parseDuration (const juce::XmlElement& element, const char* attrName, bool isBeats) const;
-    bool isTimeUnitBeats (const juce::XmlElement& element) const;
+    TimePosition parseTime (const yup::XmlElement& element, const char* attrName, bool isBeats) const;
+    TimeDuration parseDuration (const yup::XmlElement& element, const char* attrName, bool isBeats) const;
+    bool isTimeUnitBeats (const yup::XmlElement& element) const;
 
     //==============================================================================
     Engine& engine;
     ParseOptions options;
     IDRefResolver idResolver;
-    juce::File audioFileDirectory;
-    juce::File sourceFileDirectory;
+    yup::File audioFileDirectory;
+    yup::File sourceFileDirectory;
 
     // Maps DAWproject track IDs to created tracks
-    std::unordered_map<juce::String, Track*> idToTrack;
+    std::unordered_map<yup::String, Track*> idToTrack;
 
     // Maps DAWproject channel IDs to created tracks (for routing)
-    std::unordered_map<juce::String, Track*> idToChannel;
+    std::unordered_map<yup::String, Track*> idToChannel;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DAWprojectImporter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DAWprojectImporter)
 };
 
 }} // namespace tracktion::inline engine::dawproject

@@ -38,7 +38,7 @@ public:
     std::vector<Node*> getInternalNodes() override;
     void prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo&) override;
     bool isReadyToProcess() override;
-    void prefetchBlock (juce::Range<int64_t> /*referenceSampleRange*/) override;
+    void prefetchBlock (yup::Range<int64_t> /*referenceSampleRange*/) override;
     void process (ProcessContext&) override;
 
 private:

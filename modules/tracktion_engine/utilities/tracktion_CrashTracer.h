@@ -18,13 +18,13 @@ struct CrashStackTracer
     CrashStackTracer (const char* file, const char* fn, int line, const char* pluginName);
     ~CrashStackTracer();
 
-    static juce::StringArray getCrashedPlugins();
+    static yup::StringArray getCrashedPlugins();
     static void dump();
-    static void dump (juce::OutputStream&);
-    static void dump (juce::OutputStream&, juce::Thread::ThreadID);
+    static void dump (yup::OutputStream&);
+    static void dump (yup::OutputStream&, yup::Thread::ThreadID);
 
-    static juce::String getCrashedPlugin (juce::Thread::ThreadID);
-    static juce::String getCrashLocation (juce::Thread::ThreadID);
+    static yup::String getCrashedPlugin (yup::Thread::ThreadID);
+    static yup::String getCrashLocation (yup::Thread::ThreadID);
 
     struct CrashTraceThreads;
 
@@ -33,7 +33,7 @@ private:
     const char* function;
     const char* pluginName;
     int line;
-    juce::Thread::ThreadID threadID;
+    yup::Thread::ThreadID threadID;
 };
 
 /** This macro adds the current location to a stack which gets logged if a crash happens. */
@@ -50,14 +50,14 @@ private:
 */
 struct DeadMansPedalMessage
 {
-    DeadMansPedalMessage (PropertyStorage&, const juce::String&);
+    DeadMansPedalMessage (PropertyStorage&, const yup::String&);
     ~DeadMansPedalMessage();
 
-    static juce::String getAndClearLastMessage (PropertyStorage&);
+    static yup::String getAndClearLastMessage (PropertyStorage&);
 
 private:
-    const juce::File file;
-    static juce::File getDeadMansPedalFile (PropertyStorage&);
+    const yup::File file;
+    static yup::File getDeadMansPedalFile (PropertyStorage&);
 };
 
 } // namespace tracktion::inline engine

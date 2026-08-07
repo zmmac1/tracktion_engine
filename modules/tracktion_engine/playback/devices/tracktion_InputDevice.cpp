@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-InputDevice::InputDevice (Engine& e, juce::String n, juce::String idToUse)
+InputDevice::InputDevice (Engine& e, yup::String n, yup::String idToUse)
    : IODevice (e, std::move (n), std::move (idToUse))
 {
 }
@@ -36,9 +36,9 @@ void InputDevice::setMonitorMode (MonitorMode newMode)
     saveProps();
 }
 
-void InputDevice::setRetrospectiveLock (Engine& e, const juce::Array<InputDeviceInstance*>& devices, bool lock)
+void InputDevice::setRetrospectiveLock (Engine& e, const yup::Array<InputDeviceInstance*>& devices, bool lock)
 {
-    const juce::ScopedLock sl (e.getDeviceManager().deviceManager.getAudioCallbackLock());
+    const yup::ScopedLock sl (e.getDeviceManager().deviceManager.getAudioCallbackLock());
 
     for (auto* idi : devices)
         idi->getInputDevice().retrospectiveRecordLock = lock;
@@ -71,7 +71,7 @@ InputDeviceInstance::~InputDeviceInstance()
     jassert (Selectable::isSelectableValid (&edit));
 }
 
-juce::Array<EditItemID> InputDeviceInstance::getTargets() const
+yup::Array<EditItemID> InputDeviceInstance::getTargets() const
 {
     auto ref = makeWeakRef (*const_cast<InputDeviceInstance*> (this));
     trackDeviceEnabler.handleUpdateNowIfNeeded();
@@ -82,7 +82,7 @@ juce::Array<EditItemID> InputDeviceInstance::getTargets() const
     if (! owner.isEnabled())
         return {};
 
-    juce::Array<EditItemID> targets;
+    yup::Array<EditItemID> targets;
 
     for (auto dest : destinations)
         if (auto tID = dest->targetID; tID.isValid())
@@ -91,7 +91,7 @@ juce::Array<EditItemID> InputDeviceInstance::getTargets() const
     return targets;
 }
 
-tl::expected<InputDeviceInstance::Destination*, juce::String>
+tl::expected<InputDeviceInstance::Destination*, yup::String>
 InputDeviceInstance::setTarget (EditItemID targetID, bool move, juce::UndoManager* um,
                                 std::optional<int> index)
 {
@@ -115,7 +115,7 @@ InputDeviceInstance::setTarget (EditItemID targetID, bool move, juce::UndoManage
         [[ maybe_unused ]] auto res = removeTarget (targetID, um);
     }
 
-    auto v = juce::ValueTree (IDs::INPUTDEVICEDESTINATION);
+    auto v = yup::ValueTree (IDs::INPUTDEVICEDESTINATION);
     v.setProperty (IDs::targetID, targetID, nullptr);
 
     if (index.has_value())
@@ -129,10 +129,10 @@ InputDeviceInstance::setTarget (EditItemID targetID, bool move, juce::UndoManage
     return destinations[destinations.size() - 1];
 }
 
-juce::Result InputDeviceInstance::removeTarget (EditItemID targetID, juce::UndoManager* um)
+yup::Result InputDeviceInstance::removeTarget (EditItemID targetID, juce::UndoManager* um)
 {
     if (isRecording())
-        return juce::Result::fail (TRANS("Can't change tracks whilst recording is active"));
+        return yup::Result::fail (TRANS("Can't change tracks whilst recording is active"));
 
     for (int i = destinations.size(); --i >= 0;)
     {
@@ -142,7 +142,7 @@ juce::Result InputDeviceInstance::removeTarget (EditItemID targetID, juce::UndoM
             state.removeChild (dt.state, um);
     }
 
-    return juce::Result::ok();
+    return yup::Result::ok();
 }
 
 bool InputDeviceInstance::isRecordingActive() const
@@ -201,7 +201,7 @@ bool InputDeviceInstance::isLivePlayEnabled (const Track& t) const
     return false;
 }
 
-void InputDeviceInstance::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id)
+void InputDeviceInstance::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id)
 {
     if (v.getParent() == state)
         if (id == IDs::armed || id == IDs::targetID)
@@ -209,13 +209,13 @@ void InputDeviceInstance::valueTreePropertyChanged (juce::ValueTree& v, const ju
                                      id == IDs::targetID);
 }
 
-void InputDeviceInstance::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
+void InputDeviceInstance::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c)
 {
     if (p == state && c.hasType (IDs::INPUTDEVICEDESTINATION))
         handleDestinationChange (EditItemID::fromVar (c[IDs::targetID]), true);
 }
 
-void InputDeviceInstance::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int)
+void InputDeviceInstance::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int)
 {
     if (p == state && c.hasType (IDs::INPUTDEVICEDESTINATION))
         handleDestinationChange (EditItemID::fromVar (c[IDs::targetID]), true);
@@ -295,9 +295,9 @@ void InputDeviceInstance::updateRecordingStatus()
 }
 
 //==============================================================================
-juce::Array<std::pair<AudioTrack*, int>> getTargetTracksAndIndexes (InputDeviceInstance& instance)
+yup::Array<std::pair<AudioTrack*, int>> getTargetTracksAndIndexes (InputDeviceInstance& instance)
 {
-    juce::Array<std::pair<AudioTrack*, int>> tracks;
+    yup::Array<std::pair<AudioTrack*, int>> tracks;
 
     for (auto dest : instance.destinations)
         if (auto at = findAudioTrackForID (instance.edit, dest->targetID))
@@ -306,9 +306,9 @@ juce::Array<std::pair<AudioTrack*, int>> getTargetTracksAndIndexes (InputDeviceI
     return tracks;
 }
 
-juce::Array<AudioTrack*> getTargetTracks (InputDeviceInstance& instance)
+yup::Array<AudioTrack*> getTargetTracks (InputDeviceInstance& instance)
 {
-    juce::Array<AudioTrack*> tracks;
+    yup::Array<AudioTrack*> tracks;
 
     for (auto [at, idx] : getTargetTracksAndIndexes (instance))
         tracks.add (at);
@@ -325,18 +325,18 @@ bool isOnTargetTrack (InputDeviceInstance& instance, const Track& track, int ind
     return false;
 }
 
-juce::Result clearFromTargets (InputDeviceInstance& instance, juce::UndoManager* um)
+yup::Result clearFromTargets (InputDeviceInstance& instance, juce::UndoManager* um)
 {
     if (instance.isRecording())
-        return juce::Result::fail (TRANS("Can't change tracks whilst recording is active"));
+        return yup::Result::fail (TRANS("Can't change tracks whilst recording is active"));
 
-    auto result = juce::Result::ok();
+    auto result = yup::Result::ok();
 
     for (auto targetID : instance.getTargets())
         if (auto res = instance.removeTarget (targetID, um); ! res)
             result = res;
 
-    return juce::Result::ok();
+    return yup::Result::ok();
 }
 
 bool isAttached (InputDeviceInstance& instance)
@@ -363,7 +363,7 @@ InputDeviceInstance::Destination* getDestination (InputDeviceInstance& instance,
     return {};
 }
 
-InputDeviceInstance::Destination* getDestination (InputDeviceInstance& instance, const juce::ValueTree& destinationState)
+InputDeviceInstance::Destination* getDestination (InputDeviceInstance& instance, const yup::ValueTree& destinationState)
 {
     for (auto dest : instance.destinations)
         if (dest->state == destinationState)

@@ -11,20 +11,20 @@
 namespace tracktion::inline engine
 {
 
-std::optional<RenderFormat> renderFormatFromString (juce::String s)
+std::optional<RenderFormat> renderFormatFromString (yup::String s)
 {
     return magic_enum::enum_cast<RenderFormat> (s.toStdString());
 }
 
-juce::String toString (RenderFormat f)
+yup::String toString (RenderFormat f)
 {
     return std::string (magic_enum::enum_name (f));
 }
 
 //==============================================================================
-juce::StringPairArray createTagMetadata (Edit& edit)
+yup::StringPairArray createTagMetadata (Edit& edit)
 {
-    juce::StringPairArray metadataList;
+    yup::StringPairArray metadataList;
     auto metadata = edit.getEditMetadata();
 
     if (metadata.album.isNotEmpty())          metadataList.set ("id3album", metadata.album);
@@ -79,22 +79,22 @@ bool formatSupportsTagMetadata (RenderFormat f)
     comment field readers expect (JUCE's riffInfoComment is the rarer CMNT) and
     ICRD the date one.
 */
-static const char* getRiffInfoKeyForTag (const juce::String& id3Key)
+static yup::String getRiffInfoKeyForTag (const yup::String& id3Key)
 {
-    if (id3Key == "id3album")           return juce::WavAudioFormat::riffInfoProductName;
-    if (id3Key == "id3artist")          return juce::WavAudioFormat::riffInfoArtist;
-    if (id3Key == "id3comment")         return juce::WavAudioFormat::riffInfoComment2;
-    if (id3Key == "id3date")            return juce::WavAudioFormat::riffInfoDateCreated;
-    if (id3Key == "id3genre")           return juce::WavAudioFormat::riffInfoGenre;
-    if (id3Key == "id3title")           return juce::WavAudioFormat::riffInfoTitle;
-    if (id3Key == "id3trackNumber")     return juce::WavAudioFormat::riffInfoTrackNumber;
+    if (id3Key == "id3album")           return yup::WavAudioFormat::riffInfoProductName;
+    if (id3Key == "id3artist")          return yup::WavAudioFormat::riffInfoArtist;
+    if (id3Key == "id3comment")         return yup::WavAudioFormat::riffInfoComment2;
+    if (id3Key == "id3date")            return yup::WavAudioFormat::riffInfoDateCreated;
+    if (id3Key == "id3genre")           return yup::WavAudioFormat::riffInfoGenre;
+    if (id3Key == "id3title")           return yup::WavAudioFormat::riffInfoTitle;
+    if (id3Key == "id3trackNumber")     return yup::WavAudioFormat::riffInfoTrackNumber;
 
-    return nullptr;
+    return {};
 }
 
-juce::StringPairArray translateMetadataForFormat (const juce::StringPairArray& metadata, RenderFormat format)
+yup::StringPairArray translateMetadataForFormat (const yup::StringPairArray& metadata, RenderFormat format)
 {
-    juce::StringPairArray result;
+    yup::StringPairArray result;
     auto& keys = metadata.getAllKeys();
     auto& values = metadata.getAllValues();
 
@@ -138,7 +138,7 @@ namespace render_spec_utils
     inline constexpr double maxWrapRemainderTailSeconds = 30.0;
 
     /** The AudioFormat to write, or nullptr for a format that isn't audio. */
-    static juce::AudioFormat* getFormat (Engine& engine, RenderFormat format)
+    static yup::AudioFormat* getFormat (Engine& engine, RenderFormat format)
     {
         auto& affm = engine.getAudioFileFormatManager();
 
@@ -152,10 +152,10 @@ namespace render_spec_utils
             case RenderFormat::midi:    break;
         }
 
-        return nullptr;
+        return {};
     }
 
-    static bool isKnownChannelLayout (const juce::String& layout)
+    static bool isKnownChannelLayout (const yup::String& layout)
     {
         return layout.isEmpty() || layout == "mono" || layout == "stereo"
                || layout == "5.1" || layout == "7.1";
@@ -164,9 +164,9 @@ namespace render_spec_utils
     /** Finds the tracks for a set of IDs along with their indexes in the
         Edit's track list, preserving the order the IDs were given in.
     */
-    static juce::Array<std::pair<Track*, int>> resolveTracks (Edit& edit, const juce::Array<EditItemID>& ids)
+    static yup::Array<std::pair<Track*, int>> resolveTracks (Edit& edit, const yup::Array<EditItemID>& ids)
     {
-        juce::Array<std::pair<Track*, int>> result;
+        yup::Array<std::pair<Track*, int>> result;
         auto allTracks = getAllTracks (edit);
 
         for (auto id : ids)
@@ -188,7 +188,7 @@ namespace render_spec_utils
         cap for infinite tail reports rather than ignoring them, and caps the
         result so runaway feedback can't stall a render.
     */
-    static TimeDuration findWrapRemainderTail (Edit& edit, const juce::Array<EditItemID>& trackIDs)
+    static TimeDuration findWrapRemainderTail (Edit& edit, const yup::Array<EditItemID>& trackIDs)
     {
         Plugin::Array plugins;
 
@@ -207,9 +207,9 @@ namespace render_spec_utils
 }
 
 //==============================================================================
-juce::var RenderSpecification::toJSON() const
+yup::var RenderSpecification::toJSON() const
 {
-    auto obj = new juce::DynamicObject();
+    auto obj = new yup::DynamicObject();
 
     obj->setProperty ("tracks", EditItemID::listToString (tracks));
     obj->setProperty ("mutedTracks", EditItemID::listToString (mutedTracks));
@@ -243,20 +243,20 @@ juce::var RenderSpecification::toJSON() const
 
     if (metadata.size() > 0)
     {
-        auto metaObj = new juce::DynamicObject();
+        auto metaObj = new yup::DynamicObject();
 
         for (int i = 0; i < metadata.size(); ++i)
             metaObj->setProperty (metadata.getAllKeys()[i], metadata.getAllValues()[i]);
 
-        obj->setProperty ("metadata", juce::var (metaObj));
+        obj->setProperty ("metadata", yup::var (metaObj));
     }
 
-    return juce::var (obj);
+    return yup::var (obj);
 }
 
-RenderSpecification RenderSpecification::fromJSON (const juce::var& v, juce::StringArray* unknownKeys)
+RenderSpecification RenderSpecification::fromJSON (const yup::var& v, yup::StringArray* unknownKeys)
 {
-    static const juce::StringArray knownKeys { "tracks", "mutedTracks", "includeSourceTracks", "clips", "startTime", "endTime",
+    static const yup::StringArray knownKeys { "tracks", "mutedTracks", "includeSourceTracks", "clips", "startTime", "endTime",
                                               "wrapRemainder", "destination", "format", "sampleRate",
                                               "bitDepth", "quality", "channelLayout", "normalise",
                                               "normaliseByRMS", "normaliseByLUFS", "normaliseToLevelDb",
@@ -274,18 +274,18 @@ RenderSpecification RenderSpecification::fromJSON (const juce::var& v, juce::Str
             if (! knownKeys.contains (prop.name.toString()))
                 unknownKeys->add (prop.name.toString());
 
-    auto get = [obj] (const char* key, juce::var defaultValue)
+    auto get = [obj] (const char* key, yup::var defaultValue)
     {
         auto value = obj->getProperty (key);
         return value.isVoid() ? defaultValue : value;
     };
 
-    spec.tracks             = EditItemID::parseStringList (get ("tracks", juce::String()));
-    spec.mutedTracks        = EditItemID::parseStringList (get ("mutedTracks", juce::String()));
+    spec.tracks             = EditItemID::parseStringList (get ("tracks", yup::String()));
+    spec.mutedTracks        = EditItemID::parseStringList (get ("mutedTracks", yup::String()));
     spec.includeSourceTracks = get ("includeSourceTracks", spec.includeSourceTracks);
-    spec.clips              = EditItemID::parseStringList (get ("clips", juce::String()));
+    spec.clips              = EditItemID::parseStringList (get ("clips", yup::String()));
     spec.wrapRemainder      = get ("wrapRemainder", spec.wrapRemainder);
-    spec.destination        = juce::File (get ("destination", juce::String()).toString());
+    spec.destination        = yup::File (get ("destination", yup::String()).toString());
     spec.format             = renderFormatFromString (get ("format", toString (spec.format)).toString())
                                   .value_or (spec.format);
     spec.sampleRate         = get ("sampleRate", spec.sampleRate);
@@ -316,26 +316,26 @@ RenderSpecification RenderSpecification::fromJSON (const juce::var& v, juce::Str
 }
 
 //==============================================================================
-juce::Result validateRenderSpecification (Edit& edit, const RenderSpecification& spec)
+yup::Result validateRenderSpecification (Edit& edit, const RenderSpecification& spec)
 {
     using namespace render_spec_utils;
 
-    if (spec.destination == juce::File())
-        return juce::Result::fail (TRANS("No destination has been set"));
+    if (spec.destination == yup::File())
+        return yup::Result::fail (TRANS("No destination has been set"));
 
     if (spec.destination.isDirectory())
-        return juce::Result::fail (TRANS("The destination must be a file, not a directory"));
+        return yup::Result::fail (TRANS("The destination must be a file, not a directory"));
 
     // The enum can only name formats we support, so the one thing left to check
     // is whether this build actually has an encoder for it
     if (! isMidiFormat (spec.format) && getFormat (edit.engine, spec.format) == nullptr)
-        return juce::Result::fail (spec.format == RenderFormat::mp3 ? TRANS("MP3 encoding is not available")
+        return yup::Result::fail (spec.format == RenderFormat::mp3 ? TRANS("MP3 encoding is not available")
                                                                     : TRANS("Unknown format: ") + toString (spec.format));
 
     // The MIDI render still processes the graph, so it needs a sane rate, but
     // the rest of the audio settings don't apply to it and aren't checked
     if (spec.sampleRate < 8000.0 || spec.sampleRate > 384000.0)
-        return juce::Result::fail (TRANS("Invalid sample rate"));
+        return yup::Result::fail (TRANS("Invalid sample rate"));
 
     if (! isMidiFormat (spec.format))
     {
@@ -346,21 +346,21 @@ juce::Result validateRenderSpecification (Edit& edit, const RenderSpecification&
         // is silently ignored: MP3 tops out at 48kHz and simply encodes at that rate.
         auto* audioFormat = getFormat (edit.engine, spec.format);
 
-        auto listOf = [] (const juce::Array<int>& values)
+        auto listOf = [] (const yup::Array<int>& values)
         {
-            juce::StringArray strings;
+            yup::StringArray strings;
 
             for (auto v : values)
-                strings.add (juce::String (v));
+                strings.add (yup::String (v));
 
             return strings.joinIntoString (", ");
         };
 
         if (auto rates = audioFormat->getPossibleSampleRates();
-            ! rates.isEmpty() && ! rates.contains (juce::roundToInt (spec.sampleRate)))
-            return juce::Result::fail (TRANS("XZZX doesn't support a sample rate of YZZY")
+            ! rates.isEmpty() && ! rates.contains (yup::roundToInt (spec.sampleRate)))
+            return yup::Result::fail (TRANS("XZZX doesn't support a sample rate of YZZY")
                                          .replace ("XZZX", toString (spec.format))
-                                         .replace ("YZZY", juce::String (spec.sampleRate, 0))
+                                         .replace ("YZZY", yup::String (spec.sampleRate, 0))
                                         + ". " + TRANS("Supported rates: XZZX").replace ("XZZX", listOf (rates)));
 
         // A format offering a single depth fixes its own and ignores whatever it is
@@ -368,35 +368,35 @@ juce::Result validateRenderSpecification (Edit& edit, const RenderSpecification&
         // is asked for - so there is nothing to validate in that case
         if (auto depths = audioFormat->getPossibleBitDepths();
             depths.size() > 1 && ! depths.contains (spec.bitDepth))
-            return juce::Result::fail (TRANS("XZZX doesn't support YZZY bit")
+            return yup::Result::fail (TRANS("XZZX doesn't support YZZY bit")
                                          .replace ("XZZX", toString (spec.format))
-                                         .replace ("YZZY", juce::String (spec.bitDepth))
+                                         .replace ("YZZY", yup::String (spec.bitDepth))
                                         + ". " + TRANS("Supported bit depths: XZZX").replace ("XZZX", listOf (depths)));
 
         if (! isKnownChannelLayout (spec.channelLayout))
-            return juce::Result::fail (TRANS("Unknown channel layout: ") + spec.channelLayout);
+            return yup::Result::fail (TRANS("Unknown channel layout: ") + spec.channelLayout);
     }
 
     if (resolveTracks (edit, spec.tracks).size() != spec.tracks.size()
         || resolveTracks (edit, spec.mutedTracks).size() != spec.mutedTracks.size())
-        return juce::Result::fail (TRANS("The specification contains tracks which aren't in this Edit"));
+        return yup::Result::fail (TRANS("The specification contains tracks which aren't in this Edit"));
 
     for (auto id : spec.clips)
         if (findClipForID (edit, id) == nullptr)
-            return juce::Result::fail (TRANS("The specification contains clips which aren't in this Edit"));
+            return yup::Result::fail (TRANS("The specification contains clips which aren't in this Edit"));
 
     if (spec.time ? spec.time->isEmpty() : (edit.getLength() == TimeDuration()))
-        return juce::Result::fail (TRANS("There is nothing to render in the time range"));
+        return yup::Result::fail (TRANS("There is nothing to render in the time range"));
 
-    return juce::Result::ok();
+    return yup::Result::ok();
 }
 
 //==============================================================================
-juce::Array<EditItemID> findStemSourceTracks (Edit& edit, const juce::Array<EditItemID>& stemTracks)
+yup::Array<EditItemID> findStemSourceTracks (Edit& edit, const yup::Array<EditItemID>& stemTracks)
 {
     // The tracks whose processing runs as part of the stem: the given tracks
     // plus everything nested inside any folders among them
-    juce::Array<Track*> stemSet;
+    yup::Array<Track*> stemSet;
 
     for (auto id : stemTracks)
     {
@@ -409,7 +409,7 @@ juce::Array<EditItemID> findStemSourceTracks (Edit& edit, const juce::Array<Edit
         }
     }
 
-    juce::Array<Track*> sources, visited;
+    yup::Array<Track*> sources, visited;
     auto toVisit = stemSet;
 
     auto addSource = [&] (Track* source)
@@ -460,7 +460,7 @@ juce::Array<EditItemID> findStemSourceTracks (Edit& edit, const juce::Array<Edit
         }
     }
 
-    juce::Array<EditItemID> result;
+    yup::Array<EditItemID> result;
 
     for (auto t : sources)
         result.add (t->itemID);
@@ -558,11 +558,11 @@ std::optional<PlannedRenderJob> createRenderJob (Edit& edit, const RenderSpecifi
 
 std::vector<RenderSpecification> createPerTrackSpecifications (Edit& edit,
                                                                const RenderSpecification& base,
-                                                               const juce::File& directory)
+                                                               const yup::File& directory)
 {
     using namespace render_spec_utils;
 
-    juce::String extension (".mid");
+    yup::String extension (".mid");
 
     if (! isMidiFormat (base.format))
     {
@@ -581,16 +581,16 @@ std::vector<RenderSpecification> createPerTrackSpecifications (Edit& edit,
             tracksAndIndexes.add ({ at, getAllTracks (edit).indexOf (at) });
 
     std::vector<RenderSpecification> specs;
-    juce::StringArray usedNames;
+    yup::StringArray usedNames;
 
     for (auto [track, index] : tracksAndIndexes)
     {
         // Uniquify against the other tracks in this batch as well as the disk,
         // so identically-named tracks don't collide on the same file
-        auto name = juce::File::createLegalFileName (track->getName());
+        auto name = yup::File::createLegalFileName (track->getName());
 
         for (int suffix = 2; usedNames.contains (name); ++suffix)
-            name = juce::File::createLegalFileName (track->getName()) + " " + juce::String (suffix);
+            name = yup::File::createLegalFileName (track->getName()) + " " + yup::String (suffix);
 
         usedNames.add (name);
 

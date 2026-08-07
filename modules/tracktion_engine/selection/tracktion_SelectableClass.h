@@ -33,7 +33,7 @@ public:
     /** Must return a description of this particular group of objects.
         This will be shown on the properties panel.
     */
-    virtual juce::String getDescriptionOfSelectedGroup (const SelectableList&);
+    virtual yup::String getDescriptionOfSelectedGroup (const SelectableList&);
 
     /** If it's possible for an object to be selected. Things like currently recording
         clips should not be selectable
@@ -134,7 +134,7 @@ public:
         DECLARE_SELECTABLE_OBJECT_AND_CLASS (ObjectType, ObjectType ## SelectableClass)
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SelectableClass)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SelectableClass)
 };
 
 

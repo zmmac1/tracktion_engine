@@ -71,7 +71,7 @@ std::shared_ptr<EditLoader::Handle> EditLoader::loadEdit (Edit::Options editOpti
     return handle;
 }
 
-std::shared_ptr<EditLoader::Handle> EditLoader::loadEdit (Engine& engine, juce::File editFile,
+std::shared_ptr<EditLoader::Handle> EditLoader::loadEdit (Engine& engine, yup::File editFile,
                                                           std::function<void (std::unique_ptr<Edit>)> editLoadedCallback,
                                                           Edit::EditRole role, int numUndoLevelsToStore)
 {

@@ -21,10 +21,10 @@ namespace tracktion::inline engine
 namespace
 {
     /** Creates a 1-second sine WAV at the given path (mirrors getSinFile pattern). */
-    bool createTestWavFile (const juce::File& dest)
+    bool createTestWavFile (const yup::File& dest)
     {
         dest.getParentDirectory().createDirectory();
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
         assert (sinFile != nullptr);
 
         return sinFile->getFile().copyFileTo (dest);
@@ -36,7 +36,7 @@ TEST_SUITE ("tracktion_engine")
     TEST_CASE ("Clipboard: source path resolution during copy/paste")
     {
         auto& engine = *Engine::getEngines()[0];
-        auto homeDir = juce::File::getSpecialLocation (juce::File::userHomeDirectory);
+        auto homeDir = yup::File::getSpecialLocation (yup::File::userHomeDirectory);
 
         auto projectDir = homeDir.getChildFile ("ClipboardTest_Project");
         auto editFile = projectDir.getChildFile ("edit.tracktionedit");
@@ -59,7 +59,7 @@ TEST_SUITE ("tracktion_engine")
 
             // Verify the clip has a relative source path
             auto storedSource = clip->getSourceFileReference().source.get();
-            CHECK (! juce::File::isAbsolutePath (storedSource));
+            CHECK (! yup::File::isAbsolutePath (storedSource));
 
             // Copy the clip via the clipboard
             SelectableList selected;
@@ -71,8 +71,8 @@ TEST_SUITE ("tracktion_engine")
             // Verify clipboard state has absolute source path
             REQUIRE (clipboardClips.clips.size() == 1);
             auto clipboardSource = clipboardClips.clips[0].state[IDs::source].toString();
-            CHECK (juce::File::isAbsolutePath (clipboardSource));
-            CHECK (juce::File (clipboardSource) == audioFile);
+            CHECK (yup::File::isAbsolutePath (clipboardSource));
+            CHECK (yup::File (clipboardSource) == audioFile);
         }
 
         SUBCASE ("round-trip preserves path for same edit")
@@ -91,10 +91,10 @@ TEST_SUITE ("tracktion_engine")
 
             REQUIRE (clipboardClips.clips.size() == 1);
             auto absoluteSource = clipboardClips.clips[0].state[IDs::source].toString();
-            REQUIRE (juce::File::isAbsolutePath (absoluteSource));
+            REQUIRE (yup::File::isAbsolutePath (absoluteSource));
 
             // Simulate paste re-relativization for the same edit
-            auto reRelativized = SourceFileReference::findPathFromFile (*edit, juce::File (absoluteSource), true);
+            auto reRelativized = SourceFileReference::findPathFromFile (*edit, yup::File (absoluteSource), true);
 
             // It should resolve back to the same file
             auto resolvedFile = SourceFileReference::findFileFromString (*edit, reRelativized);
@@ -109,7 +109,7 @@ TEST_SUITE ("tracktion_engine")
             REQUIRE (clip != nullptr);
 
             // Add a child ValueTree with a source property to simulate a take
-            auto takeState = juce::ValueTree ("TAKE");
+            auto takeState = yup::ValueTree ("TAKE");
             auto relativeTakePath = takeFile.getRelativePathFrom (editFile);
             takeState.setProperty (IDs::source, relativeTakePath, nullptr);
             clip->state.addChild (takeState, -1, nullptr);
@@ -134,8 +134,8 @@ TEST_SUITE ("tracktion_engine")
                 if (child.hasType ("TAKE") && child.hasProperty (IDs::source))
                 {
                     auto childSource = child[IDs::source].toString();
-                    CHECK (juce::File::isAbsolutePath (childSource));
-                    CHECK (juce::File (childSource) == takeFile);
+                    CHECK (yup::File::isAbsolutePath (childSource));
+                    CHECK (yup::File (childSource) == takeFile);
                     foundTake = true;
                 }
             }
@@ -145,7 +145,7 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("ProjectItemID source is not modified during copy")
         {
-            auto clipState = juce::ValueTree (IDs::AUDIOCLIP);
+            auto clipState = yup::ValueTree (IDs::AUDIOCLIP);
             clipState.setProperty (IDs::source, "1a2b3c4d/5e6f7g8h", nullptr);
             clipState.setProperty (IDs::start, 0.0, nullptr);
             clipState.setProperty (IDs::length, 1.0, nullptr);
@@ -171,7 +171,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
         auto cleanup = [&tempDir] { tempDir.deleteRecursively (false); };
 
@@ -200,7 +200,7 @@ TEST_SUITE ("tracktion_engine")
             REQUIRE (track->getClips().isEmpty());
 
             EditInsertPoint insertPoint (*edit);
-            insertPoint.setNextInsertPoint (0_tp, juce::ReferenceCountedObjectPtr<Track> (track));
+            insertPoint.setNextInsertPoint (0_tp, yup::ReferenceCountedObjectPtr<Track> (track));
 
             Clipboard::ContentType::EditPastingOptions opts (*edit, insertPoint);
             opts.silent = true;          // keep paste synchronous

@@ -20,28 +20,28 @@ class IODevice   : public Selectable
 {
 public:
     //==============================================================================
-    IODevice (Engine&, juce::String name, juce::String deviceID);
+    IODevice (Engine&, yup::String name, yup::String deviceID);
     ~IODevice() override;
 
     //==============================================================================
-    const juce::String& getName() const                       { return name; }
-    juce::String getDeviceID() const                          { return deviceID; }
+    const yup::String& getName() const                       { return name; }
+    yup::String getDeviceID() const                          { return deviceID; }
 
     bool isEnabled() const;
     virtual void setEnabled (bool) = 0;
 
     virtual bool isMidi() const = 0;
     virtual bool isTrackDevice() const = 0;
-    virtual juce::String getDeviceTypeDescription() const = 0;
+    virtual yup::String getDeviceTypeDescription() const = 0;
 
     /// the alias is the name shown in the draggable input device components
-    void setAlias (const juce::String& newAlias);
+    void setAlias (const yup::String& newAlias);
     /// Returns the alias if set, otherwise the name.
-    juce::String getAliasOrName() const;
+    yup::String getAliasOrName() const;
     /// Returns the alias, or an empty string if not set.
-    juce::String getAliasIfSet() const;
+    yup::String getAliasIfSet() const;
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     //==============================================================================
     Engine& engine;
@@ -49,13 +49,13 @@ public:
 protected:
     std::atomic<bool> enabled { false };
 
-    const juce::String deviceID, name;
+    const yup::String deviceID, name;
 
 private:
-    juce::String alias;
-    juce::String getAliasPropName() const;
+    yup::String alias;
+    yup::String getAliasPropName() const;
 
-    const juce::String& getType() const; // Deprecated: use getDeviceTypeDescription() instead
+    const yup::String& getType() const; // Deprecated: use getDeviceTypeDescription() instead
 };
 
 

@@ -10,21 +10,21 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-class BandlimitedWaveLookupTables : public juce::ReferenceCountedObject
+class BandlimitedWaveLookupTables : public yup::ReferenceCountedObject
 {
 public:
     ~BandlimitedWaveLookupTables();
 
-    using Ptr = juce::ReferenceCountedObjectPtr<BandlimitedWaveLookupTables>;
+    using Ptr = yup::ReferenceCountedObjectPtr<BandlimitedWaveLookupTables>;
 
     static Ptr getLookupTables (double sampleRate);
 
     double sampleRate = 44100.0;
 
     //==============================================================================
-    juce::dsp::LookupTableTransform<float> sineFunction;
+    yup::dsp::LookupTableTransform<float> sineFunction;
 
-    juce::OwnedArray<juce::dsp::LookupTableTransform<float>> triangleFunctions, sawUpFunctions, sawDownFunctions;
+    yup::OwnedArray<yup::dsp::LookupTableTransform<float>> triangleFunctions, sawUpFunctions, sawDownFunctions;
 
     const int tablePerNumNotes = 3;
 
@@ -59,16 +59,16 @@ public:
     void setGain (float g)          { gain = g;         }
     void setPulseWidth (float p)    { pulseWidth = p;   }
 
-    void process (juce::AudioBuffer<float>& buffer, int startSample, int numSamples);
+    void process (yup::AudioBuffer<float>& buffer, int startSample, int numSamples);
 
 private:
     //==============================================================================
-    void processSine (juce::AudioBuffer<float>& buffer, int startSample, int numSamples);
-    void processSquare (juce::AudioBuffer<float>& buffer, int startSample, int numSamples);
-    void processNoise (juce::AudioBuffer<float>& buffer, int startSample, int numSamples);
+    void processSine (yup::AudioBuffer<float>& buffer, int startSample, int numSamples);
+    void processSquare (yup::AudioBuffer<float>& buffer, int startSample, int numSamples);
+    void processNoise (yup::AudioBuffer<float>& buffer, int startSample, int numSamples);
 
-    void processLookup (juce::AudioBuffer<float>& buffer, int startSample, int numSamples,
-                        const juce::OwnedArray<juce::dsp::LookupTableTransform<float>>& tableSet);
+    void processLookup (yup::AudioBuffer<float>& buffer, int startSample, int numSamples,
+                        const yup::OwnedArray<yup::dsp::LookupTableTransform<float>>& tableSet);
 
     //==============================================================================
     Waves wave = sine;
@@ -99,10 +99,10 @@ public:
     void setDetune (float d);
     void setSpread (float s);
 
-    void process (juce::AudioBuffer<float>& buffer, int startSample, int numSamples);
+    void process (yup::AudioBuffer<float>& buffer, int startSample, int numSamples);
 
 private:
-    juce::OwnedArray<Oscillator> oscillators;
+    yup::OwnedArray<Oscillator> oscillators;
 
     int voices = 1;
     float detune = 0, spread = 0, gain = 1.0f, note = 69.0f, pan = 0.0f;

@@ -11,7 +11,7 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-class HostedAudioDevice : public juce::AudioIODevice
+class HostedAudioDevice : public yup::AudioIODevice
 {
 public:
     HostedAudioDevice (HostedAudioDeviceInterface& aif, std::function<void (HostedAudioDevice*)> onDestroy_)
@@ -24,14 +24,14 @@ public:
             onDestroy (this);
     }
 
-    juce::StringArray getOutputChannelNames() override      { return audioIf.getOutputChannelNames();               }
-    juce::StringArray getInputChannelNames() override       { return audioIf.getInputChannelNames();                }
-    juce::Array<double> getAvailableSampleRates() override  { return { audioIf.parameters.sampleRate };             }
-    juce::Array<int> getAvailableBufferSizes() override     { return { audioIf.parameters.blockSize };              }
+    yup::StringArray getOutputChannelNames() override      { return audioIf.getOutputChannelNames();               }
+    yup::StringArray getInputChannelNames() override       { return audioIf.getInputChannelNames();                }
+    yup::Array<double> getAvailableSampleRates() override  { return { audioIf.parameters.sampleRate };             }
+    yup::Array<int> getAvailableBufferSizes() override     { return { audioIf.parameters.blockSize };              }
     int getDefaultBufferSize() override                     { return audioIf.parameters.blockSize;                  }
 
-    juce::String open (const juce::BigInteger& inputChannels,
-                       const juce::BigInteger& outputChannels,
+    yup::String open (const yup::BigInteger& inputChannels,
+                       const yup::BigInteger& outputChannels,
                        double sampleRate, int bufferSizeSamples) override
     {
         ignoreUnused (inputChannels, outputChannels, sampleRate, bufferSizeSamples);
@@ -39,7 +39,7 @@ public:
     }
 
     void close() override                                   {}
-    void start (juce::AudioIODeviceCallback* callback_) override
+    void start (yup::AudioIODeviceCallback* callback_) override
     {
         callback = callback_;
         callback->audioDeviceAboutToStart (this);
@@ -53,7 +53,7 @@ public:
 
     bool isOpen() override                                  { return true;  }
     bool isPlaying() override                               { return true;  }
-    juce::String getLastError() override                    { return {};    }
+    yup::String getLastError() override                    { return {};    }
     int getCurrentBitDepth() override                       { return 16;    }
     int getOutputLatencyInSamples() override                { return audioIf.parameters.outputLatencyNumSamples; }
     int getInputLatencyInSamples() override                 { return audioIf.parameters.inputLatencyNumSamples; }
@@ -63,21 +63,21 @@ public:
     int getCurrentBufferSizeSamples() override              { return audioIf.parameters.blockSize;      }
     double getCurrentSampleRate() override                  { return audioIf.parameters.sampleRate;     }
 
-    juce::BigInteger getActiveOutputChannels() const override
+    yup::BigInteger getActiveOutputChannels() const override
     {
-        juce::BigInteger res;
+        yup::BigInteger res;
         res.setRange (0, audioIf.parameters.outputChannels, true);
         return res;
     }
 
-    juce::BigInteger getActiveInputChannels() const override
+    yup::BigInteger getActiveInputChannels() const override
     {
-        juce::BigInteger res;
+        yup::BigInteger res;
         res.setRange (0, audioIf.parameters.inputChannels, true);
         return res;
     }
 
-    void processBlock (juce::AudioBuffer<float>& buffer)
+    void processBlock (yup::AudioBuffer<float>& buffer)
     {
         if (callback != nullptr)
             callback->audioDeviceIOCallbackWithContext (buffer.getArrayOfReadPointers(),
@@ -97,11 +97,11 @@ public:
 private:
     HostedAudioDeviceInterface& audioIf;
     std::function<void (HostedAudioDevice*)> onDestroy;
-    juce::AudioIODeviceCallback* callback = nullptr;
+    yup::AudioIODeviceCallback* callback = nullptr;
 };
 
 //==============================================================================
-class HostedAudioDeviceType  : public juce::AudioIODeviceType
+class HostedAudioDeviceType  : public yup::AudioIODeviceType
 {
 public:
     HostedAudioDeviceType (HostedAudioDeviceInterface& aif)
@@ -115,12 +115,12 @@ public:
     }
 
     void scanForDevices() override                                          {}
-    juce::StringArray getDeviceNames (bool = false) const override          { return { "Hosted Device" }; }
+    yup::StringArray getDeviceNames (bool = false) const override          { return { "Hosted Device" }; }
     int getDefaultDeviceIndex (bool) const override                         { return 0; }
-    int getIndexOfDevice (juce::AudioIODevice*, bool) const override        { return 0; }
+    int getIndexOfDevice (yup::AudioIODevice*, bool) const override        { return 0; }
     bool hasSeparateInputsAndOutputs() const override                       { return false; }
 
-    juce::AudioIODevice* createDevice (const juce::String&, const juce::String&) override
+    yup::AudioIODevice* createDevice (const yup::String&, const yup::String&) override
     {
         auto device = new HostedAudioDevice (audioIf, [ptr = makeWeakRef (*this)] (HostedAudioDevice* d)
                                                       {
@@ -131,7 +131,7 @@ public:
         return device;
     }
 
-    void processBlock (juce::AudioBuffer<float>& buffer)
+    void processBlock (yup::AudioBuffer<float>& buffer)
     {
         for (auto device : devices)
             device->processBlock (buffer);
@@ -145,9 +145,9 @@ public:
 
 private:
     HostedAudioDeviceInterface& audioIf;
-    juce::Array<HostedAudioDevice*> devices;
+    yup::Array<HostedAudioDevice*> devices;
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (HostedAudioDeviceType)
+    YUP_DECLARE_WEAK_REFERENCEABLE (HostedAudioDeviceType)
 };
 
 //==============================================================================
@@ -164,7 +164,7 @@ public:
         return virtualMidiDevice;
     }
 
-    juce::String getDeviceTypeDescription() const override
+    yup::String getDeviceTypeDescription() const override
     {
         return TRANS("MIDI Input");
     }
@@ -182,21 +182,21 @@ public:
 
     void saveProps() override
     {
-        juce::XmlElement n ("SETTINGS");
+        yup::XmlElement n ("SETTINGS");
 
         MidiInputDevice::saveMidiProps (n);
 
         engine.getPropertyStorage().setXmlPropertyItem (SettingID::midiin, getName(), n);
     }
 
-    void processBlock (juce::MidiBuffer& midi)
+    void processBlock (yup::MidiBuffer& midi)
     {
         // Process the messages via the base class to update the keyboard state
         for (auto mm : midi)
             MidiInputDevice::handleIncomingMidiMessage (nullptr, mm.getMessage());
 
         // Pending messages will then be filled with the messages to process
-        const juce::ScopedLock sl (pendingMidiMessagesMutex);
+        const yup::ScopedLock sl (pendingMidiMessagesMutex);
 
         for (auto instance : instances)
             if (auto hostedInstance = dynamic_cast<HostedMidiInputDeviceInstance*> (instance))
@@ -207,13 +207,13 @@ public:
 
     using MidiInputDevice::handleIncomingMidiMessage;
 
-    void handleIncomingMidiMessage (const juce::MidiMessage& m, MPESourceID) override
+    void handleIncomingMidiMessage (const yup::MidiMessage& m, MPESourceID) override
     {
-        const juce::ScopedLock sl (pendingMidiMessagesMutex);
+        const yup::ScopedLock sl (pendingMidiMessagesMutex);
         pendingMidiMessages.addEvent (m, 0);
     }
 
-    juce::String openDevice() override { return {}; }
+    yup::String openDevice() override { return {}; }
     void closeDevice() override {}
 
 private:
@@ -226,7 +226,7 @@ private:
         {
         }
 
-        void processBlock (juce::MidiBuffer& midi)
+        void processBlock (yup::MidiBuffer& midi)
         {
             const auto globalStreamTime = edit.engine.getDeviceManager().getCurrentStreamTime();
 
@@ -251,10 +251,10 @@ private:
     };
 
     //==============================================================================
-    juce::MidiBuffer pendingMidiMessages;
-    juce::CriticalSection pendingMidiMessagesMutex;
+    yup::MidiBuffer pendingMidiMessages;
+    yup::CriticalSection pendingMidiMessagesMutex;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HostedMidiInputDevice)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HostedMidiInputDevice)
 };
 
 //==============================================================================
@@ -262,7 +262,7 @@ class HostedMidiOutputDevice : public MidiOutputDevice
 {
 public:
     HostedMidiOutputDevice (HostedAudioDeviceInterface& aif)
-        : MidiOutputDevice (aif.engine, { TRANS("MIDI Output"), juce::String() }),
+        : MidiOutputDevice (aif.engine, { TRANS("MIDI Output"), yup::String() }),
           audioIf (aif)
     {
     }
@@ -272,7 +272,7 @@ public:
         return new HostedMidiOutputDeviceInstance (*this, epc);
     }
 
-    void processBlock (juce::MidiBuffer& midi)
+    void processBlock (yup::MidiBuffer& midi)
     {
         for (auto m : toSend)
         {
@@ -283,7 +283,7 @@ public:
         toSend.clear();
     }
 
-    void sendMessageNow (const juce::MidiMessage& message) override
+    void sendMessageNow (const yup::MidiMessage& message) override
     {
         toSend.addMidiMessage (message, 0, {});
         toSend.sortByTimestamp();
@@ -312,7 +312,7 @@ private:
     HostedAudioDeviceInterface& audioIf;
     MidiMessageArray toSend;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HostedMidiOutputDevice)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HostedMidiOutputDevice)
 };
 
 //==============================================================================
@@ -408,7 +408,7 @@ void HostedAudioDeviceInterface::prepareToPlay (double sampleRate, int blockSize
     }
 }
 
-void HostedAudioDeviceInterface::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi)
+void HostedAudioDeviceInterface::processBlock (yup::AudioBuffer<float>& buffer, yup::MidiBuffer& midi)
 {
     if (inputLatencyProcessor)
     {
@@ -441,31 +441,31 @@ bool HostedAudioDeviceInterface::isHostedMidiInputDevice (const MidiInputDevice&
     return dynamic_cast<const HostedMidiInputDevice*> (&d) != nullptr;
 }
 
-juce::StringArray HostedAudioDeviceInterface::getInputChannelNames()
+yup::StringArray HostedAudioDeviceInterface::getInputChannelNames()
 {
-    juce::StringArray res;
+    yup::StringArray res;
 
     for (int i = 0; i < parameters.inputChannels; i++)
     {
         if (i < parameters.inputNames.size())
             res.add (parameters.inputNames[i]);
         else
-            res.add (juce::String (i + 1));
+            res.add (yup::String (i + 1));
     }
 
     return res;
 }
 
-juce::StringArray HostedAudioDeviceInterface::getOutputChannelNames()
+yup::StringArray HostedAudioDeviceInterface::getOutputChannelNames()
 {
-    juce::StringArray res;
+    yup::StringArray res;
 
     for (int i = 0; i < parameters.outputChannels; i++)
     {
         if (i < parameters.outputNames.size())
             res.add (parameters.outputNames[i]);
         else
-            res.add (juce::String (i + 1));
+            res.add (yup::String (i + 1));
     }
 
     return res;

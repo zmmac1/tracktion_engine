@@ -14,19 +14,19 @@ namespace tracktion::inline engine {
 class AutomationTrack  : public Track
 {
 public:
-    AutomationTrack (Edit&, const juce::ValueTree&);
+    AutomationTrack (Edit&, const yup::ValueTree&);
     ~AutomationTrack() override;
 
     //==============================================================================
     bool isAutomationTrack() const override            { return true; }
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     bool canContainPlugin (Plugin*) const override     { return false; }
-    juce::String getName() const override;
+    yup::String getName() const override;
 
     //==============================================================================
-    using Ptr = juce::ReferenceCountedObjectPtr<AutomationTrack>;
+    using Ptr = yup::ReferenceCountedObjectPtr<AutomationTrack>;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomationTrack)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomationTrack)
 };
 
 } // namespace tracktion::inline engine

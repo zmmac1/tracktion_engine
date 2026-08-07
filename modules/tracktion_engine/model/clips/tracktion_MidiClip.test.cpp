@@ -28,7 +28,7 @@ TEST_CASE ("Benchmark: MIDI Clip sequence")
     auto& engine = *tracktion::engine::Engine::getEngines()[0];
     Clipboard clipboard;
     auto edit = Edit::createSingleTrackEdit (engine);
-    juce::Random r (42);
+    yup::Random r (42);
 
     const auto duration = 8.0s;
     auto c = getAudioTracks (*edit)[0]->insertMIDIClip ({ 0.0s, TimePosition (duration) }, nullptr);
@@ -37,7 +37,7 @@ TEST_CASE ("Benchmark: MIDI Clip sequence")
     c->getSequence().importMidiSequence (sequence, nullptr, 0s, nullptr);
 
     {
-        const int numRepititions = juce::roundToInt (50h / duration);
+        const int numRepititions = yup::roundToInt (50h / duration);
         c->setNumberOfLoops (numRepititions);
     }
 

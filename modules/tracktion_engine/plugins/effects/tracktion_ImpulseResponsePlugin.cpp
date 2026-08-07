@@ -19,44 +19,44 @@ ImpulseResponsePlugin::ImpulseResponsePlugin (PluginCreationInfo info)
 
     name.referTo (state, IDs::name, um);
 
-    const juce::NormalisableRange frequencyRange { frequencyToMidiNote (10.0f), frequencyToMidiNote (20'000.0f) };
+    const yup::NormalisableRange frequencyRange { frequencyToMidiNote (10.0f), frequencyToMidiNote (20'000.0f) };
 
     highPassCutoffValue.referTo (state, IDs::highPassFrequency, um, frequencyRange.start);
     lowPassCutoffValue.referTo (state, IDs::lowPassFrequency, um, frequencyRange.end);
     gainValue.referTo (state, IDs::gain, um, 0.0f);
     mixValue.referTo (state, IDs::mix, um, 1.0f);
-    qValue.referTo (state, IDs::filterSlope, um, 1.0f / juce::MathConstants<float>::sqrt2);
+    qValue.referTo (state, IDs::filterSlope, um, 1.0f / yup::MathConstants<float>::sqrt2);
 
     normalise.referTo (state, IDs::normalise, um, true);
     trimSilence.referTo (state, IDs::trimSilence, um, false);
 
-    juce::NormalisableRange volumeRange { -12.0f, 6.0f };
+    yup::NormalisableRange volumeRange { -12.0f, 6.0f };
     volumeRange.setSkewForCentre (0.0f);
 
     // Initialises parameter and attaches to value
     gainParam = addParam (IDs::gain.toString(), TRANS ("Gain"), volumeRange,
-                          [] (float value)             { return juce::Decibels::toString (value); },
-                          [] (const juce::String& s)   { return s.getFloatValue(); });
+                          [] (float value)             { return yup::Decibels::toString (value); },
+                          [] (const yup::String& s)   { return s.getFloatValue(); });
     gainParam->attachToCurrentValue (gainValue);
 
     highPassCutoffParam = addParam (IDs::highPassMidiNoteNumber.toString(), TRANS ("Low Cut"), frequencyRange,
-                                    [] (float value)             { return juce::String (midiNoteToFrequency (value), 1) + " Hz"; },
-                                    [] (const juce::String& s)   { return frequencyToMidiNote (s.getFloatValue()); });
+                                    [] (float value)             { return yup::String (midiNoteToFrequency (value), 1) + " Hz"; },
+                                    [] (const yup::String& s)   { return frequencyToMidiNote (s.getFloatValue()); });
     highPassCutoffParam->attachToCurrentValue (highPassCutoffValue);
 
     lowPassCutoffParam =  addParam (IDs::lowPassMidiNoteNumber.toString(), TRANS ("High Cut"), frequencyRange,
-                                    [] (float value)             { return juce::String (midiNoteToFrequency (value), 1) + " Hz"; },
-                                    [] (const juce::String& s)   { return frequencyToMidiNote (s.getFloatValue()); });
+                                    [] (float value)             { return yup::String (midiNoteToFrequency (value), 1) + " Hz"; },
+                                    [] (const yup::String& s)   { return frequencyToMidiNote (s.getFloatValue()); });
     lowPassCutoffParam->attachToCurrentValue (lowPassCutoffValue);
 
     mixParam = addParam (IDs::mix.toString(), TRANS("Mix"), { 0.0f, 1.0f, 0.0f },
-                         [] (float value)             { return juce::String (juce::roundToInt (value * 100.0f)) + "%"; },
-                         [] (const juce::String& s)   { return s.getFloatValue() / 100.0f; });
+                         [] (float value)             { return yup::String (yup::roundToInt (value * 100.0f)) + "%"; },
+                         [] (const yup::String& s)   { return s.getFloatValue() / 100.0f; });
     mixParam->attachToCurrentValue (mixValue);
 
     filterQParam = addParam (IDs::filterQ.toString(), TRANS("Filter Q"), { 0.1f, 14.0f, 0.0f },
-                             [] (float value)       { return juce::String (value); },
-                             [] (const juce::String& s)   { return s.getFloatValue(); });
+                             [] (float value)       { return yup::String (value); },
+                             [] (const yup::String& s)   { return s.getFloatValue(); });
     filterQParam->attachToCurrentValue (qValue);
 
     loadImpulseResponseFromState();
@@ -77,12 +77,12 @@ const char* ImpulseResponsePlugin::getPluginName() { return NEEDS_TRANS ("Impuls
 //==============================================================================
 bool ImpulseResponsePlugin::loadImpulseResponse (const void* sourceData, size_t sourceDataSize)
 {
-    auto is = std::make_unique<juce::MemoryInputStream> (sourceData, sourceDataSize, false);
+    auto is = std::make_unique<yup::MemoryInputStream> (sourceData, sourceDataSize, false);
     auto& formatManager = engine.getAudioFileFormatManager().readFormatManager;
 
-    if (auto reader = std::unique_ptr<juce::AudioFormatReader> (formatManager.createReaderFor (std::move (is))))
+    if (auto reader = std::unique_ptr<yup::AudioFormatReader> (formatManager.createReaderFor (std::move (is))))
     {
-        juce::AudioBuffer<float> buffer ((int) reader->numChannels, (int) reader->lengthInSamples);
+        yup::AudioBuffer<float> buffer ((int) reader->numChannels, (int) reader->lengthInSamples);
         reader->read (&buffer, 0, buffer.getNumSamples(), 0, true, true);
 
         return loadImpulseResponse (std::move (buffer), reader->sampleRate, (int) reader->bitsPerSample);
@@ -91,9 +91,9 @@ bool ImpulseResponsePlugin::loadImpulseResponse (const void* sourceData, size_t 
     return false;
 }
 
-bool ImpulseResponsePlugin::loadImpulseResponse (const juce::File& fileImpulseResponse)
+bool ImpulseResponsePlugin::loadImpulseResponse (const yup::File& fileImpulseResponse)
 {
-    juce::MemoryBlock fileDataMemoryBlock;
+    yup::MemoryBlock fileDataMemoryBlock;
 
     if (fileImpulseResponse.loadFileAsData (fileDataMemoryBlock))
         return loadImpulseResponse (fileDataMemoryBlock.getData(), fileDataMemoryBlock.getSize());
@@ -101,16 +101,16 @@ bool ImpulseResponsePlugin::loadImpulseResponse (const juce::File& fileImpulseRe
     return false;
 }
 
-bool ImpulseResponsePlugin::loadImpulseResponse (juce::AudioBuffer<float>&& bufferImpulseResponse,
+bool ImpulseResponsePlugin::loadImpulseResponse (yup::AudioBuffer<float>&& bufferImpulseResponse,
                                                  double sampleRateToStore,
                                                  int bitDepthToStore)
 {
-    juce::MemoryBlock fileDataMemoryBlock;
-    auto os = std::unique_ptr<juce::OutputStream> (std::make_unique<juce::MemoryOutputStream> (fileDataMemoryBlock, false));
+    yup::MemoryBlock fileDataMemoryBlock;
+    auto os = std::unique_ptr<yup::OutputStream> (std::make_unique<yup::MemoryOutputStream> (fileDataMemoryBlock, false));
 
-    if (auto writer = std::unique_ptr<juce::AudioFormatWriter> (juce::FlacAudioFormat()
+    if (auto writer = std::unique_ptr<yup::AudioFormatWriter> (yup::FlacAudioFormat()
                                                                     .createWriterFor (os,
-                                                                                      juce::AudioFormatWriterOptions()
+                                                                                      yup::WriteOptions()
                                                                                         .withSampleRate (sampleRateToStore)
                                                                                         .withNumChannels (bufferImpulseResponse.getNumChannels())
                                                                                         .withBitsPerSample (std::min (24, bitDepthToStore)))))
@@ -118,7 +118,7 @@ bool ImpulseResponsePlugin::loadImpulseResponse (juce::AudioBuffer<float>&& buff
         if (writer->writeFromAudioSampleBuffer (bufferImpulseResponse, 0, bufferImpulseResponse.getNumSamples()))
         {
             writer.reset(); // Delete the writer to flush the block before moving the buffer on
-            state.setProperty (IDs::irFileData, juce::var (std::move (fileDataMemoryBlock)), getUndoManager());
+            state.setProperty (IDs::irFileData, yup::var (std::move (fileDataMemoryBlock)), getUndoManager());
             return true;
         }
     }
@@ -128,10 +128,10 @@ bool ImpulseResponsePlugin::loadImpulseResponse (juce::AudioBuffer<float>&& buff
 
 
 //==============================================================================
-juce::String ImpulseResponsePlugin::getName() const             { return getPluginName(); }
-juce::String ImpulseResponsePlugin::getShortName (int)          { return "IR"; }
-juce::String ImpulseResponsePlugin::getPluginType()             { return xmlTypeName; }
-juce::String ImpulseResponsePlugin::getSelectableDescription()  { return getName(); }
+yup::String ImpulseResponsePlugin::getName() const             { return getPluginName(); }
+yup::String ImpulseResponsePlugin::getShortName (int)          { return "IR"; }
+yup::String ImpulseResponsePlugin::getPluginType()             { return xmlTypeName; }
+yup::String ImpulseResponsePlugin::getSelectableDescription()  { return getName(); }
 
 double ImpulseResponsePlugin::getLatencySeconds()
 {
@@ -140,7 +140,7 @@ double ImpulseResponsePlugin::getLatencySeconds()
 
 void ImpulseResponsePlugin::initialise (const PluginInitialisationInfo& info)
 {
-    juce::dsp::ProcessSpec processSpec;
+    yup::dsp::ProcessSpec processSpec;
     processSpec.sampleRate = info.sampleRate;
     processSpec.maximumBlockSize = (uint32_t) info.blockSizeSamples;
     processSpec.numChannels = 2;
@@ -203,16 +203,16 @@ void ImpulseResponsePlugin::applyToBuffer (const PluginRenderContext& fc)
             const int numThisTime = std::min (blockSize, numSamplesLeft);
 
             // Process sub-block
-            auto inOutBlock = juce::dsp::AudioBlock<float> (*fc.destBuffer).getSubBlock (size_t (numSamplesDone + fc.bufferStartSample),
+            auto inOutBlock = yup::dsp::AudioBlock<float> (*fc.destBuffer).getSubBlock (size_t (numSamplesDone + fc.bufferStartSample),
                                                                                          size_t (numThisTime));
-            juce::dsp::ProcessContextReplacing <float> context (inOutBlock);
+            yup::dsp::ProcessContextReplacing <float> context (inOutBlock);
             processorChain.process (context);
 
             // Update params
             const auto qFactor = qSmoother.skip (numThisTime);
-            *hpf = juce::dsp::IIR::ArrayCoefficients<float>::makeHighPass (sampleRate, highFreqSmoother.skip (numThisTime), qFactor);
-            *lpf = juce::dsp::IIR::ArrayCoefficients<float>::makeLowPass (sampleRate, lowFreqSmoother.skip (numThisTime), qFactor);
-            gain.setGainLinear (juce::Decibels::decibelsToGain (gainSmoother.skip (numThisTime)));
+            *hpf = yup::dsp::IIR::ArrayCoefficients<float>::makeHighPass (sampleRate, highFreqSmoother.skip (numThisTime), qFactor);
+            *lpf = yup::dsp::IIR::ArrayCoefficients<float>::makeLowPass (sampleRate, lowFreqSmoother.skip (numThisTime), qFactor);
+            gain.setGainLinear (yup::Decibels::decibelsToGain (gainSmoother.skip (numThisTime)));
 
             numSamplesDone += numThisTime;
             numSamplesLeft -= blockSize;
@@ -225,12 +225,12 @@ void ImpulseResponsePlugin::applyToBuffer (const PluginRenderContext& fc)
     {
         // Update params
         const auto qFactor = qSmoother.getCurrentValue();
-        *hpf = juce::dsp::IIR::ArrayCoefficients<float>::makeHighPass (sampleRate, highFreqSmoother.getCurrentValue(), qFactor);
-        *lpf = juce::dsp::IIR::ArrayCoefficients<float>::makeLowPass (sampleRate, lowFreqSmoother.getCurrentValue(), qFactor);
-        gain.setGainLinear (juce::Decibels::decibelsToGain (gainSmoother.getCurrentValue()));
+        *hpf = yup::dsp::IIR::ArrayCoefficients<float>::makeHighPass (sampleRate, highFreqSmoother.getCurrentValue(), qFactor);
+        *lpf = yup::dsp::IIR::ArrayCoefficients<float>::makeLowPass (sampleRate, lowFreqSmoother.getCurrentValue(), qFactor);
+        gain.setGainLinear (yup::Decibels::decibelsToGain (gainSmoother.getCurrentValue()));
 
-        juce::dsp::AudioBlock<float> inOutBlock (*fc.destBuffer);
-        juce::dsp::ProcessContextReplacing <float> context (inOutBlock);
+        yup::dsp::AudioBlock<float> inOutBlock (*fc.destBuffer);
+        yup::dsp::ProcessContextReplacing <float> context (inOutBlock);
         processorChain.process (context);
     }
 
@@ -249,14 +249,14 @@ void ImpulseResponsePlugin::applyToBuffer (const PluginRenderContext& fc)
     }
 }
 
-void ImpulseResponsePlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void ImpulseResponsePlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, gainValue, highPassCutoffValue, lowPassCutoffValue, mixValue, qValue);
 
     state.setProperty (IDs::name, v[IDs::name], getUndoManager());
 
     if (auto irFileData = v.getProperty (IDs::irFileData).getBinaryData())
-        state.setProperty (IDs::irFileData, juce::var (juce::MemoryBlock (*irFileData)), getUndoManager());
+        state.setProperty (IDs::irFileData, yup::var (yup::MemoryBlock (*irFileData)), getUndoManager());
 
     for (auto p : getAutomatableParameters())
         p->updateFromAttachedValue();
@@ -267,28 +267,28 @@ void ImpulseResponsePlugin::loadImpulseResponseFromState()
 {
     if (auto irFileData = state.getProperty (IDs::irFileData).getBinaryData())
     {
-        auto is = std::make_unique<juce::MemoryInputStream> (*irFileData, false);
+        auto is = std::make_unique<yup::MemoryInputStream> (*irFileData, false);
 
-        if (auto reader = std::unique_ptr<juce::AudioFormatReader> (juce::FlacAudioFormat()
+        if (auto reader = std::unique_ptr<yup::AudioFormatReader> (yup::FlacAudioFormat()
                                                                         .createReaderFor (is.release(), true)))
         {
-            juce::AudioBuffer<float> loadIRBuffer ((int) reader->numChannels, (int) reader->lengthInSamples);
+            yup::AudioBuffer<float> loadIRBuffer ((int) reader->numChannels, (int) reader->lengthInSamples);
             reader->read (&loadIRBuffer, 0, (int) reader->lengthInSamples, 0, true, true);
 
             jassert (reader->numChannels > 0);
             processorChain.get<convolutionIndex>().loadImpulseResponse (std::move (loadIRBuffer),
                                                                         reader->sampleRate,
-                                                                        reader->numChannels > 1 ? juce::dsp::Convolution::Stereo::yes
-                                                                                                : juce::dsp::Convolution::Stereo::no,
-                                                                        trimSilence.get() ? juce::dsp::Convolution::Trim::yes
-                                                                                          : juce::dsp::Convolution::Trim::no,
-                                                                        normalise.get() ? juce::dsp::Convolution::Normalise::yes
-                                                                                        : juce::dsp::Convolution::Normalise::no);
+                                                                        reader->numChannels > 1 ? yup::dsp::Convolution::Stereo::yes
+                                                                                                : yup::dsp::Convolution::Stereo::no,
+                                                                        trimSilence.get() ? yup::dsp::Convolution::Trim::yes
+                                                                                          : yup::dsp::Convolution::Trim::no,
+                                                                        normalise.get() ? yup::dsp::Convolution::Normalise::yes
+                                                                                        : yup::dsp::Convolution::Normalise::no);
         }
     }
 }
 
-void ImpulseResponsePlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id)
+void ImpulseResponsePlugin::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id)
 {
     if (v == state)
     {

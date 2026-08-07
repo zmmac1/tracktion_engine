@@ -16,7 +16,7 @@ namespace tracktion::inline engine {
     A Node that calls the listeners of an AudioTrack with any incoming MIDI.
 */
 class LiveMidiOutputNode final : public tracktion::graph::Node,
-                                 private juce::AsyncUpdater
+                                 private yup::AsyncUpdater
 {
 public:
     LiveMidiOutputNode (AudioTrack&, std::unique_ptr<tracktion::graph::Node>);

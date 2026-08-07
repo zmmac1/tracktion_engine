@@ -12,11 +12,11 @@ namespace tracktion::inline engine {
 
 //==============================================================================
 //==============================================================================
-class BufferedAudioReader : public juce::AudioFormatReader,
-                            public juce::TimeSliceClient
+class BufferedAudioReader : public yup::AudioFormatReader,
+                            public yup::TimeSliceClient
 {
 public:
-    BufferedAudioReader (std::unique_ptr<juce::AudioFormatReader>, juce::TimeSliceThread&);
+    BufferedAudioReader (std::unique_ptr<yup::AudioFormatReader>, yup::TimeSliceThread&);
 
     /** Destructor */
     ~BufferedAudioReader() override;
@@ -26,14 +26,14 @@ public:
 
     /** @internal */
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override;
+                      yup::int64 startSampleInFile, int numSamples) override;
 
     /** @internal */
     int useTimeSlice() override;
 
 private:
-    std::unique_ptr<juce::AudioFormatReader> source;
-    juce::TimeSliceThread& thread;
+    std::unique_ptr<yup::AudioFormatReader> source;
+    yup::TimeSliceThread& thread;
 
     choc::buffer::ChannelArrayBuffer<float> data;
     std::atomic<choc::buffer::FrameCount> validEnd { 0 };
@@ -67,7 +67,7 @@ public:
 
     /** @internal */
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override
+                      yup::int64 startSampleInFile, int numSamples) override
     {
         return source->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer,
                                     startSampleInFile, numSamples);
@@ -84,16 +84,16 @@ class BufferedAudioFileManager
 public:
     BufferedAudioFileManager (Engine&);
 
-    std::shared_ptr<BufferedAudioReader> get (juce::File);
+    std::shared_ptr<BufferedAudioReader> get (yup::File);
 
 private:
     Engine& engine;
-    juce::TimeSliceThread readThread { "Audio file decompressing" };
-    std::map<juce::File, std::shared_ptr<BufferedAudioReader>> cache;
+    yup::TimeSliceThread readThread { "Audio file decompressing" };
+    std::map<yup::File, std::shared_ptr<BufferedAudioReader>> cache;
     LambdaTimer timer { [this] { cleanUp(); } };
 
     void cleanUp();
-    std::unique_ptr<juce::AudioFormatReader> createReader (juce::File);
+    std::unique_ptr<yup::AudioFormatReader> createReader (yup::File);
 };
 
 } // namespace tracktion::inline engine

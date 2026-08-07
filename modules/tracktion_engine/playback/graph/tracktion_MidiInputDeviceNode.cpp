@@ -50,7 +50,7 @@ void MidiInputDeviceNode::prepareToPlay (const tracktion::graph::PlaybackInitial
         auto programToUse = midiInputDevice.getProgramToUse();
 
         if (channelToUse.isValid() && programToUse > 0)
-            handleIncomingMidiMessage (juce::MidiMessage::programChange (channelToUse.getChannelNumber(), programToUse - 1), {});
+            handleIncomingMidiMessage (yup::MidiMessage::programChange (channelToUse.getChannelNumber(), programToUse - 1), {});
     }
 
     {
@@ -78,7 +78,7 @@ void MidiInputDeviceNode::process (ProcessContext& pc)
     processSection (pc, splitTimelineRange.timelineRange1);
 }
 
-void MidiInputDeviceNode::handleIncomingMidiMessage (const juce::MidiMessage& message, MPESourceID sourceID)
+void MidiInputDeviceNode::handleIncomingMidiMessage (const yup::MidiMessage& message, MPESourceID sourceID)
 {
     if (state->activeNode.load (std::memory_order_acquire) != this)
         return;
@@ -119,7 +119,7 @@ void MidiInputDeviceNode::handleIncomingMidiMessage (const juce::MidiMessage& me
             if (sourceTime >= loopTimes.getEnd())
                 sourceTime = loopTimes.getStart();
 
-        juce::MidiMessage newMess (message, sourceTime.inSeconds());
+        yup::MidiMessage newMess (message, sourceTime.inSeconds());
 
         if (channelToUse > 0)
             newMess.setChannel (channelToUse);
@@ -129,12 +129,12 @@ void MidiInputDeviceNode::handleIncomingMidiMessage (const juce::MidiMessage& me
     }
 }
 
-void MidiInputDeviceNode::processSection (ProcessContext& pc, juce::Range<int64_t> timelineRange)
+void MidiInputDeviceNode::processSection (ProcessContext& pc, yup::Range<int64_t> timelineRange)
 {
     state->activeNode.store (this, std::memory_order_release);
 
     const auto editTime = tracktion::graph::sampleToTime (timelineRange, sampleRate);
-    const auto timeNow = juce::Time::getApproximateMillisecondCounter();
+    const auto timeNow = yup::Time::getApproximateMillisecondCounter();
     auto& destMidi = pc.buffers.midi;
 
     if (! playHeadState.isContiguousWithPreviousBlock())
@@ -155,7 +155,7 @@ void MidiInputDeviceNode::processSection (ProcessContext& pc, juce::Range<int64_
 
         jassert (state->numIncomingMessages <= state->incomingMessages.size());
 
-        if (auto num = juce::jmin ((size_t) state->numIncomingMessages, state->incomingMessages.size()))
+        if (auto num = yup::jmin ((size_t) state->numIncomingMessages, state->incomingMessages.size()))
         {
             // not quite right as the first event won't be at the start of the buffer, but near enough for live stuff
             const auto timeAdjust = state->incomingMessages.front()->getTimeStamp();
@@ -165,7 +165,7 @@ void MidiInputDeviceNode::processSection (ProcessContext& pc, juce::Range<int64_
                 auto& m = *state->incomingMessages[i];
 
                 destMidi.addMidiMessage (m,
-                                         juce::jlimit (0.0, juce::jmax (0.0, editTime.getLength()), m.getTimeStamp() - timeAdjust),
+                                         yup::jlimit (0.0, yup::jmax (0.0, editTime.getLength()), m.getTimeStamp() - timeAdjust),
                                          m.mpeSourceID);
             }
         }
@@ -205,7 +205,7 @@ void MidiInputDeviceNode::createProgramChanges (MidiMessageArray& bufferForMidiM
     auto programToUse = midiInputDevice.getProgramToUse();
 
     if (programToUse > 0 && channelToUse.isValid())
-        bufferForMidiMessages.addMidiMessage (juce::MidiMessage::programChange (channelToUse.getChannelNumber(), programToUse - 1),
+        bufferForMidiMessages.addMidiMessage (yup::MidiMessage::programChange (channelToUse.getChannelNumber(), programToUse - 1),
                                               0, midiSourceID);
 }
 

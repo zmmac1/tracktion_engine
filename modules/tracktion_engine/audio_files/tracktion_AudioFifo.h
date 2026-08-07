@@ -16,7 +16,7 @@ namespace tracktion::inline engine
     A single-producer, single-consumer fifo of audio samples.
 
     The reader and writer may be on different threads. The storage is a
-    choc::buffer::ChannelArrayBuffer rather than a juce::AudioBuffer because the
+    choc::buffer::ChannelArrayBuffer rather than a yup::AudioBuffer because the
     latter keeps a shared "hasBeenCleared" flag which both sides would touch on
     every call, giving a data race outside of the sample regions that the
     AbstractFifo keeps disjoint.
@@ -59,12 +59,12 @@ public:
         }
     }
 
-    bool write (const juce::AudioBuffer<float>& src)
+    bool write (const yup::AudioBuffer<float>& src)
     {
         return write (src.getArrayOfReadPointers(), src.getNumSamples());
     }
 
-    bool write (const juce::AudioBuffer<float>& src, int startSample, int numSamples)
+    bool write (const yup::AudioBuffer<float>& src, int startSample, int numSamples)
     {
         if (numSamples <= 0)
             return true;
@@ -136,12 +136,12 @@ public:
         return true;
     }
 
-    bool read (juce::AudioBuffer<float>& dest, int startSampleInDestBuffer)
+    bool read (yup::AudioBuffer<float>& dest, int startSampleInDestBuffer)
     {
         return read (dest, startSampleInDestBuffer, dest.getNumSamples());
     }
 
-    bool read (juce::AudioBuffer<float>& dest, int startSampleInDestBuffer, int numSamples)
+    bool read (yup::AudioBuffer<float>& dest, int startSampleInDestBuffer, int numSamples)
     {
         int start1, size1, start2, size2;
         fifo.prepareToRead (numSamples, start1, size1, start2, size2);
@@ -160,12 +160,12 @@ public:
         return true;
     }
 
-    bool readAdding (juce::AudioBuffer<float>& dest, int startSampleInDestBuffer)
+    bool readAdding (yup::AudioBuffer<float>& dest, int startSampleInDestBuffer)
     {
         return readAdding (dest, startSampleInDestBuffer, dest.getNumSamples());
     }
 
-    bool readAdding (juce::AudioBuffer<float>& dest, int startSampleInDestBuffer, int numSamples)
+    bool readAdding (yup::AudioBuffer<float>& dest, int startSampleInDestBuffer, int numSamples)
     {
         int start1, size1, start2, size2;
         fifo.prepareToRead (numSamples, start1, size1, start2, size2);
@@ -185,7 +185,7 @@ public:
     }
 
 private:
-    juce::AbstractFifo fifo;
+    yup::AbstractFifo fifo;
     choc::buffer::ChannelArrayBuffer<float> buffer;
 
     static choc::buffer::FrameRange frameRange (int start, int length)
@@ -194,14 +194,14 @@ private:
                  (choc::buffer::FrameCount) (start + length) };
     }
 
-    static choc::buffer::ChannelArrayView<const float> toSourceView (const juce::AudioBuffer<float>& b)
+    static choc::buffer::ChannelArrayView<const float> toSourceView (const yup::AudioBuffer<float>& b)
     {
         return choc::buffer::createChannelArrayView (b.getArrayOfReadPointers(),
                                                      (choc::buffer::ChannelCount) b.getNumChannels(),
                                                      (choc::buffer::FrameCount) b.getNumSamples());
     }
 
-    static choc::buffer::ChannelArrayView<float> toDestView (juce::AudioBuffer<float>& b)
+    static choc::buffer::ChannelArrayView<float> toDestView (yup::AudioBuffer<float>& b)
     {
         return choc::buffer::createChannelArrayView (b.getArrayOfWritePointers(),
                                                      (choc::buffer::ChannelCount) b.getNumChannels(),
@@ -232,7 +232,7 @@ private:
             choc::buffer::add (dest.getChannel (channel), getSourceChannel (channel, start, numSamples));
     }
 
-    JUCE_DECLARE_NON_COPYABLE (AudioFifo)
+    YUP_DECLARE_NON_COPYABLE (AudioFifo)
 };
 
 } // namespace tracktion::inline engine

@@ -18,11 +18,11 @@
 namespace {
 
 #if TIMESTRETCHER_WRITE_WRITE_TEST_FILES
-inline void writeToFile (juce::File file, const juce::AudioBuffer<float>& buffer, double sampleRate)
+inline void writeToFile (yup::File file, const yup::AudioBuffer<float>& buffer, double sampleRate)
 {
     file.deleteFile();
 
-    if (auto writer = std::unique_ptr<juce::AudioFormatWriter> (juce::WavAudioFormat().createWriterFor (file.createOutputStream().release(),
+    if (auto writer = std::unique_ptr<yup::AudioFormatWriter> (yup::WavAudioFormat().createWriterFor (file.createOutputStream().release(),
                                                                                                         sampleRate,
                                                                                                         (uint32_t) buffer.getNumChannels(),
                                                                                                         16, {}, 0)))
@@ -33,14 +33,14 @@ inline void writeToFile (juce::File file, const juce::AudioBuffer<float>& buffer
 #endif
 
 //==============================================================================
-juce::AudioBuffer<float> createSinBuffer (double sampleRate, int numChannels, float pitch)
+yup::AudioBuffer<float> createSinBuffer (double sampleRate, int numChannels, float pitch)
 {
-    juce::AudioBuffer<float> sinBuffer (numChannels, (int) sampleRate);
+    yup::AudioBuffer<float> sinBuffer (numChannels, (int) sampleRate);
 
     double currentAngle = 0.0, angleDelta = 0.0;
     float originalPitch = pitch; //A4
     auto cyclesPerSample = originalPitch / float (sampleRate);
-    angleDelta = cyclesPerSample * 2.0 * juce::MathConstants<double>::pi;
+    angleDelta = cyclesPerSample * 2.0 * yup::MathConstants<double>::pi;
 
     // Generate sin wave and store in buffer channel 0
     {
@@ -61,8 +61,8 @@ juce::AudioBuffer<float> createSinBuffer (double sampleRate, int numChannels, fl
     return sinBuffer;
 }
 
-juce::AudioBuffer<float> processStretcherBuffer (tracktion::engine::TimeStretcher& stretcher,
-                                                  const juce::AudioBuffer<float>& sourceBuffer,
+yup::AudioBuffer<float> processStretcherBuffer (tracktion::engine::TimeStretcher& stretcher,
+                                                  const yup::AudioBuffer<float>& sourceBuffer,
                                                   const int blockSize, float stretchRatio,
                                                   bool stretcherRequiresFramesNeeded)
 {
@@ -70,7 +70,7 @@ juce::AudioBuffer<float> processStretcherBuffer (tracktion::engine::TimeStretche
     jassert (numChannels == 2); // Expected stereo for now
 
     const int destSize = (int) std::ceil (sourceBuffer.getNumSamples() * stretchRatio);
-    juce::AudioBuffer<float> resultBuffer (sourceBuffer.getNumChannels(), destSize + 8192);
+    yup::AudioBuffer<float> resultBuffer (sourceBuffer.getNumChannels(), destSize + 8192);
     int numInputsDone = 0, numOutputsDone = 0;
 
     for (;;)
@@ -135,7 +135,7 @@ float getPitchFromNumZeroCrossings (const int numZeroCrossings, const int numSam
     return pitchInHertz;
 }
 
-int getNumZeroCrossings (const juce::AudioBuffer<float>& buffer)
+int getNumZeroCrossings (const yup::AudioBuffer<float>& buffer)
 {
     int numSamplesToUse = buffer.getNumSamples();
     auto dest = buffer.getReadPointer (0);
@@ -173,8 +173,8 @@ void testStretcher (tracktion::engine::TimeStretcher::Mode mode, float stretchRa
                                              || mode == tracktion::engine::TimeStretcher::rubberbandPercussive);
 
    #if TIMESTRETCHER_WRITE_WRITE_TEST_FILES
-    writeToFile (juce::File::getSpecialLocation (juce::File::userDesktopDirectory).getChildFile ("original.wav"), sourceBuffer, sampleRate);
-    writeToFile (juce::File::getSpecialLocation (juce::File::userDesktopDirectory).getChildFile ("pitched.wav"), resultBuffer, sampleRate);
+    writeToFile (yup::File::getSpecialLocation (yup::File::userDesktopDirectory).getChildFile ("original.wav"), sourceBuffer, sampleRate);
+    writeToFile (yup::File::getSpecialLocation (yup::File::userDesktopDirectory).getChildFile ("pitched.wav"), resultBuffer, sampleRate);
    #endif
 
     const float expectedPitchValue = sourcePitch * tracktion::engine::Pitch::semitonesToRatio (semitonesUp);
@@ -188,7 +188,7 @@ void testStretcher (tracktion::engine::TimeStretcher::Mode mode, float stretchRa
     if (trimLength <= 0)
         return;
 
-    juce::AudioBuffer<float> trimmedResult (const_cast<float* const*> (resultBuffer.getArrayOfReadPointers()),
+    yup::AudioBuffer<float> trimmedResult (const_cast<float* const*> (resultBuffer.getArrayOfReadPointers()),
                                              resultBuffer.getNumChannels(),
                                              trimStart, trimLength);
 
@@ -200,7 +200,7 @@ void testStretcher (tracktion::engine::TimeStretcher::Mode mode, float stretchRa
     CHECK (std::abs (shiftedPitch - expectedPitchValue) <= expectedPitchValue * 0.06f);
 
     // Compare expectedSize with the actual size of the results 5% tolerance
-    CHECK (std::abs (resultBuffer.getNumSamples() - expectedSize) <= juce::roundToInt (expectedSize * 0.05f));
+    CHECK (std::abs (resultBuffer.getNumSamples() - expectedSize) <= yup::roundToInt (expectedSize * 0.05f));
 }
 
 void runPitchShiftTest (tracktion::engine::TimeStretcher::Mode mode)
@@ -235,7 +235,7 @@ void runLatencyTest (tracktion::engine::TimeStretcher::Mode mode)
     const int reportedLatency = stretcher.getLatencySamples();
 
     const int totalSamples = (int) sampleRate; // 1 second
-    juce::AudioBuffer<float> sourceBuffer (numChannels, totalSamples);
+    yup::AudioBuffer<float> sourceBuffer (numChannels, totalSamples);
     const int changePoint = totalSamples / 2;
 
     {
@@ -246,7 +246,7 @@ void runLatencyTest (tracktion::engine::TimeStretcher::Mode mode)
         {
             float freq = (s < changePoint) ? freq1 : freq2;
             chan[s] = (float) std::sin (angle);
-            angle += (freq / sampleRate) * 2.0 * juce::MathConstants<double>::pi;
+            angle += (freq / sampleRate) * 2.0 * yup::MathConstants<double>::pi;
         }
 
         for (int c = 1; c < numChannels; ++c)
@@ -267,7 +267,7 @@ void runLatencyTest (tracktion::engine::TimeStretcher::Mode mode)
     if (trimLength <= 0)
         return;
 
-    juce::AudioBuffer<float> trimmedResult (const_cast<float* const*> (resultBuffer.getArrayOfReadPointers()),
+    yup::AudioBuffer<float> trimmedResult (const_cast<float* const*> (resultBuffer.getArrayOfReadPointers()),
                                              resultBuffer.getNumChannels(),
                                              trimStart, trimLength);
 

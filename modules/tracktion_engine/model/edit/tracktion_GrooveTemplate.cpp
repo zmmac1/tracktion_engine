@@ -20,7 +20,7 @@ GrooveTemplate::GrooveTemplate()
 {
 }
 
-GrooveTemplate::GrooveTemplate (const juce::XmlElement* node)
+GrooveTemplate::GrooveTemplate (const yup::XmlElement* node)
     : GrooveTemplate()
 {
     if (node != nullptr && node->hasTagName (grooveXmlTag))
@@ -72,14 +72,14 @@ const GrooveTemplate& GrooveTemplate::operator= (const GrooveTemplate& other)
     return *this;
 }
 
-void GrooveTemplate::setName (const juce::String& n)
+void GrooveTemplate::setName (const yup::String& n)
 {
     name = n;
 }
 
-juce::XmlElement* GrooveTemplate::createXml() const
+yup::XmlElement* GrooveTemplate::createXml() const
 {
-    auto node = new juce::XmlElement (grooveXmlTag);
+    auto node = new yup::XmlElement (grooveXmlTag);
     node->setAttribute ("name", name);
     node->setAttribute ("numberOfNotes", numNotes);
     node->setAttribute ("notesPerBeat", notesPerBeat);
@@ -92,8 +92,8 @@ juce::XmlElement* GrooveTemplate::createXml() const
 
     for (int i = 0; i <= lastNonZeroNote; ++i)
     {
-        auto n = new juce::XmlElement ("SHIFT");
-        n->setAttribute ("delta", 0.001 * juce::roundToInt (1000.0 * latenesses[i]));
+        auto n = new yup::XmlElement ("SHIFT");
+        n->setAttribute ("delta", 0.001 * yup::roundToInt (1000.0 * latenesses[i]));
         node->addChildElement (n);
     }
 
@@ -102,12 +102,12 @@ juce::XmlElement* GrooveTemplate::createXml() const
 
 void GrooveTemplate::setNumberOfNotes (int notes)
 {
-    numNotes = juce::jlimit (2, 1024, notes);
+    numNotes = yup::jlimit (2, 1024, notes);
 }
 
 void GrooveTemplate::setNotesPerBeat (int notes)
 {
-    notesPerBeat = juce::jlimit (1, 8, notes);
+    notesPerBeat = yup::jlimit (1, 8, notes);
 }
 
 float GrooveTemplate::getLatenessProportion (int noteNumber, float strength) const
@@ -124,9 +124,9 @@ void GrooveTemplate::setLatenessProportion (int noteNumber, float p, float stren
         latenesses.add (0.0f);
 
     if (parameterized)
-        latenesses.set (noteNumber, juce::jlimit (-1.0f, 1.0f, p / strength));
+        latenesses.set (noteNumber, yup::jlimit (-1.0f, 1.0f, p / strength));
     else
-        latenesses.set (noteNumber, juce::jlimit (-1.0f, 1.0f, p));
+        latenesses.set (noteNumber, yup::jlimit (-1.0f, 1.0f, p));
 }
 
 void GrooveTemplate::clearLatenesses()
@@ -140,7 +140,7 @@ BeatPosition GrooveTemplate::beatsTimeToGroovyTime (BeatPosition beatsTime, floa
 
     const double beatNum    = std::floor (beatsTime.inBeats() * notesPerBeat);
     const double offset     = notesPerBeat * (beatsTime.inBeats() - (beatNum / notesPerBeat));
-    const int latenessIndex = juce::roundToInt (beatNum) % numNotes;
+    const int latenessIndex = yup::roundToInt (beatNum) % numNotes;
 
     const double lateness   = latenesses[latenessIndex] * activeStrength;
     const double t1         = (beatNum + 0.5f * lateness);
@@ -178,7 +178,7 @@ GrooveTemplateManager::GrooveTemplateManager (Engine& e)
     if (knownGrooves.isEmpty())
     {
         // load the defaults..
-        if (auto defSettings = juce::parseXML (TracktionBinaryData::groove_templates_xml))
+        if (auto defSettings = yup::parseXML (TracktionBinaryData::groove_templates_xml))
             if (defSettings->getTagName() == "GROOVETEMPLATES")
                 reload (defSettings.get());
     }
@@ -191,7 +191,7 @@ GrooveTemplateManager::GrooveTemplateManager (Engine& e)
     // load the new defaults..
     if (! anyParameterized)
     {
-        if (auto defSettings = juce::parseXML (TracktionBinaryData::groove_templates_2_xml))
+        if (auto defSettings = yup::parseXML (TracktionBinaryData::groove_templates_2_xml))
             if (defSettings->hasTagName ("GROOVETEMPLATES"))
                 for (auto n : defSettings->getChildWithTagNameIterator (GrooveTemplate::grooveXmlTag))
                     knownGrooves.add (new GrooveTemplate (n));
@@ -207,9 +207,9 @@ GrooveTemplateManager::GrooveTemplateManager (Engine& e)
         return false;
     };
 
-    auto addGrooveIfNotExists = [this, &hasGroove] (juce::String xmlString)
+    auto addGrooveIfNotExists = [this, &hasGroove] (yup::String xmlString)
     {
-        auto xml = juce::parseXML (xmlString);
+        auto xml = yup::parseXML (xmlString);
         auto gt = std::make_unique<GrooveTemplate> (xml.get());
 
         if (! hasGroove (*gt))
@@ -245,7 +245,7 @@ void GrooveTemplateManager::reload()
         reload (xml.get());
 }
 
-void GrooveTemplateManager::reload (const juce::XmlElement* grooves)
+void GrooveTemplateManager::reload (const yup::XmlElement* grooves)
 {
     knownGrooves.clearQuick (true);
 
@@ -258,7 +258,7 @@ void GrooveTemplateManager::reload (const juce::XmlElement* grooves)
 
 void GrooveTemplateManager::save()
 {
-    juce::XmlElement n ("GROOVETEMPLATES");
+    yup::XmlElement n ("GROOVETEMPLATES");
 
     for (auto gt : knownGrooves)
         if (gt != nullptr)
@@ -273,7 +273,7 @@ int GrooveTemplateManager::getNumTemplates() const
     return activeGrooves.size();
 }
 
-juce::String GrooveTemplateManager::getTemplateName (int index) const
+yup::String GrooveTemplateManager::getTemplateName (int index) const
 {
     if (auto gt = activeGrooves[index])
         return gt->getName();
@@ -286,7 +286,7 @@ const GrooveTemplate* GrooveTemplateManager::getTemplate (int index)
     return activeGrooves[index];
 }
 
-const GrooveTemplate* GrooveTemplateManager::getTemplateByName (const juce::String& name)
+const GrooveTemplate* GrooveTemplateManager::getTemplateByName (const yup::String& name)
 {
     for (auto gt : activeGrooves)
         if (gt->getName() == name)
@@ -295,9 +295,9 @@ const GrooveTemplate* GrooveTemplateManager::getTemplateByName (const juce::Stri
     return {};
 }
 
-juce::StringArray GrooveTemplateManager::getTemplateNames() const
+yup::StringArray GrooveTemplateManager::getTemplateNames() const
 {
-    juce::StringArray names;
+    yup::StringArray names;
 
     for (auto gt : activeGrooves)
         names.add (gt->getName());
@@ -338,7 +338,7 @@ void GrooveTemplateManager::updateTemplate (int index, const GrooveTemplate& gt)
 
     int suff = 2;
     while (getTemplateByName (n) != nullptr)
-        n = originalName + " (" + juce::String (suff++) + ")";
+        n = originalName + " (" + yup::String (suff++) + ")";
 
     auto newGroove = knownGrooves.insert (index, new GrooveTemplate (gt));
     newGroove->setName (n);

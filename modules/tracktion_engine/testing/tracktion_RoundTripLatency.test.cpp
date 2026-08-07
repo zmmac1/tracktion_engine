@@ -24,10 +24,10 @@ TEST_SUITE ("tracktion_engine")
     TEST_CASE ("Latency offset detection")
     {
         using namespace choc::buffer;
-        juce::AudioBuffer<float> testSound = test_utilities::createSyncTestSound();
+        yup::AudioBuffer<float> testSound = test_utilities::createSyncTestSound();
 
         constexpr int diffNumSamples = 1234;
-        juce::AudioBuffer<float> recorded (testSound.getNumChannels(), testSound.getNumSamples() + diffNumSamples);
+        yup::AudioBuffer<float> recorded (testSound.getNumChannels(), testSound.getNumSamples() + diffNumSamples);
         recorded.clear();
         choc::buffer::copy (toBufferView (recorded).fromFrame (static_cast<FrameCount> (diffNumSamples)),
                             toBufferView (testSound));

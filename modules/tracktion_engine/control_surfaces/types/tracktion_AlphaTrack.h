@@ -11,8 +11,8 @@
 namespace tracktion::inline engine {
 
 class AlphaTrackControlSurface : public ControlSurface,
-                                 private juce::MultiTimer,
-                                 private juce::AsyncUpdater
+                                 private yup::MultiTimer,
+                                 private yup::AsyncUpdater
 {
 public:
     AlphaTrackControlSurface (ExternalControllerManager&);
@@ -34,7 +34,7 @@ public:
     void initialiseDevice (bool connect) override;
     void shutDownDevice() override;
     void updateMiscFeatures() override;
-    void acceptMidiMessage (int, const juce::MidiMessage&) override;
+    void acceptMidiMessage (int, const yup::MidiMessage&) override;
     void moveFader (int channelNum, float newSliderPos) override;
     void movePanPot (int channelNum, float newPan) override;
     void soloCountChanged (bool) override;
@@ -42,7 +42,7 @@ public:
     void recordStateChanged (bool isRecording) override;
     void automationReadModeChanged (bool isReading) override;
     void automationWriteModeChanged (bool isWriting) override;
-    void faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames) override;
+    void faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames) override;
     void trackRecordEnabled (int channel, bool isEnabled) override;
     void loopOnOffChanged (bool isLoopOn) override;
     void punchOnOffChanged (bool isPunching) override;
@@ -56,7 +56,7 @@ private:
     Mode mode;
     bool init, shift;
     int currentTrack;
-    juce::String trackName;
+    yup::String trackName;
     int fingers, stripPos;
     bool jogged;
     float faderPos, pan;
@@ -89,7 +89,7 @@ private:
     void moveFaderInt (float newSliderPos);
     bool isOnEditScreen() const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlphaTrackControlSurface)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AlphaTrackControlSurface)
 };
 
 } // namespace tracktion::inline engine

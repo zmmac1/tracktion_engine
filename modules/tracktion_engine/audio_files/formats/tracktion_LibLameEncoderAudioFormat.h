@@ -19,10 +19,10 @@ namespace tracktion::inline engine {
     LAMEEncoderAudioFormat and FFmpegEncoderAudioFormat both write a temporary
     wave file, run a command line tool over it, and then copy the result into the
     destination. This class instead loads libmp3lame at runtime and encodes
-    incrementally, writing MP3 data straight to the juce::OutputStream as it is
+    incrementally, writing MP3 data straight to the yup::OutputStream as it is
     produced, so it can just as easily fill a block of memory as a file.
 
-    The library is opened with juce::DynamicLibrary and every symbol is resolved
+    The library is opened with yup::DynamicLibrary and every symbol is resolved
     by name, so no LAME headers are needed to build this and nothing is linked at
     build time. Check isLibraryLoaded() before use - if it returns false then
     createWriterFor() will always return nullptr.
@@ -34,7 +34,7 @@ namespace tracktion::inline engine {
 
     @see LAMEManager, FFmpegEncoderAudioFormat
 */
-class LibLameEncoderAudioFormat  : public juce::AudioFormat
+class LibLameEncoderAudioFormat  : public yup::AudioFormat
 {
 public:
     /** Creates a LibLameEncoderAudioFormat, loading the LAME shared library from
@@ -45,13 +45,13 @@ public:
 
         @see getDefaultLibraryName, isLibraryLoaded
     */
-    explicit LibLameEncoderAudioFormat (const juce::String& lameSharedLibraryToUse);
+    explicit LibLameEncoderAudioFormat (const yup::String& lameSharedLibraryToUse);
 
     ~LibLameEncoderAudioFormat() override;
 
     //==============================================================================
     /** Returns the usual name of the LAME shared library on the current platform. */
-    static juce::String getDefaultLibraryName();
+    static yup::String getDefaultLibraryName();
 
     /** Returns true if the library was opened and every symbol needed for encoding
         was found in it.
@@ -61,21 +61,21 @@ public:
     /** Returns the version string reported by the library, or an empty string if it
         isn't loaded.
     */
-    juce::String getLibraryVersion() const;
+    yup::String getLibraryVersion() const;
 
     //==============================================================================
-    bool canHandleFile (const juce::File&) override;
-    juce::Array<int> getPossibleSampleRates() override;
-    juce::Array<int> getPossibleBitDepths() override;
+    bool canHandleFile (const yup::File&) override;
+    yup::Array<int> getPossibleSampleRates() override;
+    yup::Array<int> getPossibleBitDepths() override;
     bool canDoStereo() override;
     bool canDoMono() override;
     bool isCompressed() override;
-    juce::StringArray getQualityOptions() override;
+    yup::StringArray getQualityOptions() override;
 
-    juce::AudioFormatReader* createReaderFor (juce::InputStream*, bool deleteStreamIfOpeningFails) override;
+    yup::AudioFormatReader* createReaderFor (yup::InputStream*, bool deleteStreamIfOpeningFails) override;
 
-    std::unique_ptr<juce::AudioFormatWriter> createWriterFor (std::unique_ptr<juce::OutputStream>&,
-                                                              const juce::AudioFormatWriterOptions&) override;
+    std::unique_ptr<yup::AudioFormatWriter> createWriterFor (std::unique_ptr<yup::OutputStream>&,
+                                                              const yup::WriteOptions&) override;
 
 private:
     struct LameLibrary;
@@ -84,7 +84,7 @@ private:
     // Shared with the writers, so the library can't be unloaded while one is still encoding
     std::shared_ptr<LameLibrary> lame;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibLameEncoderAudioFormat)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LibLameEncoderAudioFormat)
 };
 
 #endif

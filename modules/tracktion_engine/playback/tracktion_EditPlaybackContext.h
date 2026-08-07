@@ -51,11 +51,11 @@ public:
     // Plays this context in sync with another context
     void syncToContext (EditPlaybackContext* contextToSyncTo, TimePosition previousBarTime, TimeDuration syncInterval);
 
-    tl::expected<Clip::Array, juce::String> stopRecording (InputDeviceInstance&, bool discardRecordings);
-    tl::expected<Clip::Array, juce::String> stopRecording (TimePosition unloopedEnd, bool discardRecordings);
-    juce::Result applyRetrospectiveRecord (juce::Array<Clip*>* clipsCreated = nullptr, bool armedOnly = false);
+    tl::expected<Clip::Array, yup::String> stopRecording (InputDeviceInstance&, bool discardRecordings);
+    tl::expected<Clip::Array, yup::String> stopRecording (TimePosition unloopedEnd, bool discardRecordings);
+    yup::Result applyRetrospectiveRecord (yup::Array<Clip*>* clipsCreated = nullptr, bool armedOnly = false);
 
-    juce::Array<InputDeviceInstance*> getAllInputs();
+    yup::Array<InputDeviceInstance*> getAllInputs();
     InputDeviceInstance* getInputFor (InputDevice*) const;
     OutputDeviceInstance* getOutputFor (OutputDevice*) const;
 
@@ -73,7 +73,7 @@ public:
         EditPlaybackContext& owner;
         const bool shouldReallocate;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedDeviceListReleaser)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedDeviceListReleaser)
     };
 
     //==============================================================================
@@ -139,7 +139,7 @@ public:
 
     TimePosition globalStreamTimeToEditTime (double) const;
     TimePosition globalStreamTimeToEditTimeUnlooped (double) const;
-    void resyncToGlobalStreamTime (juce::Range<double>, double sampleRate);
+    void resyncToGlobalStreamTime (yup::Range<double>, double sampleRate);
 
     /** @internal. Will be removed in a future release. */
     tracktion::graph::PlayHead* getNodePlayHead() const;
@@ -192,20 +192,20 @@ private:
 
     std::unique_ptr<ProcessPriorityBooster> priorityBooster;
 
-    juce::OwnedArray<InputDeviceInstance> waveInputs, midiInputs;
-    juce::OwnedArray<WaveOutputDeviceInstance> waveOutputs;
-    juce::OwnedArray<MidiOutputDeviceInstance> midiOutputs;
+    yup::OwnedArray<InputDeviceInstance> waveInputs, midiInputs;
+    yup::OwnedArray<WaveOutputDeviceInstance> waveOutputs;
+    yup::OwnedArray<MidiOutputDeviceInstance> midiOutputs;
 
     void releaseDeviceList();
     void rebuildDeviceList();
 
     void prepareOutputDevices (TimePosition start);
-    juce::Result startRecording (TimePosition start, TimePosition punchIn);
+    yup::Result startRecording (TimePosition start, TimePosition punchIn);
     void startPlaying (TimePosition start);
 
     friend class DeviceManager;
 
-    juce::WeakReference<EditPlaybackContext> contextToSyncTo;
+    yup::WeakReference<EditPlaybackContext> contextToSyncTo;
     TimePosition previousBarTime;
     TimeDuration syncInterval;
     bool hasSynced = false;
@@ -217,7 +217,7 @@ private:
     struct NodePlaybackContext;
     std::unique_ptr<NodePlaybackContext> nodePlaybackContext;
 
-    juce::WeakReference<EditPlaybackContext> nodeContextToSyncTo;
+    yup::WeakReference<EditPlaybackContext> nodeContextToSyncTo;
     std::atomic<double> audiblePlaybackTime { 0.0 };
     std::atomic<int> activelyRecordingInputDevices { 0 };
 
@@ -225,8 +225,8 @@ private:
     void nextBlockStarted();
     void fillNextNodeBlock (float* const* allChannels, int numChannels, int numSamples);
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (EditPlaybackContext)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditPlaybackContext)
+    YUP_DECLARE_WEAK_REFERENCEABLE (EditPlaybackContext)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditPlaybackContext)
 };
 
 //==============================================================================

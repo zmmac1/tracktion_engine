@@ -35,17 +35,17 @@ public:
     virtual bool isReadOnly() const = 0;
     virtual bool isTemporary() const                                    { return temporary; }
     virtual ProjectID getProjectID() const = 0;
-    virtual juce::String getName() const = 0;
-    virtual const juce::File& getProjectFile() const noexcept = 0;
-    virtual juce::File getDefaultDirectory() const = 0;
-    virtual juce::File getDirectoryForMedia (ProjectItem::Category) const = 0;
+    virtual yup::String getName() const = 0;
+    virtual const yup::File& getProjectFile() const noexcept = 0;
+    virtual yup::File getDefaultDirectory() const = 0;
+    virtual yup::File getDirectoryForMedia (ProjectItem::Category) const = 0;
 
-    virtual void setName (const juce::String&) = 0;
+    virtual void setName (const yup::String&) = 0;
     virtual void createNewProjectId() = 0;
     virtual void setNewProjectId (ProjectID) = 0;
 
-    virtual juce::String getProjectProperty (const juce::String&) const = 0;
-    virtual void setProjectProperty (const juce::String&, const juce::String&) = 0;
+    virtual yup::String getProjectProperty (const yup::String&) const = 0;
+    virtual void setProjectProperty (const yup::String&, const yup::String&) = 0;
 
     virtual void refreshProjectPropertiesFromFile() = 0;
     virtual bool isLibraryProject() const = 0;
@@ -53,17 +53,17 @@ public:
     //==============================================================================
     virtual int getNumProjectItems() = 0;
     virtual ProjectItemRef getProjectItemRef (int index) = 0;
-    virtual juce::Array<ProjectItemRef> getAllProjectItemRefs() const = 0;
+    virtual yup::Array<ProjectItemRef> getAllProjectItemRefs() const = 0;
     virtual ProjectItem::Ptr getProjectItemAt (int index) = 0;
-    virtual juce::Array<ProjectItem::Ptr> getAllProjectItems() = 0;
+    virtual yup::Array<ProjectItem::Ptr> getAllProjectItems() = 0;
     virtual int getIndexOf (const ProjectItemRef&) const = 0;
 
     virtual ProjectItem::Ptr getProjectItemFor (const ProjectItemRef&) = 0;
-    virtual ProjectItem::Ptr getProjectItemForFile (const juce::File&) = 0;
+    virtual ProjectItem::Ptr getProjectItemForFile (const yup::File&) = 0;
 
     //==============================================================================
-    virtual ProjectItem::Ptr createNewItem (const juce::File&, const juce::String& type,
-                                            const juce::String& name, const juce::String& description,
+    virtual ProjectItem::Ptr createNewItem (const yup::File&, const yup::String& type,
+                                            const yup::String& name, const yup::String& description,
                                             ProjectItem::Category, bool atTopOfList) = 0;
     virtual bool removeProjectItem (const ProjectItemRef&, bool deleteSourceMaterial) = 0;
     virtual void moveProjectItem (int from, int to) = 0;
@@ -71,13 +71,13 @@ public:
     virtual void redirectIDsFromProject (ProjectID oldProjId, ProjectID newProjId) = 0;
 
     //==============================================================================
-    virtual void mergeArchiveContents (const juce::File&) = 0;
-    virtual void mergeOtherProjectIntoThis (const juce::File&) = 0;
+    virtual void mergeArchiveContents (const yup::File&) = 0;
+    virtual void mergeOtherProjectIntoThis (const yup::File&) = 0;
     virtual void refreshFolderStructure() = 0;
     virtual void createDefaultFolders() = 0;
 
     //==============================================================================
-    virtual juce::String getSelectableDescription() const = 0;
+    virtual yup::String getSelectableDescription() const = 0;
 
     virtual void load() {}
     virtual void changed() = 0;
@@ -89,12 +89,12 @@ public:
     virtual void reload (ReloadMode /*mode*/ = ReloadMode::lazy) {}
 
     /** Updates all edit source references after a file has been moved/renamed. */
-    virtual void sourceFileMoved (const juce::File& oldFile, const juce::File& newFile) = 0;
+    virtual void sourceFileMoved (const yup::File& oldFile, const yup::File& newFile) = 0;
 
     Project& owner;
     bool temporary = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectBase)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectBase)
 };
 
 } // namespace tracktion::inline engine

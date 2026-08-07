@@ -16,14 +16,14 @@ namespace tracktion::inline engine {
 class VolumeAndPanPlugin  : public Plugin
 {
 public:
-    VolumeAndPanPlugin (Edit&, const juce::ValueTree&, bool isMasterVolumeNode);
+    VolumeAndPanPlugin (Edit&, const yup::ValueTree&, bool isMasterVolumeNode);
     VolumeAndPanPlugin (PluginCreationInfo, bool isMasterVolumeNode = false);
     ~VolumeAndPanPlugin() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<VolumeAndPanPlugin>;
+    using Ptr = yup::ReferenceCountedObjectPtr<VolumeAndPanPlugin>;
 
     static const char* getPluginName()                      { return NEEDS_TRANS("Volume and Pan"); }
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
     bool isMasterVolAndPan()                                { return isMasterVolume; }
     bool canBeAddedToRack() override                        { return ! isMasterVolume; }
@@ -51,10 +51,10 @@ public:
     //==============================================================================
     static const char* xmlTypeName;
 
-    juce::String getName() const override                   { return TRANS("Volume & Pan Plugin"); }
-    juce::String getPluginType() override                   { return xmlTypeName; }
-    juce::String getShortName (int) override                { return "VolPan"; }
-    juce::String getSelectableDescription() override        { return getName(); }
+    yup::String getName() const override                   { return TRANS("Volume & Pan Plugin"); }
+    yup::String getPluginType() override                   { return xmlTypeName; }
+    yup::String getShortName (int) override                { return "VolPan"; }
+    yup::String getSelectableDescription() override        { return getName(); }
 
     void initialise (const PluginInitialisationInfo&) override;
     void initialiseWithoutStopping (const PluginInitialisationInfo&) override;
@@ -63,7 +63,7 @@ public:
     int getNumOutputChannelsGivenInputs (int numInputs) override    { return numInputs; }
     BusLayout getBusses() const override   { return BusLayout::singleInOut (ChannelConfiguration::stereo(), ChannelConfiguration::none()); }
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     //==============================================================================
     juce::CachedValue<float> volume, pan;
@@ -79,17 +79,17 @@ public:
 
 private:
     float lastVolumeBeforeMute = 0.0f;
-    juce::SmoothedValue<float> smoothedGainL, smoothedGainR, smoothedGain;
+    yup::SmoothedValue<float> smoothedGainL, smoothedGainR, smoothedGain;
 
     RealTimeSpinLock vcaTrackLock;
-    juce::ReferenceCountedObjectPtr<AudioTrack> vcaTrack;
+    yup::ReferenceCountedObjectPtr<AudioTrack> vcaTrack;
     const bool isMasterVolume = false;
 
     void setSmoothedValueTargets (TimePosition, bool);
     void refreshVCATrack();
     float getVCAPosDelta (TimePosition);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VolumeAndPanPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VolumeAndPanPlugin)
 };
 
 } // namespace tracktion::inline engine

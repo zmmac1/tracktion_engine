@@ -16,19 +16,19 @@ namespace tracktion::inline engine {
 */
 class Track   : public EditItem,
                 public Selectable,
-                public juce::ReferenceCountedObject,
-                protected juce::ValueTree::Listener,
-                protected juce::AsyncUpdater
+                public yup::ReferenceCountedObject,
+                protected yup::ValueTree::Listener,
+                protected yup::AsyncUpdater
 {
 public:
     /** Creates a track with a given state. */
-    Track (Edit&, const juce::ValueTree&, bool hasModifierList);
+    Track (Edit&, const yup::ValueTree&, bool hasModifierList);
 
     /** Destructor. */
     ~Track() override;
 
-    using Ptr   = juce::ReferenceCountedObjectPtr<Track>;
-    using Array = juce::ReferenceCountedArray<Track>;
+    using Ptr   = yup::ReferenceCountedObjectPtr<Track>;
+    using Array = yup::ReferenceCountedArray<Track>;
 
     //==============================================================================
     /** Initialises the Track.
@@ -52,10 +52,10 @@ public:
 
     //==============================================================================
     /** Returns the name of the Track. */
-    juce::String getName() const override                       { return trackName; }
+    yup::String getName() const override                       { return trackName; }
 
     /** Sets the name of the Track. */
-    void setName (const juce::String&);
+    void setName (const yup::String&);
 
     /** Sets the name of the Track to an empty string.
         Base classes may then use this an an indication to return a name based on
@@ -158,18 +158,18 @@ public:
     virtual bool processAudioNodesWhileMuted() const            { return false; }
 
     /** Should return any tracks which feed into this track. */
-    virtual juce::Array<Track*> getInputTracks() const          { return {}; }
+    virtual yup::Array<Track*> getInputTracks() const          { return {}; }
 
     //==============================================================================
     /** Returns all nested tracks.
         @param recursive Whether to include all tracks recursively.
     */
-    juce::Array<Track*> getAllSubTracks (bool recursive) const;
+    yup::Array<Track*> getAllSubTracks (bool recursive) const;
 
     /** Returns all nested AudioTrack[s].
         @param recursive Whether to include all tracks recursively.
     */
-    juce::Array<AudioTrack*> getAllAudioSubTracks (bool recursive) const;
+    yup::Array<AudioTrack*> getAllAudioSubTracks (bool recursive) const;
 
     /** Returns the TrackList if this Track has any sub-tracks.
         May be nullptr if it doesn't.
@@ -208,7 +208,7 @@ public:
 
     //==============================================================================
     /** Returns the state of the parent Track. */
-    juce::ValueTree getParentTrackTree() const;
+    yup::ValueTree getParentTrackTree() const;
 
     /** Returns the parent Track if this is a nested track. */
     Track* getParentTrack() const                               { return cachedParentTrack; }
@@ -287,7 +287,7 @@ public:
 
     //==============================================================================
     /** Returns all the parameters for this track's Plugin[s] and Modifier[s]. */
-    juce::Array<AutomatableParameter*> getAllAutomatableParams() const;
+    yup::Array<AutomatableParameter*> getAllAutomatableParams() const;
 
     /** Visits all the parameters for this track's Plugin[s] and Modifier[s]. */
     void visitAllAutomatableParams (const std::function<void(AutomatableParameter&)>&) const;
@@ -335,10 +335,10 @@ public:
 
     //==============================================================================
     /** Sets a colour for this track to use. */
-    void setColour (juce::Colour newColour)                 { colour = newColour; }
+    void setColor (yup::Color newColor)                 { colour = newColor; }
 
     /** Returns the the of this. */
-    juce::Colour getColour() const                          { return colour; }
+    yup::Color getColor() const                          { return colour; }
 
     //==============================================================================
     /** Tests whether this Track can show an image.
@@ -349,12 +349,12 @@ public:
     /** Sets some image data to use.
         N.B. May be removed in a future version.
     */
-    void setTrackImage (const juce::String& idOrData);
+    void setTrackImage (const yup::String& idOrData);
 
     /** Returns previously set image data.
         N.B. May be removed in a future version.
     */
-    juce::String getTrackImage() const                      { return imageIdOrData; }
+    yup::String getTrackImage() const                      { return imageIdOrData; }
 
     /** Tests and resets a flag internally kept when the image changes.
         N.B. May be removed in a future version.
@@ -364,35 +364,35 @@ public:
     /** Sets an array of Strings to use as tags.
         N.B. May be removed in a future version.
     */
-    void setTags (const juce::StringArray&);
+    void setTags (const yup::StringArray&);
 
     /** Returns the tags as a pipe-separated single String.
         N.B. May be removed in a future version.
     */
-    juce::String getTags() const                            { return tags.get(); }
+    yup::String getTags() const                            { return tags.get(); }
 
     /** Returns the array of tags.
         N.B. May be removed in a future version.
     */
-    const juce::StringArray& getTagsArray() const noexcept  { return tagsArray; }
+    const yup::StringArray& getTagsArray() const noexcept  { return tagsArray; }
 
     //==============================================================================
-    juce::ValueTree state;  /**< The state of this Track. */
+    yup::ValueTree state;  /**< The state of this Track. */
     PluginList pluginList;  /**< The Track's PluginList. */
 
     juce::CachedValue<AutomationMode> automationMode;   ///< The automation mode for parameters on this track to use
 
 protected:
     /** @internal */
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
     /** @internal */
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
     /** @internal */
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
     /** @internal */
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override {}
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override {}
     /** @internal */
-    void valueTreeParentChanged (juce::ValueTree&) override;
+    void valueTreeParentChanged (yup::ValueTree&) override;
     /** @internal */
     void handleAsyncUpdate() override;
 
@@ -402,19 +402,19 @@ protected:
     virtual bool isTrackAudible (bool areAnyTracksSolo) const;
 
 private:
-    juce::WeakReference<Selectable> currentAutoParam;
+    yup::WeakReference<Selectable> currentAutoParam;
     std::unique_ptr<TrackList> trackList;
     std::unique_ptr<ModifierList> modifierList;
 
-    juce::CachedValue<juce::String> trackName;
+    juce::CachedValue<yup::String> trackName;
     juce::CachedValue<bool> hidden, processing;
 
     juce::CachedValue<EditItemID> currentAutoParamPlugin;
-    juce::CachedValue<juce::String> currentAutoParamID;
+    juce::CachedValue<yup::String> currentAutoParamID;
 
-    juce::CachedValue<juce::Colour> colour;
-    juce::CachedValue<juce::String> imageIdOrData, tags;
-    juce::StringArray tagsArray;
+    juce::CachedValue<yup::Color> colour;
+    juce::CachedValue<yup::String> imageIdOrData, tags;
+    yup::StringArray tagsArray;
 
     bool imageChanged = false;
     std::atomic<bool> isAudible { true };
@@ -426,7 +426,7 @@ private:
     void updateTrackList();
     void updateCachedParent();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Track)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Track)
 };
 
 } // namespace tracktion::inline engine

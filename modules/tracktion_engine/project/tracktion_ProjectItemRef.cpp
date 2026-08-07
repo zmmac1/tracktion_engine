@@ -10,12 +10,12 @@
 
 namespace tracktion::inline engine {
 
-ProjectItemRef::ProjectItemRef (const juce::String& pathOrID)
+ProjectItemRef::ProjectItemRef (const yup::String& pathOrID)
     : value (pathOrID)
 {
 }
 
-ProjectItemRef::ProjectItemRef (const juce::String& pathOrID, Project& owner)
+ProjectItemRef::ProjectItemRef (const yup::String& pathOrID, Project& owner)
     : value (pathOrID), ownerProject (&owner)
 {
 }
@@ -25,17 +25,17 @@ ProjectItemRef::ProjectItemRef (ProjectItemID pid)
 {
 }
 
-ProjectItemRef ProjectItemRef::fromPath (const juce::String& relativePath)
+ProjectItemRef ProjectItemRef::fromPath (const yup::String& relativePath)
 {
     return ProjectItemRef (relativePath);
 }
 
-ProjectItemRef ProjectItemRef::fromPath (const juce::String& relativePath, Project& owner)
+ProjectItemRef ProjectItemRef::fromPath (const yup::String& relativePath, Project& owner)
 {
     return ProjectItemRef (relativePath, owner);
 }
 
-ProjectItemRef ProjectItemRef::fromAbsolutePath (const juce::File& file)
+ProjectItemRef ProjectItemRef::fromAbsolutePath (const yup::File& file)
 {
     return ProjectItemRef (file.getFullPathName());
 }
@@ -55,14 +55,14 @@ bool ProjectItemRef::isRelativePath() const noexcept
 {
     return value.isNotEmpty()
         && ! ProjectItemID (value).isValid()
-        && ! juce::File::isAbsolutePath (value);
+        && ! yup::File::isAbsolutePath (value);
 }
 
 bool ProjectItemRef::isAbsolutePath() const noexcept
 {
     return value.isNotEmpty()
         && ! ProjectItemID (value).isValid()
-        && juce::File::isAbsolutePath (value);
+        && yup::File::isAbsolutePath (value);
 }
 
 ProjectID ProjectItemRef::getProjectID() const noexcept
@@ -84,24 +84,24 @@ std::optional<ProjectItemID> ProjectItemRef::getProjectItemID() const noexcept
     return pid.isValid() ? std::optional<ProjectItemID> (pid) : std::nullopt;
 }
 
-juce::String ProjectItemRef::toIDForFilename() const noexcept
+yup::String ProjectItemRef::toIDForFilename() const noexcept
 {
     ProjectItemID pid (value);
     return pid.isValid() ? pid.toStringSuitableForFilename()
-                         : juce::String::toHexString (value.hash());
+                         : yup::String::toHexString (value.hash());
 }
 
-juce::String ProjectItemRef::toString() const noexcept
+yup::String ProjectItemRef::toString() const noexcept
 {
     return value;
 }
 
-juce::ReferenceCountedObjectPtr<Project> ProjectItemRef::getProject() const noexcept
+yup::ReferenceCountedObjectPtr<Project> ProjectItemRef::getProject() const noexcept
 {
     return ownerProject.get();
 }
 
-juce::File ProjectItemRef::resolve (Engine& engine, const juce::File& projectFolder) const
+yup::File ProjectItemRef::resolve (Engine& engine, const yup::File& projectFolder) const
 {
     if (value.isEmpty())
         return {};
@@ -116,11 +116,11 @@ juce::File ProjectItemRef::resolve (Engine& engine, const juce::File& projectFol
         return {};
     }
 
-    if (juce::File::isAbsolutePath (value))
-        return { value };
+    if (yup::File::isAbsolutePath (value))
+        return yup::File(value);
 
     // Relative path — resolve against provided folder or owner project
-    if (projectFolder != juce::File())
+    if (projectFolder != yup::File())
         return projectFolder.getChildFile (value);
 
     if (auto p = ownerProject.get())

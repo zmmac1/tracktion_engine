@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-ProjectItemID::ProjectItemID (const juce::String& asString) noexcept
+ProjectItemID::ProjectItemID (const yup::String& asString) noexcept
 {
     int mid = 0;
     int pid = 0;
@@ -19,7 +19,7 @@ ProjectItemID::ProjectItemID (const juce::String& asString) noexcept
     for (auto p = asString.getCharPointer();; ++p)
     {
         auto c = *p;
-        auto hex = juce::CharacterFunctions::getHexDigitValue (c);
+        auto hex = yup::CharacterFunctions::getHexDigitValue (c);
 
         if (c == 0)
         {
@@ -53,22 +53,22 @@ ProjectItemID::ProjectItemID (int itemID, ProjectID projectID) noexcept
 ProjectID ProjectItemID::getProjectID() const   { return ProjectID ((int) (combinedID >> 32)); }
 int ProjectItemID::getItemID() const            { return (int) combinedID; }
 
-juce::String ProjectItemID::toString() const
+yup::String ProjectItemID::toString() const
 {
-    return juce::String::toHexString (getProjectID().toInt()) + '/' + juce::String::toHexString (getItemID());
+    return yup::String::toHexString (getProjectID().toInt()) + '/' + yup::String::toHexString (getItemID());
 }
 
-juce::String ProjectItemID::toStringSuitableForFilename() const
+yup::String ProjectItemID::toStringSuitableForFilename() const
 {
-    return juce::String::toHexString (getProjectID().toInt()) + '_' + juce::String::toHexString (getItemID());
+    return yup::String::toHexString (getProjectID().toInt()) + '_' + yup::String::toHexString (getItemID());
 }
 
 ProjectItemID ProjectItemID::createNewID (ProjectID projectID) noexcept
 {
-    return ProjectItemID (juce::Random::getSystemRandom().nextInt (0x3ffffff), projectID);
+    return ProjectItemID (yup::Random::getSystemRandom().nextInt (0x3ffffff), projectID);
 }
 
-ProjectItemID ProjectItemID::fromProperty (const juce::ValueTree& v, const juce::Identifier& prop)
+ProjectItemID ProjectItemID::fromProperty (const yup::ValueTree& v, const yup::Identifier& prop)
 {
     return ProjectItemID (v.getProperty (prop).toString());
 }

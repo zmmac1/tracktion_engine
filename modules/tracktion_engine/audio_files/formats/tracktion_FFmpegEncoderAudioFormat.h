@@ -12,33 +12,33 @@ namespace tracktion::inline engine {
 
 #if TRACKTION_ENABLE_FFMPEG
 
-class FFmpegEncoderAudioFormat : public juce::AudioFormat
+class FFmpegEncoderAudioFormat : public yup::AudioFormat
 {
 public:
     /** Creates a FFmpegEncoderAudioFormat that expects to find a working FFmpeg
      executable at the location given.
      */
-    FFmpegEncoderAudioFormat (const juce::File& ffmpegExecutableToUse);
+    FFmpegEncoderAudioFormat (const yup::File& ffmpegExecutableToUse);
     ~FFmpegEncoderAudioFormat() override;
     
-    bool canHandleFile (const juce::File&) override;
-    juce::Array<int> getPossibleSampleRates() override;
-    juce::Array<int> getPossibleBitDepths() override;
+    bool canHandleFile (const yup::File&) override;
+    yup::Array<int> getPossibleSampleRates() override;
+    yup::Array<int> getPossibleBitDepths() override;
     bool canDoStereo() override;
     bool canDoMono() override;
     bool isCompressed() override;
-    juce::StringArray getQualityOptions() override;
+    yup::StringArray getQualityOptions() override;
     
-    juce::AudioFormatReader* createReaderFor (juce::InputStream*, bool deleteStreamIfOpeningFails) override;
+    yup::AudioFormatReader* createReaderFor (yup::InputStream*, bool deleteStreamIfOpeningFails) override;
 
-    std::unique_ptr<juce::AudioFormatWriter> createWriterFor (std::unique_ptr<juce::OutputStream>&,
-                                                              const juce::AudioFormatWriterOptions&) override;
+    std::unique_ptr<yup::AudioFormatWriter> createWriterFor (std::unique_ptr<yup::OutputStream>&,
+                                                              const yup::WriteOptions&) override;
 
 private:
-    juce::File ffmpegExe;
+    yup::File ffmpegExe;
     class Writer;
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FFmpegEncoderAudioFormat)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FFmpegEncoderAudioFormat)
 };
 
 #endif

@@ -100,7 +100,7 @@ struct PitchShiftPlugin::Pimpl
             }
 
             if (fc.bufferForMidiMessages != nullptr)
-                fc.bufferForMidiMessages->addToNoteNumbers (juce::roundToInt (semis));
+                fc.bufferForMidiMessages->addToNoteNumbers (yup::roundToInt (semis));
         }
     }
 
@@ -115,7 +115,7 @@ struct PitchShiftPlugin::Pimpl
     int latencySamples = 8192;
     double latencySeconds = latencySamples / 44100.0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
 //==============================================================================
@@ -129,7 +129,7 @@ PitchShiftPlugin::PitchShiftPlugin (PluginCreationInfo info) : Plugin (info)
                           { -PitchShiftPlugin::getMaximumSemitones(), PitchShiftPlugin::getMaximumSemitones() },
                           [] (float value)            { return std::abs (value) < 0.01f ? "(" + TRANS("Original pitch") + ")"
                                                                                         : getSemitonesAsString (value); },
-                          [] (const juce::String& s)  { return juce::jlimit (-PitchShiftPlugin::getMaximumSemitones(),
+                          [] (const yup::String& s)  { return yup::jlimit (-PitchShiftPlugin::getMaximumSemitones(),
                                                                              PitchShiftPlugin::getMaximumSemitones(),
                                                                              s.getFloatValue()); });
 
@@ -140,7 +140,7 @@ PitchShiftPlugin::PitchShiftPlugin (PluginCreationInfo info) : Plugin (info)
     semitones->attachToCurrentValue (semitonesValue);
 }
 
-PitchShiftPlugin::PitchShiftPlugin (Edit& ed, const juce::ValueTree& v)
+PitchShiftPlugin::PitchShiftPlugin (Edit& ed, const yup::ValueTree& v)
     : PitchShiftPlugin (PluginCreationInfo (ed, v, false))
 {
 }
@@ -152,7 +152,7 @@ PitchShiftPlugin::~PitchShiftPlugin()
     semitones->detachFromCurrentValue();
 }
 
-juce::ValueTree PitchShiftPlugin::create()
+yup::ValueTree PitchShiftPlugin::create()
 {
     return createValueTree (IDs::PLUGIN,
                             IDs::type, xmlTypeName);
@@ -183,12 +183,12 @@ double PitchShiftPlugin::getLatencySeconds()
     return pimpl->latencySeconds;
 }
 
-juce::String PitchShiftPlugin::getSelectableDescription()
+yup::String PitchShiftPlugin::getSelectableDescription()
 {
     return TRANS("Pitch Shifter Plugin");
 }
 
-void PitchShiftPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void PitchShiftPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, semitonesValue, mode);
 

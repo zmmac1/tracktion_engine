@@ -21,11 +21,11 @@ using namespace tracktion::graph;
 
 //==============================================================================
 //==============================================================================
-class PluginNodeBenchmarks : public juce::UnitTest
+class PluginNodeBenchmarks : public yup::UnitTest
 {
 public:
     PluginNodeBenchmarks()
-        : juce::UnitTest ("Plugin Node Benchmarks", "tracktion_benchmarks")
+        : yup::UnitTest ("Plugin Node Benchmarks", "tracktion_benchmarks")
     {
     }
 
@@ -39,7 +39,7 @@ public:
 private:
     void runNodePreparationBenchmarks (Engine& engine)
     {
-        const juce::StringArray pluginTypesToTest { VolumeAndPanPlugin::xmlTypeName,
+        const yup::StringArray pluginTypesToTest { VolumeAndPanPlugin::xmlTypeName,
                                                     AuxSendPlugin::xmlTypeName,
                                                     AuxReturnPlugin::xmlTypeName,
                                                     PatchBayPlugin::xmlTypeName };
@@ -48,7 +48,7 @@ private:
             runNodePreparationBenchmark (engine, pluginType);
     }
 
-    void runNodePreparationBenchmark (Engine& engine, juce::String pluginType)
+    void runNodePreparationBenchmark (Engine& engine, yup::String pluginType)
     {
         constexpr int trackCount = 200;
         auto edit = Edit::createSingleTrackEdit (engine);
@@ -70,11 +70,11 @@ private:
             auto editNode = createNodeForEdit (*edit, cnp);
 
             const ScopedBenchmark sb (createBenchmarkDescription ("Node Preparation",
-                                                                  juce::String ("Preparing with XXYY Plugin")
+                                                                  yup::String ("Preparing with XXYY Plugin")
                                                                     .replace ("XXYY", pluginType).toStdString(),
-                                                                  juce::String ("Preparing 123 tracks with XXYY plugin")
-                                                                    .replace ("123", juce::String (trackCount))
-                                                                    .replace ("XXYY", juce::String (pluginType)).toStdString()));
+                                                                  yup::String ("Preparing 123 tracks with XXYY plugin")
+                                                                    .replace ("123", yup::String (trackCount))
+                                                                    .replace ("XXYY", yup::String (pluginType)).toStdString()));
 
             [[ maybe_unused ]] auto graph = node_player_utils::prepareToPlay (std::move (editNode), nullptr,
                                                                               cnp.sampleRate, cnp.blockSize);
@@ -140,8 +140,8 @@ private:
 
                 const ScopedBenchmark sb (createBenchmarkDescription (
                     "Node Preparation",
-                    juce::String ("Preparing 123 tracks for busses").replace ("123", juce::String (trackCount)).toStdString(),
-                    juce::String ("Preparing with 14 AuxSend, AuxReturn and PatchBay Plugins").toStdString()));
+                    yup::String ("Preparing 123 tracks for busses").replace ("123", yup::String (trackCount)).toStdString(),
+                    yup::String ("Preparing with 14 AuxSend, AuxReturn and PatchBay Plugins").toStdString()));
 
                 [[ maybe_unused ]] auto graph = node_player_utils::prepareToPlay (std::move (editNode), nullptr,
                                                                                   cnp.sampleRate, cnp.blockSize);

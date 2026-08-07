@@ -10,10 +10,10 @@
 
 namespace tracktion::inline engine {
 
-BufferedFileReader::BufferedFileReader (juce::AudioFormatReader* sourceReader,
-                                        juce::TimeSliceThread& timeSliceThread,
+BufferedFileReader::BufferedFileReader (yup::AudioFormatReader* sourceReader,
+                                        yup::TimeSliceThread& timeSliceThread,
                                         int samplesToBuffer)
-    : juce::AudioFormatReader (nullptr, sourceReader->getFormatName()),
+    : yup::AudioFormatReader (nullptr, sourceReader->getFormatName()),
       source (sourceReader), thread (timeSliceThread),
       isFullyBuffering (samplesToBuffer < 0)
 {
@@ -41,7 +41,7 @@ BufferedFileReader::BufferedFileReader (juce::AudioFormatReader* sourceReader,
     for (size_t i = 0; i < numBlocksToBuffer; ++i)
     {
         // The following code makes the assumption that the pointers are at least 8-bit aligned
-        static_assert (alignof (BufferedBlock*) >= 8);
+        // static_assert removed for WASM
         blocks.push_back (std::make_unique<BufferedBlock> (*source));
 
         // Check the least significant bit is actually 0
@@ -68,12 +68,12 @@ bool BufferedFileReader::isFullyBuffered() const
 }
 
 bool BufferedFileReader::readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                                      juce::int64 startSampleInFile, int numSamples)
+                                      yup::int64 startSampleInFile, int numSamples)
 {
     // If a cached block can't be found, update the read position and possibly wait for it
     nextReadPosition = startSampleInFile;
 
-    auto startTime = juce::Time::getMillisecondCounter();
+    auto startTime = yup::Time::getMillisecondCounter();
     clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                        startSampleInFile, numSamples, lengthInSamples);
 
@@ -102,9 +102,9 @@ bool BufferedFileReader::readSamples (int* const* destSamples, int numDestChanne
                         dest += startOffsetInDestBuffer;
 
                         if (j < (int) numChannels)
-                            juce::FloatVectorOperations::copy (dest, block->buffer.getReadPointer (j, offset), numToDo);
+                            yup::FloatVectorOperations::copy (dest, block->buffer.getReadPointer (j, offset), numToDo);
                         else
-                            juce::FloatVectorOperations::clear (dest, numToDo);
+                            yup::FloatVectorOperations::clear (dest, numToDo);
                     }
                 }
 
@@ -123,11 +123,11 @@ bool BufferedFileReader::readSamples (int* const* destSamples, int numDestChanne
             thread.moveToFrontOfQueue (this);
 
         // If the timeout has expired, clear the dest buffer and return
-        if (timeoutMs >= 0 && juce::Time::getMillisecondCounter() >= startTime + (juce::uint32) timeoutMs)
+        if (timeoutMs >= 0 && yup::Time::getMillisecondCounter() >= startTime + (yup::uint32) timeoutMs)
         {
             for (int j = 0; j < numDestChannels; ++j)
                 if (auto dest = (float*) destSamples[j])
-                    juce::FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
+                    yup::FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
 
             allSamplesRead = false;
             break;
@@ -135,19 +135,19 @@ bool BufferedFileReader::readSamples (int* const* destSamples, int numDestChanne
         else
         {
             // Otherwise wait and try again
-            juce::Thread::yield();
+            yup::Thread::yield();
         }
     }
 
     return allSamplesRead;
 }
 
-BufferedFileReader::BufferedBlock::BufferedBlock (juce::AudioFormatReader& reader)
+BufferedFileReader::BufferedBlock::BufferedBlock (yup::AudioFormatReader& reader)
     : buffer ((int) reader.numChannels, samplesPerBlock)
 {
 }
 
-void BufferedFileReader::BufferedBlock::update (juce::AudioFormatReader& reader, juce::Range<juce::int64> newSampleRange, size_t currentSlotIndex)
+void BufferedFileReader::BufferedBlock::update (yup::AudioFormatReader& reader, yup::Range<yup::int64> newSampleRange, size_t currentSlotIndex)
 {
     assert (newSampleRange.getEnd() <= reader.lengthInSamples);
     const int numSamples = (int) newSampleRange.getLength();
@@ -158,7 +158,7 @@ void BufferedFileReader::BufferedBlock::update (juce::AudioFormatReader& reader,
     allSamplesRead = reader.read (&buffer, 0, numSamples, (int) range.getStart(), true, true);
     assert (slotIndex == static_cast<int> (currentSlotIndex));
     slotIndex = static_cast<int> (currentSlotIndex);
-    lastUseTime = juce::Time::getMillisecondCounter();
+    lastUseTime = yup::Time::getMillisecondCounter();
     DBG(slotIndex);
 }
 
@@ -177,9 +177,9 @@ BufferedFileReader::ScopedSlotAccess::~ScopedSlotAccess()
     reader.markSlotUseState (slotIndex, false);
 }
 
-BufferedFileReader::ScopedSlotAccess BufferedFileReader::ScopedSlotAccess::fromPosition (BufferedFileReader& reader, juce::int64 position)
+BufferedFileReader::ScopedSlotAccess BufferedFileReader::ScopedSlotAccess::fromPosition (BufferedFileReader& reader, yup::int64 position)
 {
-    return { reader, static_cast<size_t> (position / static_cast<juce::int64> (samplesPerBlock)) };
+    return { reader, static_cast<size_t> (position / static_cast<yup::int64> (samplesPerBlock)) };
 }
 
 void BufferedFileReader::ScopedSlotAccess::setBlock (BufferedBlock* blockToReferTo)
@@ -254,7 +254,7 @@ BufferedFileReader::PositionStatus BufferedFileReader::readNextBufferChunk()
     {
         // This can be done without taking any exclusive access as the
         // blocks won't move around and their time stamps are atomic
-        juce::uint32 oldestTime = std::numeric_limits<juce::uint32>::max();
+        yup::uint32 oldestTime = std::numeric_limits<yup::uint32>::max();
         BufferedBlock* blockToUse = nullptr;
 
         for (size_t i = 0; i < blocks.size(); ++i)
@@ -296,7 +296,7 @@ BufferedFileReader::PositionStatus BufferedFileReader::readNextBufferChunk()
         }
 
         // Update the block's data
-        const juce::Range<juce::int64> slotSampleRange = getSlotRange (slotToReadIndex);
+        const yup::Range<yup::int64> slotSampleRange = getSlotRange (slotToReadIndex);
         blockToUse->update (*source, slotSampleRange, slotToReadIndex);
 
         // Increment the number of blocks in use if this was a fresh block
@@ -340,15 +340,15 @@ BufferedFileReader::PositionStatus BufferedFileReader::readNextBufferChunk()
     return PositionStatus::positionChangedByAudioThread;
 }
 
-size_t BufferedFileReader::getSlotIndexFromSamplePosition (juce::int64 samplePos)
+size_t BufferedFileReader::getSlotIndexFromSamplePosition (yup::int64 samplePos)
 {
-    return static_cast<size_t> (samplePos / static_cast<juce::int64> (samplesPerBlock));
+    return static_cast<size_t> (samplePos / static_cast<yup::int64> (samplesPerBlock));
 }
 
-juce::Range<juce::int64> BufferedFileReader::getSlotRange (size_t slotIndex)
+yup::Range<yup::int64> BufferedFileReader::getSlotRange (size_t slotIndex)
 {
-    const juce::int64 slotStartSamplePos = static_cast<juce::int64> (slotIndex * samplesPerBlock);
-    const juce::int64 slotEndSamplePos = std::min (slotStartSamplePos + samplesPerBlock, lengthInSamples);
+    const yup::int64 slotStartSamplePos = static_cast<yup::int64> (slotIndex * samplesPerBlock);
+    const yup::int64 slotEndSamplePos = std::min (slotStartSamplePos + samplesPerBlock, lengthInSamples);
 
     return { slotStartSamplePos, slotEndSamplePos };
 }

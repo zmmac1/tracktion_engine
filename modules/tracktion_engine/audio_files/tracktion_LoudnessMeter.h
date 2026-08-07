@@ -146,7 +146,7 @@ private:
     double sampleRate = 44100.0;
     int numChannels = 0, maxBlockSize = 0;
     std::vector<ChannelState> channels;
-    std::unique_ptr<juce::dsp::Oversampling<float>> oversampler;
+    std::unique_ptr<yup::dsp::Oversampling<float>> oversampler;
 
     int gatingBlockSamples = 4410, samplesIntoBlock = 0;
     double blockEnergy = 0.0;
@@ -175,7 +175,7 @@ private:
     crill::seqlock_object<Readings> publishedReadings { Readings() };
     std::atomic<bool> resetRequested { false };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoudnessMeter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoudnessMeter)
 };
 
 } // namespace tracktion::inline engine

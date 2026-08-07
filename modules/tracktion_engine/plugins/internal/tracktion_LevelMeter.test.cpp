@@ -53,7 +53,7 @@ TEST_SUITE ("tracktion_engine")
         auto& client = LevelMeterPluginTestAccess::getControllerClient (*meter);
         client.setNumChannelsUsed (wideChannels);
 
-        const auto now = juce::Time::getApproximateMillisecondCounter();
+        const auto now = yup::Time::getApproximateMillisecondCounter();
         const float seededDb = -6.0f;
         for (int i = 0; i < wideChannels; ++i)
             client.updateAudioLevel (i, { now, seededDb });

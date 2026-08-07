@@ -12,7 +12,7 @@
 namespace tracktion::inline engine {
 
 WaveInputDeviceNode::WaveInputDeviceNode (InputDeviceInstance& idi, WaveInputDevice& owner,
-                                          const juce::AudioChannelSet& destChannelsToFill)
+                                          const yup::AudioChannelSet& destChannelsToFill)
     : instance (idi),
       waveInputDevice (owner),
       destChannels (destChannelsToFill)
@@ -37,7 +37,7 @@ void WaveInputDeviceNode::prepareToPlay (const tracktion::graph::PlaybackInitial
 {
     auto numIncomingChannels = (uint32_t) waveInputDevice.getChannels().getNumChannels();
     audioFifo.setSize (numIncomingChannels, (uint32_t) info.blockSize * 8);
-    lastCallbackTime = juce::Time::getMillisecondCounter();
+    lastCallbackTime = yup::Time::getMillisecondCounter();
 
     instance.addConsumer (this);
 }
@@ -51,7 +51,7 @@ void WaveInputDeviceNode::process (ProcessContext& pc)
 {
     SCOPED_REALTIME_CHECK
 
-    const auto timeNow = juce::Time::getMillisecondCounter();
+    const auto timeNow = yup::Time::getMillisecondCounter();
 
     if (timeNow > lastCallbackTime + 150)
     {

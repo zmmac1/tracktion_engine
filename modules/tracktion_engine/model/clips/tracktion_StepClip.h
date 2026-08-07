@@ -14,45 +14,45 @@ namespace tracktion::inline engine {
 /**
 */
 class StepClip   : public Clip,
-                   public juce::ChangeBroadcaster
+                   public yup::ChangeBroadcaster
 {
 public:
-    StepClip (const juce::ValueTree&, EditItemID, ClipOwner&);
+    StepClip (const yup::ValueTree&, EditItemID, ClipOwner&);
     ~StepClip() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<StepClip>;
+    using Ptr = yup::ReferenceCountedObjectPtr<StepClip>;
 
     void cloneFrom (Clip*) override;
 
     //==============================================================================
     struct Channel  : public Selectable
     {
-        Channel (StepClip&, const juce::ValueTree&);
+        Channel (StepClip&, const yup::ValueTree&);
         ~Channel() noexcept override;
 
         bool operator== (const Channel&) const noexcept;
 
-        juce::String getSelectableDescription() override;
+        yup::String getSelectableDescription() override;
 
         int getIndex() const;
-        juce::String getDisplayName() const;
+        yup::String getDisplayName() const;
 
         bool usesGrooveStrength() const;
 
         StepClip& clip;
-        juce::ValueTree state;
+        yup::ValueTree state;
 
         juce::CachedValue<MidiChannel> channel;  // MIDI channel. Range: 1 - 16
         juce::CachedValue<int> noteNumber;       // Range: 0 - 127
         juce::CachedValue<int> noteValue;        // Most likely to be ranged from 0 to 127
-        juce::CachedValue<juce::String> grooveTemplate, name;
+        juce::CachedValue<yup::String> grooveTemplate, name;
         juce::CachedValue<float> grooveStrength;
 
     private:
-        JUCE_LEAK_DETECTOR (Channel)
+        YUP_LEAK_DETECTOR (Channel)
     };
 
-    const juce::Array<Channel*>& getChannels() const noexcept;
+    const yup::Array<Channel*>& getChannels() const noexcept;
     void removeChannel (int index);
     void insertNewChannel (int index);
 
@@ -63,11 +63,11 @@ public:
     */
     struct Pattern
     {
-        Pattern (StepClip&, const juce::ValueTree&) noexcept;
+        Pattern (StepClip&, const yup::ValueTree&) noexcept;
         Pattern (const Pattern&) noexcept;
 
-        juce::String getName() const;
-        void setName (const juce::String&);
+        yup::String getName() const;
+        void setName (const yup::String&);
 
         bool getNote (int channel, int index) const noexcept;
         void setNote (int channel, int index, bool value);
@@ -81,8 +81,8 @@ public:
         void shiftChannel (int channel, bool toTheRight);
         void toggleAtInterval (int channel, int interval);
 
-        juce::BigInteger getChannel (int index) const;
-        void setChannel (int index, const juce::BigInteger&);
+        yup::BigInteger getChannel (int index) const;
+        void setChannel (int index, const yup::BigInteger&);
 
         int getNumNotes() const;
         void setNumNotes (int);
@@ -93,20 +93,20 @@ public:
         /** Sets the length of one step as a fraction of a beat. */
         void setNoteLength (BeatDuration);
 
-        juce::Array<int> getVelocities (int channel) const;
-        void setVelocities (int channel, const juce::Array<int>&);
+        yup::Array<int> getVelocities (int channel) const;
+        void setVelocities (int channel, const yup::Array<int>&);
 
         int getVelocity (int channel, int index) const;
         void setVelocity (int channel, int index, int value);
 
-        juce::Array<double> getGates (int channel) const;
-        void setGates (int channel, const juce::Array<double>&);
+        yup::Array<double> getGates (int channel) const;
+        void setGates (int channel, const yup::Array<double>&);
 
         double getGate (int channel, int index) const;
         void setGate (int channel, int index, double value);
 
-        juce::Array<float> getProbabilities (int channel) const;
-        void setProbabilities (int channel, const juce::Array<float>&);
+        yup::Array<float> getProbabilities (int channel) const;
+        void setProbabilities (int channel, const yup::Array<float>&);
 
         float getProbability (int channel, int index) const;
         void setProbability (int channel, int index, float value);
@@ -123,26 +123,26 @@ public:
             double getGate (int index) const noexcept;
             float getProbability (int index) const noexcept;
 
-            juce::BigInteger notes;
-            juce::Array<int> velocities;
-            juce::Array<double> gates;
-            juce::Array<float> probabilities;
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedPattern)
+            yup::BigInteger notes;
+            yup::Array<int> velocities;
+            yup::Array<double> gates;
+            yup::Array<float> probabilities;
+            YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CachedPattern)
         };
 
         StepClip& clip;
-        juce::ValueTree state;
+        yup::ValueTree state;
 
     private:
         Pattern& operator= (const Pattern&) = delete;
-        JUCE_LEAK_DETECTOR (Pattern)
+        YUP_LEAK_DETECTOR (Pattern)
     };
 
     //==============================================================================
     /**
     */
     struct PatternInstance  : public Selectable,
-                              public juce::ReferenceCountedObject
+                              public yup::ReferenceCountedObject
     {
         PatternInstance (StepClip& c, int index)
             : clip (c), patternIndex (index) {}
@@ -152,7 +152,7 @@ public:
             notifyListenersOfDeletion();
         }
 
-        using Ptr = juce::ReferenceCountedObjectPtr<PatternInstance>;
+        using Ptr = yup::ReferenceCountedObjectPtr<PatternInstance>;
 
         StepClip& clip;
         int patternIndex;
@@ -160,11 +160,11 @@ public:
         Pattern getPattern() const;
         int getSequenceIndex() const;
 
-        juce::String getSelectableDescription() override;
+        yup::String getSelectableDescription() override;
 
     private:
         PatternInstance() = delete;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PatternInstance)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PatternInstance)
     };
 
     //==============================================================================
@@ -184,7 +184,7 @@ public:
     };
 
     //==============================================================================
-    using PatternArray = juce::ReferenceCountedArray<PatternInstance>;
+    using PatternArray = yup::ReferenceCountedArray<PatternInstance>;
 
     PatternArray getPatternSequence() const;
     void setPatternSequence (const PatternArray&);
@@ -208,11 +208,11 @@ public:
     //==============================================================================
     Pattern getPattern (int index);
     int getNumPatterns() const;
-    juce::Array<Pattern> getPatterns();
+    yup::Array<Pattern> getPatterns();
 
     //==============================================================================
     float getVolumeDb() const                       { return level->dbGain.get(); }
-    void setVolumeDb (float v)                      { level->dbGain = juce::jlimit (-100.0f, 0.0f, v); }
+    void setVolumeDb (float v)                      { level->dbGain = yup::jlimit (-100.0f, 0.0f, v); }
 
     //==============================================================================
     /** Generate a MidiMessageSequence from either the entire clip or
@@ -222,7 +222,7 @@ public:
         @param[in] convertToSeconds Leave the timestamps in beats, or convert them to seconds while generating
         @param[in] instance         Specific pattern to generate, nullptr for the whole clip
     */
-    void generateMidiSequence (juce::MidiMessageSequence& result,
+    void generateMidiSequence (yup::MidiMessageSequence& result,
                                bool convertToSeconds = true,
                                PatternInstance* instance = nullptr);
 
@@ -233,9 +233,9 @@ public:
         @param[in] TimeBase         The time base for the sequence
         @returns result             Result sequence
     */
-    juce::MidiMessageSequence generateMidiSequence (MidiList::TimeBase, PatternInstance* instance = nullptr);
+    yup::MidiMessageSequence generateMidiSequence (MidiList::TimeBase, PatternInstance* instance = nullptr);
 
-    juce::Array<BeatPosition> getBeatTimesOfPatternStarts() const;
+    yup::Array<BeatPosition> getBeatTimesOfPatternStarts() const;
 
     BeatPosition getStartBeatOf (PatternInstance*);
     BeatPosition getEndBeatOf (PatternInstance*);
@@ -246,8 +246,8 @@ public:
 
     //==============================================================================
     bool canBeAddedTo (ClipOwner&) override;
-    juce::String getSelectableDescription() override;
-    juce::Colour getDefaultColour() const override;
+    yup::String getSelectableDescription() override;
+    yup::Color getDefaultColor() const override;
 
     bool isMidi() const override                        { return false; }
     bool beatBasedLooping() const override              { return true; }
@@ -297,7 +297,7 @@ public:
     FollowActions* getFollowActions() override;
 
 private:
-    void generateMidiSequenceForChannels (juce::MidiMessageSequence&, bool convertToSeconds,
+    void generateMidiSequenceForChannels (yup::MidiMessageSequence&, bool convertToSeconds,
                                           const Pattern&, BeatPosition startBeat,
                                           BeatPosition clipStartBeat, BeatPosition clipEndBeat, const TempoSequence&);
 
@@ -316,14 +316,14 @@ private:
     const PatternInstance::Ptr getPatternInstance (int index, bool repeatSequence) const;
     void updatePatternList();
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override;
 
     //==============================================================================
     StepClip() = delete;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StepClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StepClip)
 };
 
 } // namespace tracktion::inline engine

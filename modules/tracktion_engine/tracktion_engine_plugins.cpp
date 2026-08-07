@@ -52,10 +52,10 @@ using namespace std::literals;
 #include "plugins/tracktion_PluginManager.cpp"
 #include "plugins/tracktion_PluginWindowState.cpp"
 
-#include "plugins/external/tracktion_ExternalAutomatableParameter.h"
-#include "plugins/external/tracktion_ExternalPluginBlacklist.h"
-#include "plugins/external/tracktion_ExternalPlugin.cpp"
-#include "plugins/external/tracktion_ExternalPlugin.test.cpp"
+// EXCLUDED: #include "plugins/external/tracktion_ExternalAutomatableParameter.h"
+// EXCLUDED: #include "plugins/external/tracktion_ExternalPluginBlacklist.h"
+// EXCLUDED: #include "plugins/external/tracktion_ExternalPlugin.cpp"
+// EXCLUDED: #include "plugins/external/tracktion_ExternalPlugin.test.cpp"
 
 #include "plugins/internal/tracktion_AuxReturn.cpp"
 #include "plugins/internal/tracktion_AuxSend.cpp"
@@ -67,7 +67,7 @@ using namespace std::literals;
 #include "plugins/internal/tracktion_RackInstance.cpp"
 #include "plugins/internal/tracktion_RackInstance.test.cpp"
 #include "plugins/internal/tracktion_RackType.cpp"
-#include "plugins/internal/tracktion_ReWirePlugin.cpp"
+// EXCLUDED: #include "plugins/internal/tracktion_ReWirePlugin.cpp"
 #include "plugins/internal/tracktion_TextPlugin.cpp"
 #include "plugins/internal/tracktion_VCA.cpp"
 #include "plugins/internal/tracktion_VolumeAndPan.cpp"
@@ -92,9 +92,9 @@ using namespace std::literals;
 #include "plugins/effects/tracktion_SamplerPlugin.cpp"
 #include "plugins/effects/tracktion_ToneGenerator.cpp"
 
-#include "plugins/ARA/tracktion_ARAFileReader.cpp"
+// EXCLUDED: #include "plugins/ARA/tracktion_ARAFileReader.cpp"
 
-#include "plugins/cmajor/tracktion_CmajorPluginFormat.cpp"
+// EXCLUDED: #include "plugins/cmajor/tracktion_CmajorPluginFormat.cpp"
 
 #include "plugins/tracktion_Plugins.test.cpp"
 

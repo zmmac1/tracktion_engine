@@ -60,7 +60,7 @@ private:
         std::vector<Node*> outputs;
         std::atomic<size_t> numInputsToBeProcessed { 0 };
         std::atomic<bool> hasBeenQueued { true };
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         std::atomic<bool> hasBeenDequeued { false };
        #endif
     };
@@ -91,7 +91,7 @@ public:
         virtual ~ThreadPool() = default;
 
         /** Subclasses should implement this to create the given number of threads. */
-        virtual void createThreads (size_t numThreads, juce::AudioWorkgroup) = 0;
+        virtual void createThreads (size_t numThreads, yup::AudioWorkgroup) = 0;
 
         /** Subclasses should implement this to clear all the threads. */
         virtual void clearThreads() = 0;
@@ -194,7 +194,7 @@ public:
     using ThreadPoolCreator = std::function<std::unique_ptr<ThreadPool> (LockFreeMultiThreadedNodePlayer&)>;
 
     /** Creates an empty LockFreeMultiThreadedNodePlayer with a specified ThreadPool type. */
-    LockFreeMultiThreadedNodePlayer (ThreadPoolCreator, juce::AudioWorkgroup = {});
+    LockFreeMultiThreadedNodePlayer (ThreadPoolCreator, yup::AudioWorkgroup = {});
 
     /** Destructor. */
     ~LockFreeMultiThreadedNodePlayer();
@@ -262,13 +262,13 @@ public:
 private:
     //==============================================================================
     std::atomic<size_t> numThreadsToUse { std::max ((size_t) 0, (size_t) std::thread::hardware_concurrency() - 1) };
-    juce::Range<int64_t> referenceSampleRange;
+    yup::Range<int64_t> referenceSampleRange;
     choc::buffer::FrameCount numSamplesToProcess = 0;
     std::atomic<bool> threadsShouldExit { false }, useMemoryPool { false }, disableLatencyComp { false };
 
     RealTimeSpinLock processMutex;
     std::unique_ptr<ThreadPool> threadPool;
-    juce::AudioWorkgroup audioWorkgroup;
+    yup::AudioWorkgroup audioWorkgroup;
 
     LockFreeObject<PreparedNode> preparedNodeObject;
     Node* rootNode = nullptr;

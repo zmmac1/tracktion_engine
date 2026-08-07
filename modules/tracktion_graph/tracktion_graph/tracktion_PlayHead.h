@@ -22,13 +22,13 @@ class PlayHead;
 */
 struct SplitTimelineRange
 {
-    SplitTimelineRange (juce::Range<int64_t> range1)
+    SplitTimelineRange (yup::Range<int64_t> range1)
         : timelineRange1 (range1), isSplit (false) {}
 
-    SplitTimelineRange (juce::Range<int64_t> range1, juce::Range<int64_t> range2)
+    SplitTimelineRange (yup::Range<int64_t> range1, yup::Range<int64_t> range2)
         : timelineRange1 (range1), timelineRange2 (range2), isSplit (true) {}
 
-    const juce::Range<int64_t> timelineRange1, timelineRange2;
+    const yup::Range<int64_t> timelineRange1, timelineRange2;
     const bool isSplit;
 };
 
@@ -36,7 +36,7 @@ struct SplitTimelineRange
 /** Converts a reference sample range to a TimelinePositionWindow which could have two time
     ranges if the stream range overlaps the end of the loop range.
 */
-static inline SplitTimelineRange referenceSampleRangeToSplitTimelineRange (const PlayHead&, juce::Range<int64_t> referenceSampleRange);
+static inline SplitTimelineRange referenceSampleRangeToSplitTimelineRange (const PlayHead&, yup::Range<int64_t> referenceSampleRange);
 
 
 //==============================================================================
@@ -58,7 +58,7 @@ public:
     void setPosition (int64_t newPosition);
 
     /** Plays a range in a loop. */
-    void play (juce::Range<int64_t> rangeToPlay, bool looped);
+    void play (yup::Range<int64_t> rangeToPlay, bool looped);
 
     /** Starts playback from the last position. */
     void play();
@@ -67,7 +67,7 @@ public:
         This is for rendering, where there will be no master stream to sync to.
         N.B. this disables looping.
     */
-    void playSyncedToRange (juce::Range<int64_t> rangeToPlay);
+    void playSyncedToRange (yup::Range<int64_t> rangeToPlay);
 
     /** Stops the play head. */
     void stop();
@@ -97,10 +97,10 @@ public:
     bool isRollingIntoLoop() const noexcept;
 
     /** Returns the looped playback range. */
-    juce::Range<int64_t> getLoopRange() const noexcept;
+    yup::Range<int64_t> getLoopRange() const noexcept;
 
     /** Sets a playback range and whether to loop or not. */
-    void setLoopRange (bool loop, juce::Range<int64_t> loopRange, bool updatePosition = true);
+    void setLoopRange (bool loop, yup::Range<int64_t> loopRange, bool updatePosition = true);
 
     /** Puts the play head in to roll in to loop mode.
         If this position is before the loop start position, the play head won't
@@ -133,17 +133,17 @@ public:
     int64_t referenceSamplePositionToTimelinePositionUnlooped (int64_t referenceSamplePosition) const;
 
     /** Converts a reference sample range to a timeline range as if there was no looping set. */
-    juce::Range<int64_t> referenceSampleRangeToSourceRangeUnlooped (juce::Range<int64_t> sourceReferenceSampleRange) const;
+    yup::Range<int64_t> referenceSampleRangeToSourceRangeUnlooped (yup::Range<int64_t> sourceReferenceSampleRange) const;
 
     /** Converts a linear timeline position to a position wrapped in the loop. */
-    static int64_t linearPositionToLoopPosition (int64_t position, juce::Range<int64_t> loopRange);
+    static int64_t linearPositionToLoopPosition (int64_t position, yup::Range<int64_t> loopRange);
 
     //==============================================================================
     /** Sets the reference sample count, adjusting the timeline if the play head is playing. */
-    void setReferenceSampleRange (juce::Range<int64_t> sampleRange);
+    void setReferenceSampleRange (yup::Range<int64_t> sampleRange);
 
     /** Returns the reference sample count. */
-    juce::Range<int64_t> getReferenceSampleRange() const;
+    yup::Range<int64_t> getReferenceSampleRange() const;
 
     /** Returns the playout sync position.
         For syncing a reference position to a timeline position.
@@ -162,8 +162,8 @@ private:
     MultipleWriterSeqLock<SyncPositions> syncPositions;
 
     //==============================================================================
-    MultipleWriterSeqLock<juce::Range<int64_t>> referenceSampleRange;
-    MultipleWriterSeqLock<juce::Range<int64_t>> timelinePlayRange;
+    MultipleWriterSeqLock<yup::Range<int64_t>> referenceSampleRange;
+    MultipleWriterSeqLock<yup::Range<int64_t>> timelinePlayRange;
     std::atomic<int64_t> scrubbingBlockLength { static_cast<int64_t> (0.08 * 44100.0) };
 
     std::atomic<int> speed { 0 };
@@ -195,7 +195,7 @@ inline void PlayHead::setPosition (int64_t newPosition)
     overridePosition (newPosition);
 }
 
-inline void PlayHead::play (juce::Range<int64_t> rangeToPlay, bool looped)
+inline void PlayHead::play (yup::Range<int64_t> rangeToPlay, bool looped)
 {
     timelinePlayRange.store (rangeToPlay);
     looping = looped && (rangeToPlay.getLength() > 50);
@@ -209,7 +209,7 @@ inline void PlayHead::play()
     speed = 1;
 }
 
-inline void PlayHead::playSyncedToRange (juce::Range<int64_t> rangeToPlay)
+inline void PlayHead::playSyncedToRange (yup::Range<int64_t> rangeToPlay)
 {
     play (rangeToPlay, false);
     setSyncPositions ({});
@@ -254,9 +254,9 @@ inline bool PlayHead::isLooping() const noexcept                    { return loo
 
 inline bool PlayHead::isRollingIntoLoop() const noexcept            { return rollInToLoop.load (std::memory_order_relaxed); }
 
-inline juce::Range<int64_t> PlayHead::getLoopRange() const noexcept { return timelinePlayRange.load(); }
+inline yup::Range<int64_t> PlayHead::getLoopRange() const noexcept { return timelinePlayRange.load(); }
 
-inline void PlayHead::setLoopRange (bool loop, juce::Range<int64_t> loopRange, bool updatePosition)
+inline void PlayHead::setLoopRange (bool loop, yup::Range<int64_t> loopRange, bool updatePosition)
 {
     if (looping != loop || (loop && loopRange != getLoopRange()))
     {
@@ -327,21 +327,21 @@ inline int64_t PlayHead::referenceSamplePositionToTimelinePositionUnlooped (int6
     return syncPos.playoutSyncPosition + (referenceSamplePosition - syncPos.referenceSyncPosition) * speed;
 }
 
-inline juce::Range<int64_t> PlayHead::referenceSampleRangeToSourceRangeUnlooped (juce::Range<int64_t> sourceReferenceSampleRange) const
+inline yup::Range<int64_t> PlayHead::referenceSampleRangeToSourceRangeUnlooped (yup::Range<int64_t> sourceReferenceSampleRange) const
 {
     const auto syncPos = getSyncPositions();
     return { syncPos.playoutSyncPosition + (sourceReferenceSampleRange.getStart() - syncPos.referenceSyncPosition) * speed,
              syncPos.playoutSyncPosition + (sourceReferenceSampleRange.getEnd() - syncPos.referenceSyncPosition) * speed };
 }
 
-inline int64_t PlayHead::linearPositionToLoopPosition (int64_t position, juce::Range<int64_t> loopRange)
+inline int64_t PlayHead::linearPositionToLoopPosition (int64_t position, yup::Range<int64_t> loopRange)
 {
     const auto loopStart = loopRange.getStart();
-    return loopStart + juce::negativeAwareModulo ((position - loopStart), loopRange.getLength());
+    return loopStart + yup::negativeAwareModulo ((position - loopStart), loopRange.getLength());
 }
 
 //==============================================================================
-inline void PlayHead::setReferenceSampleRange (juce::Range<int64_t> sampleRange)
+inline void PlayHead::setReferenceSampleRange (yup::Range<int64_t> sampleRange)
 {
     referenceSampleRange.store (sampleRange);
 
@@ -349,7 +349,7 @@ inline void PlayHead::setReferenceSampleRange (juce::Range<int64_t> sampleRange)
         rollInToLoop = false;
 }
 
-inline juce::Range<int64_t> PlayHead::getReferenceSampleRange() const
+inline yup::Range<int64_t> PlayHead::getReferenceSampleRange() const
 {
     return referenceSampleRange.load();
 }
@@ -361,7 +361,7 @@ inline int64_t PlayHead::getPlayoutSyncPosition() const
 
 //==============================================================================
 //==============================================================================
-inline SplitTimelineRange referenceSampleRangeToSplitTimelineRange (const PlayHead& playHead, juce::Range<int64_t> referenceSampleRange)
+inline SplitTimelineRange referenceSampleRangeToSplitTimelineRange (const PlayHead& playHead, yup::Range<int64_t> referenceSampleRange)
 {
     const auto unloopedRange = playHead.referenceSampleRangeToSourceRangeUnlooped (referenceSampleRange);
     auto s = unloopedRange.getStart();

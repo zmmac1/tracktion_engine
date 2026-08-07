@@ -23,7 +23,7 @@ public:
                  const AudioFile& file,
                  double sampleRate,
                  int sampleDelayFromBufferStart,
-                 const juce::AudioBuffer<float>& data,
+                 const yup::AudioBuffer<float>& data,
                  int lengthInSamples,
                  float gainDb,
                  float pan,
@@ -39,13 +39,13 @@ public:
         const float volumeSliderPos = decibelsToVolumeFaderPosition (gainDb - (20.0f * (1.0f - velocity)));
         getGainsFromVolumeFaderPositionAndPan (volumeSliderPos, pan, getDefaultPanLaw(), gains[0], gains[1]);
 
-        const double hz = juce::MidiMessage::getMidiNoteInHertz (midiNote);
-        playbackRatio = hz / juce::MidiMessage::getMidiNoteInHertz (keyNote);
+        const double hz = yup::MidiMessage::getMidiNoteInHertz (midiNote);
+        playbackRatio = hz / yup::MidiMessage::getMidiNoteInHertz (keyNote);
         playbackRatio *= file.getSampleRate() / sampleRate;
         samplesLeftToPlay = playbackRatio > 0 ? (1 + (int) (lengthInSamples / playbackRatio)) : 0;
     }
 
-    void addNextBlock (juce::AudioBuffer<float>& outBuffer, int startSamp, int numSamples)
+    void addNextBlock (yup::AudioBuffer<float>& outBuffer, int startSamp, int numSamples)
     {
         jassert (! isFinished);
 
@@ -95,7 +95,7 @@ public:
                 endFade = std::max (0.0f, startFade - float (numSamps) * 0.01f);
             }
 
-            const int numSampsNeeded = 2 + juce::roundToInt ((numSamps + 2) * playbackRatio);
+            const int numSampsNeeded = 2 + yup::roundToInt ((numSamps + 2) * playbackRatio);
             AudioScratchBuffer scratch (audioData.getNumChannels(), numSampsNeeded + 8);
 
             if (offset + numSampsNeeded < audioData.getNumSamples())
@@ -129,18 +129,18 @@ public:
         }
     }
 
-    juce::LagrangeInterpolator resampler[2];
+    yup::LagrangeInterpolator resampler[2];
     int note;
     int offset, samplesLeftToPlay = 0;
     float gains[2];
     double playbackRatio = 1.0;
-    const juce::AudioBuffer<float>& audioData;
+    const yup::AudioBuffer<float>& audioData;
     float lastVals[4] = { 0, 0, 0, 0 };
     float startFade = 1.0f;
     bool openEnded, isFinished = false;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampledNote)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampledNote)
 };
 
 //==============================================================================
@@ -170,7 +170,7 @@ void SamplerPlugin::flushPendingUpdates()
 
 void SamplerPlugin::handleAsyncUpdate()
 {
-    juce::OwnedArray<SamplerSound> newSounds;
+    yup::OwnedArray<SamplerSound> newSounds;
 
     auto numSounds = state.getNumChildren();
 
@@ -187,10 +187,10 @@ void SamplerPlugin::handleAsyncUpdate()
                                        v[IDs::length],
                                        v[IDs::gainDb]);
 
-            s->keyNote      = juce::jlimit (0, 127, static_cast<int> (v[IDs::keyNote]));
-            s->minNote      = juce::jlimit (0, 127, static_cast<int> (v[IDs::minNote]));
-            s->maxNote      = juce::jlimit (0, 127, static_cast<int> (v[IDs::maxNote]));
-            s->pan          = juce::jlimit (-1.0f, 1.0f, static_cast<float> (v[IDs::pan]));
+            s->keyNote      = yup::jlimit (0, 127, static_cast<int> (v[IDs::keyNote]));
+            s->minNote      = yup::jlimit (0, 127, static_cast<int> (v[IDs::minNote]));
+            s->maxNote      = yup::jlimit (0, 127, static_cast<int> (v[IDs::maxNote]));
+            s->pan          = yup::jlimit (-1.0f, 1.0f, static_cast<float> (v[IDs::pan]));
             s->openEnded    = v[IDs::openEnded];
 
             newSounds.add (s);
@@ -214,7 +214,7 @@ void SamplerPlugin::handleAsyncUpdate()
     }
 
     {
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
         allNotesOff();
         soundList.swapWith (newSounds);
 
@@ -227,7 +227,7 @@ void SamplerPlugin::handleAsyncUpdate()
 
 void SamplerPlugin::initialise (const PluginInitialisationInfo&)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     allNotesOff();
 }
 
@@ -237,9 +237,9 @@ void SamplerPlugin::deinitialise()
 }
 
 //==============================================================================
-void SamplerPlugin::playNotes (const juce::BigInteger& keysDown)
+void SamplerPlugin::playNotes (const yup::BigInteger& keysDown)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     if (highlightedNotes != keysDown)
     {
@@ -283,7 +283,7 @@ void SamplerPlugin::playNotes (const juce::BigInteger& keysDown)
 
 void SamplerPlugin::allNotesOff()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     playingNotes.clear();
     highlightedNotes.clear();
 }
@@ -294,7 +294,7 @@ void SamplerPlugin::applyToBuffer (const PluginRenderContext& fc)
     {
         SCOPED_REALTIME_CHECK
 
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
 
         clearChannels (*fc.destBuffer, 2, -1, fc.bufferStartSample, fc.bufferNumSamples);
 
@@ -311,7 +311,7 @@ void SamplerPlugin::applyToBuffer (const PluginRenderContext& fc)
                 if (m.isNoteOn())
                 {
                     const int note = m.getNoteNumber();
-                    const int noteTimeSample = juce::roundToInt (m.getTimeStamp() * sampleRate);
+                    const int noteTimeSample = yup::roundToInt (m.getTimeStamp() * sampleRate);
 
                     for (auto playingNote : playingNotes)
                     {
@@ -350,7 +350,7 @@ void SamplerPlugin::applyToBuffer (const PluginRenderContext& fc)
                 else if (m.isNoteOff())
                 {
                     const int note = m.getNoteNumber();
-                    const int noteTimeSample = juce::roundToInt (m.getTimeStamp() * sampleRate);
+                    const int noteTimeSample = yup::roundToInt (m.getTimeStamp() * sampleRate);
 
                     for (auto playingNote : playingNotes)
                     {
@@ -391,22 +391,22 @@ int SamplerPlugin::getNumSounds() const
                             [] (int total, auto v) { return total + (v.hasType (IDs::SOUND) ? 1 : 0); });
 }
 
-juce::String SamplerPlugin::getSoundName (int index) const
+yup::String SamplerPlugin::getSoundName (int index) const
 {
     return getSound (index)[IDs::name];
 }
 
-void SamplerPlugin::setSoundName (int index, const juce::String& n)
+void SamplerPlugin::setSoundName (int index, const yup::String& n)
 {
     getSound (index).setProperty (IDs::name, n, getUndoManager());
 }
 
-bool SamplerPlugin::hasNameForMidiNoteNumber (int note, int, juce::String& noteName)
+bool SamplerPlugin::hasNameForMidiNoteNumber (int note, int, yup::String& noteName)
 {
-    juce::String s;
+    yup::String s;
 
     {
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
 
         for (auto ss : soundList)
         {
@@ -426,7 +426,7 @@ bool SamplerPlugin::hasNameForMidiNoteNumber (int note, int, juce::String& noteN
 
 AudioFile SamplerPlugin::getSoundFile (int index) const
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     if (auto s = soundList[index])
         return s->audioFile;
@@ -434,9 +434,9 @@ AudioFile SamplerPlugin::getSoundFile (int index) const
     return AudioFile (edit.engine);
 }
 
-juce::String SamplerPlugin::getSoundMedia (int index) const
+yup::String SamplerPlugin::getSoundMedia (int index) const
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     if (auto s = soundList[index])
         return s->source;
@@ -458,7 +458,7 @@ double SamplerPlugin::getSoundLength (int index) const
 
     if (l == 0.0)
     {
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
 
         if (auto s = soundList[index])
             return s->length;
@@ -467,7 +467,7 @@ double SamplerPlugin::getSoundLength (int index) const
     return l;
 }
 
-juce::String SamplerPlugin::addSound (const juce::String& source, const juce::String& name,
+yup::String SamplerPlugin::addSound (const yup::String& source, const yup::String& name,
                                       double startTime, double length, float gainDb)
 {
     const int maxNumSamples = 64;
@@ -494,7 +494,7 @@ void SamplerPlugin::removeSound (int index)
 {
     state.removeChild (index, getUndoManager());
 
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     playingNotes.clear();
     highlightedNotes.clear();
 }
@@ -504,9 +504,9 @@ void SamplerPlugin::setSoundParams (int index, int keyNote, int minNote, int max
     auto um = getUndoManager();
 
     auto v = getSound (index);
-    v.setProperty (IDs::keyNote, juce::jlimit (0, 127, keyNote), um);
-    v.setProperty (IDs::minNote, juce::jlimit (0, 127, std::min (minNote, maxNote)), um);
-    v.setProperty (IDs::maxNote, juce::jlimit (0, 127, std::max (minNote, maxNote)), um);
+    v.setProperty (IDs::keyNote, yup::jlimit (0, 127, keyNote), um);
+    v.setProperty (IDs::minNote, yup::jlimit (0, 127, std::min (minNote, maxNote)), um);
+    v.setProperty (IDs::maxNote, yup::jlimit (0, 127, std::max (minNote, maxNote)), um);
 }
 
 void SamplerPlugin::setSoundGains (int index, float gainDb, float pan)
@@ -514,8 +514,8 @@ void SamplerPlugin::setSoundGains (int index, float gainDb, float pan)
     auto um = getUndoManager();
 
     auto v = getSound (index);
-    v.setProperty (IDs::gainDb, juce::jlimit (-48.0f, 48.0f, gainDb), um);
-    v.setProperty (IDs::pan,    juce::jlimit (-1.0f,  1.0f,  pan), um);
+    v.setProperty (IDs::gainDb, yup::jlimit (-48.0f, 48.0f, gainDb), um);
+    v.setProperty (IDs::pan,    yup::jlimit (-1.0f,  1.0f,  pan), um);
 }
 
 void SamplerPlugin::setSoundExcerpt (int index, double start, double length)
@@ -535,14 +535,14 @@ void SamplerPlugin::setSoundOpenEnded (int index, bool b)
     v.setProperty (IDs::openEnded, b, um);
 }
 
-void SamplerPlugin::setSoundMedia (int index, const juce::String& source)
+void SamplerPlugin::setSoundMedia (int index, const yup::String& source)
 {
     auto v = getSound (index);
     v.setProperty (IDs::source, source, getUndoManager());
     triggerAsyncUpdate();
 }
 
-juce::ValueTree SamplerPlugin::getSound (int soundIndex) const
+yup::ValueTree SamplerPlugin::getSound (int soundIndex) const
 {
     int index = 0;
 
@@ -555,9 +555,9 @@ juce::ValueTree SamplerPlugin::getSound (int soundIndex) const
 }
 
 //==============================================================================
-juce::Array<Exportable::ReferencedItem> SamplerPlugin::getReferencedItems()
+yup::Array<Exportable::ReferencedItem> SamplerPlugin::getReferencedItems()
 {
-    juce::Array<ReferencedItem> results;
+    yup::Array<ReferencedItem> results;
 
     // must be careful to generate this list in the right order..
     for (int i = 0; i < getNumSounds(); ++i)
@@ -602,28 +602,28 @@ void SamplerPlugin::reassignReferencedItem (const ReferencedItem& item, ProjectI
 
 void SamplerPlugin::sourceMediaChanged()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     for (auto s : soundList)
         s->refreshFile();
 }
 
-void SamplerPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void SamplerPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyValueTree (state, v, getUndoManager());
 }
 
 //==============================================================================
 SamplerPlugin::SamplerSound::SamplerSound (SamplerPlugin& sf,
-                                           const juce::String& source_,
-                                           const juce::String& name_,
+                                           const yup::String& source_,
+                                           const yup::String& name_,
                                            const double startTime_,
                                            const double length_,
                                            const float gainDb_)
     : owner (sf),
       source (source_),
       name (name_),
-      gainDb (juce::jlimit (-48.0f, 48.0f, gainDb_)),
+      gainDb (yup::jlimit (-48.0f, 48.0f, gainDb_)),
       startTime (startTime_),
       length (length_),
       audioFile (owner.edit.engine, SourceFileReference::findFileFromString (owner.edit, source))
@@ -647,7 +647,7 @@ void SamplerPlugin::SamplerSound::setExcerpt (double startTime_, double length_)
     {
         audioFile = AudioFile (owner.edit.engine, SourceFileReference::findFileFromString (owner.edit, source));
 
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         if (! audioFile.isValid() && ProjectItemID (source).isValid())
             DBG ("Failed to find media: " << source);
        #endif
@@ -657,15 +657,15 @@ void SamplerPlugin::SamplerSound::setExcerpt (double startTime_, double length_)
     {
         const double minLength = 32.0 / audioFile.getSampleRate();
 
-        startTime = juce::jlimit (0.0, audioFile.getLength() - minLength, startTime_);
+        startTime = yup::jlimit (0.0, audioFile.getLength() - minLength, startTime_);
 
         if (length_ > 0)
-            length = juce::jlimit (minLength, audioFile.getLength() - startTime, length_);
+            length = yup::jlimit (minLength, audioFile.getLength() - startTime, length_);
         else
             length = audioFile.getLength();
 
-        fileStartSample   = juce::roundToInt (startTime * audioFile.getSampleRate());
-        fileLengthSamples = juce::roundToInt (length * audioFile.getSampleRate());
+        fileStartSample   = yup::roundToInt (startTime * audioFile.getSampleRate());
+        fileLengthSamples = yup::roundToInt (length * audioFile.getSampleRate());
 
         if (auto reader = owner.engine.getAudioFileManager().cache.createReader (audioFile))
         {

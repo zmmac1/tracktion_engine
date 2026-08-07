@@ -17,11 +17,11 @@ DAWprojectImporter::DAWprojectImporter (Engine& e, const ParseOptions& opts)
 }
 
 //==============================================================================
-std::unique_ptr<Edit> DAWprojectImporter::importFromFile (const juce::File& file)
+std::unique_ptr<Edit> DAWprojectImporter::importFromFile (const yup::File& file)
 {
     sourceFileDirectory = file.getParentDirectory();
 
-    juce::ZipFile zipFile (file);
+    yup::ZipFile zipFile (file);
 
     if (zipFile.getNumEntries() == 0)
     {
@@ -37,14 +37,14 @@ std::unique_ptr<Edit> DAWprojectImporter::importFromFile (const juce::File& file
         return nullptr;
     }
 
-    std::unique_ptr<juce::InputStream> projectStream (zipFile.createStreamForEntry (*projectEntry));
+    std::unique_ptr<yup::InputStream> projectStream (zipFile.createStreamForEntry (*projectEntry));
     if (projectStream == nullptr)
     {
         DBG ("DAWproject: Failed to read project.xml");
         return nullptr;
     }
 
-    auto projectXml = juce::parseXML (projectStream->readEntireStreamAsString());
+    auto projectXml = yup::parseXML (projectStream->readEntireStreamAsString());
     if (projectXml == nullptr)
     {
         DBG ("DAWproject: Failed to parse project.xml");
@@ -55,7 +55,7 @@ std::unique_ptr<Edit> DAWprojectImporter::importFromFile (const juce::File& file
     if (options.audioFileDestination.exists())
         audioFileDirectory = options.audioFileDestination;
     else if (options.extractAudioFiles)
-        audioFileDirectory = juce::File::createTempFile ("dawproject_audio");
+        audioFileDirectory = yup::File::createTempFile ("dawproject_audio");
 
     // Extract audio files if needed
     if (options.extractAudioFiles && audioFileDirectory.isDirectory())
@@ -70,8 +70,8 @@ std::unique_ptr<Edit> DAWprojectImporter::importFromFile (const juce::File& file
 }
 
 //==============================================================================
-std::unique_ptr<Edit> DAWprojectImporter::importFromXml (const juce::XmlElement& projectXml,
-                                                         const juce::File& audioDir)
+std::unique_ptr<Edit> DAWprojectImporter::importFromXml (const yup::XmlElement& projectXml,
+                                                         const yup::File& audioDir)
 {
     audioFileDirectory = audioDir;
 
@@ -82,11 +82,11 @@ std::unique_ptr<Edit> DAWprojectImporter::importFromXml (const juce::XmlElement&
     }
 
     // Build ID resolver from all elements with id attributes
-    std::function<void(const juce::XmlElement&)> collectIds = [&] (const juce::XmlElement& element)
+    std::function<void(const yup::XmlElement&)> collectIds = [&] (const yup::XmlElement& element)
     {
         auto id = element.getStringAttribute (xml::id);
         if (id.isNotEmpty())
-            idResolver.registerElement (id, const_cast<juce::XmlElement*> (&element));
+            idResolver.registerElement (id, const_cast<yup::XmlElement*> (&element));
 
         for (auto* child : element.getChildIterator())
             collectIds (*child);
@@ -122,7 +122,7 @@ std::unique_ptr<Edit> DAWprojectImporter::importFromXml (const juce::XmlElement&
 }
 
 //==============================================================================
-void DAWprojectImporter::parseTransport (const juce::XmlElement& transportElement, Edit& edit)
+void DAWprojectImporter::parseTransport (const yup::XmlElement& transportElement, Edit& edit)
 {
     // Parse initial tempo
     if (auto* tempoElement = transportElement.getChildByName (xml::Tempo))
@@ -139,12 +139,12 @@ void DAWprojectImporter::parseTransport (const juce::XmlElement& transportElemen
         int denominator = parseInt (timeSigElement->getStringAttribute (xml::denominator), 4);
 
         if (auto* timeSig = edit.tempoSequence.getTimeSig (0))
-            timeSig->setStringTimeSig (juce::String (numerator) + "/" + juce::String (denominator));
+            timeSig->setStringTimeSig (yup::String (numerator) + "/" + yup::String (denominator));
     }
 }
 
 //==============================================================================
-void DAWprojectImporter::parseStructure (const juce::XmlElement& structureElement, Edit& edit)
+void DAWprojectImporter::parseStructure (const yup::XmlElement& structureElement, Edit& edit)
 {
     for (auto* child : structureElement.getChildIterator())
     {
@@ -156,7 +156,7 @@ void DAWprojectImporter::parseStructure (const juce::XmlElement& structureElemen
 }
 
 //==============================================================================
-void DAWprojectImporter::parseTrack (const juce::XmlElement& trackElement, Edit& edit, Track* parentTrack)
+void DAWprojectImporter::parseTrack (const yup::XmlElement& trackElement, Edit& edit, Track* parentTrack)
 {
     auto id = trackElement.getStringAttribute (xml::id);
     auto name = trackElement.getStringAttribute (xml::name);
@@ -191,7 +191,7 @@ void DAWprojectImporter::parseTrack (const juce::XmlElement& trackElement, Edit&
         // Set color if present
         auto colorStr = trackElement.getStringAttribute (xml::color);
         if (colorStr.isNotEmpty())
-            newTrack->setColour (dawprojectStringToColour (colorStr));
+            newTrack->setColor (dawprojectStringToColor (colorStr));
 
         // Register the track ID
         if (id.isNotEmpty())
@@ -216,7 +216,7 @@ void DAWprojectImporter::parseTrack (const juce::XmlElement& trackElement, Edit&
 }
 
 //==============================================================================
-void DAWprojectImporter::parseChannel (const juce::XmlElement& channelElement, Edit& edit, Track* track)
+void DAWprojectImporter::parseChannel (const yup::XmlElement& channelElement, Edit& edit, Track* track)
 {
     auto id = channelElement.getStringAttribute (xml::id);
     auto role = channelElement.getStringAttribute (xml::role);
@@ -312,7 +312,7 @@ void DAWprojectImporter::parseChannel (const juce::XmlElement& channelElement, E
 }
 
 //==============================================================================
-void DAWprojectImporter::parseArrangement (const juce::XmlElement& arrangementElement, Edit& edit)
+void DAWprojectImporter::parseArrangement (const yup::XmlElement& arrangementElement, Edit& edit)
 {
     // Parse tempo automation
     if (auto* tempoAutomation = arrangementElement.getChildByName (xml::TempoAutomation))
@@ -344,7 +344,7 @@ void DAWprojectImporter::parseArrangement (const juce::XmlElement& arrangementEl
 }
 
 //==============================================================================
-void DAWprojectImporter::parseTempoAutomation (const juce::XmlElement& tempoAutomation, Edit& edit)
+void DAWprojectImporter::parseTempoAutomation (const yup::XmlElement& tempoAutomation, Edit& edit)
 {
     for (auto* child : tempoAutomation.getChildIterator())
     {
@@ -365,14 +365,14 @@ void DAWprojectImporter::parseTempoAutomation (const juce::XmlElement& tempoAuto
             else
             {
                 auto newTempo = edit.tempoSequence.insertTempo (BeatPosition::fromBeats (beats), bpm, 0.0f);
-                juce::ignoreUnused (newTempo);
+                yup::ignoreUnused (newTempo);
             }
         }
     }
 }
 
 //==============================================================================
-void DAWprojectImporter::parseTimeSignatureAutomation (const juce::XmlElement& timeSigAutomation, Edit& edit)
+void DAWprojectImporter::parseTimeSignatureAutomation (const yup::XmlElement& timeSigAutomation, Edit& edit)
 {
     for (auto* child : timeSigAutomation.getChildIterator())
     {
@@ -383,7 +383,7 @@ void DAWprojectImporter::parseTimeSignatureAutomation (const juce::XmlElement& t
             int denominator = parseInt (child->getStringAttribute (xml::denominator), 4);
 
             double beats = parseDouble (timeStr, 0.0);
-            auto timeSigStr = juce::String (numerator) + "/" + juce::String (denominator);
+            auto timeSigStr = yup::String (numerator) + "/" + yup::String (denominator);
 
             if (beats == 0.0)
             {
@@ -401,7 +401,7 @@ void DAWprojectImporter::parseTimeSignatureAutomation (const juce::XmlElement& t
 }
 
 //==============================================================================
-void DAWprojectImporter::parseMarkers (const juce::XmlElement& markersElement, Edit& edit)
+void DAWprojectImporter::parseMarkers (const yup::XmlElement& markersElement, Edit& edit)
 {
     edit.ensureMarkerTrack();
     auto* markerTrack = edit.getMarkerTrack();
@@ -427,14 +427,14 @@ void DAWprojectImporter::parseMarkers (const juce::XmlElement& markersElement, E
 
                 auto colorStr = child->getStringAttribute (xml::color);
                 if (colorStr.isNotEmpty())
-                    clip->setColour (dawprojectStringToColour (colorStr));
+                    clip->setColor (dawprojectStringToColor (colorStr));
             }
         }
     }
 }
 
 //==============================================================================
-void DAWprojectImporter::parseLanes (const juce::XmlElement& lanesElement, Edit& edit, Track* track, bool positionIsBeats)
+void DAWprojectImporter::parseLanes (const yup::XmlElement& lanesElement, Edit& edit, Track* track, bool positionIsBeats)
 {
     auto* clipTrack = dynamic_cast<ClipTrack*> (track);
     if (clipTrack == nullptr)
@@ -452,7 +452,7 @@ void DAWprojectImporter::parseLanes (const juce::XmlElement& lanesElement, Edit&
 }
 
 //==============================================================================
-void DAWprojectImporter::parseScenes (const juce::XmlElement& scenesElement, Edit& edit)
+void DAWprojectImporter::parseScenes (const yup::XmlElement& scenesElement, Edit& edit)
 {
     int numScenes = 0;
     for (auto* child : scenesElement.getChildIterator())
@@ -480,7 +480,7 @@ void DAWprojectImporter::parseScenes (const juce::XmlElement& scenesElement, Edi
 
             auto colorStr = child->getStringAttribute (xml::color);
             if (colorStr.isNotEmpty())
-                scene->colour = dawprojectStringToColour (colorStr);
+                scene->colour = dawprojectStringToColor (colorStr);
         }
 
         if (auto* contentElement = child->getChildByName (xml::Content))
@@ -491,7 +491,7 @@ void DAWprojectImporter::parseScenes (const juce::XmlElement& scenesElement, Edi
 }
 
 //==============================================================================
-void DAWprojectImporter::parseSceneContent (const juce::XmlElement& contentElement, Edit& edit, int sceneIndex)
+void DAWprojectImporter::parseSceneContent (const yup::XmlElement& contentElement, Edit& edit, int sceneIndex)
 {
     auto* topLanes = contentElement.getChildByName (xml::Lanes);
     if (topLanes == nullptr)
@@ -536,7 +536,7 @@ void DAWprojectImporter::parseSceneContent (const juce::XmlElement& contentEleme
 }
 
 //==============================================================================
-void DAWprojectImporter::parseClips (const juce::XmlElement& clipsElement, Edit&, ClipOwner& target, bool positionIsBeats)
+void DAWprojectImporter::parseClips (const yup::XmlElement& clipsElement, Edit&, ClipOwner& target, bool positionIsBeats)
 {
     for (auto* child : clipsElement.getChildIterator())
     {
@@ -546,7 +546,7 @@ void DAWprojectImporter::parseClips (const juce::XmlElement& clipsElement, Edit&
 }
 
 //==============================================================================
-Clip::Ptr DAWprojectImporter::parseClip (const juce::XmlElement& clipElement, Edit&, ClipOwner& target, bool positionIsBeats)
+Clip::Ptr DAWprojectImporter::parseClip (const yup::XmlElement& clipElement, Edit&, ClipOwner& target, bool positionIsBeats)
 {
     auto name = clipElement.getStringAttribute (xml::name);
     auto timeAttr = parseDouble (clipElement.getStringAttribute (xml::time), 0.0);
@@ -567,12 +567,12 @@ Clip::Ptr DAWprojectImporter::parseClip (const juce::XmlElement& clipElement, Ed
     // Returns both the matching child and the Lanes element that contains it.
     struct DescendantSearch
     {
-        const juce::XmlElement* match = nullptr;
-        const juce::XmlElement* parentLanes = nullptr;
+        const yup::XmlElement* match = nullptr;
+        const yup::XmlElement* parentLanes = nullptr;
     };
 
-    std::function<DescendantSearch (const juce::XmlElement&, const char*, const juce::XmlElement*)> findDescendant
-        = [&] (const juce::XmlElement& element, const char* tag, const juce::XmlElement* parentLanes) -> DescendantSearch
+    std::function<DescendantSearch (const yup::XmlElement&, const char*, const yup::XmlElement*)> findDescendant
+        = [&] (const yup::XmlElement& element, const char* tag, const yup::XmlElement* parentLanes) -> DescendantSearch
     {
         if (auto* direct = element.getChildByName (tag))
             return { direct, parentLanes };
@@ -645,7 +645,7 @@ Clip::Ptr DAWprojectImporter::parseClip (const juce::XmlElement& clipElement, Ed
         // Set clip color
         auto colorStr = clipElement.getStringAttribute (xml::color);
         if (colorStr.isNotEmpty())
-            clip->setColour (dawprojectStringToColour (colorStr));
+            clip->setColor (dawprojectStringToColor (colorStr));
 
         // Handle enable/disable
         auto enabled = parseBool (clipElement.getStringAttribute (xml::enable), true);
@@ -656,7 +656,7 @@ Clip::Ptr DAWprojectImporter::parseClip (const juce::XmlElement& clipElement, Ed
 }
 
 //==============================================================================
-void DAWprojectImporter::parseAudioClip (const juce::XmlElement& clipElement, WaveAudioClip& clip)
+void DAWprojectImporter::parseAudioClip (const yup::XmlElement& clipElement, WaveAudioClip& clip)
 {
     // Parse playStart (offset)
     auto playStart = parseDouble (clipElement.getStringAttribute (xml::playStart), 0.0);
@@ -690,7 +690,7 @@ void DAWprojectImporter::parseAudioClip (const juce::XmlElement& clipElement, Wa
 }
 
 //==============================================================================
-void DAWprojectImporter::parseMidiClip (const juce::XmlElement& clipElement, MidiClip& clip)
+void DAWprojectImporter::parseMidiClip (const yup::XmlElement& clipElement, MidiClip& clip)
 {
     auto contentTimeUnit = clipElement.getStringAttribute (xml::contentTimeUnit);
     auto contentIsBeats = contentTimeUnit.isEmpty() || contentTimeUnit == xml::beats;
@@ -729,7 +729,7 @@ void DAWprojectImporter::parseMidiClip (const juce::XmlElement& clipElement, Mid
 }
 
 //==============================================================================
-void DAWprojectImporter::parseNotes (const juce::XmlElement& notesElement, MidiClip& clip)
+void DAWprojectImporter::parseNotes (const yup::XmlElement& notesElement, MidiClip& clip)
 {
     auto& sequence = clip.getSequence();
     auto* undoManager = &clip.edit.getUndoManager();
@@ -779,7 +779,7 @@ void DAWprojectImporter::parseNotes (const juce::XmlElement& notesElement, MidiC
 }
 
 //==============================================================================
-void DAWprojectImporter::parseControllerPoints (const juce::XmlElement& lanesElement, MidiClip& clip)
+void DAWprojectImporter::parseControllerPoints (const yup::XmlElement& lanesElement, MidiClip& clip)
 {
     auto& sequence = clip.getSequence();
     auto* undoManager = &clip.edit.getUndoManager();
@@ -844,7 +844,7 @@ void DAWprojectImporter::parseControllerPoints (const juce::XmlElement& lanesEle
 }
 
 //==============================================================================
-void DAWprojectImporter::parseDevices (const juce::XmlElement& devicesElement, Edit& edit, Track& track)
+void DAWprojectImporter::parseDevices (const yup::XmlElement& devicesElement, Edit& edit, Track& track)
 {
     auto* audioTrack = dynamic_cast<AudioTrack*> (&track);
     if (audioTrack == nullptr)
@@ -864,13 +864,13 @@ void DAWprojectImporter::parseDevices (const juce::XmlElement& devicesElement, E
 }
 
 //==============================================================================
-Plugin::Ptr DAWprojectImporter::parsePlugin (const juce::XmlElement& pluginElement, Edit& edit)
+Plugin::Ptr DAWprojectImporter::parsePlugin (const yup::XmlElement& pluginElement, Edit& edit)
 {
     auto deviceName = pluginElement.getStringAttribute (xml::deviceName);
     auto deviceID = pluginElement.getStringAttribute (xml::deviceID);
 
     // Try to find the plugin by ID or name
-    juce::String pluginFormat;
+    yup::String pluginFormat;
     if (pluginElement.hasTagName (xml::Vst3Plugin))
         pluginFormat = "VST3";
     else if (pluginElement.hasTagName (xml::Vst2Plugin))
@@ -892,7 +892,7 @@ Plugin::Ptr DAWprojectImporter::parsePlugin (const juce::XmlElement& pluginEleme
         if (! matches && deviceName.isNotEmpty())
             matches = desc.name == deviceName || desc.descriptiveName == deviceName;
 
-        if (matches && (pluginFormat.isEmpty() || desc.pluginFormatName == pluginFormat))
+        if (matches && (pluginFormat.isEmpty() || desc.name == pluginFormat))
         {
             auto plugin = edit.getPluginCache().createNewPlugin (ExternalPlugin::xmlTypeName, desc);
             if (plugin != nullptr)
@@ -914,15 +914,15 @@ Plugin::Ptr DAWprojectImporter::parsePlugin (const juce::XmlElement& pluginEleme
 }
 
 //==============================================================================
-juce::File DAWprojectImporter::resolveAudioFile (const juce::String& path, bool external)
+yup::File DAWprojectImporter::resolveAudioFile (const yup::String& path, bool external)
 {
     if (path.isEmpty())
         return {};
 
     // Absolute paths are valid for both internal and external references.
-    if (juce::File::isAbsolutePath (path))
+    if (yup::File::isAbsolutePath (path))
     {
-        juce::File file (path);
+        yup::File file (path);
         if (file.existsAsFile())
             return file;
     }
@@ -931,7 +931,7 @@ juce::File DAWprojectImporter::resolveAudioFile (const juce::String& path, bool 
     // not to the contents of the zip archive.
     if (external)
     {
-        if (sourceFileDirectory != juce::File())
+        if (sourceFileDirectory != yup::File())
         {
             auto externalFile = sourceFileDirectory.getChildFile (path);
             if (externalFile.existsAsFile())
@@ -950,7 +950,7 @@ juce::File DAWprojectImporter::resolveAudioFile (const juce::String& path, bool 
 }
 
 //==============================================================================
-void DAWprojectImporter::extractAudioFiles (juce::ZipFile& zipFile, const juce::File& destDir)
+void DAWprojectImporter::extractAudioFiles (yup::ZipFile& zipFile, const yup::File& destDir)
 {
     for (int i = 0; i < zipFile.getNumEntries(); ++i)
     {
@@ -960,14 +960,14 @@ void DAWprojectImporter::extractAudioFiles (juce::ZipFile& zipFile, const juce::
 
         const auto& filename = entry->filename;
 
-        // Extract files from audio/ directory or any audio-format file. juce::ZipFile
+        // Extract files from audio/ directory or any audio-format file. yup::ZipFile
         // appends the entry's relative path to the directory we pass, so the file lands
         // at <destDir>/<entry.filename> — matching the path stored in <File path="..."/>.
         if (filename.startsWith ("audio/") || filename.endsWithIgnoreCase (".wav") ||
             filename.endsWithIgnoreCase (".aiff") || filename.endsWithIgnoreCase (".mp3") ||
             filename.endsWithIgnoreCase (".flac") || filename.endsWithIgnoreCase (".ogg"))
         {
-            // Reject path traversal (e.g. "../escape.wav"). juce::ZipFile also enforces
+            // Reject path traversal (e.g. "../escape.wav"). yup::ZipFile also enforces
             // an isAChildOf check, but rejecting up-front avoids any partial side effects.
             if (filename.contains (".."))
                 continue;
@@ -978,21 +978,21 @@ void DAWprojectImporter::extractAudioFiles (juce::ZipFile& zipFile, const juce::
 }
 
 //==============================================================================
-TimePosition DAWprojectImporter::parseTime (const juce::XmlElement& element, const char* attrName, bool isBeats) const
+TimePosition DAWprojectImporter::parseTime (const yup::XmlElement& element, const char* attrName, bool isBeats) const
 {
     auto value = parseDouble (element.getStringAttribute (attrName), 0.0);
-    juce::ignoreUnused (isBeats); // TODO: Convert from beats using tempo sequence if needed
+    yup::ignoreUnused (isBeats); // TODO: Convert from beats using tempo sequence if needed
     return TimePosition::fromSeconds (value);
 }
 
-TimeDuration DAWprojectImporter::parseDuration (const juce::XmlElement& element, const char* attrName, bool isBeats) const
+TimeDuration DAWprojectImporter::parseDuration (const yup::XmlElement& element, const char* attrName, bool isBeats) const
 {
     auto value = parseDouble (element.getStringAttribute (attrName), 0.0);
-    juce::ignoreUnused (isBeats); // TODO: Convert from beats using tempo sequence if needed
+    yup::ignoreUnused (isBeats); // TODO: Convert from beats using tempo sequence if needed
     return TimeDuration::fromSeconds (value);
 }
 
-bool DAWprojectImporter::isTimeUnitBeats (const juce::XmlElement& element) const
+bool DAWprojectImporter::isTimeUnitBeats (const yup::XmlElement& element) const
 {
     auto timeUnit = element.getStringAttribute (xml::timeUnit);
     return timeUnit.isEmpty() || timeUnit == xml::beats;

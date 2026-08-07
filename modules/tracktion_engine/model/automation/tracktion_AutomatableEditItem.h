@@ -16,18 +16,18 @@ namespace tracktion::inline engine {
 class AutomatableEditItem  : public EditItem
 {
 public:
-    AutomatableEditItem (Edit&, const juce::ValueTree&);
+    AutomatableEditItem (Edit&, const yup::ValueTree&);
     ~AutomatableEditItem() override;
 
     //==============================================================================
     virtual void flushPluginStateToValueTree();
-    virtual void restorePluginStateFromValueTree (const juce::ValueTree&) { jassertfalse; }
+    virtual void restorePluginStateFromValueTree (const yup::ValueTree&) { jassertfalse; }
 
     //==============================================================================
-    juce::Array<AutomatableParameter*> getAutomatableParameters() const;
+    yup::Array<AutomatableParameter*> getAutomatableParameters() const;
     int getNumAutomatableParameters() const;
     AutomatableParameter::Ptr getAutomatableParameter (int index) const     { return automatableParams[index]; }
-    AutomatableParameter::Ptr getAutomatableParameterByID (const juce::String& paramID) const;
+    AutomatableParameter::Ptr getAutomatableParameterByID (const yup::String& paramID) const;
     void visitAllAutomatableParams (const std::function<void(AutomatableParameter&)>& visit) const;
 
     void deleteParameter (AutomatableParameter*);
@@ -36,7 +36,7 @@ public:
     int indexOfAutomatableParameter (const AutomatableParameter::Ptr&) const;
 
     AutomatableParameterTree& getParameterTree() const;
-    juce::ReferenceCountedArray<AutomatableParameter> getFlattenedParameterTree() const;
+    yup::ReferenceCountedArray<AutomatableParameter> getFlattenedParameterTree() const;
 
     struct ParameterListChangeListener
     {
@@ -73,7 +73,7 @@ public:
     void resetRecordingStatus();
 
     //==============================================================================
-    juce::ValueTree elementState;
+    yup::ValueTree elementState;
     juce::CachedValue<bool> remapOnTempoChange;
 
     /** @internal. */
@@ -101,7 +101,7 @@ protected:
 
 private:
     RealTimeSpinLock activeParameterLock;
-    juce::ReferenceCountedArray<AutomatableParameter> automatableParams, activeParameters;
+    yup::ReferenceCountedArray<AutomatableParameter> automatableParams, activeParameters;
     mutable AutomatableParameterTree parameterTree;
 
     mutable bool parameterTreeBuilt = false;
@@ -110,11 +110,11 @@ private:
     uint32_t systemTimeOfLastPlayedBlock = 0;
     TimePosition lastTime;
 
-    struct ParameterChangeListeners  : public juce::AsyncUpdater
+    struct ParameterChangeListeners  : public yup::AsyncUpdater
     {
         ParameterChangeListeners (AutomatableEditItem&);
         AutomatableEditItem& owner;
-        juce::ListenerList<ParameterListChangeListener> listeners;
+        yup::ListenerList<ParameterListChangeListener> listeners;
         void handleAsyncUpdate() override;
     };
 
@@ -122,10 +122,10 @@ private:
     void sendListChangeMessage() const;
 
     //==============================================================================
-    juce::ReferenceCountedArray<AutomatableParameter> getFlattenedParameterTree (AutomatableParameterTree::TreeNode&) const;
+    yup::ReferenceCountedArray<AutomatableParameter> getFlattenedParameterTree (AutomatableParameterTree::TreeNode&) const;
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (AutomatableEditItem)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomatableEditItem)
+    YUP_DECLARE_WEAK_REFERENCEABLE (AutomatableEditItem)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomatableEditItem)
 };
 
 } // namespace tracktion::inline engine

@@ -20,17 +20,17 @@ public:
     static const char* getPluginName()                  { return NEEDS_TRANS("Reverb"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return TRANS("Reverb"); }
-    juce::String getPluginType() override               { return xmlTypeName; }
+    yup::String getName() const override               { return TRANS("Reverb"); }
+    yup::String getPluginType() override               { return xmlTypeName; }
 
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     void reset() override;
-    int getNumOutputChannelsGivenInputs (int numInputChannels) override { return juce::jmin (numInputChannels, 2); }
+    int getNumOutputChannelsGivenInputs (int numInputChannels) override { return yup::jmin (numInputChannels, 2); }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
     void applyToBuffer (const PluginRenderContext&) override;
-    juce::String getSelectableDescription() override    { return TRANS("Reverb Plugin"); }
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    yup::String getSelectableDescription() override    { return TRANS("Reverb Plugin"); }
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     //==============================================================================
     void setRoomSize (float value);
@@ -59,9 +59,9 @@ public:
 
 private:
     bool outputSilent = true;
-    juce::Reverb reverb;
+    yup::Reverb reverb;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverbPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverbPlugin)
 };
 
 } // namespace tracktion::inline engine

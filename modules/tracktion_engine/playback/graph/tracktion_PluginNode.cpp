@@ -108,7 +108,7 @@ tracktion::graph::NodeProperties PluginNode::getNodeProperties()
 
 void PluginNode::prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo& info)
 {
-    juce::ignoreUnused (info);
+    yup::ignoreUnused (info);
     jassert (sampleRate == info.sampleRate);
     jassert (! isPrepared); // Is this being called multiple times?
 
@@ -118,7 +118,7 @@ void PluginNode::prepareToPlay (const tracktion::graph::PlaybackInitialisationIn
         automationAdjustmentTime = TimeDuration::fromSamples (-props.latencyNumSamples, sampleRate);
 
     if (shouldUseFineGrainAutomation (*plugin))
-        subBlockSizeToUse = std::max (128, 128 * juce::roundToInt (info.sampleRate / 44100.0));
+        subBlockSizeToUse = std::max (128, 128 * yup::roundToInt (info.sampleRate / 44100.0));
 
     canProcessBypassed = balanceLatency
                             && dynamic_cast<ExternalPlugin*> (plugin.get()) != nullptr
@@ -152,12 +152,12 @@ void PluginNode::prepareToPlay (const tracktion::graph::PlaybackInitialisationIn
     }
 }
 
-void PluginNode::prefetchBlock (juce::Range<int64_t>)
+void PluginNode::prefetchBlock (yup::Range<int64_t>)
 {
     plugin->prepareForNextBlock (getEditTimeRange().getStart());
 }
 
-void PluginNode::preProcess (choc::buffer::FrameCount, juce::Range<int64_t>)
+void PluginNode::preProcess (choc::buffer::FrameCount, yup::Range<int64_t>)
 {
     if (canUseSourceBuffers)
         setBufferViewToUse (input.get(), input->getProcessedOutput().audio);
@@ -305,10 +305,10 @@ void PluginNode::initialisePlugin (double sampleRateToUse, int blockSizeToUse)
     isInitialised = true;
 
     sampleRate = sampleRateToUse;
-    latencyNumSamples = juce::roundToInt (plugin->getLatencySeconds() * sampleRate);
+    latencyNumSamples = yup::roundToInt (plugin->getLatencySeconds() * sampleRate);
 }
 
-PluginRenderContext PluginNode::getPluginRenderContext (TimeRange editTime, juce::AudioBuffer<float>& destBuffer)
+PluginRenderContext PluginNode::getPluginRenderContext (TimeRange editTime, yup::AudioBuffer<float>& destBuffer)
 {
     return { &destBuffer,
              0, destBuffer.getNumSamples(),

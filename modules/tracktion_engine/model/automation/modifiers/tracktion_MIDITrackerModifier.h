@@ -16,15 +16,15 @@ class MIDITrackerModifier   : public Modifier,
 {
 public:
     //==============================================================================
-    MIDITrackerModifier (Edit&, const juce::ValueTree&);
+    MIDITrackerModifier (Edit&, const yup::ValueTree&);
     ~MIDITrackerModifier() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<MIDITrackerModifier>;
-    using Array = juce::ReferenceCountedArray<MIDITrackerModifier>;
+    using Ptr = yup::ReferenceCountedObjectPtr<MIDITrackerModifier>;
+    using Array = yup::ReferenceCountedArray<MIDITrackerModifier>;
 
     using Modifier::initialise;
     void initialise() override;
-    juce::String getName() const override               { return TRANS("MIDI Tracker Modifier"); }
+    yup::String getName() const override               { return TRANS("MIDI Tracker Modifier"); }
 
     //==============================================================================
     /** Returns the current value of the modifier. */
@@ -33,9 +33,9 @@ public:
     /** Returns the MIDI value, either a pitch or velocity. */
     int getCurrentMIDIValue() const noexcept;
 
-    AutomatableParameter::ModifierAssignment* createAssignment (const juce::ValueTree&) override;
+    AutomatableParameter::ModifierAssignment* createAssignment (const yup::ValueTree&) override;
 
-    juce::StringArray getMidiInputNames() override;
+    yup::StringArray getMidiInputNames() override;
     ProcessingPosition getProcessingPosition() override { return ProcessingPosition::preFX; }
 
     void applyToBuffer (const PluginRenderContext&) override;
@@ -43,18 +43,18 @@ public:
     //==============================================================================
     struct Assignment   : public AutomatableParameter::ModifierAssignment
     {
-        Assignment (const juce::ValueTree&, const MIDITrackerModifier&);
+        Assignment (const yup::ValueTree&, const MIDITrackerModifier&);
 
         bool isForModifierSource (const ModifierSource&) const override;
-        juce::ReferenceCountedObjectPtr<MIDITrackerModifier> getMIDITrackerModifier() const;
+        yup::ReferenceCountedObjectPtr<MIDITrackerModifier> getMIDITrackerModifier() const;
 
         const EditItemID midiTrackerModifierID;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
     };
 
     //==============================================================================
-    juce::String getSelectableDescription() override    { return getName(); }
+    yup::String getSelectableDescription() override    { return getName(); }
 
     //==============================================================================
     enum Type
@@ -63,7 +63,7 @@ public:
         velocity       = 1
     };
 
-    static juce::StringArray getTypeNames();
+    static yup::StringArray getTypeNames();
 
     enum Mode
     {
@@ -71,35 +71,35 @@ public:
         relative       = 1
     };
 
-    static juce::StringArray getModeNames();
+    static yup::StringArray getModeNames();
 
     /** Returns a ValueTree representing the absolute nodes of the map.
         This will have 5 children each with a midi and value property which you can adjust.
     */
-    juce::ValueTree getNodeState() const                { return nodeState; }
+    yup::ValueTree getNodeState() const                { return nodeState; }
 
     juce::CachedValue<float> type, mode, relativeRoot, relativeSpread;
 
     AutomatableParameter::Ptr typeParam, modeParam, relativeRootParam, relativeSpreadParam;
 
 private:
-    juce::ValueTree nodeState;
+    yup::ValueTree nodeState;
 
     LambdaTimer changedTimer;
     std::atomic<float> currentModifierValue { 0.0f };
     std::atomic<int> currentMIDIValue { 0 };
 
     struct Map { std::pair<int, float> node[5]; } currentMap;
-    const juce::SpinLock mapLock;
+    const yup::SpinLock mapLock;
 
     void refreshCurrentValue();
     void updateMapFromTree();
     void updateValueFromMap (int);
 
-    void midiEvent (const juce::MidiMessage&);
+    void midiEvent (const yup::MidiMessage&);
 
     void valueTreeChanged() override;
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 };
 
 } // namespace tracktion::inline engine

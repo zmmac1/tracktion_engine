@@ -32,7 +32,7 @@ public:
 
         void setLoadLevel (float newValue) noexcept
         {
-            jassert (juce::isPositiveAndBelow (newValue, 1.0f));
+            jassert (yup::isPositiveAndBelow (newValue, 1.0f));
             loadLevel = newValue;
         }
 
@@ -62,7 +62,7 @@ public:
         {
             jassert (bufferSize > 0 && sampleRateHz > 0.0);
 
-            return juce::Time::secondsToHighResolutionTicks (bufferSize / sampleRateHz);
+            return yup::Time::secondsToHighResolutionTicks (bufferSize / sampleRateHz);
         }
     };
 
@@ -94,7 +94,7 @@ public:
 
         const auto startedLateDuration = timeSinceEpoch - numPeriodsSinceEpoch * callbackPeriod;
         const auto availableDuration = callbackPeriod - startedLateDuration
-                                        - juce::Time::secondsToHighResolutionTicks (loadGenerationEndEarlyDurationSec);
+                                        - yup::Time::secondsToHighResolutionTicks (loadGenerationEndEarlyDurationSec);
 
         targetDuration = int64_t (context.loadLevel * callbackPeriod);
 
@@ -110,11 +110,11 @@ public:
             return;
         }
 
-        const auto callbackEndTime = juce::Time::getHighResolutionTicks();
+        const auto callbackEndTime = yup::Time::getHighResolutionTicks();
         const auto realExecutionDuration = callbackEndTime - startTime;
         const auto artificialLoadDuration = targetDuration - realExecutionDuration;
 
-        while (juce::Time::getHighResolutionTicks() - callbackEndTime <= artificialLoadDuration)
+        while (yup::Time::getHighResolutionTicks() - callbackEndTime <= artificialLoadDuration)
             for (int i = 0; i < context.numNopsPerIteration; ++i)
                 asm ("nop");
 
@@ -122,7 +122,7 @@ public:
     }
 
 private:
-    const int64_t startTime   { juce::Time::getHighResolutionTicks() };
+    const int64_t startTime   { yup::Time::getHighResolutionTicks() };
     Context& context;
 
     int64_t targetDuration;

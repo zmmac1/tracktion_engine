@@ -11,11 +11,11 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-/** Converts an Edit's internal transport information to a juce::AudioPlayHead::CurrentPositionInfo. */
-juce::AudioPlayHead::CurrentPositionInfo getCurrentPositionInfo (Edit&);
+/** Converts an Edit's internal transport information to a yup::AudioPlayHead::CurrentPositionInfo. */
+yup::AudioPlayHead::CurrentPositionInfo getCurrentPositionInfo (Edit&);
 
 /** Syncs an Edit's transport and tempo sequence to a juce AudioPlayHead. */
-void synchroniseEditPosition (Edit&, const juce::AudioPlayHead::CurrentPositionInfo&);
+void synchroniseEditPosition (Edit&, const yup::AudioPlayHead::CurrentPositionInfo&);
 
 
 //==============================================================================
@@ -26,7 +26,7 @@ void synchroniseEditPosition (Edit&, const juce::AudioPlayHead::CurrentPositionI
     Just create one when you create your Edit and repeatedly call the synchronise method
     in your process block like this:
     @code
-    void processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi) override
+    void processBlock (yup::AudioBuffer<float>& buffer, yup::MidiBuffer& midi) override
     {
         // Update position info first
         externalPlayheadSynchroniser.synchronise (*this);
@@ -43,21 +43,21 @@ public:
         Generally you'd call this at the start of your plugin's processBlock method.
         @returns true if it was able to synchronise, false otherwise.
     */
-    bool synchronise (juce::AudioPlayHead&);
+    bool synchronise (yup::AudioPlayHead&);
 
     /** Synchronises the Edit's playback position with the AudioProcessor's playhead if possible.
         Generally you'd call this at the start of your plugin's processBlock method.
         @returns true if it was able to synchronise, false otherwise.
     */
-    bool synchronise (juce::AudioProcessor&);
+    bool synchronise (yup::AudioProcessor&);
 
     /** Returns the current position info, useful for graphical displays etc. */
-    juce::AudioPlayHead::CurrentPositionInfo getPositionInfo() const;
+    yup::AudioPlayHead::CurrentPositionInfo getPositionInfo() const;
 
 private:
     Edit& edit;
-    juce::AudioPlayHead::CurrentPositionInfo positionInfo;
-    mutable juce::SpinLock positionInfoLock;
+    yup::AudioPlayHead::CurrentPositionInfo positionInfo;
+    mutable yup::SpinLock positionInfoLock;
 };
 
 } // namespace tracktion::inline engine

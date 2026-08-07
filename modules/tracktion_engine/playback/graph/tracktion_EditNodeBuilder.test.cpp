@@ -31,9 +31,9 @@ namespace editnode_test_helpers
         return createNodeForEdit (edit, params);
     }
 
-    static juce::BigInteger getTracksMask (const juce::Array<Track*>& tracks)
+    static yup::BigInteger getTracksMask (const yup::Array<Track*>& tracks)
     {
-        juce::BigInteger tracksMask;
+        yup::BigInteger tracksMask;
 
         for (auto t : tracks)
             tracksMask.setBit (t->getIndexInEditTrackList());
@@ -44,27 +44,27 @@ namespace editnode_test_helpers
 
     static Renderer::Statistics logStats (Renderer::Statistics stats)
     {
-        MESSAGE (("Stats: peak " + juce::String (stats.peak) + ", avg " + juce::String (stats.average) + ", duration " + juce::String (stats.audioDuration)).toStdString());
+        MESSAGE (("Stats: peak " + yup::String (stats.peak) + ", avg " + yup::String (stats.average) + ", duration " + yup::String (stats.audioDuration)).toStdString());
         return stats;
     }
 
-    static void expectPeak (Edit& edit, TimeRange tr, juce::Array<Track*> tracks, float expectedPeak)
+    static void expectPeak (Edit& edit, TimeRange tr, yup::Array<Track*> tracks, float expectedPeak)
     {
         auto blockSize = edit.engine.getDeviceManager().getBlockSize();
         auto stats = logStats (Renderer::measureStatistics ("", edit, tr, getTracksMask (tracks), blockSize));
-        CHECK_MESSAGE (juce::isWithin (stats.peak, expectedPeak, 0.01f),
-                       (juce::String ("Expected peak: ") + juce::String (expectedPeak, 4)).toStdString());
+        CHECK_MESSAGE (yup::isWithin (stats.peak, expectedPeak, 0.01f),
+                       (yup::String ("Expected peak: ") + yup::String (expectedPeak, 4)).toStdString());
     }
 
-    static void expectRMS (Edit& edit, TimeRange tr, juce::Array<Track*> tracks, float expectedRMS)
+    static void expectRMS (Edit& edit, TimeRange tr, yup::Array<Track*> tracks, float expectedRMS)
     {
         auto blockSize = edit.engine.getDeviceManager().getBlockSize();
         auto stats = logStats (Renderer::measureStatistics ("", edit, tr, getTracksMask (tracks), blockSize));
-        CHECK_MESSAGE (juce::isWithin (stats.average, expectedRMS, 0.01f),
-                       (juce::String ("Expected RMS: ") + juce::String (expectedRMS, 4)).toStdString());
+        CHECK_MESSAGE (yup::isWithin (stats.average, expectedRMS, 0.01f),
+                       (yup::String ("Expected RMS: ") + yup::String (expectedRMS, 4)).toStdString());
     }
 
-    static void expectPeakAndResetMuteSolo (Edit& edit, TimeRange tr, juce::Array<Track*> tracks, float expectedPeak)
+    static void expectPeakAndResetMuteSolo (Edit& edit, TimeRange tr, yup::Array<Track*> tracks, float expectedPeak)
     {
         expectPeak (edit, tr, tracks, expectedPeak);
 
@@ -91,11 +91,11 @@ TEST_CASE ("Edit Node Builder")
 
     auto runTrackDestinationRendering = [&] (TimeDuration durationInSeconds, int numChannels, bool isMultiThreaded)
     {
-        MESSAGE ((graph::test_utilities::getDescription (ts) + juce::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
+        MESSAGE ((graph::test_utilities::getDescription (ts) + yup::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
         auto& engine = *tracktion::engine::Engine::getEngines()[0];
 
         {
-            auto sinFile = tracktion::graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
+            auto sinFile = tracktion::graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->ensureNumberOfAudioTracks (3);
@@ -136,11 +136,11 @@ TEST_CASE ("Edit Node Builder")
 
     auto runAuxSend = [&] (TimeDuration durationInSeconds, int numChannels, bool isMultiThreaded)
     {
-        MESSAGE ((graph::test_utilities::getDescription (ts) + juce::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
+        MESSAGE ((graph::test_utilities::getDescription (ts) + yup::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
         auto& engine = *tracktion::engine::Engine::getEngines()[0];
 
         {
-            auto sinFile = tracktion::graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
+            auto sinFile = tracktion::graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->ensureNumberOfAudioTracks (2);
@@ -184,11 +184,11 @@ TEST_CASE ("Edit Node Builder")
 
     auto runRackRendering = [&] (TimeDuration durationInSeconds, int numChannels, bool isMultiThreaded)
     {
-        MESSAGE ((graph::test_utilities::getDescription (ts) + juce::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
+        MESSAGE ((graph::test_utilities::getDescription (ts) + yup::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
         auto& engine = *tracktion::engine::Engine::getEngines()[0];
 
         {
-            auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
+            auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->ensureNumberOfAudioTracks (1);
@@ -242,11 +242,11 @@ TEST_CASE ("Edit Node Builder")
 
     auto runMonoRackRendering = [&] (TimeDuration durationInSeconds, int numChannels, bool isMultiThreaded)
     {
-        MESSAGE ((graph::test_utilities::getDescription (ts) + juce::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
+        MESSAGE ((graph::test_utilities::getDescription (ts) + yup::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
         auto& engine = *tracktion::engine::Engine::getEngines()[0];
 
         {
-            auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 1, 220.0f);
+            auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 1, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->ensureNumberOfAudioTracks (1);
@@ -287,10 +287,10 @@ TEST_CASE ("Edit Node Builder")
     auto runSubmix = [&] (TimeDuration durationInSeconds, int numChannels, bool isMultiThreaded)
     {
         auto& engine = *engine::Engine::getEngines()[0];
-        MESSAGE ((graph::test_utilities::getDescription (ts) + juce::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
+        MESSAGE ((graph::test_utilities::getDescription (ts) + yup::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
 
         {
-            auto sinFile = getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
+            auto sinFile = getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
 
             auto edit = engine::test_utilities::createTestEdit (engine);
             edit->getMasterVolumePlugin()->setVolumeDb (0.0f);
@@ -322,11 +322,11 @@ TEST_CASE ("Edit Node Builder")
     auto runMuteSolo = [&] (TimeDuration durationInSeconds, int numChannels, bool isMultiThreaded)
     {
         auto& engine = *tracktion::engine::Engine::getEngines()[0];
-        MESSAGE ((graph::test_utilities::getDescription (ts) + juce::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
+        MESSAGE ((graph::test_utilities::getDescription (ts) + yup::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
 
         // Basic Solo/Mute
         {
-            auto sinFile = getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
+            auto sinFile = getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->getMasterVolumePlugin()->setVolumeDb (0.0f);
@@ -359,7 +359,7 @@ TEST_CASE ("Edit Node Builder")
 
         // Basic solo isolate
         {
-            auto sinFile = getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
+            auto sinFile = getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->getMasterVolumePlugin()->setVolumeDb (0.0f);
@@ -383,7 +383,7 @@ TEST_CASE ("Edit Node Builder")
 
         // Track destination solo/mute
         {
-            auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
+            auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->getMasterVolumePlugin()->setVolumeDb (0.0f);
@@ -448,7 +448,7 @@ TEST_CASE ("Edit Node Builder")
 
         // Submix solo/mute
         {
-            auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
+            auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->getMasterVolumePlugin()->setVolumeDb (0.0f);
@@ -488,8 +488,8 @@ TEST_CASE ("Edit Node Builder")
 
     auto runClipFade = [&] (TimeDuration durationInSeconds, int numChannels, bool isMultiThreaded)
     {
-        MESSAGE ((graph::test_utilities::getDescription (ts) + juce::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
+        MESSAGE ((graph::test_utilities::getDescription (ts) + yup::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), numChannels, 220.0f);
 
         auto& engine = *Engine::getEngines()[0];
         auto edit = test_utilities::createTestEdit (engine);
@@ -525,12 +525,12 @@ TEST_CASE ("Edit Node Builder")
 
     auto runBusTrack = [&] (TimeDuration durationInSeconds, int numChannels, bool isMultiThreaded)
     {
-        MESSAGE ((graph::test_utilities::getDescription (ts) + juce::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
+        MESSAGE ((graph::test_utilities::getDescription (ts) + yup::String (isMultiThreaded ? ", MT" : ", ST")).toStdString());
         auto& engine = *tracktion::engine::Engine::getEngines()[0];
 
         // --- Test A: Aux send/return signal flow through bus track ---
         {
-            auto sinFile = tracktion::graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
+            auto sinFile = tracktion::graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->ensureNumberOfAudioTracks (2);
@@ -596,7 +596,7 @@ TEST_CASE ("Edit Node Builder")
 
         // --- Test B: Rack instance on bus track ---
         {
-            auto sinFile = tracktion::graph::test_utilities::getSinFile<juce::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
+            auto sinFile = tracktion::graph::test_utilities::getSinFile<yup::WavAudioFormat> (ts.sampleRate, durationInSeconds.inSeconds(), 2, 220.0f);
 
             auto edit = test_utilities::createTestEdit (engine);
             edit->ensureNumberOfAudioTracks (2);
@@ -702,7 +702,7 @@ TEST_CASE ("Plugin on empty track does not crash with 0-channel buffer")
 
     auto& engine = *tracktion::engine::Engine::getEngines()[0];
 
-    auto renderEmptyTrackWithPlugin = [&] (const juce::String& pluginTypeName)
+    auto renderEmptyTrackWithPlugin = [&] (const yup::String& pluginTypeName)
     {
         auto edit = test_utilities::createTestEdit (engine);
         auto track = getAudioTracks (*edit)[0];
@@ -733,7 +733,7 @@ TEST_CASE ("Plugin on empty track does not crash with 0-channel buffer")
     // Every internal plugin declared with {} inputs in getBusses() — plus one
     // declared-stereo plugin as a control — exercised in an audio chain on a
     // track with no clips. None of these should crash or assert.
-    const juce::StringArray pluginTypeNames
+    const yup::StringArray pluginTypeNames
     {
         AuxSendPlugin::xmlTypeName,
         AuxReturnPlugin::xmlTypeName,

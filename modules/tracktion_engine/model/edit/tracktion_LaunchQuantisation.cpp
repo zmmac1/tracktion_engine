@@ -11,7 +11,7 @@
 
 namespace tracktion::inline engine {
 
-juce::StringArray getLaunchQTypeChoices()
+yup::StringArray getLaunchQTypeChoices()
 {
     return { NEEDS_TRANS("None"),
              NEEDS_TRANS("8 Bars"),
@@ -38,17 +38,17 @@ juce::StringArray getLaunchQTypeChoices()
              NEEDS_TRANS("1/64 D") };
 }
 
-std::optional<LaunchQType> launchQTypeFromName (const juce::String& name)
+std::optional<LaunchQType> launchQTypeFromName (const yup::String& name)
 {
     auto index = getLaunchQTypeChoices().indexOf (name);
 
-    if (juce::isPositiveAndNotGreaterThan (index, static_cast<int> (LaunchQType::sixtyFourthD)))
+    if (yup::isPositiveAndNotGreaterThan (index, static_cast<int> (LaunchQType::sixtyFourthD)))
         return static_cast<LaunchQType> (index);
 
     return {};
 }
 
-juce::String getName (LaunchQType t)
+yup::String getName (LaunchQType t)
 {
     assert (t >= LaunchQType::none || t <= LaunchQType::sixtyFourthD);
     return getLaunchQTypeChoices()[static_cast<int> (t)];
@@ -98,7 +98,7 @@ LaunchQType fromBarFraction (double f) noexcept
 
     magic_enum::enum_for_each<LaunchQType> ([f, &ret] (auto t)
     {
-        if (juce::approximatelyEqual (f, toBarFraction (t)))
+        if (yup::approximatelyEqual (f, toBarFraction (t)))
         {
             ret = t;
             return;
@@ -143,7 +143,7 @@ BeatPosition getNext (LaunchQType q, const TempoSequence& ts, BeatPosition pos) 
 
 //==============================================================================
 //==============================================================================
-LaunchQuantisation::LaunchQuantisation (juce::ValueTree& v, Edit& e)
+LaunchQuantisation::LaunchQuantisation (yup::ValueTree& v, Edit& e)
     : edit (e)
 {
     type.referTo (v, IDs::launchQuantisation, &e.getUndoManager(), LaunchQType::bar);

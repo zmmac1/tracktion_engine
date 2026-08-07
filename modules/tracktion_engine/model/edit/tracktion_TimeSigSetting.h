@@ -17,11 +17,11 @@ class TimeSigSetting  : public TrackItem,
                         private ValueTreeAllEventListener
 {
 public:
-    TimeSigSetting (TempoSequence&, const juce::ValueTree&);
+    TimeSigSetting (TempoSequence&, const yup::ValueTree&);
     ~TimeSigSetting() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<TimeSigSetting>;
-    using Array = juce::ReferenceCountedArray<TimeSigSetting>;
+    using Ptr = yup::ReferenceCountedObjectPtr<TimeSigSetting>;
+    using Array = yup::ReferenceCountedArray<TimeSigSetting>;
 
     //==============================================================================
     ClipPosition getPosition() const override;
@@ -29,8 +29,8 @@ public:
 
     //==============================================================================
     // time sig in the form "4/4"
-    juce::String getStringTimeSig() const;
-    void setStringTimeSig (const juce::String&);
+    yup::String getStringTimeSig() const;
+    void setStringTimeSig (const yup::String&);
 
     void removeFromEdit();
 
@@ -38,11 +38,11 @@ public:
     Track* getTrack() const override;
 
     //==============================================================================
-    juce::String getName() const override;
-    juce::String getSelectableDescription() override;
+    yup::String getName() const override;
+    yup::String getSelectableDescription() override;
 
     //==============================================================================
-    juce::ValueTree state;
+    yup::ValueTree state;
     TempoSequence& ownerSequence;
 
     juce::CachedValue<BeatPosition> startBeatNumber;
@@ -55,7 +55,7 @@ public:
 private:
     void valueTreeChanged() override { changed(); }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSigSetting)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSigSetting)
 };
 
 } // namespace tracktion::inline engine

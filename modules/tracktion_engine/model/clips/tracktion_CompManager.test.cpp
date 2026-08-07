@@ -24,7 +24,7 @@ struct CompManagerTestContext
         auto context = std::make_unique<CompManagerTestContext>();
         auto& pm = engine.getProjectManager();
 
-        context->tempDir = juce::File::createTempFile ({});
+        context->tempDir = yup::File::createTempFile ({});
         context->tempDir.createDirectory();
 
         auto projectPath = folderBased
@@ -50,8 +50,8 @@ struct CompManagerTestContext
         context->edit->setProjectItemRef (editItem->getProjectItemRef());
         context->edit->ensureNumberOfAudioTracks (1);
 
-        context->sinFile1 = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
-        context->sinFile2 = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        context->sinFile1 = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
+        context->sinFile2 = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
 
         auto audioTracks = getAudioTracks (*context->edit);
 
@@ -85,10 +85,10 @@ struct CompManagerTestContext
         tempDir.deleteRecursively (false);
     }
 
-    juce::File tempDir;
+    yup::File tempDir;
     std::unique_ptr<ProjectManager::TempProject> tempProject;
     std::unique_ptr<Edit> edit;
-    std::unique_ptr<juce::TemporaryFile> sinFile1, sinFile2;
+    std::unique_ptr<yup::TemporaryFile> sinFile1, sinFile2;
     AudioTrack::Ptr track;
     WaveAudioClip::Ptr clip;
 };
@@ -161,9 +161,9 @@ TEST_SUITE ("tracktion_engine")
         auto takesTree = context->clip->state.getChildWithName (IDs::TAKES);
         REQUIRE (takesTree.isValid());
 
-        juce::ValueTree badTake (IDs::TAKE);
+        yup::ValueTree badTake (IDs::TAKE);
         badTake.setProperty (IDs::isComp, true, nullptr);
-        badTake.setProperty (IDs::source, juce::String(), nullptr);
+        badTake.setProperty (IDs::source, yup::String(), nullptr);
         takesTree.addChild (badTake, -1, nullptr);
 
         // Reconstruct the WaveCompManager — the constructor should fix the empty source
@@ -184,7 +184,7 @@ TEST_SUITE ("tracktion_engine")
         auto takesTree = context->clip->state.getChildWithName (IDs::TAKES);
         REQUIRE (takesTree.isValid());
 
-        juce::ValueTree compTake (IDs::TAKE);
+        yup::ValueTree compTake (IDs::TAKE);
         compTake.setProperty (IDs::isComp, true, nullptr);
         compTake.setProperty (IDs::source, "media/existing_comp.wav", nullptr);
         takesTree.addChild (compTake, -1, nullptr);
@@ -206,9 +206,9 @@ TEST_SUITE ("tracktion_engine")
         auto takesTree = context->clip->state.getChildWithName (IDs::TAKES);
         REQUIRE (takesTree.isValid());
 
-        juce::ValueTree badTake (IDs::TAKE);
+        yup::ValueTree badTake (IDs::TAKE);
         badTake.setProperty (IDs::isComp, true, nullptr);
-        badTake.setProperty (IDs::source, juce::String(), nullptr);
+        badTake.setProperty (IDs::source, yup::String(), nullptr);
         takesTree.addChild (badTake, -1, nullptr);
 
         WaveCompManager reconstructed (*context->clip);

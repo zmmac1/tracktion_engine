@@ -12,8 +12,8 @@ namespace tracktion::inline engine {
 
 struct RackInputAutomatableParameter   : public AutomatableParameter
 {
-    RackInputAutomatableParameter (const juce::String& xmlTag, const juce::String& name,
-                                   Plugin& owner, juce::Range<float> valueRangeToUse)
+    RackInputAutomatableParameter (const yup::String& xmlTag, const yup::String& name,
+                                   Plugin& owner, yup::Range<float> valueRangeToUse)
         : AutomatableParameter (xmlTag, name, owner, valueRangeToUse)
     {
     }
@@ -34,8 +34,8 @@ struct RackInputAutomatableParameter   : public AutomatableParameter
 
 struct RackOutputAutomatableParameter   : public AutomatableParameter
 {
-    RackOutputAutomatableParameter (const juce::String& xmlTag, const juce::String& name,
-                                    Plugin& owner, juce::Range<float> valueRangeToUse)
+    RackOutputAutomatableParameter (const yup::String& xmlTag, const yup::String& name,
+                                    Plugin& owner, yup::Range<float> valueRangeToUse)
         : AutomatableParameter (xmlTag, name, owner, valueRangeToUse)
     {
     }
@@ -56,8 +56,8 @@ struct RackOutputAutomatableParameter   : public AutomatableParameter
 
 struct RackWetDryAutomatableParam  : public AutomatableParameter
 {
-    RackWetDryAutomatableParam (const juce::String& xmlTag, const juce::String& name,
-                                RackInstance& owner, juce::Range<float> valueRangeToUse)
+    RackWetDryAutomatableParam (const yup::String& xmlTag, const yup::String& name,
+                                RackInstance& owner, yup::Range<float> valueRangeToUse)
         : AutomatableParameter (xmlTag, name, owner, valueRangeToUse)
     {
     }
@@ -67,8 +67,8 @@ struct RackWetDryAutomatableParam  : public AutomatableParameter
         notifyListenersOfDeletion();
     }
 
-    juce::String valueToString (float value) override        { return juce::Decibels::toString (juce::Decibels::gainToDecibels (value), 1); }
-    float stringToValue (const juce::String& s) override     { return juce::Decibels::decibelsToGain (dbStringToDb (s)); }
+    yup::String valueToString (float value) override        { return yup::Decibels::toString (yup::Decibels::gainToDecibels (value), 1); }
+    float stringToValue (const yup::String& s) override     { return yup::Decibels::decibelsToGain (dbStringToDb (s)); }
 };
 
 //==============================================================================
@@ -78,7 +78,7 @@ void RackInstance::createChannelMapping (int channelIndex, int defaultInput, int
     auto mapping = std::make_unique<ChannelMapping>();
 
     // Find or create the CHANNELMAP child ValueTree for this index
-    juce::ValueTree mapTree;
+    yup::ValueTree mapTree;
 
     for (auto child : state)
     {
@@ -91,7 +91,7 @@ void RackInstance::createChannelMapping (int channelIndex, int defaultInput, int
 
     if (! mapTree.isValid())
     {
-        mapTree = juce::ValueTree (IDs::CHANNELMAP);
+        mapTree = yup::ValueTree (IDs::CHANNELMAP);
         mapTree.setProperty (IDs::index, channelIndex, nullptr);
         state.addChild (mapTree, -1, um);
     }
@@ -101,12 +101,12 @@ void RackInstance::createChannelMapping (int channelIndex, int defaultInput, int
     mapping->inputGainValue.referTo (mapTree, IDs::inputGain, um, 0.0f);
     mapping->outputGainValue.referTo (mapTree, IDs::outputGain, um, 0.0f);
 
-    auto inputParamID = "ch" + juce::String (channelIndex + 1) + " input level";
-    auto inputParamName = TRANS("Ch") + " " + juce::String (channelIndex + 1) + " " + TRANS("input level");
-    auto outputParamID = "ch" + juce::String (channelIndex + 1) + " output level";
-    auto outputParamName = TRANS("Ch") + " " + juce::String (channelIndex + 1) + " " + TRANS("output level");
+    auto inputParamID = "ch" + yup::String (channelIndex + 1) + " input level";
+    auto inputParamName = TRANS("Ch") + " " + yup::String (channelIndex + 1) + " " + TRANS("input level");
+    auto outputParamID = "ch" + yup::String (channelIndex + 1) + " output level";
+    auto outputParamName = TRANS("Ch") + " " + yup::String (channelIndex + 1) + " " + TRANS("output level");
 
-    const juce::Range<float> gainRange { (float) rackMinDb, (float) rackMaxDb };
+    const yup::Range<float> gainRange { (float) rackMinDb, (float) rackMaxDb };
 
     if (channelIndex == 0)
     {
@@ -141,10 +141,10 @@ void RackInstance::migrateFromLegacyFormat()
 
     // Create CHANNELMAP children from legacy properties
     auto createMapTree = [&] (int index, int inputDefault, int outputDefault,
-                              juce::Identifier inputProp, juce::Identifier outputProp,
-                              juce::Identifier inputGainProp, juce::Identifier outputGainProp)
+                              yup::Identifier inputProp, yup::Identifier outputProp,
+                              yup::Identifier inputGainProp, yup::Identifier outputGainProp)
     {
-        juce::ValueTree mapTree (IDs::CHANNELMAP);
+        yup::ValueTree mapTree (IDs::CHANNELMAP);
         mapTree.setProperty (IDs::index, index, nullptr);
         mapTree.setProperty (IDs::inputTo, (int) state.getProperty (inputProp, inputDefault), nullptr);
         mapTree.setProperty (IDs::outputFrom, (int) state.getProperty (outputProp, outputDefault), nullptr);
@@ -232,14 +232,14 @@ RackInstance::~RackInstance()
     }
 }
 
-juce::ValueTree RackInstance::create (RackType& type)
+yup::ValueTree RackInstance::create (RackType& type)
 {
     return createValueTree (IDs::PLUGIN,
                             IDs::type, RackInstance::xmlTypeName,
                             IDs::rackType, type.itemID);
 }
 
-juce::String RackInstance::getTooltip()
+yup::String RackInstance::getTooltip()
 {
     if (engine.getPluginManager().doubleClickToOpenWindows())
         return getName() + " (" + TRANS("Double-click to edit the rack") + ")";
@@ -249,7 +249,7 @@ juce::String RackInstance::getTooltip()
 
 const char* RackInstance::xmlTypeName = "rack";
 
-juce::String RackInstance::getName() const
+yup::String RackInstance::getName() const
 {
     return type != nullptr ? type->rackName
                            : TRANS("Rack type missing!");
@@ -271,7 +271,7 @@ void RackInstance::replaceRackWithPluginSequence (SelectionManager* sm)
         };
 
         auto rackPlugins = thisType->getPlugins();
-        juce::Array<PluginIndexAndPos> pluginLocations;
+        yup::Array<PluginIndexAndPos> pluginLocations;
 
         for (int i = 0; i < rackPlugins.size(); ++i)
             if (auto rackPlugin = rackPlugins[i])
@@ -315,9 +315,9 @@ void RackInstance::replaceRackWithPluginSequence (SelectionManager* sm)
     }
 }
 
-juce::StringArray RackInstance::getInputChoices (bool includeNumberPrefix)
+yup::StringArray RackInstance::getInputChoices (bool includeNumberPrefix)
 {
-    juce::StringArray inputChoices;
+    yup::StringArray inputChoices;
 
     if (type != nullptr)
     {
@@ -327,7 +327,7 @@ juce::StringArray RackInstance::getInputChoices (bool includeNumberPrefix)
         for (int i = 1; i < inputs.size(); ++i)
         {
             if (includeNumberPrefix)
-                inputChoices.add (juce::String (i) + ". " + inputs[i]);
+                inputChoices.add (yup::String (i) + ". " + inputs[i]);
             else
                 inputChoices.add (inputs[i]);
         }
@@ -336,9 +336,9 @@ juce::StringArray RackInstance::getInputChoices (bool includeNumberPrefix)
     return inputChoices;
 }
 
-juce::StringArray RackInstance::getOutputChoices (bool includeNumberPrefix)
+yup::StringArray RackInstance::getOutputChoices (bool includeNumberPrefix)
 {
-    juce::StringArray outputChoices;
+    yup::StringArray outputChoices;
 
     if (type != nullptr)
     {
@@ -348,7 +348,7 @@ juce::StringArray RackInstance::getOutputChoices (bool includeNumberPrefix)
         for (int i = 1; i < outputs.size(); ++i)
         {
             if (includeNumberPrefix)
-                outputChoices.add (juce::String (i) + ". " + outputs[i]);
+                outputChoices.add (yup::String (i) + ". " + outputs[i]);
             else
                 outputChoices.add (outputs[i]);
         }
@@ -357,7 +357,7 @@ juce::StringArray RackInstance::getOutputChoices (bool includeNumberPrefix)
     return outputChoices;
 }
 
-juce::String RackInstance::getNoPinName()
+yup::String RackInstance::getNoPinName()
 {
     return TRANS("<none>");
 }
@@ -444,7 +444,7 @@ void RackInstance::setOutputMapping (int channelIndex, int rackPinIndex)
         m->outputComesFrom = rackPinIndex;
 }
 
-void RackInstance::setInputMappingByName (int channelIndex, const juce::String& inputName)
+void RackInstance::setInputMappingByName (int channelIndex, const yup::String& inputName)
 {
     auto index = getInputChoices (false).indexOf (inputName);
 
@@ -457,7 +457,7 @@ void RackInstance::setInputMappingByName (int channelIndex, const juce::String& 
     setInputMapping (channelIndex, index);
 }
 
-void RackInstance::setOutputMappingByName (int channelIndex, const juce::String& outputName)
+void RackInstance::setOutputMappingByName (int channelIndex, const yup::String& outputName)
 {
     auto index = getOutputChoices (false).indexOf (outputName);
 
@@ -486,7 +486,7 @@ AutomatableParameter::Ptr RackInstance::getOutputGainParam (int channelIndex) co
     return {};
 }
 
-juce::String RackInstance::getInputMappingName (int channelIndex)
+yup::String RackInstance::getInputMappingName (int channelIndex)
 {
     if (auto m = channelMappings[channelIndex])
     {
@@ -495,13 +495,13 @@ juce::String RackInstance::getInputMappingName (int channelIndex)
         if (type == nullptr || pinIndex < 0 || type->getInputNames()[pinIndex].isEmpty())
             return getNoPinName();
 
-        return juce::String (pinIndex) + ". " + type->getInputNames()[pinIndex];
+        return yup::String (pinIndex) + ". " + type->getInputNames()[pinIndex];
     }
 
     return getNoPinName();
 }
 
-juce::String RackInstance::getOutputMappingName (int channelIndex)
+yup::String RackInstance::getOutputMappingName (int channelIndex)
 {
     if (auto m = channelMappings[channelIndex])
     {
@@ -510,7 +510,7 @@ juce::String RackInstance::getOutputMappingName (int channelIndex)
         if (type == nullptr || pinIndex < 0 || type->getOutputNames()[pinIndex].isEmpty())
             return getNoPinName();
 
-        return juce::String (pinIndex) + ". " + type->getOutputNames()[pinIndex];
+        return yup::String (pinIndex) + ". " + type->getOutputNames()[pinIndex];
     }
 
     return getNoPinName();
@@ -520,13 +520,13 @@ void RackInstance::setInputLevel (int channelIndex, float v)
 {
     if (auto m = channelMappings[channelIndex])
     {
-        m->inputGainDb->setParameter (v, juce::sendNotification);
+        m->inputGainDb->setParameter (v, yup::sendNotification);
 
         if (linkInputs)
         {
             for (auto other : channelMappings)
                 if (other != m)
-                    other->inputGainDb->setParameter (v, juce::sendNotification);
+                    other->inputGainDb->setParameter (v, yup::sendNotification);
         }
     }
 }
@@ -535,13 +535,13 @@ void RackInstance::setOutputLevel (int channelIndex, float v)
 {
     if (auto m = channelMappings[channelIndex])
     {
-        m->outputGainDb->setParameter (v, juce::sendNotification);
+        m->outputGainDb->setParameter (v, yup::sendNotification);
 
         if (linkOutputs)
         {
             for (auto other : channelMappings)
                 if (other != m)
-                    other->outputGainDb->setParameter (v, juce::sendNotification);
+                    other->outputGainDb->setParameter (v, yup::sendNotification);
         }
     }
 }
@@ -615,7 +615,7 @@ void RackInstance::applyToBuffer (const PluginRenderContext&)
 {
 }
 
-juce::String RackInstance::getSelectableDescription()
+yup::String RackInstance::getSelectableDescription()
 {
     return TRANS("Plugin Rack");
 }

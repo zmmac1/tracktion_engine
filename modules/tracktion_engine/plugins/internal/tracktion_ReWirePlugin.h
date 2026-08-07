@@ -14,7 +14,7 @@ namespace tracktion::inline engine {
 
 //==============================================================================
 /** */
-class ReWireSystem   : private juce::Timer
+class ReWireSystem   : private yup::Timer
 {
 public:
     //==============================================================================
@@ -38,12 +38,12 @@ public:
     static int getRequiredVersionNumMinor();
 
     class Device;
-    Device* openDevice (const juce::String& devName, juce::String& error);
+    Device* openDevice (const yup::String& devName, yup::String& error);
     bool tryToCloseAllOpenDevices();
 
-    juce::StringArray deviceNames;
-    juce::OwnedArray<Device> devices;
-    juce::String openError;
+    yup::StringArray deviceNames;
+    yup::OwnedArray<Device> devices;
+    yup::String openError;
     bool isOpen = false;
 
 private:
@@ -52,7 +52,7 @@ private:
     ReWireSystem (Engine&);
     ~ReWireSystem();
 
-    Device* createDevice (int index, const juce::String& devName, juce::String& error);
+    Device* createDevice (int index, const yup::String& devName, yup::String& error);
     bool closeSystem();
     void timerCallback() override;
 };
@@ -61,8 +61,8 @@ private:
 //==============================================================================
 /** */
 class ReWirePlugin  : public Plugin,
-                      private juce::Timer,
-                      private juce::AsyncUpdater
+                      private yup::Timer,
+                      private yup::AsyncUpdater
 {
 public:
     ReWirePlugin (PluginCreationInfo);
@@ -74,20 +74,20 @@ public:
     static const char* xmlTypeName;
 
     void initialiseFully() override;
-    juce::String getName() const override;
-    juce::String getPluginType() override                                         { return xmlTypeName; }
+    yup::String getName() const override;
+    yup::String getPluginType() override                                         { return xmlTypeName; }
 
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
 
-    void getChannelNames (juce::StringArray*, juce::StringArray*) override;
+    void getChannelNames (yup::StringArray*, yup::StringArray*) override;
     int getNumOutputChannelsGivenInputs (int) override     { return 2; }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
 
     void prepareForNextBlock (TimePosition editTime) override;
     void applyToBuffer (const PluginRenderContext&) override;
 
-    juce::String getSelectableDescription() override    { return TRANS("ReWire Plugin"); }
+    yup::String getSelectableDescription() override    { return TRANS("ReWire Plugin"); }
 
     bool takesMidiInput() override                      { return true; }
     bool takesAudioInput() override                     { return true; }
@@ -95,28 +95,28 @@ public:
     bool canBeAddedToClip() override                    { return false; }
     bool needsConstantBufferSize() override             { return true; }
 
-    bool hasNameForMidiNoteNumber (int note, int midiChannel, juce::String& name) override;
-    bool hasNameForMidiProgram (int, int, juce::String&) override     { return false; }
+    bool hasNameForMidiNoteNumber (int note, int midiChannel, yup::String& name) override;
+    bool hasNameForMidiProgram (int, int, yup::String&) override     { return false; }
 
     void timerCallback() override;
 
-    juce::StringArray getDeviceChannelNames() const;
+    yup::StringArray getDeviceChannelNames() const;
 
     ReWireSystem::Device* device = nullptr;
-    juce::String rewireError;
-    juce::StringArray buses, channels;
+    yup::String rewireError;
+    yup::StringArray buses, channels;
 
-    juce::CachedValue<juce::String> currentDeviceName, currentChannelNameL, currentChannelNameR;
+    juce::CachedValue<yup::String> currentDeviceName, currentChannelNameL, currentChannelNameR;
     juce::CachedValue<int> currentBus, currentChannel;
 
-    juce::String openDevice (const juce::String& devName);
+    yup::String openDevice (const yup::String& devName);
     void closeDevice();
     bool updateBusesAndChannels();
     void openExternalUI();
     bool isUIRunning() const noexcept               { return uiIsRunning; }
 
-    void setLeftChannel (const juce::String& channelName);
-    void setRightChannel (const juce::String& channelName);
+    void setLeftChannel (const yup::String& channelName);
+    void setRightChannel (const yup::String& channelName);
 
     void setMidiBus (int busNum);
     void setMidiChannel (int channel);
@@ -130,7 +130,7 @@ private:
     void valueTreeChanged() override;
     void handleAsyncUpdate() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReWirePlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReWirePlugin)
 };
 
 } // namespace tracktion::inline engine

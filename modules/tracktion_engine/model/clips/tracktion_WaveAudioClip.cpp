@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-WaveAudioClip::WaveAudioClip (const juce::ValueTree& v, EditItemID clipID, ClipOwner& co)
+WaveAudioClip::WaveAudioClip (const yup::ValueTree& v, EditItemID clipID, ClipOwner& co)
     : AudioClipBase (v, clipID, Type::wave, co)
 {
 }
@@ -46,7 +46,7 @@ void WaveAudioClip::cloneFrom (Clip* c)
 }
 
 //==============================================================================
-juce::String WaveAudioClip::getSelectableDescription()
+yup::String WaveAudioClip::getSelectableDescription()
 {
     return TRANS("Audio Clip") + " - \"" + getName() + "\"";
 }
@@ -81,7 +81,7 @@ void WaveAudioClip::sourceMediaChanged()
         updateSourceFile();
 }
 
-juce::File WaveAudioClip::getOriginalFile() const
+yup::File WaveAudioClip::getOriginalFile() const
 {
     if (hasAnyTakes() && compManager != nullptr && compManager->isCurrentTakeComp())
         return compManager->getCurrentCompFile();
@@ -189,17 +189,17 @@ void WaveAudioClip::addTake (ProjectItemRef id)
     auto um = getUndoManager();
     auto takesTree = state.getOrCreateChildWithName (IDs::TAKES, um);
 
-    juce::ValueTree take (IDs::TAKE);
+    yup::ValueTree take (IDs::TAKE);
     take.setProperty (IDs::source, id.toString(), um);
     takesTree.addChild (take, -1, um);
 }
 
-void WaveAudioClip::addTake (const juce::File& f)
+void WaveAudioClip::addTake (const yup::File& f)
 {
     auto um = getUndoManager();
     auto takesTree = state.getOrCreateChildWithName (IDs::TAKES, um);
 
-    juce::ValueTree take (IDs::TAKE);
+    yup::ValueTree take (IDs::TAKE);
 
     {
         SourceFileReference sfr (edit, take, IDs::source);
@@ -217,9 +217,9 @@ int WaveAudioClip::getNumTakes (bool includeComps)
     return hasAnyTakes() ? getCompManager().getNumTakes() : 0;
 }
 
-juce::Array<ProjectItemRef> WaveAudioClip::getTakes() const
+yup::Array<ProjectItemRef> WaveAudioClip::getTakes() const
 {
-    juce::Array<ProjectItemRef> takes;
+    yup::Array<ProjectItemRef> takes;
 
     auto takesTree = state.getChildWithName (IDs::TAKES);
 
@@ -251,7 +251,7 @@ int WaveAudioClip::getCurrentTake() const
 
         for (int i = takesTree.getNumChildren(); --i >= 0;)
         {
-            if (takesTree.getChild (i).getProperty (IDs::source) == pid)
+            if (takesTree.getChild (i).getProperty(IDs::source).toString() == pid)
             {
                 currentTakeIndex = i;
                 break;
@@ -267,14 +267,14 @@ void WaveAudioClip::invalidateCurrentTake() noexcept
     currentTakeIndex = takeIndexNeedsUpdating;
 }
 
-void WaveAudioClip::invalidateCurrentTake (const juce::ValueTree& parentState) noexcept
+void WaveAudioClip::invalidateCurrentTake (const yup::ValueTree& parentState) noexcept
 {
     if (parentState.hasType (IDs::TAKES))
         invalidateCurrentTake();
 }
 
-void WaveAudioClip::valueTreePropertyChanged (juce::ValueTree& treeWhosePropertyHasChanged,
-                                              const juce::Identifier& property)
+void WaveAudioClip::valueTreePropertyChanged (yup::ValueTree& treeWhosePropertyHasChanged,
+                                              const yup::Identifier& property)
 {
     AudioClipBase::valueTreePropertyChanged (treeWhosePropertyHasChanged, property);
 
@@ -282,19 +282,19 @@ void WaveAudioClip::valueTreePropertyChanged (juce::ValueTree& treeWhoseProperty
         invalidateCurrentTake();
 }
 
-void WaveAudioClip::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
+void WaveAudioClip::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c)
 {
     AudioClipBase::valueTreeChildAdded (p, c);
     invalidateCurrentTake (p);
 }
 
-void WaveAudioClip::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int oldIndex)
+void WaveAudioClip::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int oldIndex)
 {
     AudioClipBase::valueTreeChildRemoved (p, c, oldIndex);
     invalidateCurrentTake (p);
 }
 
-void WaveAudioClip::valueTreeChildOrderChanged (juce::ValueTree& p, int oldIndex, int newIndex)
+void WaveAudioClip::valueTreeChildOrderChanged (yup::ValueTree& p, int oldIndex, int newIndex)
 {
     AudioClipBase::valueTreeChildOrderChanged (p, oldIndex, newIndex);
     invalidateCurrentTake (p);
@@ -305,8 +305,8 @@ void WaveAudioClip::setCurrentTake (int takeIndex)
     CRASH_TRACER
     auto takesTree = getTakesTree();
     auto numTakes = takesTree.getNumChildren();
-    jassert (juce::isPositiveAndBelow (takeIndex, numTakes));
-    takeIndex = juce::jlimit (0, numTakes - 1, takeIndex);
+    jassert (yup::isPositiveAndBelow (takeIndex, numTakes));
+    takeIndex = yup::jlimit (0, numTakes - 1, takeIndex);
 
     auto take = takesTree.getChild (takeIndex);
     jassert (take.isValid());
@@ -331,11 +331,11 @@ bool WaveAudioClip::isCurrentTakeComp()
     return false;
 }
 
-juce::StringArray WaveAudioClip::getTakeDescriptions() const
+yup::StringArray WaveAudioClip::getTakeDescriptions() const
 {
     CRASH_TRACER
     auto takes = getTakes();
-    juce::StringArray s;
+    yup::StringArray s;
     int numTakes = 0;
 
     for (int i = 0; i < takes.size(); ++i)
@@ -343,15 +343,15 @@ juce::StringArray WaveAudioClip::getTakeDescriptions() const
         if (compManager == nullptr || ! compManager->isTakeComp (i))
         {
             if (auto projectItem = edit.engine.getProjectManager().getProjectItem (takes.getReference (i)))
-                s.add (juce::String (i + 1) + ". " + projectItem->getName());
+                s.add (yup::String (i + 1) + ". " + projectItem->getName());
             else
-                s.add (juce::String (i + 1) + ". <" + TRANS("Deleted") + ">");
+                s.add (yup::String (i + 1) + ". <" + TRANS("Deleted") + ">");
 
             ++numTakes;
         }
         else
         {
-            s.add (juce::String (i + 1) + ". " + TRANS("Comp") + " #" + juce::String (i + 1 - numTakes));
+            s.add (yup::String (i + 1) + ". " + TRANS("Comp") + " #" + yup::String (i + 1 - numTakes));
         }
     }
 
@@ -362,23 +362,23 @@ void WaveAudioClip::deleteAllUnusedTakesConfirmingWithUser (bool)
 {
     CRASH_TRACER
 
-    auto showWarningAsync = [] (const juce::String& title, const juce::String& message,
+    auto showWarningAsync = [] (const yup::String& title, const yup::String& message,
                                 std::function<void (bool okPressed, bool delFiles)> callback)
     {
-        auto w = std::shared_ptr<juce::AlertWindow> (juce::LookAndFeel::getDefaultLookAndFeel()
+        auto w = std::shared_ptr<yup::AlertWindow> (yup::LookAndFeel::getDefaultLookAndFeel()
                                                         .createAlertWindow (title, message,
                                                                             {}, {}, {},
-                                                                            juce::AlertWindow::QuestionIcon, 0, nullptr));
+                                                                            yup::AlertWindow::QuestionIcon, 0, nullptr));
 
-        auto delFilesButton = std::make_shared<juce::ToggleButton> (TRANS("Delete Source Files?"));
+        auto delFilesButton = std::make_shared<yup::ToggleButton> (TRANS("Delete Source Files?"));
         delFilesButton->setSize (400, 20);
         delFilesButton->setName ({});
         w->addCustomComponent (delFilesButton.get());
         w->addTextBlock (TRANS("(This will also delete these from any other Edits in this project)"));
-        w->addButton (TRANS("OK"), 1, juce::KeyPress (juce::KeyPress::returnKey));
-        w->addButton (TRANS("Cancel"), 2, juce::KeyPress (juce::KeyPress::escapeKey));
+        w->addButton (TRANS("OK"), 1, yup::KeyPress (yup::KeyPress::returnKey()));
+        w->addButton (TRANS("Cancel"), 2, yup::KeyPress (yup::KeyPress::escapeKey);
 
-        w->enterModalState (true, juce::ModalCallbackFunction::create (
+        w->enterModalState (true, yup::ModalCallbackFunction::create (
             [w, delFilesButton, cb = std::move (callback)] (int res)
             {
                 if (cb)
@@ -577,7 +577,7 @@ RenderManager::Job::Ptr WaveAudioClip::getRenderJob (const AudioFile& destFile)
     return {};
 }
 
-juce::String WaveAudioClip::getRenderMessage()
+yup::String WaveAudioClip::getRenderMessage()
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
 
@@ -585,13 +585,13 @@ juce::String WaveAudioClip::getRenderMessage()
         return {};
 
     const float progress = renderJob == nullptr ? 1.0f : renderJob->getCurrentTaskProgress();
-    juce::String m (clipEffects != nullptr ? TRANS("Rendering effects")
+    yup::String m (clipEffects != nullptr ? TRANS("Rendering effects")
                                            : (getWarpTime() ? TRANS("Warping") : TRANS("Reversing")));
 
     if (progress < 0.0f)
         return m + "...";
 
-    return m + ": " + juce::String (juce::roundToInt (progress * 100.0f)) + "%";
+    return m + ": " + yup::String (yup::roundToInt (progress * 100.0f)) + "%";
 }
 
 bool WaveAudioClip::isUsingFile (const AudioFile& af)

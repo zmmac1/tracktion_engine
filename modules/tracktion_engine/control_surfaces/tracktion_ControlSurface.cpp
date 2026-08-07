@@ -63,7 +63,7 @@ ControlSurface::~ControlSurface()
     notifyListenersOfDeletion();
 }
 
-juce::String ControlSurface::getSelectableDescription()
+yup::String ControlSurface::getSelectableDescription()
 {
     return deviceDescription;
 }
@@ -78,10 +78,10 @@ Edit* ControlSurface::getEditIfOnEditScreen() const
 
 void ControlSurface::sendMidiCommandToController (int idx, const void* midiData, int numBytes)
 {
-    sendMidiCommandToController (idx, juce::MidiMessage (midiData, numBytes));
+    sendMidiCommandToController (idx, yup::MidiMessage (midiData, numBytes));
 }
 
-void ControlSurface::sendMidiCommandToController (int idx, const juce::MidiMessage& m)
+void ControlSurface::sendMidiCommandToController (int idx, const yup::MidiMessage& m)
 {
     if (owner != nullptr)
         if (idx >= 0 && idx < (int) owner->outputDevices.size())
@@ -267,7 +267,7 @@ void ControlSurface::userPressedRecEnable (int channelNum, bool enableEtoE)
 
         if (auto track = externalControllerManager.getChannelTrack (channelNum))
         {
-            juce::Array<InputDeviceInstance*> activeDev, inactiveDev;
+            yup::Array<InputDeviceInstance*> activeDev, inactiveDev;
 
             for (auto in : ed->getAllInputDevices())
             {
@@ -315,7 +315,7 @@ void ControlSurface::userLaunchedClip (int channelNum, int sceneNum, bool press)
     recentlyPressedPads.insert ({owner->channelStart + channelNum, owner->padStart + sceneNum});
 
     externalControllerManager.userLaunchedClip (owner->channelStart + channelNum, owner->padStart + sceneNum, press);
-    externalControllerManager.updatePadColours();
+    externalControllerManager.updatePadColors();
 }
 
 void ControlSurface::userStoppedClip (int channelNum, bool press)

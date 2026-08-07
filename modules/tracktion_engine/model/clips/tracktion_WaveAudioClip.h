@@ -18,19 +18,19 @@ class WaveAudioClip  : public AudioClipBase
 {
 public:
     /** Creates a WaveAudioClip from a given state. @see ClipTrack::insertWaveClip. */
-    WaveAudioClip (const juce::ValueTree&, EditItemID, ClipOwner&);
+    WaveAudioClip (const yup::ValueTree&, EditItemID, ClipOwner&);
 
     /** Destructor. */
     ~WaveAudioClip() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<WaveAudioClip>;
+    using Ptr = yup::ReferenceCountedObjectPtr<WaveAudioClip>;
 
     //==============================================================================
     /** Adds a new take with the ProjectItemRef as the source. */
     void addTake (ProjectItemRef);
 
     /** Adds a new take with the given file as the source. */
-    void addTake (const juce::File&);
+    void addTake (const yup::File&);
 
     /** Deletes all but the current takes.
         @param deleteSourceFiles    If true, also deletes the source files
@@ -51,7 +51,7 @@ public:
     /** @internal */
     RenderManager::Job::Ptr getRenderJob (const AudioFile& destFile) override;
     /** @internal */
-    juce::String getRenderMessage() override;
+    yup::String getRenderMessage() override;
     /** @internal */
     void renderComplete() override;
 
@@ -66,7 +66,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     /** @internal */
     bool isMidi() const override                                { return false; }
@@ -79,7 +79,7 @@ public:
     void sourceMediaChanged() override;
 
     /** @internal */
-    juce::File getOriginalFile() const override;
+    yup::File getOriginalFile() const override;
     /** @internal */
     HashCode getHash() const override;
 
@@ -88,13 +88,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    juce::StringArray getTakeDescriptions() const override;
+    yup::StringArray getTakeDescriptions() const override;
     /** @internal */
     bool hasAnyTakes() const override                           { return getTakesTree().getNumChildren() > 0; }
     /** @internal */
     int getNumTakes (bool includeComps) override;
     /** @internal */
-    juce::Array<ProjectItemRef> getTakes() const override;
+    yup::Array<ProjectItemRef> getTakes() const override;
     /** @internal */
     void clearTakes() override;
     /** @internal */
@@ -117,17 +117,17 @@ private:
     static constexpr int takeIndexNeedsUpdating = -2;
     mutable int currentTakeIndex = takeIndexNeedsUpdating;
 
-    juce::ValueTree getTakesTree() const                        { return state.getChildWithName (IDs::TAKES); }
+    yup::ValueTree getTakesTree() const                        { return state.getChildWithName (IDs::TAKES); }
     void invalidateCurrentTake() noexcept;
-    void invalidateCurrentTake (const juce::ValueTree&) noexcept;
+    void invalidateCurrentTake (const yup::ValueTree&) noexcept;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveAudioClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveAudioClip)
 };
 
 } // namespace tracktion::inline engine

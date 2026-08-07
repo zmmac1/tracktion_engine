@@ -15,16 +15,16 @@ namespace tracktion::inline engine {
 class ArrangerTrack  : public ClipTrack
 {
 public:
-    ArrangerTrack (Edit&, const juce::ValueTree&);
+    ArrangerTrack (Edit&, const yup::ValueTree&);
     ~ArrangerTrack() override;
 
     bool isArrangerTrack() const override;
-    juce::String getSelectableDescription() override;
-    juce::String getName() const override;
+    yup::String getSelectableDescription() override;
+    yup::String getName() const override;
     bool canContainPlugin (Plugin*) const override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrangerTrack)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrangerTrack)
 };
 
 } // namespace tracktion::inline engine

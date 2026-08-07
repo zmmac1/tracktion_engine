@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-struct AudioFormatReaderWithTimeout  : public juce::AudioFormatReader
+struct AudioFormatReaderWithTimeout  : public yup::AudioFormatReader
 {
     /** Constructor. */
     AudioFormatReaderWithTimeout();
@@ -33,18 +33,18 @@ public:
     ~AudioFileCache();
 
     //==============================================================================
-    class Reader  : public juce::ReferenceCountedObject
+    class Reader  : public yup::ReferenceCountedObject
     {
     public:
         ~Reader();
 
-        using Ptr = juce::ReferenceCountedObjectPtr<Reader>;
+        using Ptr = yup::ReferenceCountedObjectPtr<Reader>;
 
         void setReadPosition (SampleCount) noexcept;
         SampleCount getReadPosition() const noexcept    { return readPos; }
 
         bool readSamples (int numSamples,
-                          juce::AudioBuffer<float>& destBuffer,
+                          yup::AudioBuffer<float>& destBuffer,
                           const ChannelConfiguration& destChannels,
                           int startOffsetInDestBuffer,
                           const ChannelConfiguration& sourceChannels,
@@ -76,7 +76,7 @@ public:
 
         Reader (AudioFileCache&, void*, std::unique_ptr<AudioFormatReaderWithTimeout>);
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reader)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Reader)
     };
 
     /** Creates a Reader to read an AudioFile.
@@ -86,13 +86,13 @@ public:
 
     /** @internal */
     Reader::Ptr createReader (const AudioFile&,
-                              const std::function<std::unique_ptr<AudioFormatReaderWithTimeout> (juce::AudioFormatReader* sourceReader,
-                                                                                   juce::TimeSliceThread& timeSliceThread,
+                              const std::function<std::unique_ptr<AudioFormatReaderWithTimeout> (yup::AudioFormatReader* sourceReader,
+                                                                                   yup::TimeSliceThread& timeSliceThread,
                                                                                    int samplesToBuffer)>&
                               createAudioFormatReaderWithTimeout);
 
     /** @internal */
-    Reader::Ptr createAudioFormatReaderWithTimeout (const std::function<std::unique_ptr<AudioFormatReaderWithTimeout> (juce::TimeSliceThread& timeSliceThread,
+    Reader::Ptr createAudioFormatReaderWithTimeout (const std::function<std::unique_ptr<AudioFormatReaderWithTimeout> (yup::TimeSliceThread& timeSliceThread,
                                                                                            int samplesToBuffer)>&
                                       createAudioFormatReaderWithTimeout);
 
@@ -123,9 +123,9 @@ private:
 
     class CacheBuffer;
     class CachedFile;
-    juce::OwnedArray<CachedFile> activeFiles;
+    yup::OwnedArray<CachedFile> activeFiles;
     int nextFileToService = 0;
-    juce::ReadWriteLock fileListLock;
+    yup::ReadWriteLock fileListLock;
 
     CachedFile* getOrCreateCachedFile (const AudioFile&);
     bool serviceNextReader();
@@ -136,7 +136,7 @@ private:
     class RefresherThread;
     std::unique_ptr<RefresherThread> refresherThread;
 
-    juce::TimeSliceThread backgroundReaderThread { "Preview Buffer" };
+    yup::TimeSliceThread backgroundReaderThread { "Preview Buffer" };
 
     void stopThreads();
 
@@ -148,7 +148,7 @@ private:
     void releaseAllFiles();
     void validateFile (const AudioFile&);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFileCache)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFileCache)
 };
 
 } // namespace tracktion::inline engine

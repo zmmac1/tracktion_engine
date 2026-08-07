@@ -26,12 +26,12 @@ public:
     //==============================================================================
     static const char* getPluginName()              { return NEEDS_TRANS("Channel Mapper"); }
     static const char* xmlTypeName;
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
-    juce::String getName() const override                                      { return TRANS("Channel Mapper"); }
-    juce::String getPluginType() override                                      { return xmlTypeName; }
-    juce::String getShortName (int) override                                   { return "ChMap"; }
-    juce::String getSelectableDescription() override                           { return TRANS("Channel Mapper Plugin"); }
+    yup::String getName() const override                                      { return TRANS("Channel Mapper"); }
+    yup::String getPluginType() override                                      { return xmlTypeName; }
+    yup::String getShortName (int) override                                   { return "ChMap"; }
+    yup::String getSelectableDescription() override                           { return TRANS("Channel Mapper Plugin"); }
     bool takesMidiInput() override                                             { return true; }
     bool canBeAddedToClip() override                                           { return false; }
     bool producesAudioWhenNoAudioInput() override                              { return false; }
@@ -43,7 +43,7 @@ public:
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     //==============================================================================
     /** Returns the current channel map. */
@@ -66,13 +66,13 @@ public:
 
 private:
     //==============================================================================
-    juce::CachedValue<juce::String> channelMapState;
+    juce::CachedValue<yup::String> channelMapState;
     juce::CachedValue<int> numInputChannels, numOutputChannels;
     ChannelMap currentMap;
 
     void updateMapFromState();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelMapperPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelMapperPlugin)
 };
 
 } // namespace tracktion::inline engine

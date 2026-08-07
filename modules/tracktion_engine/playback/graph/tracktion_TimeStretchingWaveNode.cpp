@@ -121,7 +121,7 @@ void TimeStretchingWaveNode::process (ProcessContext& pc)
         if (numReady > 0)
         {
             const bool res = fifo.readAdding (destAudioView.getFrameRange ({ start, start + numReady }));
-            jassert (res); juce::ignoreUnused (res);
+            jassert (res); yup::ignoreUnused (res);
 
             start += numReady;
             numSamples -= numReady;
@@ -140,7 +140,7 @@ void TimeStretchingWaveNode::process (ProcessContext& pc)
 int64_t TimeStretchingWaveNode::timeToFileSample (double time) const noexcept
 {
     const double fileStartTime = time / speedRatio;
-    return juce::roundToInt (fileStartTime * fileInfo.sampleRate);
+    return yup::roundToInt (fileStartTime * fileInfo.sampleRate);
 }
 
 void TimeStretchingWaveNode::reset (double newStartTime)
@@ -189,7 +189,7 @@ bool TimeStretchingWaveNode::fillNextBlock()
         if (needed > 0)
         {
             bool b = reader->readSamples (needed, scratch.buffer, bufChannels, 0, channelsToUse, 3);
-            juce::ignoreUnused (b);
+            yup::ignoreUnused (b);
             // don't worry about failed reads -- they are cache misses. It'll catch up
         }
 
@@ -204,7 +204,7 @@ bool TimeStretchingWaveNode::fillNextBlock()
             timestretcher.processData (ins, needed, outs);
         else
             for (int channel = fileInfo.numChannels; --channel >= 0;)
-                juce::FloatVectorOperations::copy (outs[channel], ins[channel], needed);
+                yup::FloatVectorOperations::copy (outs[channel], ins[channel], needed);
     }
     else
     {
@@ -215,7 +215,7 @@ bool TimeStretchingWaveNode::fillNextBlock()
     const bool res = fifo.write (choc::buffer::createChannelArrayView (fifoScratch.buffer.getArrayOfWritePointers(),
                                                                        (choc::buffer::ChannelCount) fifoScratch.buffer.getNumChannels(),
                                                                        (choc::buffer::FrameCount) stretchBlockSize));
-    jassert (res); juce::ignoreUnused (res);
+    jassert (res); yup::ignoreUnused (res);
 
     return true;
 }

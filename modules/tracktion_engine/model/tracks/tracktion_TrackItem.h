@@ -17,7 +17,7 @@ namespace tracktion::inline engine {
 */
 class TrackItem   : public EditItem,
                     public Selectable,
-                    public juce::ReferenceCountedObject
+                    public yup::ReferenceCountedObject
 {
 public:
     /** Defines the types of item that can live on Track[s]. */
@@ -52,18 +52,18 @@ public:
     static const char* typeToString (Type);
 
     /** Returns an Identifier version of a TrackItem::Type. */
-    static juce::Identifier clipTypeToXMLType (Type);
+    static yup::Identifier clipTypeToXMLType (Type);
 
     /** Returns the TrackItem::Type of a type string. */
-    static TrackItem::Type xmlTagToType (juce::StringRef);
+    static TrackItem::Type xmlTagToType (yup::StringRef);
 
     /** Returns the TrackItem::Type of a type string. */
-    static TrackItem::Type stringToType (const juce::String&);
+    static TrackItem::Type stringToType (const yup::String&);
 
     /** Returns a text string for a new clip of the given type.
         E.g. "New Audio Clip" for Type::wave
     */
-    static juce::String getSuggestedNameForNewItem (Type);
+    static yup::String getSuggestedNameForNewItem (Type);
 
     //==============================================================================
     /** Must return the track this item lives on. */
@@ -134,7 +134,7 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackItem)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackItem)
 };
 
 

@@ -15,13 +15,13 @@ namespace tracktion::inline engine {
 namespace MidiNodeHelpers
 {
     inline void createMessagesForTime (MidiMessageArray& destBuffer,
-                                       juce::MidiMessageSequence& sourceSequence,
+                                       yup::MidiMessageSequence& sourceSequence,
                                        double time,
-                                       juce::Range<int> channelNumbers,
+                                       yup::Range<int> channelNumbers,
                                        LiveClipLevel& clipLevel,
                                        bool useMPEChannelMode,
                                        MPESourceID midiSourceID,
-                                       juce::Array<juce::MidiMessage>& controllerMessagesScratchBuffer)
+                                       yup::Array<yup::MidiMessage>& controllerMessagesScratchBuffer)
     {
         if (useMPEChannelMode)
         {
@@ -64,7 +64,7 @@ namespace MidiNodeHelpers
                             // don't play very short notes or ones that have already finished
                             if (meh->noteOffObject->message.getTimeStamp() > time + 0.0001)
                             {
-                                juce::MidiMessage m (meh->message);
+                                yup::MidiMessage m (meh->message);
                                 m.multiplyVelocity (volScale);
 
                                 // give these a tiny offset to make sure they're played after the controller updates
@@ -77,7 +77,7 @@ namespace MidiNodeHelpers
         }
     }
 
-    inline void createNoteOffs (MidiMessageArray& destination, const juce::MidiMessageSequence& sourceSequence,
+    inline void createNoteOffs (MidiMessageArray& destination, const yup::MidiMessageSequence& sourceSequence,
                                 MPESourceID midiSourceID,
                                 double time, double midiTimeOffset, bool isPlaying)
     {
@@ -107,13 +107,13 @@ namespace MidiNodeHelpers
         {
             if ((activeChannels & (1 << i)) != 0)
             {
-                destination.addMidiMessage (juce::MidiMessage::controllerEvent (i, 66 /* sustain pedal off */, 0), midiTimeOffset, midiSourceID);
-                destination.addMidiMessage (juce::MidiMessage::controllerEvent (i, 64 /* hold pedal off */, 0), midiTimeOffset, midiSourceID);
+                destination.addMidiMessage (yup::MidiMessage::controllerEvent (i, 66 /* sustain pedal off */, 0), midiTimeOffset, midiSourceID);
+                destination.addMidiMessage (yup::MidiMessage::controllerEvent (i, 64 /* hold pedal off */, 0), midiTimeOffset, midiSourceID);
 
                 // NB: Some buggy plugins seem to fail to respond to note-ons if they are preceded
                 // by an all-notes-off, so avoid this while playing.
                 if (! isPlaying)
-                    destination.addMidiMessage (juce::MidiMessage::allNotesOff (i), midiTimeOffset, midiSourceID);
+                    destination.addMidiMessage (yup::MidiMessage::allNotesOff (i), midiTimeOffset, midiSourceID);
             }
         }
     }
@@ -136,7 +136,7 @@ namespace MidiNodeHelpers
         activeNoteList.iterate ([&] (int channel, int noteNumber)
                                 {
                                     activeChannels |= (1 << channel);
-                                    destination.addMidiMessage (juce::MidiMessage::noteOff (channel, noteNumber), midiTimeOffset, midiSourceID);
+                                    destination.addMidiMessage (yup::MidiMessage::noteOff (channel, noteNumber), midiTimeOffset, midiSourceID);
                                 });
         activeNoteList.reset();
 
@@ -145,13 +145,13 @@ namespace MidiNodeHelpers
         {
             if ((activeChannels & (1 << i)) != 0)
             {
-                destination.addMidiMessage (juce::MidiMessage::controllerEvent (i, 66 /* sustain pedal off */, 0), midiTimeOffset, midiSourceID);
-                destination.addMidiMessage (juce::MidiMessage::controllerEvent (i, 64 /* hold pedal off */, 0), midiTimeOffset, midiSourceID);
+                destination.addMidiMessage (yup::MidiMessage::controllerEvent (i, 66 /* sustain pedal off */, 0), midiTimeOffset, midiSourceID);
+                destination.addMidiMessage (yup::MidiMessage::controllerEvent (i, 64 /* hold pedal off */, 0), midiTimeOffset, midiSourceID);
 
                 // NB: Some buggy plugins seem to fail to respond to note-ons if they are preceded
                 // by an all-notes-off, so avoid this while playing.
                 if (! isPlaying)
-                    destination.addMidiMessage (juce::MidiMessage::allNotesOff (i), midiTimeOffset, midiSourceID);
+                    destination.addMidiMessage (yup::MidiMessage::allNotesOff (i), midiTimeOffset, midiSourceID);
             }
         }
     }

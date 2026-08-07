@@ -23,7 +23,7 @@ struct RandomModifier::RandomModifierTimer    : public ModifierTimer
         modifier.setEditTime (editTime);
         modifier.updateParameterStreams (editTime);
 
-        const auto syncTypeThisBlock = juce::roundToInt (modifier.syncTypeParam->getCurrentValue());
+        const auto syncTypeThisBlock = yup::roundToInt (modifier.syncTypeParam->getCurrentValue());
         const auto rateTypeThisBlock = getTypedParamValue<ModifierCommon::RateType> (*modifier.rateTypeParam);
 
         const float rateThisBlock = modifier.rateParam->getCurrentValue();
@@ -77,7 +77,7 @@ struct RandomModifier::RandomModifierTimer    : public ModifierTimer
 
     void resync (double duration)
     {
-        if (juce::roundToInt (modifier.syncTypeParam->getCurrentValue()) == ModifierCommon::note)
+        if (yup::roundToInt (modifier.syncTypeParam->getCurrentValue()) == ModifierCommon::note)
         {
             ramp.setPosition (0.0f);
             modifier.setPhase (0.0f);
@@ -91,11 +91,11 @@ struct RandomModifier::RandomModifierTimer    : public ModifierTimer
     Ramp ramp;
     tempo::Sequence::Position tempoSequence { createPosition (modifier.edit.tempoSequence) };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RandomModifierTimer)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RandomModifierTimer)
 };
 
 //==============================================================================
-RandomModifier::RandomModifier (Edit& e, const juce::ValueTree& v)
+RandomModifier::RandomModifier (Edit& e, const yup::ValueTree& v)
     : Modifier (e, v)
 {
     auto um = &edit.getUndoManager();
@@ -110,9 +110,9 @@ RandomModifier::RandomModifier (Edit& e, const juce::ValueTree& v)
     smooth.referTo (state, IDs::smooth, um);
     bipolar.referTo (state, IDs::bipolar, um);
 
-    auto addDiscreteParam = [this] (const juce::String& paramID, const juce::String& name,
-                                    juce::Range<float> valueRange, juce::CachedValue<float>& val,
-                                    const juce::StringArray& labels) -> AutomatableParameter*
+    auto addDiscreteParam = [this] (const yup::String& paramID, const yup::String& name,
+                                    yup::Range<float> valueRange, juce::CachedValue<float>& val,
+                                    const yup::StringArray& labels) -> AutomatableParameter*
     {
         auto* p = new DiscreteLabelledParameter (paramID, name, *this, valueRange, labels.size(), labels);
         addAutomatableParameter (p);
@@ -121,10 +121,10 @@ RandomModifier::RandomModifier (Edit& e, const juce::ValueTree& v)
         return p;
     };
 
-    auto addParam = [this] (const juce::String& paramID, const juce::String& name,
-                            juce::NormalisableRange<float> valueRange,
+    auto addParam = [this] (const yup::String& paramID, const yup::String& name,
+                            yup::NormalisableRange<float> valueRange,
                             float centreVal, juce::CachedValue<float>& val,
-                            const juce::String& suffix) -> AutomatableParameter*
+                            const yup::String& suffix) -> AutomatableParameter*
     {
         valueRange.setSkewForCentre (centreVal);
         auto* p = new SuffixedParameter (paramID, name, *this, valueRange, suffix);
@@ -187,7 +187,7 @@ float RandomModifier::getCurrentPhase() const noexcept
     return currentPhase.load (std::memory_order_acquire);
 }
 
-AutomatableParameter::ModifierAssignment* RandomModifier::createAssignment (const juce::ValueTree& v)
+AutomatableParameter::ModifierAssignment* RandomModifier::createAssignment (const yup::ValueTree& v)
 {
     return new Assignment (v, *this);
 }
@@ -203,7 +203,7 @@ void RandomModifier::applyToBuffer (const PluginRenderContext& prc)
 }
 
 //==============================================================================
-RandomModifier::Assignment::Assignment (const juce::ValueTree& v, const RandomModifier& rm)
+RandomModifier::Assignment::Assignment (const yup::ValueTree& v, const RandomModifier& rm)
     : AutomatableParameter::ModifierAssignment (rm.edit, v),
       randomModifierID (rm.itemID)
 {
@@ -226,7 +226,7 @@ RandomModifier::Ptr RandomModifier::Assignment::getRandomModifier() const
 }
 
 //==============================================================================
-juce::StringArray RandomModifier::getTypeNames()
+yup::StringArray RandomModifier::getTypeNames()
 {
     return { NEEDS_TRANS("Random"),
              NEEDS_TRANS("Noise") };
@@ -247,15 +247,15 @@ void RandomModifier::setPhase (float newPhase)
 
         const bool bp = getBoolParamValue (*bipolarParam);
         const float sd = stepDepthParam->getCurrentValue() * (bp ? 1.0f : 0.5f);
-        const auto randomRange = juce::Range<float> (currentRandom - sd, currentRandom + sd)
+        const auto randomRange = yup::Range<float> (currentRandom - sd, currentRandom + sd)
                                     .getIntersectionWith ({ bp ? -1.0f : 0.0f, 1.0f });
 
-        currentRandom = juce::jmap (rand.nextFloat(), randomRange.getStart(), randomRange.getEnd());
+        currentRandom = yup::jmap (rand.nextFloat(), randomRange.getStart(), randomRange.getEnd());
         jassert (randomRange.contains (currentRandom));
         randomDifference = currentRandom - previousRandom;
     }
 
-    jassert (juce::isPositiveAndBelow (newPhase, 1.0f));
+    jassert (yup::isPositiveAndBelow (newPhase, 1.0f));
     currentPhase.store (newPhase, std::memory_order_release);
 
     auto newValue = [this, newPhase, shapeVal = shapeParam->getCurrentValue()]

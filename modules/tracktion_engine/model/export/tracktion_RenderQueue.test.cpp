@@ -25,13 +25,13 @@ TEST_SUITE ("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine, 2);
         auto tracks = getAudioTracks (*edit);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
 
         for (auto t : tracks)
             insertWaveClip (*t, {}, sinFile->getFile(), { .time = { 0_tp, 1_tp } },
                             DeleteExistingClips::no);
 
-        auto destDir = juce::File::createTempFile ({});
+        auto destDir = yup::File::createTempFile ({});
         destDir.createDirectory();
 
         RenderQueue queue;
@@ -76,13 +76,13 @@ TEST_SUITE ("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine, 2);
         auto tracks = getAudioTracks (*edit);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
 
         for (auto t : tracks)
             insertWaveClip (*t, {}, sinFile->getFile(), { .time = { 0_tp, 1_tp } },
                             DeleteExistingClips::no);
 
-        auto destDir = juce::File::createTempFile ({});
+        auto destDir = yup::File::createTempFile ({});
         destDir.createDirectory();
 
         RenderQueue queue;
@@ -110,11 +110,11 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto edit = test_utilities::createTestEdit (engine);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 5.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 5.0);
         insertWaveClip (*getAudioTracks (*edit)[0], {}, sinFile->getFile(), { .time = { 0_tp, 5_tp } },
                         DeleteExistingClips::no);
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
 
         RenderSpecification spec;
         spec.destination = destFile.getFile();
@@ -139,11 +139,11 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto edit = test_utilities::createTestEdit (engine);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 5.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 5.0);
         insertWaveClip (*getAudioTracks (*edit)[0], {}, sinFile->getFile(), { .time = { 0_tp, 5_tp } },
                         DeleteExistingClips::no);
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
 
         RenderSpecification spec;
         spec.destination = destFile.getFile();
@@ -152,7 +152,7 @@ TEST_SUITE ("tracktion_engine")
         auto job = queue->addJob (*createRenderJob (*edit, spec));
 
         queue->start();
-        juce::MessageManager::getInstance()->runDispatchLoopUntil (50);
+        yup::MessageManager::getInstance()->runDispatchLoopUntil (50);
         queue.reset();  // cancels the active job, joins its thread and cleans up
 
         CHECK (job->getState() == RenderQueue::Job::State::cancelled);
@@ -172,11 +172,11 @@ TEST_SUITE ("tracktion_engine")
             static const char* getPluginName()               { return NEEDS_TRANS("Teardown Thread Tester"); }
             static const char* xmlTypeName;
 
-            static juce::ValueTree create()                  { return createValueTree (IDs::PLUGIN, IDs::type, xmlTypeName); }
+            static yup::ValueTree create()                  { return createValueTree (IDs::PLUGIN, IDs::type, xmlTypeName); }
 
-            juce::String getName() const override            { return getPluginName(); }
-            juce::String getPluginType() override            { return xmlTypeName; }
-            juce::String getSelectableDescription() override { return getName(); }
+            yup::String getName() const override            { return getPluginName(); }
+            yup::String getPluginType() override            { return xmlTypeName; }
+            yup::String getSelectableDescription() override { return getName(); }
 
             BusLayout getBusses() const override             { return BusLayout::singleStereoInOut(); }
 
@@ -187,7 +187,7 @@ TEST_SUITE ("tracktion_engine")
             {
                 // Monotonic, as deinitialise can be called more than once and a later
                 // message-thread call mustn't hide an earlier render-thread one
-                if (! juce::MessageManager::existsAndIsCurrentThread())
+                if (! yup::MessageManager::existsAndIsCurrentThread())
                     deinitialisedOffMessageThread = true;
 
                 wasDeinitialised = true;
@@ -209,14 +209,14 @@ TEST_SUITE ("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine);
         auto track = getAudioTracks (*edit)[0];
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 5.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 5.0);
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, 5_tp } },
                         DeleteExistingClips::no);
 
         auto plugin = insertNewPlugin<TeardownThreadPlugin> (*track);
         REQUIRE (plugin != nullptr);
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
 
         RenderSpecification spec;
         spec.destination = destFile.getFile();
@@ -225,7 +225,7 @@ TEST_SUITE ("tracktion_engine")
         auto job = queue->addJob (*createRenderJob (*edit, spec));
 
         queue->start();
-        juce::MessageManager::getInstance()->runDispatchLoopUntil (50);
+        yup::MessageManager::getInstance()->runDispatchLoopUntil (50);
 
         // Destroying the queue cancels the active job and joins its render thread. The
         // graph holds the plugin, which has to be deinitialised on the message thread
@@ -242,13 +242,13 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto edit = test_utilities::createTestEdit (engine);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
         insertWaveClip (*getAudioTracks (*edit)[0], {}, sinFile->getFile(), { .time = { 0_tp, 1_tp } },
                         DeleteExistingClips::no);
 
-        juce::TemporaryFile destFile1 (".wav"), destFile2 (".wav"), destFile3 (".wav");
+        yup::TemporaryFile destFile1 (".wav"), destFile2 (".wav"), destFile3 (".wav");
 
-        auto makeSpec = [] (const juce::File& f)
+        auto makeSpec = [] (const yup::File& f)
         {
             RenderSpecification spec;
             spec.destination = f;
@@ -290,13 +290,13 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto edit = test_utilities::createTestEdit (engine);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
         insertWaveClip (*getAudioTracks (*edit)[0], {}, sinFile->getFile(), { .time = { 0_tp, 1_tp } },
                         DeleteExistingClips::no);
 
-        juce::TemporaryFile destFile1 (".wav"), destFile2 (".wav");
+        yup::TemporaryFile destFile1 (".wav"), destFile2 (".wav");
 
-        auto makeSpec = [] (const juce::File& f)
+        auto makeSpec = [] (const yup::File& f)
         {
             RenderSpecification spec;
             spec.destination = f;
@@ -332,13 +332,13 @@ TEST_SUITE ("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine, 2);
         auto tracks = getAudioTracks (*edit);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
 
         for (auto t : tracks)
             insertWaveClip (*t, {}, sinFile->getFile(), { .time = { 0_tp, 1_tp } },
                             DeleteExistingClips::no);
 
-        auto destDir = juce::File::createTempFile ({});
+        auto destDir = yup::File::createTempFile ({});
         destDir.createDirectory();
 
         RenderQueue queue;
@@ -384,11 +384,11 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto edit = test_utilities::createTestEdit (engine);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
         insertWaveClip (*getAudioTracks (*edit)[0], {}, sinFile->getFile(), { .time = { 0_tp, 1_tp } },
                         DeleteExistingClips::no);
 
-        juce::TemporaryFile destFile (".wav");
+        yup::TemporaryFile destFile (".wav");
 
         RenderSpecification spec;
         spec.destination = destFile.getFile();
@@ -408,7 +408,7 @@ TEST_SUITE ("tracktion_engine")
         };
 
         const auto firstSize = renderOnce();
-        CHECK_GT (firstSize, (juce::int64) 0);
+        CHECK_GT (firstSize, (yup::int64) 0);
 
         // A file output stream opens at the end of an existing file, so without the
         // destination being deleted first this second render appends a whole second
@@ -430,7 +430,7 @@ TEST_SUITE ("tracktion_engine")
         // second half plays during the end allowance. A non-integer number of
         // cycles per second makes any fold misalignment show up, and the
         // lowered gain keeps the folded sum out of clipping.
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0, 1, 223.4f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0, 1, 223.4f);
         auto clip = insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, 2_tp } },
                                     DeleteExistingClips::no);
         REQUIRE (clip != nullptr);
@@ -441,7 +441,7 @@ TEST_SUITE ("tracktion_engine")
         const auto regionSamples = (int) toSamples (1_td, 44100.0);
 
         // Reference: render the region plus tail without wrapping
-        juce::TemporaryFile refFile (".wav");
+        yup::TemporaryFile refFile (".wav");
         Renderer::Parameters refParams (*edit);
         refParams.destFile = refFile.getFile();
         refParams.time = renderRange;
@@ -459,7 +459,7 @@ TEST_SUITE ("tracktion_engine")
         // Wrapped render of the same region through the queue. There are no
         // tail-reporting plugins here, so give the job the same explicit
         // allowance the reference render used.
-        juce::TemporaryFile wrapFile (".wav");
+        yup::TemporaryFile wrapFile (".wav");
         RenderSpecification spec;
         spec.destination = wrapFile.getFile();
         spec.time = renderRange;

@@ -29,7 +29,7 @@ public:
     ~LevelMeasurer();
 
     //==============================================================================
-    void processBuffer (juce::AudioBuffer<float>& buffer, int start, int numSamples);
+    void processBuffer (yup::AudioBuffer<float>& buffer, int start, int numSamples);
     void processMidi (MidiMessageArray& midiBuffer, const float* gains);
     void processMidiLevel (float level);
 
@@ -93,7 +93,7 @@ public:
         bool clearOverload = true;
         bool clearPeak = true;
 
-        juce::SpinLock mutex;
+        yup::SpinLock mutex;
     };
 
     //==============================================================================
@@ -105,13 +105,13 @@ private:
     std::atomic<int> numActiveChannels { 1 };
     bool showMidi = false;
 
-    juce::Array<Client*> clients;
+    yup::Array<Client*> clients;
     RealTimeSpinLock clientsMutex;
 
     choc::SmallVector<ChannelLevel, 32> channelLevels;
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE(LevelMeasurer)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelMeasurer)
+    YUP_DECLARE_WEAK_REFERENCEABLE(LevelMeasurer)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelMeasurer)
 };
 
 //==============================================================================
@@ -119,18 +119,18 @@ private:
     total output level
 */
 class SharedLevelMeasurer  : public LevelMeasurer,
-                             public juce::ReferenceCountedObject
+                             public yup::ReferenceCountedObject
 {
 public:
-    using Ptr = juce::ReferenceCountedObjectPtr<SharedLevelMeasurer>;
+    using Ptr = yup::ReferenceCountedObjectPtr<SharedLevelMeasurer>;
 
     void startNextBlock (double streamTime);
     void setSize (int channels, int numSamples);
-    void addBuffer (const juce::AudioBuffer<float>& inBuffer, int startSample, int numSamples);
+    void addBuffer (const yup::AudioBuffer<float>& inBuffer, int startSample, int numSamples);
 
-    juce::SpinLock spinLock;
+    yup::SpinLock spinLock;
     double lastStreamTime = 0;
-    juce::AudioBuffer<float> sumBuffer;
+    yup::AudioBuffer<float> sumBuffer;
 };
 
 } // namespace tracktion::inline engine

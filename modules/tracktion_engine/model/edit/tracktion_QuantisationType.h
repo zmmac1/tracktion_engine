@@ -13,36 +13,36 @@ namespace tracktion::inline engine {
 //==============================================================================
 /**
 */
-class QuantisationType  : private juce::ValueTree::Listener
+class QuantisationType  : private yup::ValueTree::Listener
 {
 public:
     //==============================================================================
     QuantisationType();
-    QuantisationType (const juce::ValueTree&, juce::UndoManager*);
+    QuantisationType (const yup::ValueTree&, juce::UndoManager*);
     ~QuantisationType() override;
 
     QuantisationType (const QuantisationType&);
     QuantisationType& operator= (const QuantisationType&);
     bool operator== (const QuantisationType&) const;
 
-    void applyQuantisationToSequence (juce::MidiMessageSequence&, Edit&, TimePosition sequenceStartOffset);
+    void applyQuantisationToSequence (yup::MidiMessageSequence&, Edit&, TimePosition sequenceStartOffset);
 
     //==============================================================================
     /** this type may represent "no quantising" */
     bool isEnabled() const;
 
-    static juce::StringArray getAvailableQuantiseTypes (bool translated);
+    static yup::StringArray getAvailableQuantiseTypes (bool translated);
     /// Returns the list of quantise types, annotated with their musical note equivalents to
     /// avoid confusion between beat fractions and note names
-    static juce::StringArray getAvailableQuantiseTypes (bool translated, int timeSigDenominator);
-    static juce::StringArray getAvailableQuantiseTypes (bool translated, const Edit&);
-    static juce::String beatFractionToNoteName (double beatFraction, bool isTriplet, int timeSigDenominator);
-    static juce::String getDefaultType (bool translated);
+    static yup::StringArray getAvailableQuantiseTypes (bool translated, int timeSigDenominator);
+    static yup::StringArray getAvailableQuantiseTypes (bool translated, const Edit&);
+    static yup::String beatFractionToNoteName (double beatFraction, bool isTriplet, int timeSigDenominator);
+    static yup::String getDefaultType (bool translated);
 
-    void setType (const juce::String& newTypeName);
-    juce::String getType (bool translated) const;
-    juce::String getType (bool translated, int timeSigDenominator) const;
-    juce::String getType (bool translated, const Edit&) const;
+    void setType (const yup::String& newTypeName);
+    yup::String getType (bool translated) const;
+    yup::String getType (bool translated, int timeSigDenominator) const;
+    yup::String getType (bool translated, const Edit&) const;
 
     /** Returns the TimecodeSnapType level for the current quantisation type.
         Because the TimecodeSnapType level means something different if the time sig is
@@ -68,8 +68,8 @@ public:
     TimePosition roundToNearest (TimePosition, const Edit&) const;
     TimePosition roundUp (TimePosition, const Edit&) const;
 
-    juce::ValueTree state;
-    juce::CachedValue<juce::String> typeName;
+    yup::ValueTree state;
+    juce::CachedValue<yup::String> typeName;
     juce::CachedValue<float> proportion;
     juce::CachedValue<bool> quantiseNoteOffs;
 
@@ -79,7 +79,7 @@ private:
 
     /// Strips the parenthesised note annotation from a quantise type name,
     /// e.g. "1/2 beat (1/8 note)" -> "1/2 beat"
-    static juce::String stripNoteAnnotation (const juce::String&);
+    static yup::String stripNoteAnnotation (const yup::String&);
 
     void initialiseCachedValues (juce::UndoManager*);
 
@@ -88,11 +88,11 @@ private:
     TimePosition roundTo (TimePosition, double adjustment, const Edit&) const;
     BeatPosition roundToBeat (BeatPosition beatNumber, double adjustment) const;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override {}
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override {}
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override {}
-    void valueTreeParentChanged (juce::ValueTree&) override {}
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override {}
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override {}
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override {}
+    void valueTreeParentChanged (yup::ValueTree&) override {}
 };
 
 } // namespace tracktion::inline engine

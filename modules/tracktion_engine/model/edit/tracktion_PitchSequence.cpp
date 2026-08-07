@@ -11,9 +11,9 @@
 namespace tracktion::inline engine {
 
 struct PitchSequence::PitchList  : public ValueTreeObjectList<PitchSetting>,
-                                   private juce::AsyncUpdater
+                                   private yup::AsyncUpdater
 {
-    PitchList (PitchSequence& s, const juce::ValueTree& parentTree)
+    PitchList (PitchSequence& s, const yup::ValueTree& parentTree)
         : ValueTreeObjectList<PitchSetting> (parentTree), pitchSequence (s)
     {
         rebuildObjects();
@@ -24,12 +24,12 @@ struct PitchSequence::PitchList  : public ValueTreeObjectList<PitchSetting>,
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return v.hasType (IDs::PITCH);
     }
 
-    PitchSetting* createNewObject (const juce::ValueTree& v) override
+    PitchSetting* createNewObject (const yup::ValueTree& v) override
     {
         auto t = new PitchSetting (pitchSequence.getEdit(), v);
         t->incReferenceCount();
@@ -45,7 +45,7 @@ struct PitchSequence::PitchList  : public ValueTreeObjectList<PitchSetting>,
     void newObjectAdded (PitchSetting*) override    { sendChange(); }
     void objectRemoved (PitchSetting*) override     { sendChange(); }
     void objectOrderChanged() override              { sendChange(); }
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override  { sendChange(); }
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override  { sendChange(); }
 
     void sendChange()
     {
@@ -90,7 +90,7 @@ void PitchSequence::clear()
     }
 }
 
-void PitchSequence::initialise (Edit& ed, const juce::ValueTree& v)
+void PitchSequence::initialise (Edit& ed, const yup::ValueTree& v)
 {
     edit = &ed;
     state = v;
@@ -113,7 +113,7 @@ void PitchSequence::copyFrom (const PitchSequence& other)
     copyValueTree (state, other.state, nullptr);
 }
 
-const juce::Array<PitchSetting*>& PitchSequence::getPitches() const    { return list->objects; }
+const yup::Array<PitchSetting*>& PitchSequence::getPitches() const    { return list->objects; }
 int PitchSequence::getNumPitches() const                               { return list->objects.size(); }
 PitchSetting* PitchSequence::getPitch (int index) const                { return list->objects[index]; }
 PitchSetting& PitchSequence::getPitchAt (TimePosition time) const      { return *list->objects[indexOfPitchAt (time)]; }
@@ -208,7 +208,7 @@ void PitchSequence::movePitchStart (PitchSetting& p, BeatDuration deltaBeats, bo
         {
             t->startBeat.forceUpdateOfCachedValue();
             auto newBeat = t->getStartBeat() + deltaBeats;
-            t->setStartBeat (BeatPosition::fromBeats (juce::jlimit (0.0, 1e10, snapToBeat ? juce::roundToInt (newBeat.inBeats())
+            t->setStartBeat (BeatPosition::fromBeats (yup::jlimit (0.0, 1e10, snapToBeat ? yup::roundToInt (newBeat.inBeats())
                                                                                           : newBeat.inBeats())));
         }
     }
@@ -256,7 +256,7 @@ void PitchSequence::sortEvents()
 {
     struct PitchSorter
     {
-        static int compareElements (const juce::ValueTree& p1, const juce::ValueTree& p2) noexcept
+        static int compareElements (const yup::ValueTree& p1, const yup::ValueTree& p2) noexcept
         {
             const double beat1 = p1[IDs::startBeat];
             const double beat2 = p2[IDs::startBeat];

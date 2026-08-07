@@ -20,10 +20,10 @@ class EditClip    : public AudioClipBase,
 {
 public:
     //==============================================================================
-    EditClip (const juce::ValueTree&, EditItemID, ClipOwner&, ProjectItemRef sourceEdit);
+    EditClip (const yup::ValueTree&, EditItemID, ClipOwner&, ProjectItemRef sourceEdit);
     ~EditClip() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<EditClip>;
+    using Ptr = yup::ReferenceCountedObjectPtr<EditClip>;
 
     /** Returns the AudioFileInfo for an edit clip.
         This is a bit of a hack but necessary to get the AudioSegmentList structures
@@ -46,22 +46,22 @@ public:
     double getCurrentStretchRatio() const;
 
     //==============================================================================
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
-    juce::File getOriginalFile() const override;
+    yup::File getOriginalFile() const override;
     HashCode getHash() const override                   { return hash; }
 
     void setLoopDefaults() override;
 
-    void setTracksToRender (const juce::Array<EditItemID>& trackIDs);
+    void setTracksToRender (const yup::Array<EditItemID>& trackIDs);
 
     //==============================================================================
     bool requiresRenderingSource() const override;
     bool needsRender() const override;
     RenderManager::Job::Ptr getRenderJob (const AudioFile& destFile) override;
     void renderComplete() override;
-    juce::String getRenderMessage() override;
-    juce::String getClipMessage() override;
+    yup::String getRenderMessage() override;
+    yup::String getClipMessage() override;
 
     //==============================================================================
     TimeDuration getSourceLength() const override       { return editSnapshot == nullptr ? 0_td : editSnapshot->getLength(); }
@@ -76,13 +76,13 @@ public:
     ProjectItem::Ptr createUniqueCopy();
     HashCode generateHash();
 
-    juce::CachedValue<bool> copyColourFromMarker, trimToMarker, renderEnabled;
+    juce::CachedValue<bool> copyColorFromMarker, trimToMarker, renderEnabled;
 
     /** @internal */
     void editFinishedLoading();
 
 protected:
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
 private:
     //==============================================================================
@@ -92,7 +92,7 @@ private:
     //==============================================================================
     ProjectItemRef lastSourceRef;
     EditSnapshot::Ptr editSnapshot;
-    juce::ReferenceCountedArray<EditSnapshot> referencedEdits;
+    yup::ReferenceCountedArray<EditSnapshot> referencedEdits;
 
     AudioFileInfo waveInfo;
     HashCode hash = 0;
@@ -107,7 +107,7 @@ private:
     void editChanged (EditSnapshot&) override;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditClip)
 };
 
 } // namespace tracktion::inline engine

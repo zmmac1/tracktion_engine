@@ -24,19 +24,19 @@ public:
     bool isMute();
 
     int getBusNumber() const                { return busNumber; }
-    juce::String getBusName();
+    yup::String getBusName();
 
-    static juce::StringArray getBusNames (Edit&, int maxNumBusses);
-    static juce::String getDefaultBusName (int busIndex);
+    static yup::StringArray getBusNames (Edit&, int maxNumBusses);
+    static yup::String getDefaultBusName (int busIndex);
 
     //==============================================================================
     static const char* getPluginName()              { return NEEDS_TRANS("Aux Send"); }
     static const char* xmlTypeName;
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
-    juce::String getName() const override;
-    juce::String getShortName (int suggestedMaxLength) override;
-    juce::String getPluginType() override           { return xmlTypeName; }
+    yup::String getName() const override;
+    yup::String getShortName (int suggestedMaxLength) override;
+    yup::String getPluginType() override           { return xmlTypeName; }
 
     int getNumOutputChannelsGivenInputs (int numInputChannels) override { return numInputChannels; }
     BusLayout getBusses() const override   { return BusLayout::singlePassThrough(); }
@@ -45,13 +45,13 @@ public:
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
 
-    juce::String getSelectableDescription() override { return TRANS("Aux Send Plugin"); }
+    yup::String getSelectableDescription() override { return TRANS("Aux Send Plugin"); }
 
     bool canBeAddedToClip() override                 { return false; }
     bool canBeAddedToRack() override                 { return false; }
     bool needsConstantBufferSize() override          { return true; }
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     juce::CachedValue<int> busNumber;
     juce::CachedValue<float> gainLevel;
@@ -68,11 +68,11 @@ private:
     juce::CachedValue<float> lastVolumeBeforeMute;
     float lastGain = 1.0f;
 
-    juce::CriticalSection ownerTrackLock;
+    yup::CriticalSection ownerTrackLock;
     Track* ownerTrack = nullptr;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AuxSendPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AuxSendPlugin)
 };
 
 } // namespace tracktion::inline engine

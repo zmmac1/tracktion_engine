@@ -10,17 +10,17 @@
 
 namespace tracktion::inline engine {
 
-inline void addSortedListToMenu (juce::PopupMenu& m, juce::StringArray names, int startID)
+inline void addSortedListToMenu (yup::PopupMenu& m, yup::StringArray names, int startID)
 {
     struct ItemWithID
     {
-        juce::String name;
+        yup::String name;
         int id;
 
         bool operator< (const ItemWithID& other) const  { return id < other.id; }
     };
 
-    juce::Array<ItemWithID> items;
+    yup::Array<ItemWithID> items;
 
     for (const auto& name : names)
         items.add ({ name, startID++ });
@@ -28,10 +28,10 @@ inline void addSortedListToMenu (juce::PopupMenu& m, juce::StringArray names, in
     items.sort();
 
     for (const auto& i : items)
-        m.addItem (i.id, i.name);
+        m.addItem (i.name, i.id);
 }
 
-inline juce::AffineTransform getScaleAroundCentre (juce::Rectangle<float> r, float numPixels)
+inline yup::AffineTransform getScaleAroundCentre (yup::Rectangle<float> r, float numPixels)
 {
     jassert (! r.isEmpty());
     auto cx = r.getCentreX();
@@ -39,12 +39,12 @@ inline juce::AffineTransform getScaleAroundCentre (juce::Rectangle<float> r, flo
     auto w = r.getWidth();
     auto h = r.getHeight();
 
-    return juce::AffineTransform::scale ((w + numPixels) / w, (h + numPixels) / h, cx, cy);
+    return yup::AffineTransform::scale ((w + numPixels) / w, (h + numPixels) / h, cx, cy);
 }
 
-inline void moveXMLAttributeToStart (juce::XmlElement& xml, juce::StringRef att)
+inline void moveXMLAttributeToStart (yup::XmlElement& xml, yup::StringRef att)
 {
-    juce::StringArray names, values;
+    yup::StringArray names, values;
     bool wasFound = false;
 
     for (int i = 0; i < xml.getNumAttributes(); ++i)
@@ -109,15 +109,15 @@ public:
     /** Shows the wait cursor. */
     ScopedWaitCursor()
     {
-        if (juce::JUCEApplicationBase::getInstance() != nullptr)
-            juce::MouseCursor::showWaitCursor();
+        if (yup::JUCEApplicationBase::getInstance() != nullptr)
+            yup::MouseCursor::showWaitCursor();
     }
 
     /** Hides the wait cursor. */
     ~ScopedWaitCursor()
     {
-        if (juce::JUCEApplicationBase::getInstance() != nullptr)
-            juce::MouseCursor::hideWaitCursor();
+        if (yup::JUCEApplicationBase::getInstance() != nullptr)
+            yup::MouseCursor::hideWaitCursor();
     }
 };
 

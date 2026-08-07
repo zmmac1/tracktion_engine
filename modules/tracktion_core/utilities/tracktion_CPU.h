@@ -10,12 +10,14 @@
 
 #pragma once
 
-#if defined (__arm__) || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM) || defined (_M_ARM64)
+#if defined(__EMSCRIPTEN__) || defined(__wasm__) || defined(__wasm)
+#elif defined (__arm__) || defined (__arm64__) || defined (__aarch64__) || defined (_M_ARM) || defined (_M_ARM64)
  #define TRACKTION_ARM 1
 #endif
 
-#ifdef _WIN32
- #include <intrin.h>
+#if ! defined(__EMSCRIPTEN__) && ! defined(__wasm__) && ! defined(__wasm)
+ #ifdef _WIN32
+  #include <intrin.h>
 #elif TRACKTION_ARM
  // Use clang built-in
 #else
@@ -33,7 +35,9 @@ namespace tracktion::inline core {
 /** Returns the CPU cycle count, useful for benchmarking. */
 inline std::uint64_t rdtsc()
 {
-   #if TRACKTION_ARM && ! defined (_MSC_VER)
+   #if defined(__EMSCRIPTEN__) || defined(__wasm__) || defined(__wasm)
+    return 0;
+   #elif TRACKTION_ARM && ! defined (_MSC_VER)
     std::uint64_t result;
     __asm __volatile("mrs %0, CNTVCT_EL0" : "=&r" (result));
     return result;
@@ -56,7 +60,9 @@ inline std::uint64_t rdtsc()
 */
 inline void pause()
 {
-   #if TRACKTION_ARM && ! defined (_MSC_VER)
+   #if defined(__EMSCRIPTEN__) || defined(__wasm__) || defined(__wasm)
+    // no-op
+   #elif TRACKTION_ARM && ! defined (_MSC_VER)
     __asm__ __volatile__ ("yield");
    #elif TRACKTION_ARM
     __yield();

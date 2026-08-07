@@ -13,11 +13,11 @@ namespace tracktion::inline engine {
 /**
     Acts as a holder for a ControlSurface object.
 */
-class ExternalController  : private juce::AsyncUpdater,
+class ExternalController  : private yup::AsyncUpdater,
                             private SelectableListener,
                             private AutomatableParameter::Listener,
-                            private juce::ChangeListener,
-                            private juce::Timer
+                            private yup::ChangeListener,
+                            private yup::Timer
 {
 public:
     //==============================================================================
@@ -25,15 +25,15 @@ public:
     ~ExternalController() override;
 
     //==============================================================================
-    juce::String getName() const;
+    yup::String getName() const;
 
     bool wantsDevice (const MidiID& m);
 
     bool needsMidiChannel() const               { return needsChannel; }
     bool needsMidiBackChannel() const           { return needsBackChannel; }
 
-    juce::String getDesiredMidiChannel() const;
-    juce::String getDesiredMidiBackChannel() const;
+    yup::String getDesiredMidiChannel() const;
+    yup::String getDesiredMidiBackChannel() const;
 
     bool needsOSCSocket() const                 { return needsOSC; }
 
@@ -43,19 +43,19 @@ public:
     int getMainDevice() const;
     void setMainDevice (int);
 
-    juce::String getMidiInputDevice (int idx) const;
-    void setMidiInputDevice (int idx, const juce::String& nameOfMidiInput);
+    yup::String getMidiInputDevice (int idx) const;
+    void setMidiInputDevice (int idx, const yup::String& nameOfMidiInput);
 
-    juce::String getBackChannelDevice (int idx) const;
-    void setBackChannelDevice (int idx, const juce::String& nameOfMidiOutput);
+    yup::String getBackChannelDevice (int idx) const;
+    void setBackChannelDevice (int idx, const yup::String& nameOfMidiOutput);
     bool isUsingMidiOutputDevice (const MidiOutputDevice* d) const noexcept;
 
     int getOSCInputPort()                       { return oscInputPort; }
     void setOSCInputPort (int port);
     int getOSCOutputPort()                      { return oscOutputPort; }
     void setOSCOutputPort (int port);
-    juce::String getOSCOutputAddress()          { return oscOutputAddr; }
-    void setOSCOutputAddress (const juce::String addr);
+    yup::String getOSCOutputAddress()          { return oscOutputAddr; }
+    void setOSCOutputAddress (const yup::String addr);
 
     bool isEnabled() const;
     void setEnabled (bool);
@@ -108,41 +108,41 @@ public:
     void updatePunchLights();
     void updateScrollLights();
     void updateUndoLights();
-    void updatePadColours();
-    void clearPadColours();
+    void updatePadColors();
+    void clearPadColors();
 
     int getNumFaderChannels() const noexcept;
     int getFaderIndexInActiveRegion (int num) const noexcept;
-    juce::Range<int> getActiveChannels() const noexcept;
+    yup::Range<int> getActiveChannels() const noexcept;
 
     int getNumParameterControls() const noexcept;
-    juce::Range<int> getActiveParams() const noexcept;
+    yup::Range<int> getActiveParams() const noexcept;
 
     void midiInOutDevicesChanged();
     void oscSettingsChanged();
 
     //==============================================================================
     void handleAsyncUpdate() override;
-    void acceptMidiMessage (MidiInputDevice&, const juce::MidiMessage&);
-    bool wantsMessage (MidiInputDevice&, const juce::MidiMessage&);
+    void acceptMidiMessage (MidiInputDevice&, const yup::MidiMessage&);
+    bool wantsMessage (MidiInputDevice&, const yup::MidiMessage&);
     bool eatsAllMessages() const;
     bool canSetEatsAllMessages();
     void setEatsAllMessages (bool eatAll);
 
     //==============================================================================
-    juce::Colour getSelectionColour() const             { return selectionColour; }
-    bool getShowTrackSelectionColour() const            { return showTrackSelection; }
-    bool getShowClipSlotSelectionColour() const         { return showClipSlotSelection; }
-    void setSelectionColour (juce::Colour);
-    void setShowTrackSelectionColour (bool);
-    void setShowClipSlotSelectionColour (bool);
+    yup::Color getSelectionColor() const             { return selectionColor; }
+    bool getShowTrackSelectionColor() const            { return showTrackSelection; }
+    bool getShowClipSlotSelectionColor() const         { return showClipSlotSelection; }
+    void setSelectionColor (yup::Color);
+    void setShowTrackSelectionColor (bool);
+    void setShowClipSlotSelectionColor (bool);
 
-    bool shouldTrackBeColoured (int channelNum);
-    void getTrackColour (int channelNum, juce::Colour&);
-    std::optional<ColourArea> getColouredArea (const Edit&);
+    bool shouldTrackBeColored (int channelNum);
+    void getTrackColor (int channelNum, yup::Color&);
+    std::optional<ColorArea> getColoredArea (const Edit&);
 
-    bool shouldPluginBeColoured (Plugin*);
-    void getPluginColour (Plugin*, juce::Colour&);
+    bool shouldPluginBeColored (Plugin*);
+    void getPluginColor (Plugin*, yup::Color&);
     void repaintParamSource();
     void redrawTracks();
 
@@ -155,21 +155,21 @@ public:
     Edit* getEdit() const                               { return getControlSurface().getEdit(); }
     TransportControl* getTransport() const noexcept     { return getControlSurface().getTransport(); }
 
-    static juce::String shortenName (juce::String, int maxLen);
+    static yup::String shortenName (yup::String, int maxLen);
 
-    juce::String getInputDeviceName (int idx) const     { return inputDeviceNames[idx]; }
-    juce::String getOutputDeviceName (int idx) const    { return outputDeviceNames[idx]; }
+    yup::String getInputDeviceName (int idx) const     { return inputDeviceNames[idx]; }
+    yup::String getOutputDeviceName (int idx) const    { return outputDeviceNames[idx]; }
 
-    juce::StringArray getMidiInputPorts() const;
-    juce::StringArray getMidiOutputPorts() const;
+    yup::StringArray getMidiInputPorts() const;
+    yup::StringArray getMidiOutputPorts() const;
 
-    static juce::String getNoDeviceSelectedMessage();
+    static yup::String getNoDeviceSelectedMessage();
 
     Engine& engine;
 
 private:
     void timerCallback() override;
-    void changeListenerCallback (juce::ChangeBroadcaster*) override;
+    void changeListenerCallback (yup::ChangeBroadcaster*) override;
 
     static constexpr int maxDevices = 4;
     friend class ExternalControllerManager;
@@ -179,11 +179,11 @@ private:
 
     int numDevices = 1;
     int mainDevice = 0;
-    juce::StringArray inputDeviceNames, outputDeviceNames;
+    yup::StringArray inputDeviceNames, outputDeviceNames;
 
     std::unique_ptr<ControlSurface> controlSurface;
     int oscInputPort, oscOutputPort;
-    juce::String oscOutputAddr;
+    yup::String oscOutputAddr;
 
     bool enabled;
     mutable std::optional<bool> hasMidiInput;
@@ -202,7 +202,7 @@ private:
     SafeScopedListener lastRegisteredListener;
     bool showTrackSelection = false;
     bool showClipSlotSelection = true;
-    juce::Colour selectionColour;
+    yup::Color selectionColor;
     int startMarkerNumber = 0;
     int auxBank = 0;
     bool followsTrackSelection;
@@ -211,8 +211,8 @@ private:
     std::vector<MidiInputDevice*> inputDevices;
     std::vector<MidiOutputDevice*> outputDevices;
 
-    juce::Array<std::pair<int, juce::MidiMessage>> pendingMidiMessages;
-    juce::CriticalSection incomingMidiLock;
+    yup::Array<std::pair<int, yup::MidiMessage>> pendingMidiMessages;
+    yup::CriticalSection incomingMidiLock;
 
     int getMarkerBankOffset() const   { return startMarkerNumber; }
     int getFaderBankOffset() const    { return channelStart;      }
@@ -237,7 +237,7 @@ private:
 
     bool wantsClock;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ExternalController)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ExternalController)
 };
 
 } // namespace tracktion::inline engine

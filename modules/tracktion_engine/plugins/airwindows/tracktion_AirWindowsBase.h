@@ -32,13 +32,13 @@ inline void float2string (float f, char* text, int len)
     else
         decimals = 3;
 
-    juce::String str (f, decimals);
+    yup::String str (f, decimals);
     str.copyToUTF8 (text, (size_t)len);
 }
 
 inline void int2string (float i, char* text, int len)
 {
-    juce::String str (i);
+    yup::String str (i);
     str.copyToUTF8 (text, (size_t)len);
 }
 
@@ -76,13 +76,13 @@ public:
     virtual void processDoubleReplacing (double** inputs, double** outputs, VstInt32 sampleFrames) = 0;
     virtual void getProgramName(char *name)                       = 0;
     virtual void setProgramName(char *name)                       = 0;
-    virtual VstInt32 getChunk (void** data, bool isPreset)                          { juce::ignoreUnused (data, isPreset); return 0; }
-    virtual VstInt32 setChunk (void* data, VstInt32 byteSize, bool isPreset)        { juce::ignoreUnused (data, byteSize, isPreset); return 0; }
-    virtual float getParameter(VstInt32 index)                                      { juce::ignoreUnused (index); return 0; }
-    virtual void setParameter(VstInt32 index, float value)                          { juce::ignoreUnused (index, value); }
-    virtual void getParameterLabel(VstInt32 index, char *text)                      { juce::ignoreUnused (index, text); }
-    virtual void getParameterName(VstInt32 index, char *text)                       { juce::ignoreUnused (index, text); }
-    virtual void getParameterDisplay(VstInt32 index, char *text)                    { juce::ignoreUnused (index, text); }
+    virtual VstInt32 getChunk (void** data, bool isPreset)                          { yup::ignoreUnused (data, isPreset); return 0; }
+    virtual VstInt32 setChunk (void* data, VstInt32 byteSize, bool isPreset)        { yup::ignoreUnused (data, byteSize, isPreset); return 0; }
+    virtual float getParameter(VstInt32 index)                                      { yup::ignoreUnused (index); return 0; }
+    virtual void setParameter(VstInt32 index, float value)                          { yup::ignoreUnused (index, value); }
+    virtual void getParameterLabel(VstInt32 index, char *text)                      { yup::ignoreUnused (index, text); }
+    virtual void getParameterName(VstInt32 index, char *text)                       { yup::ignoreUnused (index, text); }
+    virtual void getParameterDisplay(VstInt32 index, char *text)                    { yup::ignoreUnused (index, text); }
     virtual VstInt32 canDo(char *text)                            = 0;
 
 protected:
@@ -109,12 +109,12 @@ public:
         : AutomatableParameter (getParamId (p, idx), getParamName (p, idx), p, {0, 1}),
           awPlugin (p), index (idx)
     {
-        valueToStringFunction = [] (float v)         { return juce::String (v); };
-        stringToValueFunction = [] (juce::String v)  { return v.getFloatValue(); };
+        valueToStringFunction = [] (float v)         { return yup::String (v); };
+        stringToValueFunction = [] (yup::String v)  { return v.getFloatValue(); };
 
         defaultValue = awPlugin.impl->getParameter (idx);
 
-        setParameter (defaultValue, juce::sendNotification);
+        setParameter (defaultValue, yup::sendNotification);
 
         autodetectRange();
     }
@@ -126,7 +126,7 @@ public:
 
     void resetToDefault()
     {
-        setParameter (defaultValue, juce::sendNotificationSync);
+        setParameter (defaultValue, yup::sendNotificationSync);
     }
 
     void autodetectRange()
@@ -151,11 +151,11 @@ public:
         listeners.call (&Listener::currentValueChanged, *this);
     }
 
-    void setConversionRange (juce::NormalisableRange<float> range)
+    void setConversionRange (yup::NormalisableRange<float> range)
     {
         conversionRange = range;
 
-        stringToValueFunction = [this] (juce::String v) { return conversionRange.convertTo0to1 (v.getFloatValue()); };
+        stringToValueFunction = [this] (yup::String v) { return conversionRange.convertTo0to1 (v.getFloatValue()); };
     }
 
     void parameterChanged (float newValue, bool byAutomation) override
@@ -169,15 +169,15 @@ public:
         }
     }
 
-    juce::String getCurrentValueAsString() override
+    yup::String getCurrentValueAsString() override
     {
         char paramText[kVstMaxParamStrLen];
         awPlugin.impl->getParameterDisplay (index, paramText);
-        auto t1 = juce::String (paramText);
+        auto t1 = yup::String (paramText);
 
         char labelText[kVstMaxParamStrLen];
         awPlugin.impl->getParameterLabel (index, labelText);
-        auto t2 = juce::String (labelText);
+        auto t2 = yup::String (labelText);
 
         if (t2.isNotEmpty())
             return t1 + " " + t2;
@@ -189,22 +189,22 @@ public:
         getEdit().pluginChanged (awPlugin);
     }
 
-    static juce::String getParamId (AirWindowsPlugin& p, int idx)
+    static yup::String getParamId (AirWindowsPlugin& p, int idx)
     {
         return getParamName (p, idx).toLowerCase().retainCharacters ("abcdefghijklmnopqrstuvwxyz");
     }
 
-    static juce::String getParamName (AirWindowsPlugin& p, int idx)
+    static yup::String getParamName (AirWindowsPlugin& p, int idx)
     {
         char paramName[kVstMaxParamStrLen];
         p.impl->getParameterName (idx, paramName);
-        return juce::String (paramName);
+        return yup::String (paramName);
     }
 
     AirWindowsPlugin& awPlugin;
     int index = 0;
     float defaultValue = 0.0f;
-    juce::NormalisableRange<float> conversionRange;
+    yup::NormalisableRange<float> conversionRange;
 };
 
 } // namespace tracktion::inline engine

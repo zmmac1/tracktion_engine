@@ -51,7 +51,7 @@ TEST_CASE ("Follow Actions")
         CHECK_EQ (slots.size(), 8);
 
         for (int clipIndex : { 0, 1, 3, 4, 5, 7 })
-            insertWaveClip (*slots[clipIndex], {}, juce::File(), ClipPosition { { 0_tp, fileLength } }, DeleteExistingClips::no);
+            insertWaveClip (*slots[clipIndex], {}, yup::File(), ClipPosition { { 0_tp, fileLength } }, DeleteExistingClips::no);
 
         for (int clipIndex : { 0, 1, 3, 4, 5, 7 })
         {

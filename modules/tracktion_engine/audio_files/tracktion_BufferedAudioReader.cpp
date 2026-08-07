@@ -11,8 +11,8 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-BufferedAudioReader::BufferedAudioReader (std::unique_ptr<juce::AudioFormatReader> sourceReader, juce::TimeSliceThread& t)
-    : juce::AudioFormatReader (nullptr, "BufferedAudioReader"),
+BufferedAudioReader::BufferedAudioReader (std::unique_ptr<yup::AudioFormatReader> sourceReader, yup::TimeSliceThread& t)
+    : yup::AudioFormatReader (nullptr, "BufferedAudioReader"),
       source (std::move (sourceReader)), thread (t)
 {
     assert (source);
@@ -42,7 +42,7 @@ float BufferedAudioReader::getProportionComplete() const
 }
 
 bool BufferedAudioReader::readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                                       juce::int64 startSampleInFile, int numSamples)
+                                       yup::int64 startSampleInFile, int numSamples)
 {
     clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                        startSampleInFile, numSamples, lengthInSamples);
@@ -106,7 +106,7 @@ bool BufferedAudioReader::readIntoBuffer (choc::buffer::FrameRange range)
     // The alternative would be to create some storage for the pointers and add the offsets manually
     auto destView = toAudioBuffer (data.getFrameRange (range));
     return source->read (destView.getArrayOfWritePointers(), static_cast<int> (destView.getNumChannels()),
-                         static_cast<juce::int64> (range.start), static_cast<int> (range.size()));
+                         static_cast<yup::int64> (range.start), static_cast<int> (range.size()));
 }
 
 
@@ -116,7 +116,7 @@ BufferedAudioFileManager::BufferedAudioFileManager (Engine& e)
 {
 }
 
-std::shared_ptr<BufferedAudioReader> BufferedAudioFileManager::get (juce::File f)
+std::shared_ptr<BufferedAudioReader> BufferedAudioFileManager::get (yup::File f)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     auto& item = cache[f];
@@ -127,7 +127,7 @@ std::shared_ptr<BufferedAudioReader> BufferedAudioFileManager::get (juce::File f
         {
             item = std::make_shared<BufferedAudioReader> (std::move (reader), readThread);
             readThread.addTimeSliceClient (item.get());
-            readThread.startThread (juce::Thread::Priority::normal);
+            readThread.startThread (yup::Thread::Priority::normal);
 
             if (! timer.isTimerRunning())
                 timer.startTimer (5'000);
@@ -149,7 +149,7 @@ void BufferedAudioFileManager::cleanUp()
         timer.stopTimer();
 }
 
-std::unique_ptr<juce::AudioFormatReader> BufferedAudioFileManager::createReader (juce::File f)
+std::unique_ptr<yup::AudioFormatReader> BufferedAudioFileManager::createReader (yup::File f)
 {
     if (auto mappedFileAndReader = AudioFileUtils::createMappedFileAndReaderFor (engine, f))
         return std::make_unique<MemoryMappedFileReader> (std::move (mappedFileAndReader));

@@ -18,28 +18,28 @@ static constexpr float freezemode = 0.5f;
 ReverbPlugin::ReverbPlugin (PluginCreationInfo info) : Plugin (info)
 {
     roomSizeParam = addParam ("room size", TRANS("Room Size"), { 0.0f, 1.0f },
-                              [] (float value)           { return juce::String (1 + (int) (10.0f * value)); },
-                              [] (const juce::String& s) { return s.getFloatValue(); });
+                              [] (float value)           { return yup::String (1 + (int) (10.0f * value)); },
+                              [] (const yup::String& s) { return s.getFloatValue(); });
 
     dampParam     = addParam ("damping", TRANS("Damping"), { 0.0f, 1.0f },
-                              [] (float value)           { return juce::String ((int) (100.0f * value)) + "%"; },
-                              [] (const juce::String& s) { return s.getFloatValue(); });
+                              [] (float value)           { return yup::String ((int) (100.0f * value)) + "%"; },
+                              [] (const yup::String& s) { return s.getFloatValue(); });
 
     wetParam      = addParam ("wet level", TRANS("Wet Level"), { 0.0f, 1.0f },
                               [] (float value)           { return gainToDbString (scalewet * value); },
-                              [] (const juce::String& s) { return s.getFloatValue(); });
+                              [] (const yup::String& s) { return s.getFloatValue(); });
 
     dryParam      = addParam ("dry level", TRANS("Dry Level"), { 0.0f, 1.0f },
                               [] (float value)           { return gainToDbString (scaledry * value); },
-                              [] (const juce::String& s) { return s.getFloatValue(); });
+                              [] (const yup::String& s) { return s.getFloatValue(); });
 
     widthParam    = addParam ("width", TRANS("Width"), { 0.0f, 1.0f },
-                              [] (float value)           { return juce::String ((int) (100.0f * value)) + "%"; },
-                              [] (const juce::String& s) { return s.getFloatValue(); });
+                              [] (float value)           { return yup::String ((int) (100.0f * value)) + "%"; },
+                              [] (const yup::String& s) { return s.getFloatValue(); });
 
     modeParam     = addParam ("mode", TRANS("Freeze"), { 0.0f, 1.0f },
                               [] (float value)           { return value >= freezemode ? TRANS("On") : TRANS("Off"); },
-                              [] (const juce::String& s) { return s.getFloatValue(); });
+                              [] (const yup::String& s) { return s.getFloatValue(); });
 
     auto um = getUndoManager();
 
@@ -98,7 +98,7 @@ static bool isSilent (const float* data, int num) noexcept
     if (isNotSilent (data[0]) || isNotSilent (data[num / 2]))
         return false;
 
-    auto range = juce::FloatVectorOperations::findMinAndMax (data, num);
+    auto range = yup::FloatVectorOperations::findMinAndMax (data, num);
 
     return ! (isNotSilent (range.getStart())
                || isNotSilent (range.getEnd()));
@@ -110,7 +110,7 @@ void ReverbPlugin::applyToBuffer (const PluginRenderContext& fc)
     {
         SCOPED_REALTIME_CHECK
 
-        juce::Reverb::Parameters params;
+        yup::Reverb::Parameters params;
         params.roomSize   = roomSizeParam->getCurrentValue();
         params.damping    = dampParam->getCurrentValue();
         params.wetLevel   = wetParam->getCurrentValue();
@@ -151,7 +151,7 @@ void ReverbPlugin::applyToBuffer (const PluginRenderContext& fc)
     }
 }
 
-void ReverbPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void ReverbPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, roomSizeValue, dampValue, wetValue, dryValue, widthValue, modeValue);
 
@@ -159,22 +159,22 @@ void ReverbPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
         p->updateFromAttachedValue();
 }
 
-void ReverbPlugin::setRoomSize (float value)    { roomSizeParam->setParameter (juce::jlimit (0.0f, 1.0f, value), juce::sendNotification); }
+void ReverbPlugin::setRoomSize (float value)    { roomSizeParam->setParameter (yup::jlimit (0.0f, 1.0f, value), yup::sendNotification); }
 float ReverbPlugin::getRoomSize()               { return roomSizeParam->getCurrentValue(); }
 
-void ReverbPlugin::setDamp (float value)        { dampParam->setParameter (juce::jlimit (0.0f, 1.0f, value), juce::sendNotification); }
+void ReverbPlugin::setDamp (float value)        { dampParam->setParameter (yup::jlimit (0.0f, 1.0f, value), yup::sendNotification); }
 float ReverbPlugin::getDamp()                   { return dampParam->getCurrentValue(); }
 
-void ReverbPlugin::setWet (float value)         { wetParam->setParameter (juce::jlimit (0.0f, 1.0f, value), juce::sendNotification); }
+void ReverbPlugin::setWet (float value)         { wetParam->setParameter (yup::jlimit (0.0f, 1.0f, value), yup::sendNotification); }
 float ReverbPlugin::getWet()                    { return wetParam->getCurrentValue(); }
 
-void ReverbPlugin::setDry (float value)         { dryParam->setParameter (juce::jlimit (0.0f, 1.0f, value), juce::sendNotification); }
+void ReverbPlugin::setDry (float value)         { dryParam->setParameter (yup::jlimit (0.0f, 1.0f, value), yup::sendNotification); }
 float ReverbPlugin::getDry()                    { return dryParam->getCurrentValue(); }
 
-void ReverbPlugin::setWidth (float value)       { widthParam->setParameter (juce::jlimit (0.0f, 1.0f, value), juce::sendNotification); }
+void ReverbPlugin::setWidth (float value)       { widthParam->setParameter (yup::jlimit (0.0f, 1.0f, value), yup::sendNotification); }
 float ReverbPlugin::getWidth()                  { return widthParam->getCurrentValue(); }
 
-void ReverbPlugin::setMode (float value)        { modeParam->setParameter (juce::jlimit (0.0f, 1.0f, value), juce::sendNotification); }
+void ReverbPlugin::setMode (float value)        { modeParam->setParameter (yup::jlimit (0.0f, 1.0f, value), yup::sendNotification); }
 float ReverbPlugin::getMode()                   { return modeParam->getCurrentValue(); }
 
 } // namespace tracktion::inline engine

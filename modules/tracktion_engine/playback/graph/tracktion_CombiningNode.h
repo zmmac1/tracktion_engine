@@ -58,7 +58,7 @@ public:
     tracktion::graph::NodeProperties getNodeProperties() override;
     void prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo&) override;
     bool isReadyToProcess() override;
-    void prefetchBlock (juce::Range<int64_t> /*referenceSampleRange*/) override;
+    void prefetchBlock (yup::Range<int64_t> /*referenceSampleRange*/) override;
     void process (ProcessContext&) override;
 
     size_t getAllocatedBytes() const override;
@@ -67,18 +67,18 @@ private:
     const EditItemID itemID;
 
     struct TimedNode;
-    juce::OwnedArray<TimedNode> inputs;
-    juce::OwnedArray<juce::Array<TimedNode*>> groups;
+    yup::OwnedArray<TimedNode> inputs;
+    yup::OwnedArray<yup::Array<TimedNode*>> groups;
     std::atomic<bool> isReadyToProcessBlock { false };
     choc::buffer::ChannelArrayBuffer<float> tempAudioBuffer;
     MidiMessageArray noteOffEventsToSend;
 
     tracktion::graph::NodeProperties nodeProperties;
 
-    void prefetchGroup (juce::Range<int64_t>, TimeRange, BeatRange);
+    void prefetchGroup (yup::Range<int64_t>, TimeRange, BeatRange);
     void queueNoteOffsForClipsNoLongerPresent (const CombiningNode&);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CombiningNode)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CombiningNode)
 };
 
 } // namespace tracktion::inline engine

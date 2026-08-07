@@ -19,8 +19,8 @@
 
 #if TRACKTION_AIR_WINDOWS
 
-#include "plugins/airwindows/tracktion_AirWindowsBase.h"
-#include "plugins/airwindows/tracktion_AirWindowsBase.cpp"
+// EXCLUDED: #include "plugins/airwindows/tracktion_AirWindowsBase.h"
+// EXCLUDED: #include "plugins/airwindows/tracktion_AirWindowsBase.cpp"
 
 #if JUCE_CLANG
  #pragma clang diagnostic push
@@ -58,308 +58,308 @@ namespace airwindows
 {
 namespace adclip7
 {
- #include "3rd_party/airwindows/ADClip7/ADClip7.cpp"
- #include "3rd_party/airwindows/ADClip7/ADClip7Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ADClip7/ADClip7.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ADClip7/ADClip7Proc.cpp"
 }
 namespace adt
 {
- #include "3rd_party/airwindows/ADT/ADT.cpp"
- #include "3rd_party/airwindows/ADT/ADTProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ADT/ADT.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ADT/ADTProc.cpp"
 }
 namespace aquickvoiceclip
 {
- #include "3rd_party/airwindows/AQuickVoiceClip/AQuickVoiceClip.cpp"
- #include "3rd_party/airwindows/AQuickVoiceClip/AQuickVoiceClipProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/AQuickVoiceClip/AQuickVoiceClip.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/AQuickVoiceClip/AQuickVoiceClipProc.cpp"
 }
 namespace acceleration
 {
- #include "3rd_party/airwindows/Acceleration/Acceleration.cpp"
- #include "3rd_party/airwindows/Acceleration/AccelerationProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Acceleration/Acceleration.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Acceleration/AccelerationProc.cpp"
 }
 namespace air
 {
- #include "3rd_party/airwindows/Air/Air.cpp"
- #include "3rd_party/airwindows/Air/AirProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Air/Air.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Air/AirProc.cpp"
 }
 namespace atmospherebuss
 {
- #include "3rd_party/airwindows/AtmosphereBuss/AtmosphereBuss.cpp"
- #include "3rd_party/airwindows/AtmosphereBuss/AtmosphereBussProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/AtmosphereBuss/AtmosphereBuss.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/AtmosphereBuss/AtmosphereBussProc.cpp"
 }
 namespace atmospherechannel
 {
- #include "3rd_party/airwindows/AtmosphereChannel/AtmosphereChannel.cpp"
- #include "3rd_party/airwindows/AtmosphereChannel/AtmosphereChannelProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/AtmosphereChannel/AtmosphereChannel.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/AtmosphereChannel/AtmosphereChannelProc.cpp"
 }
 namespace aura
 {
- #include "3rd_party/airwindows/Aura/Aura.cpp"
- #include "3rd_party/airwindows/Aura/AuraProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Aura/Aura.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Aura/AuraProc.cpp"
 }
 namespace average
 {
- #include "3rd_party/airwindows/Average/Average.cpp"
- #include "3rd_party/airwindows/Average/AverageProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Average/Average.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Average/AverageProc.cpp"
 }
 namespace bassdrive
 {
- #include "3rd_party/airwindows/BassDrive/BassDrive.cpp"
- #include "3rd_party/airwindows/BassDrive/BassDriveProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BassDrive/BassDrive.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BassDrive/BassDriveProc.cpp"
 }
 namespace basskit
 {
- #include "3rd_party/airwindows/BassKit/BassKit.cpp"
- #include "3rd_party/airwindows/BassKit/BassKitProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BassKit/BassKit.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BassKit/BassKitProc.cpp"
 }
 namespace biquad
 {
- #include "3rd_party/airwindows/Biquad/Biquad.cpp"
- #include "3rd_party/airwindows/Biquad/BiquadProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Biquad/Biquad.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Biquad/BiquadProc.cpp"
 }
 namespace biquad2
 {
- #include "3rd_party/airwindows/Biquad2/Biquad2.cpp"
- #include "3rd_party/airwindows/Biquad2/Biquad2Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Biquad2/Biquad2.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Biquad2/Biquad2Proc.cpp"
 }
 namespace bitglitter
 {
- #include "3rd_party/airwindows/BitGlitter/BitGlitter.cpp"
- #include "3rd_party/airwindows/BitGlitter/BitGlitterProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BitGlitter/BitGlitter.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BitGlitter/BitGlitterProc.cpp"
 }
 namespace bitshiftgain
 {
- #include "3rd_party/airwindows/BitShiftGain/BitShiftGain.cpp"
- #include "3rd_party/airwindows/BitShiftGain/BitShiftGainProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BitShiftGain/BitShiftGain.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BitShiftGain/BitShiftGainProc.cpp"
 }
 namespace bite
 {
- #include "3rd_party/airwindows/Bite/Bite.cpp"
- #include "3rd_party/airwindows/Bite/BiteProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Bite/Bite.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Bite/BiteProc.cpp"
 }
 namespace blockparty
 {
- #include "3rd_party/airwindows/BlockParty/BlockParty.cpp"
- #include "3rd_party/airwindows/BlockParty/BlockPartyProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BlockParty/BlockParty.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BlockParty/BlockPartyProc.cpp"
 }
 namespace brassrider
 {
- #include "3rd_party/airwindows/BrassRider/BrassRider.cpp"
- #include "3rd_party/airwindows/BrassRider/BrassRiderProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BrassRider/BrassRider.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BrassRider/BrassRiderProc.cpp"
 }
 namespace buildatpdf
 {
- #include "3rd_party/airwindows/BuildATPDF/BuildATPDF.cpp"
- #include "3rd_party/airwindows/BuildATPDF/BuildATPDFProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BuildATPDF/BuildATPDF.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BuildATPDF/BuildATPDFProc.cpp"
 }
 namespace busscolors4
 {
- #include "3rd_party/airwindows/BussColors4/BussColors4.cpp"
- #include "3rd_party/airwindows/BussColors4/BussColors4Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BussColors4/BussColors4.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/BussColors4/BussColors4Proc.cpp"
 }
 namespace buttercomp
 {
- #include "3rd_party/airwindows/ButterComp/ButterComp.cpp"
- #include "3rd_party/airwindows/ButterComp/ButterCompProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ButterComp/ButterComp.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ButterComp/ButterCompProc.cpp"
 }
 namespace buttercomp2
 {
- #include "3rd_party/airwindows/ButterComp2/ButterComp2.cpp"
- #include "3rd_party/airwindows/ButterComp2/ButterComp2Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ButterComp2/ButterComp2.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ButterComp2/ButterComp2Proc.cpp"
 }
 namespace c5rawbuss
 {
- #include "3rd_party/airwindows/C5RawBuss/C5RawBuss.cpp"
- #include "3rd_party/airwindows/C5RawBuss/C5RawBussProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/C5RawBuss/C5RawBuss.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/C5RawBuss/C5RawBussProc.cpp"
 }
 namespace c5rawchannel
 {
- #include "3rd_party/airwindows/C5RawChannel/C5RawChannel.cpp"
- #include "3rd_party/airwindows/C5RawChannel/C5RawChannelProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/C5RawChannel/C5RawChannel.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/C5RawChannel/C5RawChannelProc.cpp"
 }
 namespace cstrip
 {
- #include "3rd_party/airwindows/CStrip/CStrip.cpp"
- #include "3rd_party/airwindows/CStrip/CStripProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/CStrip/CStrip.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/CStrip/CStripProc.cpp"
 }
 namespace capacitor
 {
- #include "3rd_party/airwindows/Capacitor/Capacitor.cpp"
- #include "3rd_party/airwindows/Capacitor/CapacitorProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Capacitor/Capacitor.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Capacitor/CapacitorProc.cpp"
 }
 namespace channel4
 {
- #include "3rd_party/airwindows/Channel4/Channel4.cpp"
- #include "3rd_party/airwindows/Channel4/Channel4Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Channel4/Channel4.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Channel4/Channel4Proc.cpp"
 }
 namespace channel5
 {
- #include "3rd_party/airwindows/Channel5/Channel5.cpp"
- #include "3rd_party/airwindows/Channel5/Channel5Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Channel5/Channel5.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Channel5/Channel5Proc.cpp"
 }
 namespace channel6
 {
- #include "3rd_party/airwindows/Channel6/Channel6.cpp"
- #include "3rd_party/airwindows/Channel6/Channel6Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Channel6/Channel6.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Channel6/Channel6Proc.cpp"
 }
 namespace channel7
 {
- #include "3rd_party/airwindows/Channel7/Channel7.cpp"
- #include "3rd_party/airwindows/Channel7/Channel7Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Channel7/Channel7.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Channel7/Channel7Proc.cpp"
 }
 namespace chorus
 {
- #include "3rd_party/airwindows/Chorus/Chorus.cpp"
- #include "3rd_party/airwindows/Chorus/ChorusProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Chorus/Chorus.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Chorus/ChorusProc.cpp"
 }
 namespace chorusensemble
 {
- #include "3rd_party/airwindows/ChorusEnsemble/ChorusEnsemble.cpp"
- #include "3rd_party/airwindows/ChorusEnsemble/ChorusEnsembleProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ChorusEnsemble/ChorusEnsemble.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ChorusEnsemble/ChorusEnsembleProc.cpp"
 }
 namespace cliponly
 {
- #include "3rd_party/airwindows/ClipOnly/ClipOnly.cpp"
- #include "3rd_party/airwindows/ClipOnly/ClipOnlyProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ClipOnly/ClipOnly.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/ClipOnly/ClipOnlyProc.cpp"
 }
 namespace coils
 {
- #include "3rd_party/airwindows/Coils/Coils.cpp"
- #include "3rd_party/airwindows/Coils/CoilsProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Coils/Coils.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Coils/CoilsProc.cpp"
 }
 namespace cojones
 {
- #include "3rd_party/airwindows/Cojones/Cojones.cpp"
- #include "3rd_party/airwindows/Cojones/CojonesProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Cojones/Cojones.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Cojones/CojonesProc.cpp"
 }
 namespace compresaturator
 {
- #include "3rd_party/airwindows/Compresaturator/Compresaturator.cpp"
- #include "3rd_party/airwindows/Compresaturator/CompresaturatorProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Compresaturator/Compresaturator.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Compresaturator/CompresaturatorProc.cpp"
 }
 namespace console4buss
 {
- #include "3rd_party/airwindows/Console4Buss/Console4Buss.cpp"
- #include "3rd_party/airwindows/Console4Buss/Console4BussProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console4Buss/Console4Buss.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console4Buss/Console4BussProc.cpp"
 }
 namespace console4channel
 {
- #include "3rd_party/airwindows/Console4Channel/Console4Channel.cpp"
- #include "3rd_party/airwindows/Console4Channel/Console4ChannelProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console4Channel/Console4Channel.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console4Channel/Console4ChannelProc.cpp"
 }
 namespace console5buss
 {
- #include "3rd_party/airwindows/Console5Buss/Console5Buss.cpp"
- #include "3rd_party/airwindows/Console5Buss/Console5BussProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console5Buss/Console5Buss.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console5Buss/Console5BussProc.cpp"
 }
 namespace console5channel
 {
- #include "3rd_party/airwindows/Console5Channel/Console5Channel.cpp"
- #include "3rd_party/airwindows/Console5Channel/Console5ChannelProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console5Channel/Console5Channel.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console5Channel/Console5ChannelProc.cpp"
 }
 namespace console5darkch
 {
- #include "3rd_party/airwindows/Console5DarkCh/Console5DarkCh.cpp"
- #include "3rd_party/airwindows/Console5DarkCh/Console5DarkChProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console5DarkCh/Console5DarkCh.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console5DarkCh/Console5DarkChProc.cpp"
 }
 namespace console6buss
 {
- #include "3rd_party/airwindows/Console6Buss/Console6Buss.cpp"
- #include "3rd_party/airwindows/Console6Buss/Console6BussProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console6Buss/Console6Buss.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console6Buss/Console6BussProc.cpp"
 }
 namespace console6channel
 {
- #include "3rd_party/airwindows/Console6Channel/Console6Channel.cpp"
- #include "3rd_party/airwindows/Console6Channel/Console6ChannelProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console6Channel/Console6Channel.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Console6Channel/Console6ChannelProc.cpp"
 }
 namespace crunchygroovewear
 {
- #include "3rd_party/airwindows/CrunchyGrooveWear/CrunchyGrooveWear.cpp"
- #include "3rd_party/airwindows/CrunchyGrooveWear/CrunchyGrooveWearProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/CrunchyGrooveWear/CrunchyGrooveWear.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/CrunchyGrooveWear/CrunchyGrooveWearProc.cpp"
 }
 namespace crystal
 {
- #include "3rd_party/airwindows/Crystal/Crystal.cpp"
- #include "3rd_party/airwindows/Crystal/CrystalProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Crystal/Crystal.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Crystal/CrystalProc.cpp"
 }
 namespace dcvoltage
 {
- #include "3rd_party/airwindows/DCVoltage/DCVoltage.cpp"
- #include "3rd_party/airwindows/DCVoltage/DCVoltageProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DCVoltage/DCVoltage.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DCVoltage/DCVoltageProc.cpp"
 }
 namespace debess
 {
- #include "3rd_party/airwindows/DeBess/DeBess.cpp"
- #include "3rd_party/airwindows/DeBess/DeBessProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeBess/DeBess.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeBess/DeBessProc.cpp"
 }
 namespace deess
 {
- #include "3rd_party/airwindows/DeEss/DeEss.cpp"
- #include "3rd_party/airwindows/DeEss/DeEssProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeEss/DeEss.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeEss/DeEssProc.cpp"
 }
 namespace dehiss
 {
- #include "3rd_party/airwindows/DeHiss/DeHiss.cpp"
- #include "3rd_party/airwindows/DeHiss/DeHissProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeHiss/DeHiss.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeHiss/DeHissProc.cpp"
 }
 namespace derez
 {
- #include "3rd_party/airwindows/DeRez/DeRez.cpp"
- #include "3rd_party/airwindows/DeRez/DeRezProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeRez/DeRez.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeRez/DeRezProc.cpp"
 }
 namespace derez2
 {
- #include "3rd_party/airwindows/DeRez2/DeRez2.cpp"
- #include "3rd_party/airwindows/DeRez2/DeRez2Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeRez2/DeRez2.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DeRez2/DeRez2Proc.cpp"
 }
 namespace deckwrecka
 {
- #include "3rd_party/airwindows/Deckwrecka/Deckwrecka.cpp"
- #include "3rd_party/airwindows/Deckwrecka/DeckwreckaProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Deckwrecka/Deckwrecka.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Deckwrecka/DeckwreckaProc.cpp"
 }
 namespace density
 {
- #include "3rd_party/airwindows/Density/Density.cpp"
- #include "3rd_party/airwindows/Density/DensityProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Density/Density.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Density/DensityProc.cpp"
 }
 namespace desk
 {
- #include "3rd_party/airwindows/Desk/Desk.cpp"
- #include "3rd_party/airwindows/Desk/DeskProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Desk/Desk.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Desk/DeskProc.cpp"
 }
 namespace desk4
 {
- #include "3rd_party/airwindows/Desk4/Desk4.cpp"
- #include "3rd_party/airwindows/Desk4/Desk4Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Desk4/Desk4.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Desk4/Desk4Proc.cpp"
 }
 namespace distance
 {
- #include "3rd_party/airwindows/Distance/Distance.cpp"
- #include "3rd_party/airwindows/Distance/DistanceProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Distance/Distance.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Distance/DistanceProc.cpp"
 }
 namespace distance2
 {
- #include "3rd_party/airwindows/Distance2/Distance2.cpp"
- #include "3rd_party/airwindows/Distance2/Distance2Proc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Distance2/Distance2.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Distance2/Distance2Proc.cpp"
 }
 namespace ditherfloat
 {
- #include "3rd_party/airwindows/DitherFloat/DitherFloat.cpp"
- #include "3rd_party/airwindows/DitherFloat/DitherFloatProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DitherFloat/DitherFloat.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DitherFloat/DitherFloatProc.cpp"
 }
 namespace dithermediskers
 {
- #include "3rd_party/airwindows/DitherMeDiskers/DitherMeDiskers.cpp"
- #include "3rd_party/airwindows/DitherMeDiskers/DitherMeDiskersProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DitherMeDiskers/DitherMeDiskers.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DitherMeDiskers/DitherMeDiskersProc.cpp"
 }
 namespace dithermetimbers
 {
- #include "3rd_party/airwindows/DitherMeTimbers/DitherMeTimbers.cpp"
- #include "3rd_party/airwindows/DitherMeTimbers/DitherMeTimbersProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DitherMeTimbers/DitherMeTimbers.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/DitherMeTimbers/DitherMeTimbersProc.cpp"
 }
 namespace ditherbox
 {
- #include "3rd_party/airwindows/Ditherbox/Ditherbox.cpp"
- #include "3rd_party/airwindows/Ditherbox/DitherboxProc.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Ditherbox/Ditherbox.cpp"
+// EXCLUDED:  #include "3rd_party/airwindows/Ditherbox/DitherboxProc.cpp"
 }
 }
 } // namespace tracktion::inline engine
@@ -373,7 +373,7 @@ namespace ditherbox
  #pragma warning (pop)
 #endif
 
-#include "plugins/airwindows/tracktion_AirWindows1.cpp"
+// EXCLUDED: #include "plugins/airwindows/tracktion_AirWindows1.cpp"
 
 #endif
 #endif

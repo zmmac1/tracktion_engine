@@ -16,10 +16,10 @@ class MidiList
 {
 public:
     MidiList();
-    MidiList (const juce::ValueTree&, juce::UndoManager*);
+    MidiList (const yup::ValueTree&, juce::UndoManager*);
     ~MidiList();
 
-    static juce::ValueTree createMidiList();
+    static yup::ValueTree createMidiList();
 
     /** Clears the current list and copies the others contents and properties. */
     void copyFrom (const MidiList&, juce::UndoManager*);
@@ -35,9 +35,9 @@ public:
     };
 
     //==============================================================================
-    const juce::Array<MidiNote*>& getNotes() const;
-    const juce::Array<MidiControllerEvent*>& getControllerEvents() const;
-    const juce::Array<MidiSysexEvent*>& getSysexEvents() const;
+    const yup::Array<MidiNote*>& getNotes() const;
+    const yup::Array<MidiControllerEvent*>& getControllerEvents() const;
+    const yup::Array<MidiSysexEvent*>& getSysexEvents() const;
 
     //==============================================================================
     bool isAttachedToClip() const noexcept                          { return ! state.getParent().hasType (IDs::NA); }
@@ -53,11 +53,11 @@ public:
     void setMidiChannel (MidiChannel chanNum);
 
     /** If the data was pulled from a midi file then this may have a useful name describing its purpose. */
-    juce::String getImportedMidiTrackName() const noexcept          { return importedName; }
+    yup::String getImportedMidiTrackName() const noexcept          { return importedName; }
 
     /** Set the imported file name if you want it to appear on the clip */
-    juce::String getImportedFileName() const noexcept               { return importedFileName; }
-    void setImportedFileName (const juce::String& n)                { importedFileName = n; }
+    yup::String getImportedFileName() const noexcept               { return importedFileName; }
+    void setImportedFileName (const yup::String& n)                { importedFileName = n; }
 
     //==============================================================================
     bool isEmpty() const noexcept                                   { return state.getNumChildren() == 0; }
@@ -70,9 +70,9 @@ public:
     //==============================================================================
     int getNumNotes() const                                         { return getNotes().size(); }
     MidiNote* getNote (int index) const                             { return getNotes()[index]; }
-    MidiNote* getNoteFor (const juce::ValueTree&);
+    MidiNote* getNoteFor (const yup::ValueTree&);
 
-    juce::Range<int> getNoteNumberRange() const;
+    yup::Range<int> getNoteNumberRange() const;
 
     /** Beat number of first event in the list */
     BeatPosition getFirstBeatNumber() const;
@@ -114,9 +114,9 @@ public:
 
     MidiSysexEvent* getSysexEvent (int index) const                 { return getSysexEvents()[index]; }
     MidiSysexEvent* getSysexEventUnchecked (int index) const        { return getSysexEvents().getUnchecked (index); }
-    MidiSysexEvent* getSysexEventFor (const juce::ValueTree&) const;
+    MidiSysexEvent* getSysexEventFor (const yup::ValueTree&) const;
 
-    MidiSysexEvent& addSysExEvent (const juce::MidiMessage&, BeatPosition, juce::UndoManager*);
+    MidiSysexEvent& addSysExEvent (const yup::MidiMessage&, BeatPosition, juce::UndoManager*);
 
     void removeSysExEvent (const MidiSysexEvent&, juce::UndoManager*);
     void removeAllSysexes (juce::UndoManager*);
@@ -125,11 +125,11 @@ public:
     /** Adds the contents of a MidiMessageSequence to this list.
         If an Edit is provided, it'll be used to convert the timestamps from possible seconds to beats
     */
-    void importMidiSequence (const juce::MidiMessageSequence&, Edit*,
+    void importMidiSequence (const yup::MidiMessageSequence&, Edit*,
                              TimePosition editTimeOfListTimeZero, juce::UndoManager*);
 
     /** Adds the contents of a MidiSequence to this list assigning MPE expression changes to EXP expression. */
-    void importFromEditTimeSequenceWithNoteExpression (const juce::MidiMessageSequence&, Edit*,
+    void importFromEditTimeSequenceWithNoteExpression (const yup::MidiMessageSequence&, Edit*,
                                                        TimePosition editTimeOfListTimeZero, juce::UndoManager*);
 
     /** Determines MIDI event timing. */
@@ -140,76 +140,76 @@ public:
         beatsRaw    /** Event times will be in beats with no quantisation or groove. */
     };
 
-    /** Creates a juce::MidiMessageSequence from the list in order to be played back
+    /** Creates a yup::MidiMessageSequence from the list in order to be played back
         The sequence will be in terms of edit time, either in seconds or beats
         @param MidiClip     The clip boundries to use and the groove template if the clip contains one
         @param TimeBase     The format the exported MIDI event times will be in
         @param generateMPE  Whether the sequence should create MPE or standard MIDI
     */
-    juce::MidiMessageSequence exportToPlaybackMidiSequence (MidiClip&, TimeBase, bool generateMPE) const;
+    yup::MidiMessageSequence exportToPlaybackMidiSequence (MidiClip&, TimeBase, bool generateMPE) const;
 
     /** Creates the default MIDI playback sequence. */
-    static juce::MidiMessageSequence createDefaultPlaybackMidiSequence (const MidiList&, MidiClip&, TimeBase, bool generateMPE);
+    static yup::MidiMessageSequence createDefaultPlaybackMidiSequence (const MidiList&, MidiClip&, TimeBase, bool generateMPE);
 
     //==============================================================================
-    static bool looksLikeMPEData (const juce::File&);
+    static bool looksLikeMPEData (const yup::File&);
 
     static constexpr const double defaultInitialTimbreValue = 0.5;
     static constexpr const double defaultInitialPitchBendValue = 0;
     static constexpr const double defaultInitialPressureValue = 0;
 
-    static bool fileHasTempoChanges (const juce::File&);
+    static bool fileHasTempoChanges (const yup::File&);
 
-    static bool readSeparateTracksFromFile (const juce::File&,
-                                            juce::OwnedArray<MidiList>& lists,
-                                            juce::Array<BeatPosition>& tempoChangeBeatNumbers,
-                                            juce::Array<double>& bpms,
-                                            juce::Array<int>& numerators,
-                                            juce::Array<int>& denominators,
+    static bool readSeparateTracksFromFile (const yup::File&,
+                                            yup::OwnedArray<MidiList>& lists,
+                                            yup::Array<BeatPosition>& tempoChangeBeatNumbers,
+                                            yup::Array<double>& bpms,
+                                            yup::Array<int>& numerators,
+                                            yup::Array<int>& denominators,
                                             BeatDuration& songLength,
                                             bool importAsNoteExpression);
 
     //==============================================================================
     template <typename Type>
-    static void sortMidiEventsByTime (juce::Array<Type>& notes)
+    static void sortMidiEventsByTime (yup::Array<Type>& notes)
     {
         std::sort (notes.begin(), notes.end(),
                    [] (const Type& a, const Type& b) { return a->getBeatPosition() < b->getBeatPosition(); });
     }
 
     template <typename Type>
-    static void sortMidiEventsByNoteNumber (juce::Array<Type>& notes)
+    static void sortMidiEventsByNoteNumber (yup::Array<Type>& notes)
     {
         std::sort (notes.begin(), notes.end(),
                    [] (const Type& a, const Type& b) { return a->getNoteNumber() < b->getNoteNumber(); });
     }
 
     //==============================================================================
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     //==============================================================================
     juce::CachedValue<MidiChannel> midiChannel;
     juce::CachedValue<bool> isComp;
 
-    juce::String importedFileName;
-    juce::String importedName;
+    yup::String importedFileName;
+    yup::String importedName;
 
     void initialise (juce::UndoManager*);
 
     template<typename EventType>
     struct EventDelegate
     {
-        static bool isSuitableType (const juce::ValueTree&);
+        static bool isSuitableType (const yup::ValueTree&);
         /** Return true if the order may have changed. */
-        static bool updateObject (EventType&, const juce::Identifier&);
+        static bool updateObject (EventType&, const yup::Identifier&);
         static void removeFromSelection (EventType*);
     };
 
     template<typename EventType>
     struct EventList : public ValueTreeObjectList<EventType>
     {
-        EventList (const juce::ValueTree& v)
+        EventList (const yup::ValueTree& v)
             : ValueTreeObjectList<EventType> (v)
         {
             ValueTreeObjectList<EventType>::rebuildObjects();
@@ -220,7 +220,7 @@ private:
             ValueTreeObjectList<EventType>::freeObjects();
         }
 
-        EventType* getEventFor (const juce::ValueTree& v)
+        EventType* getEventFor (const yup::ValueTree& v)
         {
             for (auto m : ValueTreeObjectList<EventType>::objects)
                 if (m->state == v)
@@ -229,14 +229,14 @@ private:
             return {};
         }
 
-        bool isSuitableType (const juce::ValueTree& v) const override   { return EventDelegate<EventType>::isSuitableType (v); }
-        EventType* createNewObject (const juce::ValueTree& v) override  { return new EventType (v); }
+        bool isSuitableType (const yup::ValueTree& v) const override   { return EventDelegate<EventType>::isSuitableType (v); }
+        EventType* createNewObject (const yup::ValueTree& v) override  { return new EventType (v); }
         void deleteObject (EventType* m) override                       { delete m; }
         void newObjectAdded (EventType*) override                       { triggerSort(); }
         void objectRemoved (EventType* m) override                      { EventDelegate<EventType>::removeFromSelection (m); triggerSort(); }
         void objectOrderChanged() override                              { triggerSort(); }
 
-        void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i) override
+        void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i) override
         {
             if (auto e = getEventFor (v))
                 if (EventDelegate<EventType>::updateObject (*e, i))
@@ -245,15 +245,15 @@ private:
 
         void triggerSort()
         {
-            const juce::ScopedLock sl (lock);
+            const yup::ScopedLock sl (lock);
             needsSorting = true;
         }
 
-        const juce::Array<EventType*>& getSortedList()
+        const yup::Array<EventType*>& getSortedList()
         {
             TRACKTION_ASSERT_MESSAGE_THREAD
 
-            const juce::ScopedLock sl (lock);
+            const yup::ScopedLock sl (lock);
 
             if (needsSorting)
             {
@@ -266,10 +266,10 @@ private:
         }
 
         bool needsSorting = true;
-        juce::Array<EventType*> sortedEvents;
-        juce::CriticalSection lock;
+        yup::Array<EventType*> sortedEvents;
+        yup::CriticalSection lock;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventList)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventList)
     };
 
     std::unique_ptr<EventList<MidiNote>> noteList;
@@ -277,7 +277,7 @@ private:
     std::unique_ptr<EventList<MidiSysexEvent>> sysexList;
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiList)
 };
 
 } // namespace tracktion::inline engine

@@ -26,25 +26,25 @@ public:
     static const char* getPluginName()      { return NEEDS_TRANS("MIDI Modifier"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override;
-    juce::String getPluginType() override;
-    juce::String getShortName (int) override;
+    yup::String getName() const override;
+    yup::String getPluginType() override;
+    yup::String getShortName (int) override;
     BusLayout getBusses() const override   { return {}; }
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     double getLatencySeconds() override;
     int getNumOutputChannelsGivenInputs (int) override;
-    void getChannelNames (juce::StringArray*, juce::StringArray*) override;
+    void getChannelNames (yup::StringArray*, yup::StringArray*) override;
     bool canBeAddedToClip() override;
 
     void applyToBuffer (const PluginRenderContext&) override;
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiModifierPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiModifierPlugin)
 };
 
 } // namespace tracktion::inline engine

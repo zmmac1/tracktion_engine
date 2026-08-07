@@ -22,13 +22,13 @@ public:
         A thumbnail represeting a recording file.
         Get one of these for a file with the getThumbnailFor function.
     */
-    struct Thumbnail  : public juce::ReferenceCountedObject
+    struct Thumbnail  : public yup::ReferenceCountedObject
     {
-        using Ptr = juce::ReferenceCountedObjectPtr<Thumbnail>;
+        using Ptr = yup::ReferenceCountedObjectPtr<Thumbnail>;
 
         Engine& engine;             /**< The Engine instance this belongs to. */
-        const std::unique_ptr<juce::AudioThumbnailBase> thumb;  /**< The thumbnail. */
-        juce::File file;            /**< The file this thumbnail represents. */
+        const std::unique_ptr<yup::AudioThumbnailBase> thumb;  /**< The thumbnail. */
+        yup::File file;            /**< The file this thumbnail represents. */
         const HashCode hash;        /**< A hash uniquely identifying this thumbnail. */
         TimePosition punchInTime;   /**< The time the start of this thumbnail represents. */
 
@@ -49,7 +49,7 @@ public:
         /** Adss a block of recorded data to the thumbnail.
             This is called by the engine so shouldn't need to be called manually.
         */
-        void addBlock (const juce::AudioBuffer<float>& incoming, int startOffsetInBuffer, int numSamples)
+        void addBlock (const yup::AudioBuffer<float>& incoming, int startOffsetInBuffer, int numSamples)
         {
             thumb->addBlock (nextSampleNum, incoming, startOffsetInBuffer, numSamples);
             nextSampleNum += numSamples;
@@ -59,7 +59,7 @@ public:
         friend class RecordingThumbnailManager;
         std::atomic<int64_t> nextSampleNum { 0 };
 
-        Thumbnail (Engine& e, const juce::File& f)
+        Thumbnail (Engine& e, const yup::File& f)
             : engine (e),
               thumb (engine.getUIBehaviour().createAudioThumbnail (1024, engine.getAudioFileFormatManager().readFormatManager,
                                                                    engine.getAudioFileManager().getAudioThumbnailCache())),
@@ -69,14 +69,14 @@ public:
             engine.getRecordingThumbnailManager().thumbs.addIfNotAlreadyThere (this);
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thumbnail)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Thumbnail)
     };
 
     //==============================================================================
     /** Returns the Thumbnail for a given audio file.
         The engine will update this so you should only use it for drawing.
     */
-    Thumbnail::Ptr getThumbnailFor (const juce::File& f)
+    Thumbnail::Ptr getThumbnailFor (const yup::File& f)
     {
         TRACKTION_ASSERT_MESSAGE_THREAD
 
@@ -89,9 +89,9 @@ public:
 
 private:
     Engine& engine;
-    juce::Array<Thumbnail*> thumbs;
+    yup::Array<Thumbnail*> thumbs;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RecordingThumbnailManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RecordingThumbnailManager)
 };
 
 } // namespace tracktion::inline engine

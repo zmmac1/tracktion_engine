@@ -11,8 +11,8 @@
 namespace tracktion::inline engine {
 
 /** Controls the set of midi-controller-to-parameter mappings. */
-class ParameterControlMappings  : public juce::ChangeBroadcaster,
-                                  private juce::AsyncUpdater
+class ParameterControlMappings  : public yup::ChangeBroadcaster,
+                                  private yup::AsyncUpdater
 {
 public:
     //==============================================================================
@@ -38,7 +38,7 @@ public:
     int getNumControllerIDs() const                 { return controllerIDs.size(); }
     void showMappingsListForRow (int);
     int getRowBeingListenedTo() const;
-    std::pair<juce::String, juce::String> getTextForRow (int rowNumber) const;
+    std::pair<yup::String, yup::String> getTextForRow (int rowNumber) const;
 
     void listenToRow (int);
     void setLearntParam (bool keepListening);
@@ -59,7 +59,7 @@ public:
     /** This will put the surface in listen and assign mode, launching the given dialog window.
         The call will block whilst assignments are made and return when the window is closed.
     */
-    void showMappingsEditor (juce::DialogWindow::LaunchOptions&);
+    void showMappingsEditor (yup::DialogWindow::LaunchOptions&);
 
 private:
     //==============================================================================
@@ -69,26 +69,26 @@ private:
         int index;
     };
 
-    juce::PopupMenu buildMenu (juce::Array<ParameterAndIndex>& allParams);
-    void addPluginToMenu (AutomatableParameterTree::TreeNode*, juce::PopupMenu&, juce::Array<ParameterAndIndex>& allParams, int& index, int addAllItemIndex);
-    void addPluginToMenu (Plugin::Ptr, juce::PopupMenu&, juce::Array<ParameterAndIndex>& allParams, int& index, int addAllItemIndex);
+    yup::PopupMenu buildMenu (yup::Array<ParameterAndIndex>& allParams);
+    void addPluginToMenu (AutomatableParameterTree::TreeNode*, yup::PopupMenu&, yup::Array<ParameterAndIndex>& allParams, int& index, int addAllItemIndex);
+    void addPluginToMenu (Plugin::Ptr, yup::PopupMenu&, yup::Array<ParameterAndIndex>& allParams, int& index, int addAllItemIndex);
     void savePreset (int index);
     void loadPreset (int index);
     void deletePreset (int index);
-    juce::StringArray getPresets() const;
+    yup::StringArray getPresets() const;
 
     Edit& edit;
 
-    juce::Array<int> controllerIDs, channelIDs;
-    juce::ReferenceCountedArray<AutomatableParameter> parameters;
-    juce::StringArray parameterFullNames;
+    yup::Array<int> controllerIDs, channelIDs;
+    yup::ReferenceCountedArray<AutomatableParameter> parameters;
+    yup::StringArray parameterFullNames;
 
     int lastControllerID = 0;
     float lastControllerValue = 0;
     int lastControllerChannel = 0;
     int listeningOnRow = -1;
 
-    juce::CriticalSection lock;
+    yup::CriticalSection lock;
 
     void tellEditAboutChange();
     int addMapping (int id, int channel, const AutomatableParameter::Ptr&);

@@ -16,22 +16,22 @@ AudioFileFormatManager::AudioFileFormatManager()
 
     // NB default must be first!
 
-    wavFormat = std::make_unique<juce::WavAudioFormat>();
+    wavFormat = std::make_unique<yup::WavAudioFormat>();
     readFormats.add (wavFormat.get());
     writeFormats.add (wavFormat.get());
 
-    aiffFormat = std::make_unique<juce::AiffAudioFormat>();
+    aiffFormat = std::make_unique<yup::AiffAudioFormat>();
     readFormats.add (aiffFormat.get());
     writeFormats.add (aiffFormat.get());
 
     floatFormat = std::make_unique<FloatAudioFormat>();
     readFormats.add (floatFormat.get());
 
-    oggFormat = std::make_unique<juce::OggVorbisAudioFormat>();
+    oggFormat = std::make_unique<yup::OggVorbisAudioFormat>();
     readFormats.add (oggFormat.get());
     writeFormats.add (oggFormat.get());
 
-    flacFormat = std::make_unique<juce::FlacAudioFormat>();
+    flacFormat = std::make_unique<yup::FlacAudioFormat>();
     readFormats.add (flacFormat.get());
     writeFormats.add (flacFormat.get());
 
@@ -40,16 +40,16 @@ AudioFileFormatManager::AudioFileFormatManager()
     readFormats.add (rexFormat.get());
    #endif
 
-   #if JUCE_MAC || JUCE_IOS
-    nativeAudioFormat = std::make_unique<juce::CoreAudioFormat>();
+   #if YUP_MAC || JUCE_IOS
+    nativeAudioFormat = std::make_unique<yup::CoreAudioFormat>();
     readFormats.add (nativeAudioFormat.get());
    #elif JUCE_WINDOWS
-    nativeAudioFormat = std::make_unique<juce::WindowsMediaAudioFormat>();
+    nativeAudioFormat = std::make_unique<yup::WindowsMediaAudioFormat>();
     readFormats.add (nativeAudioFormat.get());
    #endif
 
    #if JUCE_USE_MP3AUDIOFORMAT
-    mp3ReadFormat = std::make_unique<juce::MP3AudioFormat>();
+    mp3ReadFormat = std::make_unique<yup::MP3AudioFormat>();
     readFormats.add (mp3ReadFormat.get());
    #endif
 
@@ -58,34 +58,34 @@ AudioFileFormatManager::AudioFileFormatManager()
     allFormats = readFormats;
 
 
-    readFormatManager.registerFormat (new juce::WavAudioFormat(), true);
-    readFormatManager.registerFormat (new juce::AiffAudioFormat(), false);
+    readFormatManager.registerFormat (new yup::WavAudioFormat(), true);
+    readFormatManager.registerFormat (new yup::AiffAudioFormat(), false);
     readFormatManager.registerFormat (new FloatAudioFormat(), false);
-    readFormatManager.registerFormat (new juce::OggVorbisAudioFormat(), false);
-    readFormatManager.registerFormat (new juce::FlacAudioFormat(), false);
+    readFormatManager.registerFormat (new yup::OggVorbisAudioFormat(), false);
+    readFormatManager.registerFormat (new yup::FlacAudioFormat(), false);
 
    #if TRACKTION_ENABLE_REX
     readFormatManager.registerFormat (new RexAudioFormat(), false);
    #endif
 
-   #if JUCE_MAC || JUCE_IOS
-    readFormatManager.registerFormat (new juce::CoreAudioFormat(), false);
+   #if YUP_MAC || JUCE_IOS
+    readFormatManager.registerFormat (new yup::CoreAudioFormat(), false);
    #elif JUCE_WINDOWS
-    readFormatManager.registerFormat (new juce::WindowsMediaAudioFormat(), false);
+    readFormatManager.registerFormat (new yup::WindowsMediaAudioFormat(), false);
    #endif
 
    #if JUCE_USE_MP3AUDIOFORMAT
-    readFormatManager.registerFormat (new juce::MP3AudioFormat(), false);
+    readFormatManager.registerFormat (new yup::MP3AudioFormat(), false);
    #endif
 
-    writeFormatManager.registerFormat (new juce::WavAudioFormat(), true);
-    writeFormatManager.registerFormat (new juce::AiffAudioFormat(), false);
+    writeFormatManager.registerFormat (new yup::WavAudioFormat(), true);
+    writeFormatManager.registerFormat (new yup::AiffAudioFormat(), false);
     writeFormatManager.registerFormat (new FloatAudioFormat(), false);
-    writeFormatManager.registerFormat (new juce::OggVorbisAudioFormat(), false);
-    writeFormatManager.registerFormat (new juce::FlacAudioFormat(), false);
+    writeFormatManager.registerFormat (new yup::OggVorbisAudioFormat(), false);
+    writeFormatManager.registerFormat (new yup::FlacAudioFormat(), false);
 
-    memoryMappedFormatManager.registerFormat (new juce::WavAudioFormat(), true);
-    memoryMappedFormatManager.registerFormat (new juce::AiffAudioFormat(), false);
+    memoryMappedFormatManager.registerFormat (new yup::WavAudioFormat(), true);
+    memoryMappedFormatManager.registerFormat (new yup::AiffAudioFormat(), false);
     memoryMappedFormatManager.registerFormat (new FloatAudioFormat(), false);
 }
 
@@ -94,8 +94,8 @@ AudioFileFormatManager::~AudioFileFormatManager()
     CRASH_TRACER
 }
 
-void AudioFileFormatManager::addLameFormat (std::unique_ptr<juce::AudioFormat> lameForArray,
-                                            std::unique_ptr<juce::AudioFormat> lameForAccess)
+void AudioFileFormatManager::addLameFormat (std::unique_ptr<yup::AudioFormat> lameForArray,
+                                            std::unique_ptr<yup::AudioFormat> lameForAccess)
 {
     if (lameFormat != nullptr || lameForArray == nullptr || lameForAccess == nullptr)
         return;
@@ -105,7 +105,7 @@ void AudioFileFormatManager::addLameFormat (std::unique_ptr<juce::AudioFormat> l
     writeFormatManager.registerFormat (lameForArray.release(), false);
 }
 
-void AudioFileFormatManager::addFormat (std::function<juce::AudioFormat*()> formatCreator, bool isWritable, bool isMemoryMappable)
+void AudioFileFormatManager::addFormat (std::function<yup::AudioFormat*()> formatCreator, bool isWritable, bool isMemoryMappable)
 {
     jassert (formatCreator);
 
@@ -122,7 +122,7 @@ void AudioFileFormatManager::addFormat (std::function<juce::AudioFormat*()> form
         memoryMappedFormatManager.registerFormat (formatCreator(), false);
 }
 
-juce::AudioFormat* AudioFileFormatManager::getFormatFromFileName (const juce::File& f) const
+yup::AudioFormat* AudioFileFormatManager::getFormatFromFileName (const yup::File& f) const
 {
     for (auto format : allFormats)
         if (format->canHandleFile (f))
@@ -131,17 +131,17 @@ juce::AudioFormat* AudioFileFormatManager::getFormatFromFileName (const juce::Fi
     return {};
 }
 
-bool AudioFileFormatManager::canOpen (const juce::File& f) const
+bool AudioFileFormatManager::canOpen (const yup::File& f) const
 {
     return getFormatFromFileName (f) != nullptr;
 }
 
-juce::String AudioFileFormatManager::getValidFileExtensions() const
+yup::String AudioFileFormatManager::getValidFileExtensions() const
 {
     return "wav;aiff;aif;ogg;mp3;mid;midi;flac;au;voc;caf;w64;rx2;rcy;rex;m4a;wfaf";
 }
 
-juce::AudioFormat* AudioFileFormatManager::getNamedFormat (const juce::String& formatName) const
+yup::AudioFormat* AudioFileFormatManager::getNamedFormat (const yup::String& formatName) const
 {
     for (auto format : allFormats)
         if (format->getFormatName() == formatName)

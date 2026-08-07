@@ -18,7 +18,7 @@ public:
 
     void initialiseDevice (bool connect) override;
     void shutDownDevice() override;
-    void acceptMidiMessage (int, const juce::MidiMessage& m) override;
+    void acceptMidiMessage (int, const yup::MidiMessage& m) override;
 
     int getDeviceIndex() const noexcept         { return deviceIdx; }
     void setDeviceIndex (int idx)               { deviceIdx = idx; }
@@ -27,7 +27,7 @@ private:
     int deviceIdx = 1;
     MackieMCU& mcu;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MackieXT)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MackieXT)
 };
 
 } // namespace tracktion::inline engine

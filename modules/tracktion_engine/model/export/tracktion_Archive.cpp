@@ -12,19 +12,19 @@
 
 namespace tracktion::inline engine {
 
-bool isLegacyArchive (Engine& engine, const juce::File& file)
+bool isLegacyArchive (Engine& engine, const yup::File& file)
 {
     legacy::TracktionArchiveFile archive (engine, file);
     return archive.isValidArchive();
 }
 
-bool isArchive (Engine& engine, const juce::File& file)
+bool isArchive (Engine& engine, const yup::File& file)
 {
     if (isLegacyArchive (engine, file))
         return true;
 
     // Check if it's a valid zip containing at least one .tracktionedit file
-    juce::ZipFile zip (file);
+    yup::ZipFile zip (file);
 
     for (int i = 0; i < zip.getNumEntries(); ++i)
         if (auto entry = zip.getEntry (i))
@@ -36,7 +36,7 @@ bool isArchive (Engine& engine, const juce::File& file)
 
 //==============================================================================
 ArchiveJob::ArchiveJob (Source src,
-                        const juce::File& dest,
+                        const yup::File& dest,
                         CompressionLevel level)
     : ThreadPoolJobWithProgress (TRANS("Archiving") + "..."),
       source (std::move (src)),
@@ -57,15 +57,15 @@ bool ArchiveJob::canCancel() const
     return true;
 }
 
-juce::String ArchiveJob::getError() const
+yup::String ArchiveJob::getError() const
 {
     return errorMessage;
 }
 
-juce::ThreadPoolJob::JobStatus ArchiveJob::runJob()
+yup::ThreadPoolJob::JobStatus ArchiveJob::runJob()
 {
     CRASH_TRACER
-    juce::FloatVectorOperations::disableDenormalisedNumberSupport();
+    yup::FloatVectorOperations::disableDenormalisedNumberSupport();
 
     if (! copyToTempDir())
     {
@@ -145,7 +145,7 @@ bool ArchiveJob::copyToTempDir()
 
     // Create temp directory
     tempDir = choc::file::TempFile (choc::file::TempFile::createRandomFilename ("tracktion_archive", ""));
-    auto tempDirFile = juce::File (tempDir.file.string());
+    auto tempDirFile = yup::File(yup::String(tempDir.file.string()));
 
     if (auto project = std::get_if<Project*> (&source))
     {
@@ -268,8 +268,8 @@ bool ArchiveJob::copyToTempDir()
 
             struct FileToCopy
             {
-                juce::File mediaSrc;
-                juce::String itemType, itemName, itemDescription;
+                yup::File mediaSrc;
+                yup::String itemType, itemName, itemDescription;
                 ProjectItem::Category itemCategory;
                 ProjectItemRef oldRef;
             };
@@ -320,11 +320,11 @@ bool ArchiveJob::copyToTempDir()
 
                 auto srcProject = (*projectItem)->getProject();
                 auto srcProjectDir = srcProject != nullptr ? srcProject->getDefaultDirectory()
-                                                           : juce::File();
+                                                           : yup::File();
 
-                juce::File destMedia;
+                yup::File destMedia;
 
-                if (srcProjectDir != juce::File() && f.mediaSrc.isAChildOf (srcProjectDir))
+                if (srcProjectDir != yup::File() && f.mediaSrc.isAChildOf (srcProjectDir))
                 {
                     // Preserve the source project's layout (e.g. "Imported/foo.ogg",
                     // "Recorded/take 3.wav", or any custom subfolder structure).
@@ -381,7 +381,7 @@ bool ArchiveJob::copyToTempDir()
             // message thread before consolidate() runs.
             bool destEditLoadFailed = false;
 
-            juce::MessageManager::callSync ([&engine, &destEditItem, &exportablesToUpdate, &destEditLoadFailed]
+            yup::MessageManager::callSync ([&engine, &destEditItem, &exportablesToUpdate, &destEditLoadFailed]
                                             {
                                                 auto destEdit = loadEditForExamining (engine.getProjectManager(),
                                                                                       destEditItem->getProjectItemRef());
@@ -424,7 +424,7 @@ bool ArchiveJob::copyToTempDir()
         }
 
         // Destroy the original `edit` on the message thread before continuing.
-        juce::MessageManager::callSync ([&edit] { edit.reset(); });
+        yup::MessageManager::callSync ([&edit] { edit.reset(); });
 
         tempProject->save();
     }
@@ -446,14 +446,14 @@ bool ArchiveJob::consolidate()
 
     progress = 0.3f;
 
-    std::pair<int, juce::String> numImportedAndError;
-    juce::MessageManager::callSync ([this, &numImportedAndError]
+    std::pair<int, yup::String> numImportedAndError;
+    yup::MessageManager::callSync ([this, &numImportedAndError]
                                     {
                                         numImportedAndError = ProjectUtilities::consolidateProject (*tempProject);
                                     });
 
     auto [numImported, error] = numImportedAndError;
-    juce::ignoreUnused (numImported);
+    yup::ignoreUnused (numImported);
 
     if (error.isNotEmpty())
     {
@@ -470,12 +470,12 @@ bool ArchiveJob::createZip()
     progress = 0.5f;
 
     // Find the root dir to zip
-    juce::File rootDir;
+    yup::File rootDir;
 
     if (tempProject->isFolderBased())
         rootDir = tempProject->getDefaultDirectory();
     else
-        rootDir = juce::File (tempDir.file.string());
+        rootDir = yup::File(yup::String(tempDir.file.string()));
 
     // Save the project before zipping
     tempProject->save();
@@ -483,22 +483,22 @@ bool ArchiveJob::createZip()
     // Add archive_type to project_info.json
     {
         auto infoFile = rootDir.getChildFile ("project_info.json");
-        auto infoJson = juce::JSON::parse (infoFile);
+        auto infoJson = yup::JSON::parse (infoFile);
         auto obj = infoJson.getDynamicObject();
 
         if (obj == nullptr)
         {
-            obj = new juce::DynamicObject();
-            infoJson = juce::var (obj);
+            obj = new yup::DynamicObject();
+            infoJson = yup::var (obj);
         }
 
         obj->setProperty ("archive_type", 1);
-        infoFile.replaceWithText (juce::JSON::toString (infoJson));
+        infoFile.replaceWithText (yup::JSON::toString (infoJson));
     }
 
     // Collect all files to zip
-    juce::Array<juce::File> files;
-    rootDir.findChildFiles (files, juce::File::findFiles, true);
+    yup::Array<yup::File> files;
+    rootDir.findChildFiles (files, yup::File::findFiles, true);
 
     if (files.isEmpty())
     {

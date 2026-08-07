@@ -17,7 +17,7 @@ class GrooveTemplate
 {
 public:
     GrooveTemplate();
-    GrooveTemplate (const juce::XmlElement*);
+    GrooveTemplate (const yup::XmlElement*);
     GrooveTemplate (const GrooveTemplate&);
     ~GrooveTemplate();
 
@@ -37,8 +37,8 @@ public:
     TimePosition editTimeToGroovyTime (TimePosition editTime, float strength, Edit& edit) const;
 
     //==============================================================================
-    const juce::String& getName() const                     { return name; }
-    void setName (const juce::String&);
+    const yup::String& getName() const                     { return name; }
+    void setName (const yup::String&);
 
     // all indexes are in quarter-notes
     int getNumberOfNotes() const                            { return numNotes; }
@@ -54,17 +54,17 @@ public:
 
     //==============================================================================
     static const char* grooveXmlTag;
-    juce::XmlElement* createXml() const;
+    yup::XmlElement* createXml() const;
 
 private:
     //==============================================================================
-    juce::Array<float> latenesses;
+    yup::Array<float> latenesses;
     int numNotes, notesPerBeat;
-    juce::String name;
+    yup::String name;
     bool parameterized = false;
 
     //==============================================================================
-    JUCE_LEAK_DETECTOR (GrooveTemplate)
+    YUP_LEAK_DETECTOR (GrooveTemplate)
 };
 
 //==============================================================================
@@ -81,12 +81,12 @@ public:
 
     //==============================================================================
     int getNumTemplates() const;
-    juce::String getTemplateName (int index) const;
+    yup::String getTemplateName (int index) const;
 
-    juce::StringArray getTemplateNames() const;
+    yup::StringArray getTemplateNames() const;
 
     const GrooveTemplate* getTemplate (int index);
-    const GrooveTemplate* getTemplateByName (const juce::String& name);
+    const GrooveTemplate* getTemplateByName (const yup::String& name);
 
     void updateTemplate (int index, const GrooveTemplate&);
     void deleteTemplate (int index);
@@ -98,16 +98,16 @@ public:
 
 private:
     //==============================================================================
-    juce::OwnedArray<GrooveTemplate> knownGrooves;
-    juce::Array<GrooveTemplate*> activeGrooves;
+    yup::OwnedArray<GrooveTemplate> knownGrooves;
+    yup::Array<GrooveTemplate*> activeGrooves;
 
     //==============================================================================
     void save();
-    void reload (const juce::XmlElement*);
+    void reload (const yup::XmlElement*);
 
     bool useParameterized = false;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GrooveTemplateManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GrooveTemplateManager)
 };
 
 } // namespace tracktion::inline engine

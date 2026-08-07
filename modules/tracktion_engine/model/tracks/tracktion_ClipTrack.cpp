@@ -11,15 +11,15 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-struct ClipTrack::CollectionClipList  : public juce::ValueTree::Listener
+struct ClipTrack::CollectionClipList  : public yup::ValueTree::Listener
 {
-    CollectionClipList (ClipTrack& t, juce::ValueTree& v)
+    CollectionClipList (ClipTrack& t, yup::ValueTree& v)
         : ct (t), state (v)
     {
         state.addListener (this);
     }
 
-    void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id) override
+    void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id) override
     {
         if (id == IDs::groupID)
         {
@@ -70,7 +70,7 @@ struct ClipTrack::CollectionClipList  : public juce::ValueTree::Listener
         }
     }
 
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree& child) override
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree& child) override
     {
         if (Clip::isClipState (child))
         {
@@ -87,7 +87,7 @@ struct ClipTrack::CollectionClipList  : public juce::ValueTree::Listener
         }
     }
 
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree& child, int) override
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree& child, int) override
     {
         if (Clip::isClipState (child))
         {
@@ -140,19 +140,19 @@ struct ClipTrack::CollectionClipList  : public juce::ValueTree::Listener
         ct.trackItemsDirty = true;
     }
 
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override {}
-    void valueTreeParentChanged (juce::ValueTree&) override {}
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override {}
+    void valueTreeParentChanged (yup::ValueTree&) override {}
 
     ClipTrack& ct;
-    juce::ValueTree state;
+    yup::ValueTree state;
 
-    juce::ReferenceCountedArray<CollectionClip> collectionClips;
+    yup::ReferenceCountedArray<CollectionClip> collectionClips;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CollectionClipList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CollectionClipList)
 };
 
 //==============================================================================
-ClipTrack::ClipTrack (Edit& ed, const juce::ValueTree& v, bool hasModifierList)
+ClipTrack::ClipTrack (Edit& ed, const yup::ValueTree& v, bool hasModifierList)
     : Track (ed, v, hasModifierList)
 {
     collectionClipList = std::make_unique<CollectionClipList> (*this, state);
@@ -352,31 +352,31 @@ void ClipTrack::removeCollectionClip (CollectionClip* cc)
 }
 
 //==============================================================================
-Clip* ClipTrack::insertClipWithState (juce::ValueTree clipState)
+Clip* ClipTrack::insertClipWithState (yup::ValueTree clipState)
 {
     return engine::insertClipWithState (*this, clipState);
 }
 
-Clip* ClipTrack::insertClipWithState (const juce::ValueTree& stateToUse, const juce::String& name, TrackItem::Type type,
+Clip* ClipTrack::insertClipWithState (const yup::ValueTree& stateToUse, const yup::String& name, TrackItem::Type type,
                                       ClipPosition position, bool deleteExistingClips, bool allowSpottingAdjustment)
 {
     return engine::insertClipWithState (*this, stateToUse, name, type,
                                         position, deleteExistingClips ? DeleteExistingClips::yes : DeleteExistingClips::no, allowSpottingAdjustment);
 }
 
-WaveAudioClip::Ptr ClipTrack::insertWaveClip (const juce::String& name, const juce::File& sourceFile,
+WaveAudioClip::Ptr ClipTrack::insertWaveClip (const yup::String& name, const yup::File& sourceFile,
                                               ClipPosition position, bool deleteExistingClips)
 {
     return engine::insertWaveClip (*this, name, sourceFile, position, deleteExistingClips ? DeleteExistingClips::yes : DeleteExistingClips::no);
 }
 
-WaveAudioClip::Ptr ClipTrack::insertWaveClip (const juce::String& name, ProjectItemRef sourceID,
+WaveAudioClip::Ptr ClipTrack::insertWaveClip (const yup::String& name, ProjectItemRef sourceID,
                                               ClipPosition position, bool deleteExistingClips)
 {
     return engine::insertWaveClip (*this, name, sourceID, position, deleteExistingClips ? DeleteExistingClips::yes : DeleteExistingClips::no);
 }
 
-MidiClip::Ptr ClipTrack::insertMIDIClip (const juce::String& name, TimeRange position, SelectionManager* sm)
+MidiClip::Ptr ClipTrack::insertMIDIClip (const yup::String& name, TimeRange position, SelectionManager* sm)
 {
     if (auto newClip = engine::insertMIDIClip (*this, name, position))
     {
@@ -421,12 +421,12 @@ void ClipTrack::deleteRegionOfClip (Clip::Ptr c, TimeRange range, SelectionManag
             sm->addToSelection (newClip);
 }
 
-Clip* ClipTrack::insertNewClip (TrackItem::Type type, const juce::String& name, TimeRange pos, SelectionManager* sm)
+Clip* ClipTrack::insertNewClip (TrackItem::Type type, const yup::String& name, TimeRange pos, SelectionManager* sm)
 {
     return insertNewClip (type, name, { pos, 0_td }, sm);
 }
 
-Clip* ClipTrack::insertNewClip (TrackItem::Type type, const juce::String& name, ClipPosition position, SelectionManager* sm)
+Clip* ClipTrack::insertNewClip (TrackItem::Type type, const yup::String& name, ClipPosition position, SelectionManager* sm)
 {
     CRASH_TRACER
 
@@ -454,7 +454,7 @@ bool ClipTrack::containsAnyMIDIClips() const
     return engine::containsAnyMIDIClips (*this);
 }
 
-juce::ValueTree& ClipTrack::getClipOwnerState()
+yup::ValueTree& ClipTrack::getClipOwnerState()
 {
     return state;
 }
@@ -501,13 +501,13 @@ void ClipTrack::clipPositionChanged()
     trackItemsDirty = true;
 }
 
-inline juce::String incrementLastDigit (const juce::String& in)
+inline yup::String incrementLastDigit (const yup::String& in)
 {
     int digitCount = 0;
 
     for (int i = in.length(); --i >= 0;)
     {
-        if (juce::CharacterFunctions::isDigit (in[i]))
+        if (yup::CharacterFunctions::isDigit (in[i]))
             digitCount++;
         else
             break;
@@ -517,7 +517,7 @@ inline juce::String incrementLastDigit (const juce::String& in)
         return in + " 2";
 
     return in.dropLastCharacters (digitCount)
-            + juce::String (in.getTrailingIntValue() + 1);
+            + yup::String (in.getTrailingIntValue() + 1);
 }
 
 Clip* ClipTrack::splitClip (Clip& clip, const TimePosition time)
@@ -553,9 +553,9 @@ void ClipTrack::insertSpace (TimePosition time, TimeDuration length)
             c->setStart (c->getPosition().getStart() + length, false, true);
 }
 
-juce::Array<TimePosition> ClipTrack::findAllTimesOfInterest()
+yup::Array<TimePosition> ClipTrack::findAllTimesOfInterest()
 {
-    juce::Array<TimePosition> cuts;
+    yup::Array<TimePosition> cuts;
 
     for (auto& o : getClips())
         cuts.addArray (o->getInterestingTimes());

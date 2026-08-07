@@ -18,7 +18,7 @@ class WaveInputDeviceNode final : public tracktion::graph::Node,
 {
 public:
     WaveInputDeviceNode (InputDeviceInstance&, WaveInputDevice&,
-                         const juce::AudioChannelSet& destChannelsToFill);
+                         const yup::AudioChannelSet& destChannelsToFill);
     ~WaveInputDeviceNode() override;
 
     tracktion::graph::NodeProperties getNodeProperties() override;
@@ -34,7 +34,7 @@ private:
     WaveInputDevice& waveInputDevice;
     uint32_t lastCallbackTime = 0;
     tracktion::graph::AudioFifo audioFifo { 1, 32 };
-    const juce::AudioChannelSet destChannels;
+    const yup::AudioChannelSet destChannels;
 };
 
 } // namespace tracktion::inline engine

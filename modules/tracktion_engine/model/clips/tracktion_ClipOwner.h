@@ -26,7 +26,7 @@ public:
     virtual ~ClipOwner();
 
     /** Must return the state of this ClipOwner. */
-    virtual juce::ValueTree& getClipOwnerState() = 0;
+    virtual yup::ValueTree& getClipOwnerState() = 0;
 
     /** Must return the ID of this ClipOwner. */
     virtual EditItemID getClipOwnerID() = 0;
@@ -38,11 +38,11 @@ public:
     virtual Edit& getClipOwnerEdit() = 0;
 
     /** Returns the clips this owner contains. */
-    const juce::Array<Clip*>& getClips() const;
+    const yup::Array<Clip*>& getClips() const;
 
 protected:
     /** Must be called once from the subclass constructor to init the clip owner. */
-    void initialiseClipOwner (Edit&, juce::ValueTree clipParentState);
+    void initialiseClipOwner (Edit&, yup::ValueTree clipParentState);
 
     /** Called when a clip is created which could be during Edit load. */
     virtual void clipCreated (Clip&) = 0;
@@ -68,7 +68,7 @@ private:
 
 //==============================================================================
 /** Returns a clip with the given state if the ClipOwner contains it. */
-Clip* findClipForState (ClipOwner&, const juce::ValueTree&);
+Clip* findClipForState (ClipOwner&, const yup::ValueTree&);
 
 /** Returns a clip with the given ID if the ClipOwner contains it. */
 Clip* findClipForID (ClipOwner&, EditItemID);
@@ -84,11 +84,11 @@ enum class DeleteExistingClips
 };
 
 /** Inserts a clip with the given state in to the ClipOwner's clip list. */
-Clip* insertClipWithState (ClipOwner&, juce::ValueTree);
+Clip* insertClipWithState (ClipOwner&, yup::ValueTree);
 
 /** Inserts a clip with the given state in to the ClipOwner's clip list. */
 Clip* insertClipWithState (ClipOwner&,
-                           const juce::ValueTree& stateToUse, const juce::String& name, TrackItem::Type,
+                           const yup::ValueTree& stateToUse, const yup::String& name, TrackItem::Type,
                            ClipPosition, DeleteExistingClips, bool allowSpottingAdjustment);
 
 //==============================================================================
@@ -96,38 +96,38 @@ Clip* insertClipWithState (ClipOwner&,
 Clip* insertNewClip (ClipOwner&, TrackItem::Type, EditTimeRange);
 
 /** Inserts a new clip with the given type and name. */
-Clip* insertNewClip (ClipOwner&, TrackItem::Type, const juce::String& name, EditTimeRange);
+Clip* insertNewClip (ClipOwner&, TrackItem::Type, const yup::String& name, EditTimeRange);
 
 /** Inserts a new clip with the given type and name. */
-Clip* insertNewClip (ClipOwner&, TrackItem::Type, const juce::String& name, ClipPosition);
+Clip* insertNewClip (ClipOwner&, TrackItem::Type, const yup::String& name, ClipPosition);
 
 //==============================================================================
 /** Inserts a new WaveAudioClip into the ClipOwner's clip list. */
-juce::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (ClipOwner&, const juce::String& name, const juce::File& sourceFile,
+yup::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (ClipOwner&, const yup::String& name, const yup::File& sourceFile,
                                                                ClipPosition, DeleteExistingClips);
 
 /** Inserts a new WaveAudioClip into the ClipOwner's clip list. */
-juce::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (ClipOwner&, const juce::String& name, ProjectItemRef sourceID,
+yup::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (ClipOwner&, const yup::String& name, ProjectItemRef sourceID,
                                                                ClipPosition, DeleteExistingClips);
 
 /** Inserts a new MidiClip into the ClipOwner's clip list. */
-juce::ReferenceCountedObjectPtr<MidiClip> insertMIDIClip (ClipOwner&, const juce::String& name, TimeRange);
+yup::ReferenceCountedObjectPtr<MidiClip> insertMIDIClip (ClipOwner&, const yup::String& name, TimeRange);
 
 /** Inserts a new MidiClip into the ClipOwner's clip list. */
-juce::ReferenceCountedObjectPtr<MidiClip> insertMIDIClip (ClipOwner&, TimeRange);
+yup::ReferenceCountedObjectPtr<MidiClip> insertMIDIClip (ClipOwner&, TimeRange);
 
 /** Inserts a new EditClip into the ClipOwner's clip list. */
-juce::ReferenceCountedObjectPtr<EditClip> insertEditClip (ClipOwner&, TimeRange, ProjectItemRef);
+yup::ReferenceCountedObjectPtr<EditClip> insertEditClip (ClipOwner&, TimeRange, ProjectItemRef);
 
 //==============================================================================
 /** Removes a region of a ClipOwner and returns any newly created clips. */
-juce::Array<Clip*> deleteRegion (ClipOwner&, TimeRange);
+yup::Array<Clip*> deleteRegion (ClipOwner&, TimeRange);
 
 /** Removes a region of a clip and returns any newly created clips. */
-juce::Array<Clip*> deleteRegion (Clip&, TimeRange);
+yup::Array<Clip*> deleteRegion (Clip&, TimeRange);
 
 /** Splits the given clp owner at the time and returns any newly created clips. */
-juce::Array<Clip*> split (ClipOwner&, TimePosition);
+yup::Array<Clip*> split (ClipOwner&, TimePosition);
 
 /** Splits the given clip at the time and returns the newly created clip. */
 Clip* split (Clip&, TimePosition);
@@ -137,11 +137,11 @@ Clip* split (Clip&, TimePosition);
 
 /** Returns the subclips of the given type. */
 template<typename ClipType>
-[[ nodiscard ]] juce::Array<ClipType*> getClipsOfType (const ClipOwner&);
+[[ nodiscard ]] yup::Array<ClipType*> getClipsOfType (const ClipOwner&);
 
 /** Returns the subclips of the given type, if any clips contain other clips, this will also return those. */
 template<typename ClipType>
-[[ nodiscard ]] juce::Array<ClipType*> getClipsOfTypeRecursive (const ClipOwner&);
+[[ nodiscard ]] yup::Array<ClipType*> getClipsOfTypeRecursive (const ClipOwner&);
 
 
 //==============================================================================
@@ -210,9 +210,9 @@ bool isOnTop (const Track&);
 //==============================================================================
 
 template<typename ClipType>
-inline juce::Array<ClipType*> getClipsOfType (const ClipOwner& parent)
+inline yup::Array<ClipType*> getClipsOfType (const ClipOwner& parent)
 {
-    juce::Array<ClipType*> clips;
+    yup::Array<ClipType*> clips;
 
     for (auto clip : parent.getClips())
         if (auto typedClip = dynamic_cast<ClipType*> (clip))
@@ -222,9 +222,9 @@ inline juce::Array<ClipType*> getClipsOfType (const ClipOwner& parent)
 }
 
 template<typename ClipType>
-inline juce::Array<ClipType*> getClipsOfTypeRecursive (const ClipOwner& parent)
+inline yup::Array<ClipType*> getClipsOfTypeRecursive (const ClipOwner& parent)
 {
-    juce::Array<ClipType*> results;
+    yup::Array<ClipType*> results;
 
     results.addArray (getClipsOfType<ClipType> (parent));
 

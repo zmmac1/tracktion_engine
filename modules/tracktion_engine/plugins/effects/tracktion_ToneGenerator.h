@@ -20,20 +20,20 @@ public:
     static const char* getPluginName()                  { return NEEDS_TRANS("Tone Generator"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return TRANS(getPluginName()); }
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getShortName (int) override            { return getName(); }
+    yup::String getName() const override               { return TRANS(getPluginName()); }
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getShortName (int) override            { return getName(); }
     bool producesAudioWhenNoAudioInput() override       { return true; }
     bool isSynth() override                             { return true; }
 
-    int getNumOutputChannelsGivenInputs (int numInputChannels) override { return juce::jmax (1, numInputChannels); }
+    int getNumOutputChannelsGivenInputs (int numInputChannels) override { return yup::jmax (1, numInputChannels); }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
-    juce::String getSelectableDescription() override    { return getName(); }
+    yup::String getSelectableDescription() override    { return getName(); }
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     enum class OscType
     {
@@ -45,26 +45,26 @@ public:
         noise
     };
 
-    static juce::StringArray getOscTypeNames();
+    static yup::StringArray getOscTypeNames();
 
     juce::CachedValue<float> oscType, bandLimit, frequency, level;
     AutomatableParameter::Ptr oscTypeParam, bandLimitParam, frequencyParam, levelParam;
 
 private:
     //==============================================================================
-    juce::AudioBuffer<float> scratch;
+    yup::AudioBuffer<float> scratch;
     std::atomic<bool> bandLimitOsc { false };
 
-    juce::dsp::Oscillator<float> sine;
-    juce::dsp::Oscillator<float> triangle;
-    juce::dsp::Oscillator<float> sawUp;
-    juce::dsp::Oscillator<float> sawDown;
-    juce::dsp::Oscillator<float> square;
-    juce::dsp::Oscillator<float> noise;
+    yup::dsp::Oscillator<float> sine;
+    yup::dsp::Oscillator<float> triangle;
+    yup::dsp::Oscillator<float> sawUp;
+    yup::dsp::Oscillator<float> sawDown;
+    yup::dsp::Oscillator<float> square;
+    yup::dsp::Oscillator<float> noise;
 
     void initialiseOscilators();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToneGeneratorPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ToneGeneratorPlugin)
 };
 
 } // namespace tracktion::inline engine

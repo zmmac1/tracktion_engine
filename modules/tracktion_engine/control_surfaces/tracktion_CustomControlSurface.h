@@ -12,10 +12,10 @@ namespace tracktion::inline engine {
 
 /** */
 class CustomControlSurface  : public ControlSurface,
-                              public juce::ChangeBroadcaster,
-                              private juce::AsyncUpdater,
-                              private juce::OSCReceiver::Listener<juce::OSCReceiver::MessageLoopCallback>,
-                              private juce::Timer
+                              public yup::ChangeBroadcaster,
+                              private yup::AsyncUpdater,
+                              private yup::OSCReceiver::Listener<yup::OSCReceiver::MessageLoopCallback>,
+                              private yup::Timer
 {
 public:
     //==============================================================================
@@ -176,35 +176,35 @@ public:
         MappingSet& operator= (const MappingSet&) = default;
 
         ActionID id = none;
-        juce::String addr;
+        yup::String addr;
         int controllerID = -1, note = -1, channel = -1;
-        juce::Colour colour { juce::Colours::transparentWhite };
-        juce::String surfaceName;
+        yup::Color colour { yup::Colors::transparentWhite };
+        yup::String surfaceName;
     };
 
     //==============================================================================
-    CustomControlSurface (ExternalControllerManager&, const juce::String& name, ExternalControllerManager::Protocol);
-    CustomControlSurface (ExternalControllerManager&, const juce::XmlElement&);
+    CustomControlSurface (ExternalControllerManager&, const yup::String& name, ExternalControllerManager::Protocol);
+    CustomControlSurface (ExternalControllerManager&, const yup::XmlElement&);
     ~CustomControlSurface() override;
 
     //==============================================================================
-    static juce::String getNameForActionID (ExternalControllerManager&, ActionID);
-    static juce::Array<ControlSurface*> getCustomSurfaces (ExternalControllerManager&);
-    static juce::Array<MappingSet> getMappingSetsForID (ExternalControllerManager&, ActionID);
+    static yup::String getNameForActionID (ExternalControllerManager&, ActionID);
+    static yup::Array<ControlSurface*> getCustomSurfaces (ExternalControllerManager&);
+    static yup::Array<MappingSet> getMappingSetsForID (ExternalControllerManager&, ActionID);
     static int getControllerNumberFromId (int) noexcept;
 
     //==============================================================================
     void initialiseDevice (bool connect) override;
     void shutDownDevice() override;
 
-    void updateOSCSettings (int oscInputPort, int oscOutputPort, juce::String oscOutputAddr) override;
+    void updateOSCSettings (int oscInputPort, int oscOutputPort, yup::String oscOutputAddr) override;
 
     /** Saves the settings of all open custom surfaces. */
     static void saveAllSettings (Engine& engine);
 
     void updateMiscFeatures() override;
-    void acceptMidiMessage (int, const juce::MidiMessage&) override;
-    bool wantsMessage(int, const juce::MidiMessage&) override;
+    void acceptMidiMessage (int, const yup::MidiMessage&) override;
+    bool wantsMessage(int, const yup::MidiMessage&) override;
     bool eatsAllMessages() override;
     bool canSetEatsAllMessages() override;
     void setEatsAllMessages(bool eatAll) override;
@@ -219,7 +219,7 @@ public:
     void recordStateChanged (bool isRecording) override;
     void automationReadModeChanged (bool isReading) override;
     void automationWriteModeChanged (bool isWriting) override;
-    void faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames) override;
+    void faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames) override;
     void channelLevelChanged (int channel, std::span<const float> levels) override;
     void trackSelectionChanged (int channel, bool isSelected) override;
     void trackRecordEnabled (int channel, bool isEnabled) override;
@@ -234,7 +234,7 @@ public:
     void parameterChanged (int parameterNumber, const ParameterSetting& newValue) override;
     void clearParameter (int parameterNumber) override;
     bool canChangeSelectedPlugin() override;
-    void currentSelectionChanged (juce::String) override;
+    void currentSelectionChanged (yup::String) override;
     void deleteController() override;
     void markerChanged (int parameterNumber, const MarkerSetting& newValue) override;
     void clearMarker (int parameterNumber) override;
@@ -245,7 +245,7 @@ public:
     /** This will put the surface in listen and assign mode, launching the given dialog window.
         The call will block whilst assignments are made and return when the window is closed.
     */
-    void showMappingsEditor (juce::DialogWindow::LaunchOptions&);
+    void showMappingsEditor (yup::DialogWindow::LaunchOptions&);
 
     //==============================================================================
     struct Mapping
@@ -256,7 +256,7 @@ public:
         }
 
         int id = 0;
-        juce::String addr;
+        yup::String addr;
         int note = -1;
         int channel = 0;
         int function = 0;
@@ -270,7 +270,7 @@ public:
     void setLearntParam (bool keepListening);
     void removeMapping (int index);
     Mapping* getMappingForRow (int) const;
-    std::pair<juce::String, juce::String> getTextForRow (int) const;
+    std::pair<yup::String, yup::String> getTextForRow (int) const;
 
     //==============================================================================
     // transport
@@ -418,10 +418,10 @@ public:
 
     virtual void loadFunctions();
 
-    virtual juce::XmlElement* createXml();
-    virtual void importSettings (const juce::File&);
-    virtual void importSettings (const juce::String&);
-    virtual void exportSettings (const juce::File&);
+    virtual yup::XmlElement* createXml();
+    virtual void importSettings (const yup::File&);
+    virtual void importSettings (const yup::String&);
+    virtual void exportSettings (const yup::File&);
 
     int getPacketsIn()  { return packetsIn; }
     int getPacketsOut() { return packetsOut; }
@@ -432,7 +432,7 @@ private:
 
     struct ActionFunctionInfo
     {
-        juce::String name, group;
+        yup::String name, group;
         int id = 0;
         int param = 0;
         ActionFunction actionFunc {};
@@ -440,32 +440,32 @@ private:
 
     //==============================================================================
     ExternalControllerManager::Protocol protocol;
-    juce::OwnedArray<Mapping> mappings;
-    std::map<int, juce::SortedSet<int>*> commandGroups;
+    yup::OwnedArray<Mapping> mappings;
+    std::map<int, yup::SortedSet<int>*> commandGroups;
     int nextCmdGroupIndex = 50000;
 
-    juce::String lastControllerAddr;
+    yup::String lastControllerAddr;
     int lastControllerNote = -1;
     int lastControllerID = 0;
     float lastControllerValue = 0;
     int lastControllerChannel = 0;
     int listeningOnRow = -1;
 
-    juce::OwnedArray<ActionFunctionInfo> actionFunctionList;
-    juce::PopupMenu contextMenu;
+    yup::OwnedArray<ActionFunctionInfo> actionFunctionList;
+    yup::PopupMenu contextMenu;
     bool pluginMoveMode = true;
     bool eatsAllMidi = false;
     bool online = false;
     int oscInputPort = 0, oscOutputPort = 0;
     int packetsIn = 0, packetsOut = 0;
-    juce::String oscOutputAddr, oscActiveAddr;
-    std::map<juce::String, bool> oscControlTouched;
-    std::map<juce::String, int> oscControlTapsWhileTouched;
-    std::map<juce::String, float> oscLastValue;
-    std::map<juce::String, double> oscLastUsedTime;
+    yup::String oscOutputAddr, oscActiveAddr;
+    std::map<yup::String, bool> oscControlTouched;
+    std::map<yup::String, int> oscControlTapsWhileTouched;
+    std::map<yup::String, float> oscLastValue;
+    std::map<yup::String, double> oscLastUsedTime;
 
-    std::unique_ptr<juce::OSCSender> oscSender;
-    std::unique_ptr<juce::OSCReceiver> oscReceiver;
+    std::unique_ptr<yup::OSCSender> oscSender;
+    std::unique_ptr<yup::OSCReceiver> oscReceiver;
 
     //==============================================================================
     void timerCallback() override;
@@ -473,7 +473,7 @@ private:
     //==============================================================================
     struct RPNParser
     {
-        void parseControllerMessage (const juce::MidiMessage& m, int& paramID,
+        void parseControllerMessage (const yup::MidiMessage& m, int& paramID,
                                      int& chan, int& val) noexcept
         {
             jassert (m.isController());
@@ -504,39 +504,39 @@ private:
         void unregisterSurface (CustomControlSurface*);
         void saveAllSettings (Engine&);
 
-        juce::Array<CustomControlSurface*> surfaces;
+        yup::Array<CustomControlSurface*> surfaces;
     };
 
-    juce::SharedResourcePointer<CustomControlSurfaceManager> manager;
+    yup::SharedResourcePointer<CustomControlSurfaceManager> manager;
 
     //==============================================================================
-    virtual void oscMessageReceived (const juce::OSCMessage&) override;
-    virtual void oscBundleReceived (const juce::OSCBundle&) override;
+    virtual void oscMessageReceived (const yup::OSCMessage&) override;
+    virtual void oscBundleReceived (const yup::OSCBundle&) override;
 
     bool isTextAction (ActionID);
 
     //==============================================================================
-    virtual void addFunction (juce::PopupMenu&, juce::SortedSet<int>& commandSet, const juce::String& group, const juce::String& name, ActionID id, ActionFunction);
-    virtual void addTrackFunction (juce::PopupMenu&, const juce::String& group, const juce::String& name, ActionID id, ActionFunction);
-    virtual void addPluginFunction (juce::PopupMenu&, const juce::String& group, const juce::String& name, ActionID id, ActionFunction);
-    virtual void addSceneFunction (juce::PopupMenu&, const juce::String& group, const juce::String& name, ActionID id, ActionFunction);
-    virtual void addAllCommandItem (juce::PopupMenu&);
+    virtual void addFunction (yup::PopupMenu&, yup::SortedSet<int>& commandSet, const yup::String& group, const yup::String& name, ActionID id, ActionFunction);
+    virtual void addTrackFunction (yup::PopupMenu&, const yup::String& group, const yup::String& name, ActionID id, ActionFunction);
+    virtual void addPluginFunction (yup::PopupMenu&, const yup::String& group, const yup::String& name, ActionID id, ActionFunction);
+    virtual void addSceneFunction (yup::PopupMenu&, const yup::String& group, const yup::String& name, ActionID id, ActionFunction);
+    virtual void addAllCommandItem (yup::PopupMenu&);
 
     virtual void sendCommandToControllerForActionID (int actionID, bool);
     virtual void sendCommandToControllerForActionID (int actionID, float value);
-    virtual void sendCommandToControllerForActionID (int actionID, juce::String);
+    virtual void sendCommandToControllerForActionID (int actionID, yup::String);
 
-    virtual juce::String controllerIDToString (int id, int channelid) const;
-    virtual juce::String noteIDToString (int note, int channelid) const;
-    virtual juce::String getFunctionName (int id) const;
+    virtual yup::String controllerIDToString (int id, int channelid) const;
+    virtual yup::String noteIDToString (int note, int channelid) const;
+    virtual yup::String getFunctionName (int id) const;
 
     virtual void init();
-    virtual bool loadFromXml (const juce::XmlElement&);
+    virtual bool loadFromXml (const yup::XmlElement&);
     virtual void clearCommandGroups();
 
     virtual bool isPendingEventAssignable();
-    virtual void updateOrCreateMappingForID (int id, juce::String addr, int channel, int noteNum, int controllerID);
-    virtual void addMappingSetsForID (ActionID, juce::Array<MappingSet>& mappingSet);
+    virtual void updateOrCreateMappingForID (int id, yup::String addr, int channel, int noteNum, int controllerID);
+    virtual void addMappingSetsForID (ActionID, yup::Array<MappingSet>& mappingSet);
 
     virtual void handleAsyncUpdate() override;
     virtual void recreateOSCSockets();
@@ -544,7 +544,7 @@ private:
     virtual bool shouldActOnValue (float v);
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomControlSurface)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomControlSurface)
 };
 
 } // namespace tracktion::inline engine

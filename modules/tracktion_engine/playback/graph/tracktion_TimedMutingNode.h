@@ -19,7 +19,7 @@ class TimedMutingNode final : public tracktion::graph::Node
 {
 public:
     TimedMutingNode (std::unique_ptr<tracktion::graph::Node>,
-                     juce::Array<TimeRange> muteTimes,
+                     yup::Array<TimeRange> muteTimes,
                      tracktion::graph::PlayHeadState&);
 
     //==============================================================================
@@ -33,7 +33,7 @@ private:
     //==============================================================================
     std::unique_ptr<tracktion::graph::Node> input;
     tracktion::graph::PlayHeadState& playHeadState;
-    juce::Array<TimeRange> muteTimes;
+    yup::Array<TimeRange> muteTimes;
     double sampleRate = 44100.0;
 
     //==============================================================================

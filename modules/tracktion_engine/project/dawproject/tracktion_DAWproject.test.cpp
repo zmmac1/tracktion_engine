@@ -73,22 +73,22 @@ TEST_SUITE ("tracktion_engine")
         using namespace dawproject;
 
         // Test colour to string (JUCE outputs uppercase hex)
-        CHECK_EQ (colourToDAWprojectString (juce::Colour (0xff, 0x00, 0x00)).toLowerCase(), "#ff0000");
-        CHECK_EQ (colourToDAWprojectString (juce::Colour (0x00, 0xff, 0x00)).toLowerCase(), "#00ff00");
-        CHECK_EQ (colourToDAWprojectString (juce::Colour (0x00, 0x00, 0xff)).toLowerCase(), "#0000ff");
+        CHECK_EQ (colourToDAWprojectString (yup::Color (0xff, 0x00, 0x00)).toLowerCase(), "#ff0000");
+        CHECK_EQ (colourToDAWprojectString (yup::Color (0x00, 0xff, 0x00)).toLowerCase(), "#00ff00");
+        CHECK_EQ (colourToDAWprojectString (yup::Color (0x00, 0x00, 0xff)).toLowerCase(), "#0000ff");
 
         // Test string to colour
-        CHECK_EQ (dawprojectStringToColour ("#ff0000").getRed(), 255);
-        CHECK_EQ (dawprojectStringToColour ("#00ff00").getGreen(), 255);
-        CHECK_EQ (dawprojectStringToColour ("#0000ff").getBlue(), 255);
+        CHECK_EQ (dawprojectStringToColor ("#ff0000").getRed(), 255);
+        CHECK_EQ (dawprojectStringToColor ("#00ff00").getGreen(), 255);
+        CHECK_EQ (dawprojectStringToColor ("#0000ff").getBlue(), 255);
 
         // Test round-trip
-        auto testColour = juce::Colour (0x12, 0x34, 0x56);
-        auto str = colourToDAWprojectString (testColour);
-        auto backToColour = dawprojectStringToColour (str);
-        CHECK_EQ (backToColour.getRed(), testColour.getRed());
-        CHECK_EQ (backToColour.getGreen(), testColour.getGreen());
-        CHECK_EQ (backToColour.getBlue(), testColour.getBlue());
+        auto testColor = yup::Color (0x12, 0x34, 0x56);
+        auto str = colourToDAWprojectString (testColor);
+        auto backToColor = dawprojectStringToColor (str);
+        CHECK_EQ (backToColor.getRed(), testColor.getRed());
+        CHECK_EQ (backToColor.getGreen(), testColor.getGreen());
+        CHECK_EQ (backToColor.getBlue(), testColor.getBlue());
     }
 
     //==============================================================================
@@ -157,7 +157,7 @@ TEST_SUITE ("tracktion_engine")
         auto* track = getAudioTracks (*edit)[0];
         REQUIRE (track != nullptr);
         track->setName ("Test Track");
-        track->setColour (juce::Colour (0xff, 0x00, 0x00));
+        track->setColor (yup::Color (0xff, 0x00, 0x00));
 
         // Export to XML
         WriteOptions writeOpts;
@@ -172,7 +172,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (structure != nullptr);
 
         // Find our specific track by name
-        juce::XmlElement* trackElement = nullptr;
+        yup::XmlElement* trackElement = nullptr;
         for (auto* child : structure->getChildIterator())
         {
             if (child->hasTagName ("Track") && child->getStringAttribute ("name") == "Test Track")
@@ -277,7 +277,7 @@ TEST_SUITE ("tracktion_engine")
                                           100, 0, nullptr);
 
         // Write to file
-        juce::TemporaryFile tempFile (".dawproject");
+        yup::TemporaryFile tempFile (".dawproject");
         WriteOptions writeOpts;
         writeOpts.embedAudioFiles = false;
 
@@ -410,7 +410,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (structure != nullptr);
 
         // Find folder track
-        juce::XmlElement* folderElement = nullptr;
+        yup::XmlElement* folderElement = nullptr;
         for (auto* child : structure->getChildIterator())
         {
             if (child->hasTagName ("Track") && child->getStringAttribute ("name") == "My Folder")
@@ -436,7 +436,7 @@ TEST_SUITE ("tracktion_engine")
 
         // Seeded random for reproducibility
         const uint32_t seed = 12345;
-        juce::Random random (seed);
+        yup::Random random (seed);
 
         auto& engine = *Engine::getEngines()[0];
         auto edit = test_utilities::createTestEdit (engine, 0);
@@ -451,12 +451,12 @@ TEST_SUITE ("tracktion_engine")
         // Track totals for verification
         int totalNotesCreated = 0;
         int totalControllerEventsCreated = 0;
-        std::vector<juce::String> trackNames;
+        std::vector<yup::String> trackNames;
 
         // Create multiple tracks with MIDI clips
         for (int t = 0; t < numTracks; ++t)
         {
-            auto trackName = "FuzzTrack_" + juce::String (t);
+            auto trackName = "FuzzTrack_" + yup::String (t);
             trackNames.push_back (trackName);
 
             TrackInsertPoint insertPoint (nullptr, getTopLevelTracks (*edit).getLast());
@@ -465,7 +465,7 @@ TEST_SUITE ("tracktion_engine")
             track->setName (trackName);
 
             // Random track color
-            track->setColour (juce::Colour::fromHSV (random.nextFloat(), 0.7f, 0.8f, 1.0f));
+            track->setColor (yup::Color::fromHSV (random.nextFloat(), 0.7f, 0.8f, 1.0f));
 
             // Create multiple clips on each track
             for (int c = 0; c < clipsPerTrack; ++c)
@@ -476,7 +476,7 @@ TEST_SUITE ("tracktion_engine")
                 auto midiClip = track->insertMIDIClip ({ TimePosition::fromSeconds (clipStart),
                                                           TimePosition::fromSeconds (clipEnd) }, nullptr);
                 REQUIRE (midiClip != nullptr);
-                midiClip->setName ("Clip_" + juce::String (t) + "_" + juce::String (c));
+                midiClip->setName ("Clip_" + yup::String (t) + "_" + yup::String (c));
 
                 auto& sequence = midiClip->getSequence();
 
@@ -541,7 +541,7 @@ TEST_SUITE ("tracktion_engine")
         INFO ("Total controller events created: " << totalControllerEventsCreated);
 
         // Write to file
-        juce::TemporaryFile tempFile (".dawproject");
+        yup::TemporaryFile tempFile (".dawproject");
         WriteOptions writeOpts;
         writeOpts.embedAudioFiles = false;
 
@@ -605,13 +605,13 @@ TEST_SUITE ("tracktion_engine")
 
     //==============================================================================
     // Helpers for audio-import round-trip tests.
-    static std::unique_ptr<juce::TemporaryFile> writeTestWavFile (Engine& engine,
+    static std::unique_ptr<yup::TemporaryFile> writeTestWavFile (Engine& engine,
                                                                    int numChannels = 1,
                                                                    double sampleRate = 44100.0,
                                                                    double durationSeconds = 0.25)
     {
-        juce::WavAudioFormat format;
-        auto tempFile = std::make_unique<juce::TemporaryFile> (".wav");
+        yup::WavAudioFormat format;
+        auto tempFile = std::make_unique<yup::TemporaryFile> (".wav");
 
         AudioFile audioFile (engine, tempFile->getFile());
         const int bitDepth = 16;
@@ -619,12 +619,12 @@ TEST_SUITE ("tracktion_engine")
 
         AudioFileWriter writer (audioFile, &format, numChannels, sampleRate, bitDepth, {}, 0);
 
-        juce::AudioBuffer<float> buffer (numChannels, numSamples);
+        yup::AudioBuffer<float> buffer (numChannels, numSamples);
         for (int ch = 0; ch < numChannels; ++ch)
         {
             auto* data = buffer.getWritePointer (ch);
             for (int s = 0; s < numSamples; ++s)
-                data[s] = std::sin (2.0f * juce::MathConstants<float>::pi * 440.0f
+                data[s] = std::sin (2.0f * yup::MathConstants<float>::pi * 440.0f
                                     * (static_cast<float> (s) / static_cast<float> (sampleRate)));
         }
         writer.appendBuffer (buffer, buffer.getNumSamples());
@@ -635,21 +635,21 @@ TEST_SUITE ("tracktion_engine")
     // Builds a minimal .dawproject zip on disk: project.xml plus audio entries placed
     // at user-specified zip paths. Used to simulate files exported by other DAWs
     // without depending on Tracktion's own exporter.
-    static void writeMinimalDAWprojectZip (const juce::File& destFile,
-                                            const juce::String& projectXml,
-                                            const std::vector<std::pair<juce::String, juce::File>>& audioEntries)
+    static void writeMinimalDAWprojectZip (const yup::File& destFile,
+                                            const yup::String& projectXml,
+                                            const std::vector<std::pair<yup::String, yup::File>>& audioEntries)
     {
-        juce::ZipFile::Builder builder;
+        yup::ZipFile::Builder builder;
 
-        auto projectStream = std::make_unique<juce::MemoryInputStream> (projectXml.toRawUTF8(),
+        auto projectStream = std::make_unique<yup::MemoryInputStream> (projectXml.toRawUTF8(),
                                                                         projectXml.getNumBytesAsUTF8(), false);
-        builder.addEntry (std::move (projectStream), 9, "project.xml", juce::Time::getCurrentTime());
+        builder.addEntry (std::move (projectStream), 9, "project.xml", yup::Time::getCurrentTime());
 
         for (const auto& [archivePath, sourceFile] : audioEntries)
             builder.addFile (sourceFile, 9, archivePath);
 
         destFile.deleteFile();
-        juce::FileOutputStream out (destFile);
+        yup::FileOutputStream out (destFile);
         REQUIRE (out.openedOk());
         builder.writeToStream (out, nullptr);
     }
@@ -667,8 +667,8 @@ TEST_SUITE ("tracktion_engine")
         auto sourceWav = writeTestWavFile (engine);
         REQUIRE (sourceWav != nullptr);
 
-        const juce::String archivePath = "audio/loop.wav";
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String archivePath = "audio/loop.wav";
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport>
@@ -695,7 +695,7 @@ TEST_SUITE ("tracktion_engine")
 </Project>
 )";
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml,
                                     { { archivePath, sourceWav->getFile() } });
 
@@ -727,29 +727,29 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
 
         // Place the audio file in the same temporary directory as the .dawproject file.
-        auto tempDir = juce::File::createTempFile ("dawproject_external_test").getSiblingFile (
-                            "dawproject_external_" + juce::String (juce::Time::getMillisecondCounter()));
+        auto tempDir = yup::File::createTempFile ("dawproject_external_test").getSiblingFile (
+                            "dawproject_external_" + yup::String (yup::Time::getMillisecondCounter()));
         tempDir.createDirectory();
 
         struct ScopedDir
         {
-            juce::File dir;
+            yup::File dir;
             ~ScopedDir() { dir.deleteRecursively(); }
         } scoped { tempDir };
 
         auto externalAudio = tempDir.getChildFile ("external_loop.wav");
         {
-            juce::WavAudioFormat format;
+            yup::WavAudioFormat format;
             AudioFile audioFile (engine, externalAudio);
             AudioFileWriter writer (audioFile, &format, 1, 44100.0, 16, {}, 0);
             REQUIRE (writer.isOpen());
-            juce::AudioBuffer<float> buffer (1, 4096);
+            yup::AudioBuffer<float> buffer (1, 4096);
             buffer.clear();
             writer.appendBuffer (buffer, buffer.getNumSamples());
         }
         REQUIRE (externalAudio.existsAsFile());
 
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport><Tempo value="120.0"/></Transport>
@@ -806,7 +806,7 @@ TEST_SUITE ("tracktion_engine")
         auto sourceWav = writeTestWavFile (engine);
         REQUIRE (sourceWav != nullptr);
 
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport><Tempo value="120.0"/></Transport>
@@ -835,7 +835,7 @@ TEST_SUITE ("tracktion_engine")
 </Project>
 )";
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml,
                                     { { "audio/loop.wav", sourceWav->getFile() } });
 
@@ -866,7 +866,7 @@ TEST_SUITE ("tracktion_engine")
         auto sourceWav = writeTestWavFile (engine);
         REQUIRE (sourceWav != nullptr);
 
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport><Tempo value="120.0"/></Transport>
@@ -879,12 +879,12 @@ TEST_SUITE ("tracktion_engine")
 </Project>
 )";
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml,
                                     { { "../escape.wav", sourceWav->getFile() } });
 
         // Use an explicit destination directory so we can verify nothing escaped it.
-        auto extractDir = juce::File::createTempFile ("dawproject_traversal");
+        auto extractDir = yup::File::createTempFile ("dawproject_traversal");
         extractDir.deleteFile();
         extractDir.createDirectory();
 
@@ -928,17 +928,17 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (waveClip != nullptr);
 
         // Export with embedded audio
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         WriteOptions writeOpts;
         writeOpts.embedAudioFiles = true;
         auto result = writeDAWprojectFile (dawprojectFile.getFile(), *edit, writeOpts);
         REQUIRE (result.wasOk());
 
         // Re-import into a fresh extraction directory
-        auto extractDir = juce::File::createTempFile ("dawproject_roundtrip_extract");
+        auto extractDir = yup::File::createTempFile ("dawproject_roundtrip_extract");
         extractDir.deleteFile();
         extractDir.createDirectory();
-        struct ScopedDir { juce::File dir; ~ScopedDir() { dir.deleteRecursively(); } } scoped { extractDir };
+        struct ScopedDir { yup::File dir; ~ScopedDir() { dir.deleteRecursively(); } } scoped { extractDir };
 
         ParseOptions parseOpts;
         parseOpts.audioFileDestination = extractDir;
@@ -994,16 +994,16 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (clip1 != nullptr);
         REQUIRE (clip2 != nullptr);
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         WriteOptions writeOpts;
         writeOpts.embedAudioFiles = true;
         auto result = writeDAWprojectFile (dawprojectFile.getFile(), *edit, writeOpts);
         REQUIRE (result.wasOk());
 
-        auto extractDir = juce::File::createTempFile ("dawproject_multi_extract");
+        auto extractDir = yup::File::createTempFile ("dawproject_multi_extract");
         extractDir.deleteFile();
         extractDir.createDirectory();
-        struct ScopedDir { juce::File dir; ~ScopedDir() { dir.deleteRecursively(); } } scoped { extractDir };
+        struct ScopedDir { yup::File dir; ~ScopedDir() { dir.deleteRecursively(); } } scoped { extractDir };
 
         ParseOptions parseOpts;
         parseOpts.audioFileDestination = extractDir;
@@ -1036,7 +1036,7 @@ TEST_SUITE ("tracktion_engine")
 
         auto& engine = *Engine::getEngines()[0];
 
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport><Tempo value="120.0"/></Transport>
@@ -1056,7 +1056,7 @@ TEST_SUITE ("tracktion_engine")
 </Project>
 )";
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml, {});
 
         ParseOptions parseOpts;
@@ -1064,7 +1064,7 @@ TEST_SUITE ("tracktion_engine")
         auto importedEdit = parseDAWproject (engine, dawprojectFile.getFile(), parseOpts);
         REQUIRE (importedEdit != nullptr);
 
-        auto findTrack = [&] (const juce::String& name) -> AudioTrack*
+        auto findTrack = [&] (const yup::String& name) -> AudioTrack*
         {
             for (auto* t : getAudioTracks (*importedEdit))
                 if (t->getName() == name)
@@ -1103,7 +1103,7 @@ TEST_SUITE ("tracktion_engine")
 
         auto& engine = *Engine::getEngines()[0];
 
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport><Tempo value="120.0"/></Transport>
@@ -1128,7 +1128,7 @@ TEST_SUITE ("tracktion_engine")
 </Project>
 )";
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml, {});
 
         ParseOptions parseOpts;
@@ -1136,7 +1136,7 @@ TEST_SUITE ("tracktion_engine")
         auto importedEdit = parseDAWproject (engine, dawprojectFile.getFile(), parseOpts);
         REQUIRE (importedEdit != nullptr);
 
-        auto checkPan = [&] (const juce::String& trackName, float expectedPan)
+        auto checkPan = [&] (const yup::String& trackName, float expectedPan)
         {
             for (auto t : getAudioTracks (*importedEdit))
             {
@@ -1183,7 +1183,7 @@ TEST_SUITE ("tracktion_engine")
         auto* structure = xml.getChildByName ("Structure");
         REQUIRE (structure != nullptr);
 
-        juce::XmlElement* panElement = nullptr;
+        yup::XmlElement* panElement = nullptr;
         for (auto* child : structure->getChildIterator())
             if (child->hasTagName ("Track") && child->getStringAttribute ("name") == "Panned Track")
                 if (auto* channel = child->getChildByName ("Channel"))
@@ -1194,7 +1194,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK_EQ (panElement->getDoubleAttribute ("value"), doctest::Approx (0.25).epsilon (0.01));
 
         // Re-import and check the pan value survives the round-trip
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml.toString(), {});
 
         ParseOptions parseOpts;
@@ -1226,7 +1226,7 @@ TEST_SUITE ("tracktion_engine")
 
         auto& engine = *Engine::getEngines()[0];
 
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport><Tempo value="120.0"/></Transport>
@@ -1258,7 +1258,7 @@ TEST_SUITE ("tracktion_engine")
 </Project>
 )";
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml, {});
 
         ParseOptions parseOpts;
@@ -1299,7 +1299,7 @@ TEST_SUITE ("tracktion_engine")
 
         auto& engine = *Engine::getEngines()[0];
 
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport><Tempo value="120.0"/></Transport>
@@ -1359,7 +1359,7 @@ TEST_SUITE ("tracktion_engine")
 </Project>
 )";
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml, {});
 
         ParseOptions parseOpts;
@@ -1412,7 +1412,7 @@ TEST_SUITE ("tracktion_engine")
         auto sourceWav = writeTestWavFile (engine);
         REQUIRE (sourceWav != nullptr);
 
-        const juce::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
+        const yup::String xml = R"(<?xml version="1.0" encoding="UTF-8"?>
 <Project version="1.0">
   <Application name="TestDAW" version="1.0"/>
   <Transport><Tempo value="120.0"/></Transport>
@@ -1440,7 +1440,7 @@ TEST_SUITE ("tracktion_engine")
 </Project>
 )";
 
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         writeMinimalDAWprojectZip (dawprojectFile.getFile(), xml,
                                     { { "audio/loop.wav", sourceWav->getFile() } });
 
@@ -1494,7 +1494,7 @@ TEST_SUITE ("tracktion_engine")
                                               BeatDuration::fromBeats (0.5), 80, 0, nullptr);
 
         // Export
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         WriteOptions writeOpts;
         writeOpts.embedAudioFiles = false;
         auto result = writeDAWprojectFile (dawprojectFile.getFile(), *edit, writeOpts);
@@ -1558,7 +1558,7 @@ TEST_SUITE ("tracktion_engine")
                                               BeatDuration::fromBeats (1.0), 100, 0, nullptr);
 
         // Round-trip
-        juce::TemporaryFile dawprojectFile (".dawproject");
+        yup::TemporaryFile dawprojectFile (".dawproject");
         WriteOptions writeOpts;
         writeOpts.embedAudioFiles = false;
         REQUIRE (writeDAWprojectFile (dawprojectFile.getFile(), *edit, writeOpts).wasOk());
@@ -1595,7 +1595,7 @@ TEST_SUITE ("tracktion_engine")
         using namespace dawproject;
 
         const uint32_t seed = 67890;
-        juce::Random random (seed);
+        yup::Random random (seed);
 
         auto& engine = *Engine::getEngines()[0];
         auto edit = test_utilities::createTestEdit (engine, 1);
@@ -1664,7 +1664,7 @@ TEST_SUITE ("tracktion_engine")
         INFO ("Created " << notesCreated << " notes and " << controllerEventsCreated << " controller events");
 
         // Export
-        juce::TemporaryFile tempFile (".dawproject");
+        yup::TemporaryFile tempFile (".dawproject");
         WriteOptions writeOpts;
         writeOpts.embedAudioFiles = false;
 

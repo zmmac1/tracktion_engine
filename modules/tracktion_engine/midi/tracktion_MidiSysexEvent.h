@@ -13,17 +13,17 @@ namespace tracktion::inline engine {
 class MidiSysexEvent
 {
 public:
-    static juce::ValueTree createSysexEvent (const MidiSysexEvent&, BeatPosition);
-    static juce::ValueTree createSysexEvent (const juce::MidiMessage&, BeatPosition);
+    static yup::ValueTree createSysexEvent (const MidiSysexEvent&, BeatPosition);
+    static yup::ValueTree createSysexEvent (const yup::MidiMessage&, BeatPosition);
 
-    MidiSysexEvent (const juce::ValueTree&);
-    MidiSysexEvent (const juce::MidiMessage&);
-    MidiSysexEvent (const juce::MidiMessage&, BeatPosition);
+    MidiSysexEvent (const yup::ValueTree&);
+    MidiSysexEvent (const yup::MidiMessage&);
+    MidiSysexEvent (const yup::MidiMessage&, BeatPosition);
     ~MidiSysexEvent() noexcept {}
 
     //==============================================================================
-    const juce::MidiMessage& getMessage() const noexcept            { return message; }
-    void setMessage (const juce::MidiMessage&, juce::UndoManager*);
+    const yup::MidiMessage& getMessage() const noexcept            { return message; }
+    void setMessage (const yup::MidiMessage&, juce::UndoManager*);
 
     //==============================================================================
     BeatPosition getBeatPosition() const noexcept                         { return BeatPosition::fromBeats (message.getTimeStamp()); }
@@ -33,12 +33,12 @@ public:
     TimePosition getEditTime (const MidiClip&) const;
     BeatPosition getEditBeats (const MidiClip&) const;
 
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     //==============================================================================
     friend class MidiList;
-    juce::MidiMessage message;
+    yup::MidiMessage message;
 
     void updateMessage();
     void updateTime();
@@ -46,7 +46,7 @@ private:
     MidiSysexEvent() = delete;
     MidiSysexEvent (const MidiSysexEvent&) = delete;
 
-    JUCE_LEAK_DETECTOR (MidiSysexEvent)
+    YUP_LEAK_DETECTOR (MidiSysexEvent)
 };
 
 } // namespace tracktion::inline engine

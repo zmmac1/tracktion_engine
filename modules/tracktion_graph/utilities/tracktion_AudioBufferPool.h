@@ -142,7 +142,7 @@ inline bool AudioBufferPool::release (choc::buffer::ChannelArrayBuffer<float>&& 
 //==============================================================================
 inline void  AudioBufferPool::setCapacity (size_t maxCapacity)
 {
-    maxCapacity = (size_t) juce::nextPowerOfTwo ((int) maxCapacity);
+    maxCapacity = (size_t) yup::nextPowerOfTwo ((int) maxCapacity);
 
     if (maxCapacity <= capacity)
         return;

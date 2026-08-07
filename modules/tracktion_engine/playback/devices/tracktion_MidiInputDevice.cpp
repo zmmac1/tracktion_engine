@@ -16,7 +16,7 @@ namespace tracktion::inline engine {
    Polls a set of targets to see if they should be stopped.
    Used by MidiInputDeviceInstance and WaveInputDeviceInstance.
 */
-class MidiInputDevice::NoteDispatcher : public juce::HighResolutionTimer
+class MidiInputDevice::NoteDispatcher : public yup::HighResolutionTimer
 {
 public:
     NoteDispatcher (MidiInputDevice& o) : owner (o)
@@ -32,12 +32,12 @@ public:
 
     void hiResTimerCallback() override
     {
-        juce::ScopedLock sl (lock);
+        yup::ScopedLock sl (lock);
 
         if (items.size() == 0)
             return;
 
-        auto now = juce::Time::getMillisecondCounterHiRes();
+        auto now = yup::Time::getMillisecondCounterHiRes();
 
         int sent = 0;
         for (size_t i = 0; i < items.size(); i++)
@@ -46,7 +46,7 @@ public:
                 break;
 
             auto m = items[i].m;
-            m.setTimeStamp (juce::Time::getMillisecondCounterHiRes() * 0.001);
+            m.setTimeStamp (yup::Time::getMillisecondCounterHiRes() * 0.001);
 
             owner.handleIncomingMidiMessage (m, owner.getMPESourceID());
 
@@ -57,16 +57,16 @@ public:
             items.erase (items.begin(), items.begin() + sent);
     }
 
-    void enqueue (double tm, const juce::MidiMessage& m)
+    void enqueue (double tm, const yup::MidiMessage& m)
     {
-        juce::ScopedLock sl (lock);
+        yup::ScopedLock sl (lock);
 
         items.push_back ({tm, m});
     }
 
     void clear (int channel, int note)
     {
-        juce::ScopedLock sl (lock);
+        yup::ScopedLock sl (lock);
 
         items.erase (std::remove_if (items.begin(), items.end(),
                                      [&](const Item& i) -> bool { return i.m.getChannel() == channel && i.m.getNoteNumber() == note; }),
@@ -77,10 +77,10 @@ private:
     struct Item
     {
         double when;
-        juce::MidiMessage m;
+        yup::MidiMessage m;
     };
 
-    juce::CriticalSection lock;
+    yup::CriticalSection lock;
     std::vector<Item> items;
     MidiInputDevice& owner;
 };
@@ -141,12 +141,12 @@ private:
 
 //==============================================================================
 //==============================================================================
-class MidiControllerParser  : private juce::AsyncUpdater
+class MidiControllerParser  : private yup::AsyncUpdater
 {
 public:
     MidiControllerParser (Engine& e) : engine (e) {}
 
-    void processMessage (const juce::MidiMessage& m)
+    void processMessage (const yup::MidiMessage& m)
     {
         const int channel = m.getChannel();
 
@@ -212,7 +212,7 @@ private:
     void controllerMoved (int number, int value, int channel)
     {
         {
-            const juce::ScopedLock sl (pendingLock);
+            const yup::ScopedLock sl (pendingLock);
             pendingMessages.add ({ number, channel, static_cast<float> (value) / 127.0f });
         }
 
@@ -221,10 +221,10 @@ private:
 
     void handleAsyncUpdate() override
     {
-        juce::Array<Message> messages;
+        yup::Array<Message> messages;
 
         {
-            const juce::ScopedLock sl (pendingLock);
+            const yup::ScopedLock sl (pendingLock);
             pendingMessages.swapWith (messages);
         }
 
@@ -245,8 +245,8 @@ private:
     };
 
     Engine& engine;
-    juce::Array<Message> pendingMessages;
-    juce::CriticalSection pendingLock;
+    yup::Array<Message> pendingMessages;
+    yup::CriticalSection pendingLock;
 };
 
 //==============================================================================
@@ -257,11 +257,11 @@ struct RetrospectiveMidiBuffer
         lengthInSeconds = e.getPropertyStorage().getProperty (SettingID::retrospectiveRecord, 30);
     }
 
-    void addMessage (const juce::MidiMessage& m, double adjust)
+    void addMessage (const yup::MidiMessage& m, double adjust)
     {
         if (lock.try_lock())
         {
-            auto cutoffTime = juce::Time::getMillisecondCounterHiRes() * 0.001
+            auto cutoffTime = yup::Time::getMillisecondCounterHiRes() * 0.001
             + adjust - lengthInSeconds;
 
             if (m.getTimeStamp() > cutoffTime)
@@ -279,9 +279,9 @@ struct RetrospectiveMidiBuffer
         }
     }
 
-    juce::MidiMessageSequence takeMidiMessages()
+    yup::MidiMessageSequence takeMidiMessages()
     {
-        juce::MidiMessageSequence result;
+        yup::MidiMessageSequence result;
 
         {
             lock.lock();
@@ -296,7 +296,7 @@ struct RetrospectiveMidiBuffer
 
         result.updateMatchedPairs();
 
-        juce::SortedSet<int> usedIndexes;
+        yup::SortedSet<int> usedIndexes;
 
         // remove all unmatched note on / off from the sequence
         for (int i = 0; i < result.getNumEvents(); ++i)
@@ -323,13 +323,13 @@ struct RetrospectiveMidiBuffer
         return result;
     }
 
-    juce::Array<juce::MidiMessage> sequence;
+    yup::Array<yup::MidiMessage> sequence;
     double lengthInSeconds = 0;
     RealTimeSpinLock lock;
 };
 
 //==============================================================================
-MidiInputDevice::MidiInputDevice (Engine& e, juce::String deviceName, juce::String deviceIDToUse)
+MidiInputDevice::MidiInputDevice (Engine& e, yup::String deviceName, yup::String deviceIDToUse)
    : InputDevice (e, std::move (deviceName), std::move (deviceIDToUse))
 {
     enabled = true;
@@ -358,7 +358,7 @@ void MidiInputDevice::setEnabled (bool b)
     }
 }
 
-void MidiInputDevice::loadMidiProps (const juce::XmlElement* n)
+void MidiInputDevice::loadMidiProps (const yup::XmlElement* n)
 {
     monitorMode = defaultMonitorMode;
     recordingEnabled = true;
@@ -406,7 +406,7 @@ void MidiInputDevice::loadMidiProps (const juce::XmlElement* n)
     lastNoteOns.resize (minimumLengthMs > 0 ? 128 * 16 : 0);
 }
 
-void MidiInputDevice::saveMidiProps (juce::XmlElement& n)
+void MidiInputDevice::saveMidiProps (yup::XmlElement& n)
 {
     n.setAttribute ("enabled", enabled);
     n.setAttribute ("monitorMode", std::string (magic_enum::enum_name (monitorMode)));
@@ -432,7 +432,7 @@ void MidiInputDevice::saveMidiProps (juce::XmlElement& n)
     }
 }
 
-juce::Array<AudioTrack*> MidiInputDevice::getDestinationTracks()
+yup::Array<AudioTrack*> MidiInputDevice::getDestinationTracks()
 {
     if (auto edit = engine.getUIBehaviour().getLastFocusedEdit())
         if (auto in = edit->getCurrentInstanceForInputDevice (this))
@@ -476,7 +476,7 @@ void MidiInputDevice::setChannelToUse (int newChan)
 
 void MidiInputDevice::setProgramToUse (int prog)
 {
-    programToUse = juce::jlimit (0, 128, prog);
+    programToUse = yup::jlimit (0, 128, prog);
     changed();
 }
 
@@ -528,25 +528,25 @@ bool MidiInputDevice::isMPEDevice() const
 }
 
 //==============================================================================
-void MidiInputDevice::handleNoteOn (juce::MidiKeyboardState*, int /*midiChannel*/, int midiNoteNumber, float velocity)
+void MidiInputDevice::handleNoteOn (yup::MidiKeyboardState*, int /*midiChannel*/, int midiNoteNumber, float velocity)
 {
     if (eventReceivedFromDevice)
         return;
 
-    handleIncomingMidiMessage (juce::MidiMessage::noteOn (std::max (1, channelToUse.getChannelNumber()), midiNoteNumber, velocity), midiSourceID);
+    handleIncomingMidiMessage (yup::MidiMessage::noteOn (std::max (1, channelToUse.getChannelNumber()), midiNoteNumber, velocity), midiSourceID);
 }
 
-void MidiInputDevice::handleNoteOff (juce::MidiKeyboardState*, int /*midiChannel*/, int midiNoteNumber, float)
+void MidiInputDevice::handleNoteOff (yup::MidiKeyboardState*, int /*midiChannel*/, int midiNoteNumber, float)
 {
     if (eventReceivedFromDevice)
         return;
 
-    handleIncomingMidiMessage (juce::MidiMessage::noteOff (std::max (1, channelToUse.getChannelNumber()), midiNoteNumber), midiSourceID);
+    handleIncomingMidiMessage (yup::MidiMessage::noteOff (std::max (1, channelToUse.getChannelNumber()), midiNoteNumber), midiSourceID);
 }
 
-void MidiInputDevice::handleIncomingMidiMessage (juce::MidiInput*, const juce::MidiMessage& m)
+void MidiInputDevice::handleIncomingMidiMessage (yup::MidiInput*, const yup::MidiMessage& m)
 {
-    const juce::ScopedValueSetter<bool> svs (eventReceivedFromDevice, true, false);
+    const yup::ScopedValueSetter<bool> svs (eventReceivedFromDevice, true, false);
     handleIncomingMidiMessage (m, midiSourceID);
     keyboardState.processNextMidiEvent (m);
 }
@@ -558,8 +558,8 @@ void MidiInputDevice::updateRetrospectiveBufferLength (double length)
 }
 
 //==============================================================================
-void MidiInputDevice::addInstance (MidiInputDeviceInstanceBase* i)    { const juce::ScopedLock sl (instanceLock); instances.addIfNotAlreadyThere (i); }
-void MidiInputDevice::removeInstance (MidiInputDeviceInstanceBase* i) { const juce::ScopedLock sl (instanceLock); instances.removeAllInstancesOf (i); }
+void MidiInputDevice::addInstance (MidiInputDeviceInstanceBase* i)    { const yup::ScopedLock sl (instanceLock); instances.addIfNotAlreadyThere (i); }
+void MidiInputDevice::removeInstance (MidiInputDeviceInstanceBase* i) { const yup::ScopedLock sl (instanceLock); instances.removeAllInstancesOf (i); }
 
 void MidiInputDevice::connectionStateChanged()
 {
@@ -576,14 +576,14 @@ void MidiInputDevice::connectionStateChanged()
             bankID = engine.getMidiProgramManager().getBankID (0, bankToUse);
 
         auto chan = channelToUse.getChannelNumber();
-        handleIncomingMidiMessage (juce::MidiMessage::controllerEvent (chan, 0x00, MidiControllerEvent::bankIDToCoarse (bankID)), midiSourceID);
-        handleIncomingMidiMessage (juce::MidiMessage::controllerEvent (chan, 0x20, MidiControllerEvent::bankIDToFine (bankID)), midiSourceID);
-        handleIncomingMidiMessage (juce::MidiMessage::programChange (chan, programToUse - 1), midiSourceID);
+        handleIncomingMidiMessage (yup::MidiMessage::controllerEvent (chan, 0x00, MidiControllerEvent::bankIDToCoarse (bankID)), midiSourceID);
+        handleIncomingMidiMessage (yup::MidiMessage::controllerEvent (chan, 0x20, MidiControllerEvent::bankIDToFine (bankID)), midiSourceID);
+        handleIncomingMidiMessage (yup::MidiMessage::programChange (chan, programToUse - 1), midiSourceID);
     }
 }
 
 //==============================================================================
-void MidiInputDevice::sendNoteOnToMidiKeyListeners (juce::MidiMessage& message)
+void MidiInputDevice::sendNoteOnToMidiKeyListeners (yup::MidiMessage& message)
 {
     if (message.isNoteOn())
     {
@@ -595,7 +595,7 @@ void MidiInputDevice::sendNoteOnToMidiKeyListeners (juce::MidiMessage& message)
         const int noteNum = message.getNoteNumber();
 
         {
-            juce::ScopedLock sl (noteLock);
+            yup::ScopedLock sl (noteLock);
             keysDown[noteNum] = true;
             keyDownVelocities[noteNum] = message.getVelocity();
         }
@@ -607,7 +607,7 @@ void MidiInputDevice::sendNoteOnToMidiKeyListeners (juce::MidiMessage& message)
         const int noteNum = message.getNoteNumber();
 
         {
-            juce::ScopedLock sl (noteLock);
+            yup::ScopedLock sl (noteLock);
             keysUp[noteNum] = true;
         }
 
@@ -619,13 +619,13 @@ void MidiInputDevice::timerCallback()
 {
     stopTimer();
 
-    juce::Array<int> down, vels, up;
+    yup::Array<int> down, vels, up;
 
     bool keysDownCopy[128], keysUpCopy[128];
     uint8_t keyDownVelocitiesCopy[128];
 
     {
-        juce::ScopedLock sl (noteLock);
+        yup::ScopedLock sl (noteLock);
 
         memcpy (keysUpCopy, keysUp, sizeof (keysUp));
         memcpy (keysDownCopy, keysDown, sizeof (keysDown));
@@ -655,7 +655,7 @@ void MidiInputDevice::timerCallback()
 }
 
 //==============================================================================
-static bool trackContainsClipWithName (const AudioTrack& track, const juce::String& name)
+static bool trackContainsClipWithName (const AudioTrack& track, const yup::String& name)
 {
     for (auto& c : track.getClips())
         if (c->getName().equalsIgnoreCase (name))
@@ -664,18 +664,18 @@ static bool trackContainsClipWithName (const AudioTrack& track, const juce::Stri
     return false;
 }
 
-static juce::String getNameForNewClip (AudioTrack& track)
+static yup::String getNameForNewClip (AudioTrack& track)
 {
     for (int index = 1; ; ++index)
     {
-        auto clipName = track.getName() + " "  + TRANS("Recording") + " " + juce::String (index);
+        auto clipName = track.getName() + " "  + TRANS("Recording") + " " + yup::String (index);
 
         if (! trackContainsClipWithName (track, clipName))
             return clipName;
     }
 }
 
-static juce::String getNameForNewClip (ClipOwner& owner)
+static yup::String getNameForNewClip (ClipOwner& owner)
 {
     if (auto slot = dynamic_cast<ClipSlot*> (&owner))
         if (auto at = dynamic_cast<AudioTrack*> (&slot->track))
@@ -689,7 +689,7 @@ static juce::String getNameForNewClip (ClipOwner& owner)
 
 
 Clip* MidiInputDevice::addMidiAsTransaction (Edit& ed, EditItemID targetID,
-                                             Clip* takeClip, juce::MidiMessageSequence ms,
+                                             Clip* takeClip, yup::MidiMessageSequence ms,
                                              TimeRange position, MergeMode merge, MidiChannel midiChannel)
 {
     CRASH_TRACER
@@ -811,10 +811,10 @@ public:
             && ! getMidiInput().mergeRecordings;
     }
 
-    virtual void handleMMCMessage (const juce::MidiMessage&) {}
-    virtual bool handleTimecodeMessage (const juce::MidiMessage&) { return false; }
+    virtual void handleMMCMessage (const yup::MidiMessage&) {}
+    virtual bool handleTimecodeMessage (const yup::MidiMessage&) { return false; }
 
-    std::shared_ptr<choc::fifo::SingleReaderSingleWriterFIFO<juce::MidiMessage>> getRecordingNotes (EditItemID targetID) const override
+    std::shared_ptr<choc::fifo::SingleReaderSingleWriterFIFO<yup::MidiMessage>> getRecordingNotes (EditItemID targetID) const override
     {
         const std::shared_lock sl (contextLock);
 
@@ -832,25 +832,25 @@ public:
               scopedActiveRecordingDevice (epc),
               punchRange (punchRange_)
         {
-            liveNotes = std::make_shared<choc::fifo::SingleReaderSingleWriterFIFO<juce::MidiMessage>>();
+            liveNotes = std::make_shared<choc::fifo::SingleReaderSingleWriterFIFO<yup::MidiMessage>>();
             liveNotes->reset (100);
         }
 
         detail::ScopedActiveRecordingDevice scopedActiveRecordingDevice;
         const TimeRange punchRange;
-        juce::MidiMessageSequence recorded;
+        yup::MidiMessageSequence recorded;
         TimePosition unloopedStopTime;
 
-        std::shared_ptr<choc::fifo::SingleReaderSingleWriterFIFO<juce::MidiMessage>> liveNotes;
+        std::shared_ptr<choc::fifo::SingleReaderSingleWriterFIFO<yup::MidiMessage>> liveNotes;
 
-        std::function<void (tl::expected<Clip::Array, juce::String>)> stopCallback;
+        std::function<void (tl::expected<Clip::Array, yup::String>)> stopCallback;
         StopRecordingParameters stopParams;
     };
 
-    std::vector<tl::expected<std::unique_ptr<RecordingContext>, juce::String>> prepareToRecord (RecordingParameters params) override
+    std::vector<tl::expected<std::unique_ptr<RecordingContext>, yup::String>> prepareToRecord (RecordingParameters params) override
     {
         TRACKTION_ASSERT_MESSAGE_THREAD
-        std::vector<tl::expected<std::unique_ptr<RecordingContext>, juce::String>> results;
+        std::vector<tl::expected<std::unique_ptr<RecordingContext>, yup::String>> results;
 
         if (params.targets.empty())
             for (auto dest : destinations)
@@ -905,7 +905,7 @@ public:
         // audio by bypassing input
     }
 
-    tl::expected<Clip::Array, juce::String> stopRecording (StopRecordingParameters params) override
+    tl::expected<Clip::Array, yup::String> stopRecording (StopRecordingParameters params) override
     {
         TRACKTION_ASSERT_MESSAGE_THREAD
         // Reserve to avoid allocating whilst
@@ -960,7 +960,7 @@ public:
     }
 
     void stopRecording (StopRecordingParameters params,
-                        std::function<void (tl::expected<Clip::Array, juce::String>)> callback) override
+                        std::function<void (tl::expected<Clip::Array, yup::String>)> callback) override
     {
         TRACKTION_ASSERT_MESSAGE_THREAD
         // Reserve to avoid allocating whilst the lock is held
@@ -1029,10 +1029,10 @@ public:
         return ! recordingContexts.empty();
     }
 
-    bool handleIncomingMidiMessage (const juce::MidiMessage& message, MPESourceID sourceID)
+    bool handleIncomingMidiMessage (const yup::MidiMessage& message, MPESourceID sourceID)
     {
         {
-            juce::ScopedLock sl (activeNotesLock);
+            yup::ScopedLock sl (activeNotesLock);
 
             if (message.isNoteOn())
                 activeNotes.startNote (message.getChannel(), message.getNoteNumber());
@@ -1044,8 +1044,8 @@ public:
 
         if (recording)
         {
-            auto m1 = juce::MidiMessage (message, context.globalStreamTimeToEditTime (message.getTimeStamp()).inSeconds());
-            auto m2 = juce::MidiMessage (message, context.globalStreamTimeToEditTimeUnlooped (message.getTimeStamp()).inSeconds());
+            auto m1 = yup::MidiMessage (message, context.globalStreamTimeToEditTime (message.getTimeStamp()).inSeconds());
+            auto m2 = yup::MidiMessage (message, context.globalStreamTimeToEditTimeUnlooped (message.getTimeStamp()).inSeconds());
 
             for (auto& recContext : recordingContexts)
                 recContext->liveNotes->push (m1);
@@ -1056,7 +1056,7 @@ public:
                 recContext->recorded.addEvent (m2);
         }
 
-        juce::ScopedLock sl (consumerLock);
+        yup::ScopedLock sl (consumerLock);
 
         for (auto c : consumers)
             c->handleIncomingMidiMessage (message, sourceID);
@@ -1064,7 +1064,7 @@ public:
         return recording || consumers.size() > 0;
     }
 
-    MidiChannel applyChannel (juce::MidiMessageSequence& sequence, MidiChannel channelToApply)
+    MidiChannel applyChannel (yup::MidiMessageSequence& sequence, MidiChannel channelToApply)
     {
         if (! channelToApply.isValid())
         {
@@ -1087,7 +1087,7 @@ public:
         return channelToApply;
     }
 
-    static void applyTimeAdjustment (juce::MidiMessageSequence& sequence, double adjustmentMs)
+    static void applyTimeAdjustment (yup::MidiMessageSequence& sequence, double adjustmentMs)
     {
         if (adjustmentMs != 0)
             sequence.addTimeToMessages (adjustmentMs * 0.001);
@@ -1101,7 +1101,7 @@ public:
         CRASH_TRACER
         if (! recContext || discardRecordings)
         {
-            for (juce::ScopedLock sl (consumerLock); auto c : consumers)
+            for (yup::ScopedLock sl (consumerLock); auto c : consumers)
                 c->discardRecordings (recContext ? recContext->targetID : EditItemID());
 
             return {};
@@ -1145,7 +1145,7 @@ public:
 
         if (isLooping && recordingEnd > loopRange.getEnd())
         {
-            juce::MidiMessageSequence replaceSequence;
+            yup::MidiMessageSequence replaceSequence;
             const auto loopLen = loopRange.getLength();
             const auto maxNumLoops = 2 + (int) ((recordingEnd - recordingStart) / loopLen);
 
@@ -1153,7 +1153,7 @@ public:
 
             for (int loopNum = 0; loopNum < maxNumLoops; ++loopNum)
             {
-                juce::MidiMessageSequence loopSequence;
+                yup::MidiMessageSequence loopSequence;
                 const auto thisLoopStart = loopRange.getStart() + loopLen * loopNum;
                 const auto thisLoopEnd = (thisLoopStart + loopLen).inSeconds();
 
@@ -1181,8 +1181,8 @@ public:
                             else
                                 e = std::fmod (e - loopRange.getStart().inSeconds(), loopLen.inSeconds());
 
-                            loopSequence.addEvent (juce::MidiMessage (m, s));
-                            loopSequence.addEvent (juce::MidiMessage (juce::MidiMessage::noteOff (m.getChannel(),
+                            loopSequence.addEvent (yup::MidiMessage (m, s));
+                            loopSequence.addEvent (yup::MidiMessage (yup::MidiMessage::noteOff (m.getChannel(),
                                                                                                   m.getNoteNumber()), e));
                         }
                     }
@@ -1191,7 +1191,7 @@ public:
                         const double t = m.getTimeStamp();
 
                         if (t >= thisLoopStart.inSeconds() && t < thisLoopEnd)
-                            loopSequence.addEvent (juce::MidiMessage (m, std::fmod (t - loopRange.getStart().inSeconds(), loopLen.inSeconds())));
+                            loopSequence.addEvent (yup::MidiMessage (m, std::fmod (t - loopRange.getStart().inSeconds(), loopLen.inSeconds())));
                     }
                 }
 
@@ -1253,7 +1253,7 @@ public:
                         return createdClips;
 
                     startPos  = std::max (startPos, loopRange.getStart());
-                    endPos    = juce::jlimit (startPos + 0.1s, loopRange.getEnd(), endPos);
+                    endPos    = yup::jlimit (startPos + 0.1s, loopRange.getEnd(), endPos);
                     maxEndPos = endPos;
                 }
                 else if (edit.getNumCountInBeats() > 0)
@@ -1262,27 +1262,27 @@ public:
                 }
             }
 
-            juce::Array<int> eventsToDelete;
-            juce::Array<juce::MidiMessage> noteOffMessagesToAdd, mpeMessagesToAddAtStartPos;
+            yup::Array<int> eventsToDelete;
+            yup::Array<yup::MidiMessage> noteOffMessagesToAdd, mpeMessagesToAddAtStartPos;
 
-            const auto ensureNoteOffIsInsideClip = [&noteOffMessagesToAdd, endPos] (juce::MidiMessageSequence::MidiEventHolder& m)
+            const auto ensureNoteOffIsInsideClip = [&noteOffMessagesToAdd, endPos] (yup::MidiMessageSequence::MidiEventHolder& m)
             {
                 jassert (m.message.isNoteOn());
 
                 if (m.noteOffObject == nullptr)
-                    noteOffMessagesToAdd.add (juce::MidiMessage (juce::MidiMessage::noteOff (m.message.getChannel(),
+                    noteOffMessagesToAdd.add (yup::MidiMessage (yup::MidiMessage::noteOff (m.message.getChannel(),
                                                                                              m.message.getNoteNumber()), endPos.inSeconds()));
 
                 else if (m.noteOffObject->message.getTimeStamp() > endPos.inSeconds())
                     m.noteOffObject->message.setTimeStamp (endPos.inSeconds());
             };
 
-            const auto isNoteOnThatEndsAfterClipStart = [startPos] (juce::MidiMessageSequence::MidiEventHolder& m)
+            const auto isNoteOnThatEndsAfterClipStart = [startPos] (yup::MidiMessageSequence::MidiEventHolder& m)
             {
                 return m.message.isNoteOn() && (m.noteOffObject == nullptr || m.noteOffObject->message.getTimeStamp() > startPos.inSeconds());
             };
 
-            const auto isOutsideClipAndNotNoteOff = [startPos, maxEndPos] (const juce::MidiMessage& m)
+            const auto isOutsideClipAndNotNoteOff = [startPos, maxEndPos] (const yup::MidiMessage& m)
             {
                 return (m.getTimeStamp() < startPos.inSeconds() || m.getTimeStamp() > maxEndPos.inSeconds()) && ! m.isNoteOff();
             };
@@ -1364,17 +1364,17 @@ public:
             }
         }
 
-        for (juce::ScopedLock sl (consumerLock); auto c : consumers)
+        for (yup::ScopedLock sl (consumerLock); auto c : consumers)
             c->discardRecordings (recContext->targetID);
 
         return createdClips;
     }
 
-    juce::Array<Clip*> applyRetrospectiveRecord (bool armedOnly) override
+    yup::Array<Clip*> applyRetrospectiveRecord (bool armedOnly) override
     {
         CRASH_TRACER
 
-        juce::Array<Clip*> clips;
+        yup::Array<Clip*> clips;
 
         auto& mi = getMidiInput();
         auto retrospective = mi.getRetrospectiveMidiBuffer();
@@ -1402,7 +1402,7 @@ public:
 
             applyTimeAdjustment (sequence, timeAdjustMs);
 
-            auto clipStart = juce::Time::getMillisecondCounterHiRes() * 0.001
+            auto clipStart = yup::Time::getMillisecondCounterHiRes() * 0.001
                                 - retrospective->lengthInSeconds + mi.getAdjustSecs();
             sequence.addTimeToMessages (-clipStart);
 
@@ -1495,18 +1495,18 @@ public:
     std::vector<std::unique_ptr<MidiRecordingContext>> recordingContexts;
 
 private:
-    juce::CriticalSection consumerLock, activeNotesLock;
-    juce::Array<Consumer*> consumers;
+    yup::CriticalSection consumerLock, activeNotesLock;
+    yup::Array<Consumer*> consumers;
     double lastEditTime = -1.0;
     double pausedTime = 0;
     MPESourceID midiSourceID = createUniqueMPESourceID();
     ActiveNoteList activeNotes;
     std::unique_ptr<RecordStopper> recordStopper;
 
-    void addConsumer (Consumer* c) override      { juce::ScopedLock sl (consumerLock); consumers.addIfNotAlreadyThere (c); }
-    void removeConsumer (Consumer* c) override   { juce::ScopedLock sl (consumerLock); consumers.removeAllInstancesOf (c); }
+    void addConsumer (Consumer* c) override      { yup::ScopedLock sl (consumerLock); consumers.addIfNotAlreadyThere (c); }
+    void removeConsumer (Consumer* c) override   { yup::ScopedLock sl (consumerLock); consumers.removeAllInstancesOf (c); }
 
-    void valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int index) override
+    void valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int index) override
     {
         if (p == state && c.hasType (IDs::INPUTDEVICEDESTINATION))
             injectNoteOffsToTrack();
@@ -1521,7 +1521,7 @@ private:
         // The lock isn't great here but it's mostly uncontended and when it is, it's between the MIDI and message threads
         // The lock time is also constant so low-risk
         {
-            const juce::ScopedLock sl (activeNotesLock);
+            const yup::ScopedLock sl (activeNotesLock);
             notes = activeNotes;
         }
 
@@ -1529,7 +1529,7 @@ private:
         {
             notes.iterate ([&] (auto channel, auto noteNumber)
                            {
-                               t->injectLiveMidiMessage (juce::MidiMessage::noteOff (channel, noteNumber), midiSourceID);
+                               t->injectLiveMidiMessage (yup::MidiMessage::noteOff (channel, noteNumber), midiSourceID);
                            });
         }
     }
@@ -1580,12 +1580,12 @@ private:
         return *recordStopper;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputDeviceInstanceBase)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInputDeviceInstanceBase)
 };
 
 
 //==============================================================================
-bool MidiInputDevice::handleIncomingMessage (juce::MidiMessage& m)
+bool MidiInputDevice::handleIncomingMessage (yup::MidiMessage& m)
 {
     if (m.isActiveSense())
         return false;
@@ -1602,7 +1602,7 @@ bool MidiInputDevice::handleIncomingMessage (juce::MidiMessage& m)
     }
 
     if (m.getTimeStamp() == 0 || (! engine.getEngineBehaviour().isMidiDriverUsedForIncommingMessageTiming()))
-        m.setTimeStamp (juce::Time::getMillisecondCounterHiRes() * 0.001);
+        m.setTimeStamp (yup::Time::getMillisecondCounterHiRes() * 0.001);
 
     m.addToTimeStamp (adjustSecs);
 
@@ -1618,20 +1618,20 @@ bool MidiInputDevice::handleIncomingMessage (juce::MidiMessage& m)
 
 void MidiInputDevice::masterTimeUpdate (double time)
 {
-    adjustSecs = time - juce::Time::getMillisecondCounterHiRes() * 0.001;
+    adjustSecs = time - yup::Time::getMillisecondCounterHiRes() * 0.001;
 
-    const juce::ScopedLock sl (instanceLock);
+    const yup::ScopedLock sl (instanceLock);
 
     for (auto instance : instances)
         instance->masterTimeUpdate (time);
 }
 
-void MidiInputDevice::sendMessageToInstances (const juce::MidiMessage& message, MPESourceID sourceID)
+void MidiInputDevice::sendMessageToInstances (const yup::MidiMessage& message, MPESourceID sourceID)
 {
     bool messageUnused = true;
 
     {
-        const juce::ScopedLock sl (instanceLock);
+        const yup::ScopedLock sl (instanceLock);
 
         for (auto i : instances)
             if (i->handleIncomingMidiMessage (message, sourceID))

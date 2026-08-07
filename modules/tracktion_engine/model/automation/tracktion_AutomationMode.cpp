@@ -11,12 +11,12 @@
 namespace tracktion::inline engine
 {
 
-std::optional<AutomationMode> automationModeFromString (juce::String s)
+std::optional<AutomationMode> automationModeFromString (yup::String s)
 {
     return magic_enum::enum_cast<AutomationMode> (s.toStdString());
 }
 
-juce::String toString (AutomationMode am)
+yup::String toString (AutomationMode am)
 {
     return std::string (magic_enum::enum_name (am));
 }

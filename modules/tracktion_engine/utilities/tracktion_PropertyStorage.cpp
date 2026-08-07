@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-juce::StringRef PropertyStorage::settingToString (SettingID setting)
+yup::StringRef PropertyStorage::settingToString (SettingID setting)
 {
     switch (setting)
     {
@@ -46,7 +46,7 @@ juce::StringRef PropertyStorage::settingToString (SettingID setting)
         case SettingID::externControlMain:                  return "externControlMain";
         case SettingID::externControlShowSelection:         return "externControlShowSelection";
         case SettingID::externControlShowClipSlotSelection: return "externControlShowClipSlotSelection";
-        case SettingID::externControlSelectionColour:       return "externControlSelectionColour";
+        case SettingID::externControlSelectionColor:       return "externControlSelectionColor";
         case SettingID::externControlEnable:                return "externControlEnable";
         case SettingID::externOscInputPort:                 return "externOscInputPort";
         case SettingID::externOscOutputPort:                return "externOscOutputPort";
@@ -140,14 +140,14 @@ juce::StringRef PropertyStorage::settingToString (SettingID setting)
 }
 
 //==============================================================================
-juce::File PropertyStorage::getAppCacheFolder()
+yup::File PropertyStorage::getAppCacheFolder()
 {
     return getAppPrefsFolder();
 }
 
-juce::File PropertyStorage::getAppPrefsFolder()
+yup::File PropertyStorage::getAppPrefsFolder()
 {
-    auto f = juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory).getChildFile (getApplicationName());
+    auto f = yup::File::getSpecialLocation (yup::File::userApplicationDataDirectory).getChildFile (getApplicationName());
 
     if (! f.isDirectory())
         f.createDirectory();
@@ -155,23 +155,23 @@ juce::File PropertyStorage::getAppPrefsFolder()
     return f;
 }
 
-juce::String PropertyStorage::getUserName()
+yup::String PropertyStorage::getUserName()
 {
-    return juce::SystemStats::getFullUserName();
+    return yup::SystemStats::getFullUserName();
 }
 
-juce::PropertiesFile& PropertyStorage::getPropertiesFile()
+yup::PropertiesFile& PropertyStorage::getPropertiesFile()
 {
     if (propertiesFile == nullptr)
     {
         auto file = getAppPrefsFolder().getChildFile ("Settings.xml");
         TRACKTION_LOG ("Settings file: " + file.getFullPathName());
 
-        juce::PropertiesFile::Options options;
+        yup::PropertiesFile::Options options;
         options.millisecondsBeforeSaving = 2000;
-        options.storageFormat = juce::PropertiesFile::storeAsXML;
+        options.storageFormat = yup::PropertiesFile::storeAsXML;
 
-        propertiesFile = std::make_unique<juce::PropertiesFile> (file, options);
+        propertiesFile = std::make_unique<yup::PropertiesFile> (file, options);
     }
 
     return *propertiesFile;
@@ -183,65 +183,65 @@ void PropertyStorage::removeProperty (SettingID setting)
     getPropertiesFile().removeValue (PropertyStorage::settingToString (setting));
 }
 
-juce::var PropertyStorage::getProperty (SettingID setting, const juce::var& defaultValue)
+yup::var PropertyStorage::getProperty (SettingID setting, const yup::var& defaultValue)
 {
     return getPropertiesFile().getValue (PropertyStorage::settingToString (setting), defaultValue);
 }
 
-void PropertyStorage::setProperty (SettingID setting, const juce::var& value)
+void PropertyStorage::setProperty (SettingID setting, const yup::var& value)
 {
     getPropertiesFile().setValue (PropertyStorage::settingToString (setting), value);
 }
 
-std::unique_ptr<juce::XmlElement> PropertyStorage::getXmlProperty (SettingID setting)
+std::unique_ptr<yup::XmlElement> PropertyStorage::getXmlProperty (SettingID setting)
 {
-    return std::unique_ptr<juce::XmlElement> (getPropertiesFile().getXmlValue (PropertyStorage::settingToString (setting)));
+    return std::unique_ptr<yup::XmlElement> (getPropertiesFile().getXmlValue (PropertyStorage::settingToString (setting)));
 }
 
-void PropertyStorage::setXmlProperty (SettingID setting, const juce::XmlElement& xml)
+void PropertyStorage::setXmlProperty (SettingID setting, const yup::XmlElement& xml)
 {
     getPropertiesFile().setValue (PropertyStorage::settingToString (setting), &xml);
 }
 
 //==============================================================================
-void PropertyStorage::removePropertyItem (SettingID setting, juce::StringRef item)
+void PropertyStorage::removePropertyItem (SettingID setting, yup::StringRef item)
 {
     getPropertiesFile().removeValue (PropertyStorage::settingToString (setting) + "_" + item);
 }
 
-juce::var PropertyStorage::getPropertyItem (SettingID setting, juce::StringRef item, const juce::var& defaultValue)
+yup::var PropertyStorage::getPropertyItem (SettingID setting, yup::StringRef item, const yup::var& defaultValue)
 {
     return getPropertiesFile().getValue (PropertyStorage::settingToString (setting) + "_" + item, defaultValue);
 }
 
-void PropertyStorage::setPropertyItem (SettingID setting, juce::StringRef item, const juce::var& value)
+void PropertyStorage::setPropertyItem (SettingID setting, yup::StringRef item, const yup::var& value)
 {
     getPropertiesFile().setValue (PropertyStorage::settingToString (setting) + "_" + item, value);
 }
 
-std::unique_ptr<juce::XmlElement> PropertyStorage::getXmlPropertyItem (SettingID setting, juce::StringRef item)
+std::unique_ptr<yup::XmlElement> PropertyStorage::getXmlPropertyItem (SettingID setting, yup::StringRef item)
 {
-    return std::unique_ptr<juce::XmlElement> (getPropertiesFile().getXmlValue (PropertyStorage::settingToString (setting) + "_" + item));
+    return std::unique_ptr<yup::XmlElement> (getPropertiesFile().getXmlValue (PropertyStorage::settingToString (setting) + "_" + item));
 }
 
-void PropertyStorage::setXmlPropertyItem (SettingID setting, juce::StringRef item, const juce::XmlElement& xml)
+void PropertyStorage::setXmlPropertyItem (SettingID setting, yup::StringRef item, const yup::XmlElement& xml)
 {
     getPropertiesFile().setValue (PropertyStorage::settingToString (setting) + "_" + item, &xml);
 }
 
 //==============================================================================
-juce::File PropertyStorage::getDefaultLoadSaveDirectory (juce::StringRef)
+yup::File PropertyStorage::getDefaultLoadSaveDirectory (yup::StringRef)
 {
-    return juce::File::getSpecialLocation (juce::File::userDocumentsDirectory);
+    return yup::File::getSpecialLocation (yup::File::userDocumentsDirectory);
 }
 
-void PropertyStorage::setDefaultLoadSaveDirectory (juce::StringRef, const juce::File&)
+void PropertyStorage::setDefaultLoadSaveDirectory (yup::StringRef, const yup::File&)
 {
 }
 
-juce::File PropertyStorage::getDefaultLoadSaveDirectory (ProjectItem::Category)
+yup::File PropertyStorage::getDefaultLoadSaveDirectory (ProjectItem::Category)
 {
-    return juce::File::getSpecialLocation (juce::File::userDocumentsDirectory);
+    return yup::File::getSpecialLocation (yup::File::userDocumentsDirectory);
 }
 
 } // namespace tracktion::inline engine

@@ -47,7 +47,7 @@ bool SharedLevelMeasuringNode::isReadyToProcess()
     return input->hasProcessed();
 }
 
-void SharedLevelMeasuringNode::prefetchBlock (juce::Range<int64_t> referenceSampleRange)
+void SharedLevelMeasuringNode::prefetchBlock (yup::Range<int64_t> referenceSampleRange)
 {
     levelMeasurer->startNextBlock (tracktion::graph::sampleToTime (referenceSampleRange.getStart(), sampleRate));
 }

@@ -45,7 +45,7 @@ enum class SettingID
     externControlNum,
     externControlMain,
     externControlShowSelection,
-    externControlSelectionColour,
+    externControlSelectionColor,
     externControlEnable,
     externOscInputPort,
     externOscOutputPort,

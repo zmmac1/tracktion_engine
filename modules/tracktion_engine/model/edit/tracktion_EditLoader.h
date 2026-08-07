@@ -62,7 +62,7 @@ public:
         operation or poll to get progress.
     */
     static std::shared_ptr<Handle> loadEdit (Engine&,
-                                             juce::File,
+                                             yup::File,
                                              std::function<void (std::unique_ptr<Edit>)> editLoadedCallback,
                                              Edit::EditRole role = Edit::forEditing,
                                              int numUndoLevelsToStore = Edit::getDefaultNumUndoLevels());

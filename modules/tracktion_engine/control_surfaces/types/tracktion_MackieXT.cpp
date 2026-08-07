@@ -13,7 +13,7 @@ namespace tracktion::inline engine {
 MackieXT::MackieXT (ExternalControllerManager& ecm, MackieMCU& m, int id)
     : ControlSurface (ecm), mcu (m)
 {
-    deviceDescription = m.deviceDescription + " XT #" + juce::String (id + 1);
+    deviceDescription = m.deviceDescription + " XT #" + yup::String (id + 1);
 
     needsMidiChannel = true;
     needsMidiBackChannel = true;
@@ -54,7 +54,7 @@ void MackieXT::shutDownDevice()
     sendMidiArray (0, d);
 }
 
-void MackieXT::acceptMidiMessage (int, const juce::MidiMessage& m)
+void MackieXT::acceptMidiMessage (int, const yup::MidiMessage& m)
 {
     mcu.acceptMidiMessageInt (deviceIdx, m);
 }

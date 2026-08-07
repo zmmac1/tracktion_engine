@@ -50,7 +50,7 @@ public:
     virtual Type getPluginCategory() = 0;
 
     //==============================================================================
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     int getNumOutputChannelsGivenInputs (int numInputChannels) override;
     BusLayout getBusses() const override;
 
@@ -68,7 +68,7 @@ public:
     bool canBeAddedToRack() override                 { return true; }
 
     //==============================================================================
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
     void flushPluginStateToValueTree() override;
 
 protected:
@@ -76,23 +76,23 @@ protected:
     friend AirWindowsAutomatableParameter;
     friend AirWindowsCallback;
 
-    void setConversionRange (int param, juce::NormalisableRange<float> range);
-    void processBlock (juce::AudioBuffer<float>& buffer);
+    void setConversionRange (int param, yup::NormalisableRange<float> range);
+    void processBlock (yup::AudioBuffer<float>& buffer);
 
-    juce::CriticalSection lock;
+    yup::CriticalSection lock;
     AirWindowsCallback callback;
     std::unique_ptr<AirWindowsBase> impl;
 
 public:
     //==============================================================================
-    juce::ReferenceCountedArray<AutomatableParameter> parameters;
+    yup::ReferenceCountedArray<AutomatableParameter> parameters;
 
     juce::CachedValue<float> dryValue, wetValue;
     AutomatableParameter::Ptr dryGain, wetGain;
 
 private:
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AirWindowsPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AirWindowsPlugin)
 };
 
 //==============================================================================
@@ -103,8 +103,8 @@ public: \
     className (PluginCreationInfo); \
     ~className() override                                                   { notifyListenersOfDeletion(); } \
     \
-    virtual juce::String getName() const override                           { return TRANS(pluginName); } \
-    juce::String getPluginType() override                                   { return xmlTypeName; } \
+    virtual yup::String getName() const override                           { return TRANS(pluginName); } \
+    yup::String getPluginType() override                                   { return xmlTypeName; } \
     \
     Type getPluginCategory() override                                       { return pluginType; } \
     \

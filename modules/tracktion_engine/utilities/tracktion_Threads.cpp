@@ -65,7 +65,7 @@ namespace details
     {
         details::getShouldExitFlag (id, true);
 
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         auto& map = details::getShouldExitMap();
         const std::scoped_lock sl (map.idMapMutex);
         assert (map.map.contains (id));

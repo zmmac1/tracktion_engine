@@ -54,7 +54,7 @@ EditReferences getEditsInProject (Project& project)
     return edits;
 }
 
-int importExternalFiles (Project& proj, juce::Array<ProjectItemRef> refsToImport)
+int importExternalFiles (Project& proj, yup::Array<ProjectItemRef> refsToImport)
 {
     auto& pm = proj.projectManager;
     const auto projectDir = proj.getDefaultDirectory();
@@ -89,10 +89,10 @@ int importExternalFiles (Project& proj, juce::Array<ProjectItemRef> refsToImport
     return numImported;
 }
 
-int importExternalReferences (Project& proj, juce::Array<ProjectItemRef> refsToImport)
+int importExternalReferences (Project& proj, yup::Array<ProjectItemRef> refsToImport)
 {
     auto& pm = proj.projectManager;
-    juce::Array<ProjectItemRef> newRefs;
+    yup::Array<ProjectItemRef> newRefs;
     int numImported = 0;
 
     for (auto ref : refsToImport)
@@ -168,7 +168,7 @@ int importExternalReferences (Project& proj, juce::Array<ProjectItemRef> refsToI
     return numImported;
 }
 
-std::pair<int, juce::String> consolidateEdit (Edit& edit)
+std::pair<int, yup::String> consolidateEdit (Edit& edit)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     auto proj = getProjectForEdit (edit);
@@ -181,7 +181,7 @@ std::pair<int, juce::String> consolidateEdit (Edit& edit)
 
     const auto projectDir = proj->getDefaultDirectory();
 
-    juce::Array<ProjectItemRef> allRefs, externalProjectItemRefs;
+    yup::Array<ProjectItemRef> allRefs, externalProjectItemRefs;
 
     for (auto e : Exportable::addAllExportables (edit))
     {
@@ -193,7 +193,7 @@ std::pair<int, juce::String> consolidateEdit (Edit& edit)
             if (! isInternal && refItem.itemRef.isRelativePath())
             {
                 auto resolved = refItem.itemRef.resolve (edit.engine, projectDir);
-                isInternal = resolved != juce::File() && resolved.isAChildOf (projectDir);
+                isInternal = resolved != yup::File() && resolved.isAChildOf (projectDir);
             }
 
             if (isInternal)
@@ -210,7 +210,7 @@ std::pair<int, juce::String> consolidateEdit (Edit& edit)
     {
         return (numProjectItemsImported < externalProjectItemRefs.size())
                 ? TRANS("This edit referenced some external clips that didn't exist, so couldn't be imported")
-                : juce::String();
+                : yup::String();
     }();
 
     const int numImported = importExternalFiles (*proj, allRefs);
@@ -228,7 +228,7 @@ bool canConsolidateEdit (Edit& edit)
         return false;
     }
 
-    juce::Array<ProjectItemRef> allRefs;
+    yup::Array<ProjectItemRef> allRefs;
     const auto projectDir = proj->getDefaultDirectory();
 
     for (auto e : Exportable::addAllExportables (edit))
@@ -241,7 +241,7 @@ bool canConsolidateEdit (Edit& edit)
             if (! isInternal && ref.itemRef.isRelativePath())
             {
                 auto resolved = ref.itemRef.resolve (edit.engine, projectDir);
-                isInternal = resolved != juce::File() && resolved.isAChildOf (projectDir);
+                isInternal = resolved != yup::File() && resolved.isAChildOf (projectDir);
             }
 
             if (isInternal)
@@ -259,7 +259,7 @@ bool canConsolidateEdit (Edit& edit)
     return false;
 }
 
-std::pair<int, juce::String> consolidateProject (Project& project)
+std::pair<int, yup::String> consolidateProject (Project& project)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     int numImported = 0;
@@ -283,7 +283,7 @@ std::pair<int, juce::String> consolidateProject (Project& project)
 bool canConsolidateProject (Project& project)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
-    juce::Array<ProjectItemRef> allRefs;
+    yup::Array<ProjectItemRef> allRefs;
     auto& pm = project.projectManager;
     const auto projectDir = project.getDefaultDirectory();
     auto edits = getEditsInProject (project);
@@ -331,7 +331,7 @@ void consolidateEditInteractive (Edit& edit, std::function<void()> completionCal
 
                 e->engine.getUIBehaviour().showWarningAlert (TRANS("Finished Consolidating"),
                                                               TRANS("XXX external files copied into project.")
-                                                                  .replace ("XXX", juce::String (num)));
+                                                                  .replace ("XXX", yup::String (num)));
 
                 if (completionCallback)
                     completionCallback();
@@ -360,14 +360,14 @@ void consolidateProjectInteractive (Project& project, std::function<void()> comp
                 {
                     p->engine.getUIBehaviour().showWarningAlert (TRANS("Unable to Consolidate"),
                                                                   TRANS("XXX external files copied into project.")
-                                                                      .replace ("XXX", juce::String (num))
+                                                                      .replace ("XXX", yup::String (num))
                                                                       + "\n\n" + error);
                 }
                 else
                 {
                     p->engine.getUIBehaviour().showWarningAlert (TRANS("Finished Consolidating"),
                                                                   TRANS("XXX external files copied into project.")
-                                                                      .replace ("XXX", juce::String (num)));
+                                                                      .replace ("XXX", yup::String (num)));
                 }
 
                 if (completionCallback)

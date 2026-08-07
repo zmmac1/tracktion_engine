@@ -109,7 +109,7 @@ public:
     {
         // The internal nodes won't be interested in the top level audio/midi inputs
         // They should only be referencing this for time and continuity
-        tracktion::engine::PluginRenderContext rc (nullptr, juce::AudioChannelSet(), 0, 0,
+        tracktion::engine::PluginRenderContext rc (nullptr, yup::AudioChannelSet(), 0, 0,
                                                    nullptr, 0.0,
                                                    editTime, isPlaying, isScrubbing, isRendering, true);
 

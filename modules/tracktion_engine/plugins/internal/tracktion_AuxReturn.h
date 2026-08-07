@@ -19,10 +19,10 @@ public:
     static const char* getPluginName()                                      { return NEEDS_TRANS("Aux Return"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override;
-    juce::String getPluginType() override                                   { return xmlTypeName; }
-    juce::String getShortName (int suggestedMaxLength) override;
-    juce::String getSelectableDescription() override                        { return TRANS("Aux Return Plugin"); }
+    yup::String getName() const override;
+    yup::String getPluginType() override                                   { return xmlTypeName; }
+    yup::String getShortName (int suggestedMaxLength) override;
+    yup::String getSelectableDescription() override                        { return TRANS("Aux Return Plugin"); }
     int getNumOutputChannelsGivenInputs (int numInputChannels) override     { return numInputChannels; }
     BusLayout getBusses() const override   { return BusLayout::singlePassThrough(); }
 
@@ -36,12 +36,12 @@ public:
     bool canBeAddedToRack() override                 { return false; }
     bool needsConstantBufferSize() override          { return true; }
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     juce::CachedValue<int> busNumber;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AuxReturnPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AuxReturnPlugin)
 };
 
 } // namespace tracktion::inline engine

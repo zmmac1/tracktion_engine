@@ -44,9 +44,9 @@ class FolderBasedProject;
 
     @see ProjectManager, ProjectItem
 */
-class Project  : public juce::ReferenceCountedObject,
+class Project  : public yup::ReferenceCountedObject,
                  public Selectable,
-                 private juce::AsyncUpdater
+                 private yup::AsyncUpdater
 {
 public:
     //==============================================================================
@@ -84,26 +84,26 @@ public:
     /** Returns the project name.
         Folder-based projects return the folder name.
     */
-    juce::String getName() const;
+    yup::String getName() const;
 
     /** Returns the project description string.
         Stored as a project property and works for both file-based and folder-based projects.
     */
-    juce::String getDescription() const;
+    yup::String getDescription() const;
 
     /** Returns true if this is a folder-based project (as opposed to file-based). */
     bool isFolderBased() const;
 
     /** Returns the project file (.tracktion) or, for folder-based projects, the folder itself. */
-    const juce::File& getProjectFile() const noexcept;
+    const yup::File& getProjectFile() const noexcept;
 
     /** Returns the default directory for storing project media.
         For folder-based projects this is the project folder itself.
     */
-    juce::File getDefaultDirectory() const;
+    yup::File getDefaultDirectory() const;
 
     /** Returns the subdirectory for media of the given category (e.g. "recorded", "rendered"). */
-    juce::File getDirectoryForMedia (ProjectItem::Category category) const;
+    yup::File getDirectoryForMedia (ProjectItem::Category category) const;
 
     /** Returns the appropriate source path string for referencing the given file.
 
@@ -111,13 +111,13 @@ public:
         folder if the file is a child of it, or an absolute path otherwise.
         File-based projects should not use this method — they use ProjectItemIDs.
     */
-    juce::String getSourcePathForFile (const juce::File& file) const;
+    yup::String getSourcePathForFile (const yup::File& file) const;
 
     /** Renames the project. This renames the underlying file or folder on disk. */
-    void setName (const juce::String& newName);
+    void setName (const yup::String& newName);
 
     /** Sets the project description. Works for both file-based and folder-based projects. */
-    void setDescription (const juce::String& newDesc);
+    void setDescription (const yup::String& newDesc);
 
     /** Generates and assigns a new random project ID. No-op for folder-based projects. */
     void createNewProjectId();
@@ -125,12 +125,12 @@ public:
     /** Returns a named project property.
         Folder-based projects store properties in project_info.json.
     */
-    juce::String getProjectProperty (const juce::String& name) const;
+    yup::String getProjectProperty (const yup::String& name) const;
 
     /** Sets a named project property.
         Folder-based projects store properties in project_info.json.
     */
-    void setProjectProperty (const juce::String& name, const juce::String& value);
+    void setProjectProperty (const yup::String& name, const yup::String& value);
 
     /** Reloads project properties from the project file (or project_info.json). */
     void refreshProjectPropertiesFromFile();
@@ -141,10 +141,10 @@ public:
     /** Returns refs to items whose source files are not referenced by any edit.
         Works for both file-based and folder-based projects.
     */
-    juce::Array<ProjectItemRef> findOrphanItemRefs();
+    yup::Array<ProjectItemRef> findOrphanItemRefs();
 
     /** @deprecated Use findOrphanItemRefs() instead. */
-    juce::Array<ProjectItem::Ptr> findOrphanItems();
+    yup::Array<ProjectItem::Ptr> findOrphanItems();
 
     //==============================================================================
     /** Returns the number of items in this project.
@@ -160,13 +160,13 @@ public:
     /** Returns all ProjectItemRefs in this project.
         Folder-based projects trigger the lazy folder scan and return path-based refs.
     */
-    juce::Array<ProjectItemRef> getAllProjectItemRefs() const;
+    yup::Array<ProjectItemRef> getAllProjectItemRefs() const;
 
     /** Returns the ProjectItem at the given index, or nullptr if out of range. */
     ProjectItem::Ptr getProjectItemAt (int index);
 
     /** Returns all ProjectItems in this project. */
-    juce::Array<ProjectItem::Ptr> getAllProjectItems();
+    yup::Array<ProjectItem::Ptr> getAllProjectItems();
 
     /** Returns the index of the item with the given ref, or -1 if not found. */
     int getIndexOf (const ProjectItemRef&) const;
@@ -180,17 +180,17 @@ public:
     /** Returns the ProjectItem that references the given file, or nullptr if not found.
         Works for both file-based and folder-based projects.
     */
-    ProjectItem::Ptr getProjectItemForFile (const juce::File& file);
+    ProjectItem::Ptr getProjectItemForFile (const yup::File& file);
 
     //==============================================================================
     /** Returns an existing ProjectItem for the file if one exists, otherwise creates
         a new one with the given name, type, description, and category.
         Folder-based items are created with invalid ProjectItemIDs.
     */
-    ProjectItem::Ptr createNewItem (const juce::File& fileToReference,
-                                    const juce::String& type,
-                                    const juce::String& name,
-                                    const juce::String& description,
+    ProjectItem::Ptr createNewItem (const yup::File& fileToReference,
+                                    const yup::String& type,
+                                    const yup::String& name,
+                                    const yup::String& description,
                                     const ProjectItem::Category cat,
                                     bool atTopOfList);
 
@@ -226,12 +226,12 @@ public:
     /** Imports items from a .tracktion archive file into this project.
         No-op for folder-based projects.
     */
-    void mergeArchiveContents (const juce::File& archiveFile);
+    void mergeArchiveContents (const yup::File& archiveFile);
 
     /** Merges all items from another project file into this project.
         No-op for folder-based projects.
     */
-    void mergeOtherProjectIntoThis (const juce::File& otherProject);
+    void mergeOtherProjectIntoThis (const yup::File& otherProject);
 
     /** Makes sure all media files are in the correct category subfolders.
         No-op for folder-based projects.
@@ -254,7 +254,7 @@ public:
     };
 
     //==============================================================================
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     /** Locks the project file to prevent writes or moves. No-op for folder-based projects. */
     void lockFile();
@@ -266,7 +266,7 @@ public:
         For folder-based projects, this walks all edits and calls reassignReferencedItem
         to update path-based source references. File-based projects are a no-op (IDs are stable).
     */
-    void sourceFileMoved (const juce::File& oldFile, const juce::File& newFile);
+    void sourceFileMoved (const yup::File& oldFile, const yup::File& newFile);
 
     /** Controls when reload() actually re-reads the backing store.
         @see ProjectBase::ReloadMode */
@@ -277,7 +277,7 @@ public:
         scan cache; for file-based projects this is a no-op. */
     void reload (ReloadMode = ReloadMode::lazy);
 
-    using Ptr = juce::ReferenceCountedObjectPtr<Project>;
+    using Ptr = yup::ReferenceCountedObjectPtr<Project>;
 
     /** The Engine instance this project belongs to. */
     Engine& engine;
@@ -297,12 +297,12 @@ private:
 
     std::unique_ptr<ProjectBase> impl;
 
-    Project (Engine&, ProjectManager&, const juce::File&);
+    Project (Engine&, ProjectManager&, const yup::File&);
 
     void changed() override;
     void projectChanged();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)
 };
 
 /** Converts a file-based project to a folder-based project.

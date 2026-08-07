@@ -14,12 +14,12 @@ SelectedMidiEvents::SelectedMidiEvents (MidiClip& m)  : clips ({ &m })
 {
 }
 
-SelectedMidiEvents::SelectedMidiEvents (juce::Array<MidiClip*> m)  : clips (m)
+SelectedMidiEvents::SelectedMidiEvents (yup::Array<MidiClip*> m)  : clips (m)
 {
     // SelectedMidiEvents must always have one clip
     jassert (m.size() > 0);
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     // All the clips must be frmom the same edit
     for (int i = 1; i < m.size(); i++)
         jassert (&m[0]->edit == &m[i]->edit);
@@ -197,7 +197,7 @@ void SelectedMidiEvents::removeSelectedEvent (MidiControllerEvent* controller)
         deselect();
 }
 
-void SelectedMidiEvents::setSelected (SelectionManager& sm, const juce::Array<MidiNote*>& notes, bool addToSelection, bool allowMixedSelection)
+void SelectedMidiEvents::setSelected (SelectionManager& sm, const yup::Array<MidiNote*>& notes, bool addToSelection, bool allowMixedSelection)
 {
     if (! addToSelection)
         selectedNotes.clearQuick();
@@ -225,7 +225,7 @@ void SelectedMidiEvents::setSelected (SelectionManager& sm, const juce::Array<Mi
         deselect();
 }
 
-void SelectedMidiEvents::setSelected (SelectionManager& sm, const juce::Array<MidiSysexEvent*>& events, bool addToSelection, bool allowMixedSelection)
+void SelectedMidiEvents::setSelected (SelectionManager& sm, const yup::Array<MidiSysexEvent*>& events, bool addToSelection, bool allowMixedSelection)
 {
     if (! addToSelection)
         selectedSysexes.clearQuick();
@@ -253,7 +253,7 @@ void SelectedMidiEvents::setSelected (SelectionManager& sm, const juce::Array<Mi
         deselect();
 }
 
-void SelectedMidiEvents::setSelected (SelectionManager& sm, const juce::Array<MidiControllerEvent*>& events, bool addToSelection, bool allowMixedSelection)
+void SelectedMidiEvents::setSelected (SelectionManager& sm, const yup::Array<MidiControllerEvent*>& events, bool addToSelection, bool allowMixedSelection)
 {
     if (! addToSelection)
         selectedControllers.clearQuick();
@@ -330,7 +330,7 @@ bool SelectedMidiEvents::isSelected (const MidiControllerEvent* event) const
 }
 
 //==============================================================================
-juce::String SelectedMidiEvents::getSelectableDescription()
+yup::String SelectedMidiEvents::getSelectableDescription()
 {
     return TRANS("MIDI Events");
 }
@@ -354,7 +354,7 @@ void SelectedMidiEvents::moveEvents (TimeDuration deltaStart, TimeDuration delta
     auto* undoManager = &getEdit().getUndoManager();
     auto notes = selectedNotes; // Use a copy in case any of them get deleted while moving
 
-    juce::Array<MidiClip*> uniqueClips;
+    yup::Array<MidiClip*> uniqueClips;
 
     auto startTime = TimePosition::fromSeconds (std::numeric_limits<double>::max());
     auto endTime   = TimePosition::fromSeconds (std::numeric_limits<double>::lowest());
@@ -439,12 +439,12 @@ void SelectedMidiEvents::setVelocities (int newVelocity)
         note->setVelocity (newVelocity, undoManager);
 }
 
-void SelectedMidiEvents::changeColour (uint8_t newColour)
+void SelectedMidiEvents::changeColor (uint8_t newColor)
 {
     auto undoManager = &getEdit().getUndoManager();
 
     for (auto note : selectedNotes)
-        note->setColour (newColour, undoManager);
+        note->setColor (newColor, undoManager);
 }
 
 void SelectedMidiEvents::nudge (TimecodeSnapType snapType, int leftRight, int upDown)
@@ -471,7 +471,7 @@ void SelectedMidiEvents::nudge (TimecodeSnapType snapType, int leftRight, int up
                 auto delta = ed.tempoSequence.toBeats (snapped)
                                 - ed.tempoSequence.toBeats (start);
 
-                juce::Array<MidiClip*> uniqueClips;
+                yup::Array<MidiClip*> uniqueClips;
                 auto startTime = TimePosition::fromSeconds (std::numeric_limits<double>::max());
                 auto endTime   = TimePosition::fromSeconds (std::numeric_limits<double>::lowest());
 
@@ -532,7 +532,7 @@ void SelectedMidiEvents::sendSelectionChangedMessage (SelectionManager* sm)
     sendChangeMessage();
 }
 
-void SelectedMidiEvents::setClips (juce::Array<MidiClip*> clips_)
+void SelectedMidiEvents::setClips (yup::Array<MidiClip*> clips_)
 {
     // You should try and avoid changing the list of clips, instead
     // create a new SelectedMidiEvents for the new clips. If you do
@@ -554,16 +554,16 @@ void SelectedMidiEvents::setClips (juce::Array<MidiClip*> clips_)
             selectedControllers.remove (i);
 }
 
-void SelectedMidiEvents::moveControllerData (const juce::Array<MidiClip*>& clips, const juce::Array<MidiControllerEvent*>* onlyTheseEvents,
+void SelectedMidiEvents::moveControllerData (const yup::Array<MidiClip*>& clips, const yup::Array<MidiControllerEvent*>* onlyTheseEvents,
                                              BeatDuration deltaBeats, TimePosition startTime, TimePosition endTime, bool makeCopy)
 {
     for (auto c : clips)
     {
-        juce::Array<juce::ValueTree> itemsToRemove;
+        yup::Array<yup::ValueTree> itemsToRemove;
 
         auto& seq = c->getSequence();
 
-        juce::Array<MidiControllerEvent*> movedEvents;
+        yup::Array<MidiControllerEvent*> movedEvents;
 
         for (auto evt : seq.getControllerEvents())
         {

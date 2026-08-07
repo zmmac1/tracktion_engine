@@ -183,9 +183,9 @@ public:
     IDGenerator() = default;
 
     /** Generates a new unique ID string. */
-    juce::String generateID()
+    yup::String generateID()
     {
-        return "id" + juce::String (++counter);
+        return "id" + yup::String (++counter);
     }
 
     /** Resets the counter. */
@@ -206,14 +206,14 @@ public:
     IDRefResolver() = default;
 
     /** Registers an element with its ID. */
-    void registerElement (const juce::String& id, juce::XmlElement* element)
+    void registerElement (const yup::String& id, yup::XmlElement* element)
     {
         if (id.isNotEmpty() && element != nullptr)
             idToElement[id] = element;
     }
 
     /** Resolves an IDREF to an element. */
-    juce::XmlElement* resolveRef (const juce::String& idref) const
+    yup::XmlElement* resolveRef (const yup::String& idref) const
     {
         auto it = idToElement.find (idref);
         return it != idToElement.end() ? it->second : nullptr;
@@ -226,19 +226,19 @@ public:
     }
 
 private:
-    std::unordered_map<juce::String, juce::XmlElement*> idToElement;
+    std::unordered_map<yup::String, yup::XmlElement*> idToElement;
 };
 
 //==============================================================================
 /** Velocity conversion between tracktion (0-127 int) and DAWproject (0.0-1.0 normalized). */
 inline float velocityToNormalized (int velocity)
 {
-    return juce::jlimit (0.0f, 1.0f, static_cast<float> (velocity) / 127.0f);
+    return yup::jlimit (0.0f, 1.0f, static_cast<float> (velocity) / 127.0f);
 }
 
 inline int normalizedToVelocity (float normalized)
 {
-    return juce::jlimit (0, 127, juce::roundToInt (normalized * 127.0f));
+    return yup::jlimit (0, 127, yup::roundToInt (normalized * 127.0f));
 }
 
 //==============================================================================
@@ -250,20 +250,20 @@ inline float controllerValueToNormalized (int value, int controllerType)
 {
     // Pitch wheel is 14-bit centered at 8192
     if (controllerType == MidiControllerEvent::pitchWheelType)
-        return juce::jlimit (0.0f, 1.0f, static_cast<float> (value) / 16383.0f);
+        return yup::jlimit (0.0f, 1.0f, static_cast<float> (value) / 16383.0f);
 
     // Most controllers are stored as 14-bit (value << 7)
-    return juce::jlimit (0.0f, 1.0f, static_cast<float> (value >> 7) / 127.0f);
+    return yup::jlimit (0.0f, 1.0f, static_cast<float> (value >> 7) / 127.0f);
 }
 
 inline int normalizedToControllerValue (float normalized, int controllerType)
 {
     // Pitch wheel is 14-bit centered at 8192
     if (controllerType == MidiControllerEvent::pitchWheelType)
-        return juce::jlimit (0, 16383, juce::roundToInt (normalized * 16383.0f));
+        return yup::jlimit (0, 16383, yup::roundToInt (normalized * 16383.0f));
 
     // Most controllers stored as 14-bit (value << 7)
-    return juce::jlimit (0, 16256, juce::roundToInt (normalized * 127.0f) << 7);
+    return yup::jlimit (0, 16256, yup::roundToInt (normalized * 127.0f) << 7);
 }
 
 /** Maps tracktion MidiControllerEvent type to DAWproject expression type string. */
@@ -285,7 +285,7 @@ inline const char* controllerTypeToExpression (int type)
 /** Maps DAWproject expression type string to tracktion MidiControllerEvent type.
     For channelController, returns -1 (caller should use the controller attribute).
 */
-inline int expressionToControllerType (const juce::String& expression)
+inline int expressionToControllerType (const yup::String& expression)
 {
     if (expression == xml::pitchBend)
         return MidiControllerEvent::pitchWheelType;
@@ -317,34 +317,34 @@ inline int64_t beatsToTicks (double beats, int ticksPerQuarterNote = defaultTick
 }
 
 //==============================================================================
-/** Color conversion between tracktion (juce::Colour) and DAWproject (CSS-style hex string). */
-inline juce::String colourToDAWprojectString (juce::Colour colour)
+/** Color conversion between tracktion (yup::Color) and DAWproject (CSS-style hex string). */
+inline yup::String colourToDAWprojectString (yup::Color colour)
 {
     return "#" + colour.toDisplayString (false);
 }
 
-inline juce::Colour dawprojectStringToColour (const juce::String& str)
+inline yup::Color dawprojectStringToColor (const yup::String& str)
 {
     if (str.isEmpty())
         return {};
 
-    juce::String hexStr = str;
+    yup::String hexStr = str;
     if (hexStr.startsWith ("#"))
         hexStr = hexStr.substring (1);
 
-    return juce::Colour::fromString (hexStr);
+    return yup::Color::fromString (hexStr);
 }
 
 //==============================================================================
 /** Pan conversion between tracktion (-1.0 to 1.0) and DAWproject (0.0-1.0 normalized, 0.5 = centre). */
 inline float normalizedToPan (double normalized)
 {
-    return juce::jlimit (-1.0f, 1.0f, static_cast<float> (normalized * 2.0 - 1.0));
+    return yup::jlimit (-1.0f, 1.0f, static_cast<float> (normalized * 2.0 - 1.0));
 }
 
 inline double panToNormalized (float pan)
 {
-    return juce::jlimit (0.0, 1.0, (static_cast<double> (pan) + 1.0) / 2.0);
+    return yup::jlimit (0.0, 1.0, (static_cast<double> (pan) + 1.0) / 2.0);
 }
 
 //==============================================================================
@@ -363,31 +363,31 @@ inline float decibelsToGain (double dB)
 
 //==============================================================================
 /** XML helper functions. */
-inline void setAttributeIfNotEmpty (juce::XmlElement& element, const char* name, const juce::String& value)
+inline void setAttributeIfNotEmpty (yup::XmlElement& element, const char* name, const yup::String& value)
 {
     if (value.isNotEmpty())
         element.setAttribute (name, value);
 }
 
-inline void setAttributeIfValid (juce::XmlElement& element, const char* name, double value)
+inline void setAttributeIfValid (yup::XmlElement& element, const char* name, double value)
 {
     if (std::isfinite (value))
         element.setAttribute (name, value);
 }
 
-inline std::unique_ptr<juce::XmlElement> createXmlElement (const char* tagName)
+inline std::unique_ptr<yup::XmlElement> createXmlElement (const char* tagName)
 {
-    return std::make_unique<juce::XmlElement> (tagName);
+    return std::make_unique<yup::XmlElement> (tagName);
 }
 
-inline juce::XmlElement* addChildElement (juce::XmlElement& parent, const char* tagName)
+inline yup::XmlElement* addChildElement (yup::XmlElement& parent, const char* tagName)
 {
     return parent.createNewChildElement (tagName);
 }
 
 //==============================================================================
 /** Parses a double from a string, handling potential formatting differences. */
-inline double parseDouble (const juce::String& str, double defaultValue = 0.0)
+inline double parseDouble (const yup::String& str, double defaultValue = 0.0)
 {
     if (str.isEmpty())
         return defaultValue;
@@ -396,7 +396,7 @@ inline double parseDouble (const juce::String& str, double defaultValue = 0.0)
 }
 
 /** Parses an int from a string. */
-inline int parseInt (const juce::String& str, int defaultValue = 0)
+inline int parseInt (const yup::String& str, int defaultValue = 0)
 {
     if (str.isEmpty())
         return defaultValue;
@@ -405,7 +405,7 @@ inline int parseInt (const juce::String& str, int defaultValue = 0)
 }
 
 /** Parses a bool from a string or attribute value. */
-inline bool parseBool (const juce::String& str, bool defaultValue = false)
+inline bool parseBool (const yup::String& str, bool defaultValue = false)
 {
     if (str.isEmpty())
         return defaultValue;

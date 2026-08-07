@@ -27,9 +27,9 @@ TEST_SUITE ("tracktion_graph")
     {
         for (auto setup : getTestSetups())
         {
-            MESSAGE ((juce::String ("Test setup: sample rate SR, block size BS, random blocks RND")
-                        .replace ("SR", juce::String (setup.sampleRate))
-                        .replace ("BS", juce::String (setup.blockSize))
+            MESSAGE ((yup::String ("Test setup: sample rate SR, block size BS, random blocks RND")
+                        .replace ("SR", yup::String (setup.sampleRate))
+                        .replace ("BS", yup::String (setup.blockSize))
                         .replace ("RND", setup.randomiseBlockSizes ? "Y" : "N")).toStdString());
 
             // Sin
@@ -71,7 +71,7 @@ TEST_SUITE ("tracktion_graph")
                 trackNodes.push_back (std::move (trackOneNode));
                 trackNodes.push_back (std::move (trackTwoNode));
                 auto mainOutput = std::make_unique<SummingNode> (std::move (trackNodes));
-                juce::ignoreUnused (mainOutput);
+                yup::ignoreUnused (mainOutput);
             }
 
             // Sin octave
@@ -140,7 +140,7 @@ TEST_SUITE ("tracktion_graph")
                 const double sampleRate = setup.sampleRate;
                 const double sinFrequency = sampleRate / 100.0;
                 const double numSamplesPerCycle = sampleRate / sinFrequency;
-                const int numLatencySamples = juce::roundToInt (numSamplesPerCycle / 2.0);
+                const int numLatencySamples = yup::roundToInt (numSamplesPerCycle / 2.0);
 
                 std::vector<std::unique_ptr<Node>> nodes;
                 nodes.push_back (std::make_unique<SinNode> ((float) sinFrequency));
@@ -160,7 +160,7 @@ TEST_SUITE ("tracktion_graph")
                 const double sampleRate = setup.sampleRate;
                 const double sinFrequency = sampleRate / 100.0;
                 const double numSamplesPerCycle = sampleRate / sinFrequency;
-                const int numLatencySamples = juce::roundToInt (numSamplesPerCycle / 2.0);
+                const int numLatencySamples = yup::roundToInt (numSamplesPerCycle / 2.0);
 
                 std::vector<std::unique_ptr<Node>> nodes;
                 nodes.push_back (makeGainNode (makeNode<SinNode> ((float) sinFrequency), 0.5f));
@@ -179,7 +179,7 @@ TEST_SUITE ("tracktion_graph")
             {
                 const double sinFrequency = setup.sampleRate / 100.0;
                 const double numSamplesPerCycle = setup.sampleRate / sinFrequency;
-                const int numLatencySamples = juce::roundToInt (numSamplesPerCycle / 2.0);
+                const int numLatencySamples = yup::roundToInt (numSamplesPerCycle / 2.0);
 
                 auto track1 = makeNode<SinNode> ((float) sinFrequency);
                 track1 = makeNode<LatencyNode> (std::move (track1), numLatencySamples);
@@ -201,7 +201,7 @@ TEST_SUITE ("tracktion_graph")
             {
                 const double sinFrequency = setup.sampleRate / 100.0;
                 const double numSamplesPerCycle = setup.sampleRate / sinFrequency;
-                const int numLatencySamples = juce::roundToInt (numSamplesPerCycle / 2.0);
+                const int numLatencySamples = yup::roundToInt (numSamplesPerCycle / 2.0);
 
                 auto track1 = makeNode<SinNode> ((float) sinFrequency);
                 track1 = makeNode<LatencyNode> (std::move (track1), numLatencySamples);
@@ -229,7 +229,7 @@ TEST_SUITE ("tracktion_graph")
             {
                 const double sinFrequency = setup.sampleRate / 100.0;
                 const double numSamplesPerCycle = setup.sampleRate / sinFrequency;
-                const int numLatencySamples = juce::roundToInt (numSamplesPerCycle / 2.0);
+                const int numLatencySamples = yup::roundToInt (numSamplesPerCycle / 2.0);
 
                 auto track1 = makeNode<SinNode> ((float) sinFrequency);
                 track1 = makeNode<LatencyNode> (std::move (track1), numLatencySamples);
@@ -272,7 +272,7 @@ TEST_SUITE ("tracktion_graph")
                 const auto sequence = test_utilities::createRandomMidiMessageSequence (duration - 0.5, setup.random);
                 CHECK_GT (sequence.getNumEvents(), 0);
 
-                const int latencyNumSamples = juce::roundToInt (sampleRate / 100.0);
+                const int latencyNumSamples = yup::roundToInt (sampleRate / 100.0);
                 const double delayedTime = latencyNumSamples / sampleRate;
                 auto midiNode = makeNode<MidiNode> (sequence);
                 auto delayedNode = makeNode<LatencyNode> (std::move (midiNode), latencyNumSamples);
@@ -291,7 +291,7 @@ TEST_SUITE ("tracktion_graph")
                 const auto sequence = test_utilities::createRandomMidiMessageSequence (duration - 0.5, setup.random);
                 CHECK_GT (sequence.getNumEvents(), 0);
 
-                const int latencyNumSamples = juce::roundToInt (sampleRate / 100.0);
+                const int latencyNumSamples = yup::roundToInt (sampleRate / 100.0);
                 const double delayedTime = latencyNumSamples / sampleRate;
 
                 auto sinNode = makeNode<SinNode> (220.0f);
@@ -414,10 +414,10 @@ TEST_SUITE ("tracktion_graph")
 
                 CHECK_EQ (testContext->buffer.getNumSamples(), firstHalfNumSamples + secondHalfNumSamples);
                 test_utilities::expectAudioBuffer (testContext->buffer, 0,
-                                                   juce::Range<int>::withStartAndLength (firstHalfNumSamples, latencyNumSamples),
+                                                   yup::Range<int>::withStartAndLength (firstHalfNumSamples, latencyNumSamples),
                                                    0.0f, 0.0f);
                 test_utilities::expectAudioBuffer (testContext->buffer, 0,
-                                                   juce::Range<int>::withStartAndLength (firstHalfNumSamples + latencyNumSamples,
+                                                   yup::Range<int>::withStartAndLength (firstHalfNumSamples + latencyNumSamples,
                                                                                          secondHalfNumSamples - latencyNumSamples),
                                                    1.0f, 0.707f);
             }

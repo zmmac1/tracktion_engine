@@ -22,7 +22,7 @@ namespace tracktion::inline engine
 namespace audio_fifo_test_utils
 {
     /** Fills a buffer so that sample n of every channel holds startValue + n. */
-    inline void fillWithRamp (juce::AudioBuffer<float>& b, float startValue)
+    inline void fillWithRamp (yup::AudioBuffer<float>& b, float startValue)
     {
         for (int channel = 0; channel < b.getNumChannels(); ++channel)
             for (int i = 0; i < b.getNumSamples(); ++i)
@@ -30,7 +30,7 @@ namespace audio_fifo_test_utils
     }
 
     /** Returns true if every sample of every channel matches startValue + n. */
-    inline bool matchesRamp (const juce::AudioBuffer<float>& b, float startValue,
+    inline bool matchesRamp (const yup::AudioBuffer<float>& b, float startValue,
                              int startSample, int numSamples)
     {
         for (int channel = 0; channel < b.getNumChannels(); ++channel)
@@ -74,14 +74,14 @@ TEST_SUITE ("tracktion_engine")
         CHECK_EQ (fifo.getFreeSpace(), 15);
         CHECK_EQ (fifo.getNumReady(), 0);
 
-        juce::AudioBuffer<float> src (2, 8);
+        yup::AudioBuffer<float> src (2, 8);
         fillWithRamp (src, 100.0f);
 
         CHECK (fifo.write (src));
         CHECK_EQ (fifo.getNumReady(), 8);
         CHECK_EQ (fifo.getFreeSpace(), 7);
 
-        juce::AudioBuffer<float> dest (2, 8);
+        yup::AudioBuffer<float> dest (2, 8);
         dest.clear();
         CHECK (fifo.read (dest, 0));
         CHECK (matchesRamp (dest, 100.0f, 0, 8));
@@ -95,7 +95,7 @@ TEST_SUITE ("tracktion_engine")
 
         // Writing more than there's space for should fail and add nothing
         fifo.reset();
-        juce::AudioBuffer<float> tooBig (2, 20);
+        yup::AudioBuffer<float> tooBig (2, 20);
         fillWithRamp (tooBig, 0.0f);
         CHECK (! fifo.write (tooBig));
         CHECK_EQ (fifo.getNumReady(), 0);
@@ -107,14 +107,14 @@ TEST_SUITE ("tracktion_engine")
 
         AudioFifo fifo (1, 16);
 
-        juce::AudioBuffer<float> src (1, 12);
+        yup::AudioBuffer<float> src (1, 12);
         fillWithRamp (src, 0.0f);
 
         // Write samples 4-8 of the source, i.e. the ramp values 4, 5, 6, 7
         CHECK (fifo.write (src, 4, 4));
         CHECK_EQ (fifo.getNumReady(), 4);
 
-        juce::AudioBuffer<float> dest (1, 8);
+        yup::AudioBuffer<float> dest (1, 8);
         dest.clear();
         CHECK (fifo.read (dest, 2, 4));
 
@@ -130,7 +130,7 @@ TEST_SUITE ("tracktion_engine")
 
         AudioFifo fifo (2, 16);
 
-        juce::AudioBuffer<float> src (2, 12), dest (2, 12);
+        yup::AudioBuffer<float> src (2, 12), dest (2, 12);
 
         // Push the read/write positions near the end of the storage
         fillWithRamp (src, 0.0f);
@@ -156,14 +156,14 @@ TEST_SUITE ("tracktion_engine")
             AudioFifo fifo (2, 16);
 
             // Dirty the fifo storage so the clear is actually observable
-            juce::AudioBuffer<float> stereoSrc (2, 8);
+            yup::AudioBuffer<float> stereoSrc (2, 8);
             fillWithRamp (stereoSrc, 900.0f);
             CHECK (fifo.write (stereoSrc));
 
-            juce::AudioBuffer<float> stereoDest (2, 8);
+            yup::AudioBuffer<float> stereoDest (2, 8);
             CHECK (fifo.read (stereoDest, 0));
 
-            juce::AudioBuffer<float> monoSrc (1, 8);
+            yup::AudioBuffer<float> monoSrc (1, 8);
             fillWithRamp (monoSrc, 10.0f);
             CHECK (fifo.write (monoSrc, 0, 8));
 
@@ -181,11 +181,11 @@ TEST_SUITE ("tracktion_engine")
         {
             AudioFifo fifo (1, 16);
 
-            juce::AudioBuffer<float> monoSrc (1, 8);
+            yup::AudioBuffer<float> monoSrc (1, 8);
             fillWithRamp (monoSrc, 20.0f);
             CHECK (fifo.write (monoSrc));
 
-            juce::AudioBuffer<float> stereoDest (2, 8);
+            yup::AudioBuffer<float> stereoDest (2, 8);
             stereoDest.clear();
             CHECK (fifo.read (stereoDest, 0));
 
@@ -200,11 +200,11 @@ TEST_SUITE ("tracktion_engine")
         {
             AudioFifo fifo (2, 16);
 
-            juce::AudioBuffer<float> stereoSrc (2, 8);
+            yup::AudioBuffer<float> stereoSrc (2, 8);
             fillWithRamp (stereoSrc, 30.0f);
             CHECK (fifo.write (stereoSrc));
 
-            juce::AudioBuffer<float> monoDest (1, 8);
+            yup::AudioBuffer<float> monoDest (1, 8);
             monoDest.clear();
             CHECK (fifo.read (monoDest, 0));
             CHECK (matchesRamp (monoDest, 30.0f, 0, 8));
@@ -217,11 +217,11 @@ TEST_SUITE ("tracktion_engine")
 
         AudioFifo fifo (2, 16);
 
-        juce::AudioBuffer<float> src (2, 8);
+        yup::AudioBuffer<float> src (2, 8);
         fillWithRamp (src, 1.0f);
         CHECK (fifo.write (src));
 
-        juce::AudioBuffer<float> dest (2, 8);
+        yup::AudioBuffer<float> dest (2, 8);
         CHECK (fifo.read (dest, 0));
 
         // Silence has to actually zero the storage, not just flag it as cleared
@@ -251,11 +251,11 @@ TEST_SUITE ("tracktion_engine")
 
         AudioFifo fifo (2, 16);
 
-        juce::AudioBuffer<float> src (2, 8);
+        yup::AudioBuffer<float> src (2, 8);
         fillWithRamp (src, 0.0f);
         CHECK (fifo.write (src));
 
-        juce::AudioBuffer<float> dest (2, 8);
+        yup::AudioBuffer<float> dest (2, 8);
 
         for (int channel = 0; channel < 2; ++channel)
             for (int i = 0; i < 8; ++i)
@@ -286,7 +286,7 @@ TEST_SUITE ("tracktion_engine")
 
         std::thread producer ([&]
         {
-            juce::AudioBuffer<float> src (numChannels, blockSize);
+            yup::AudioBuffer<float> src (numChannels, blockSize);
 
             for (int block = 0; block < numBlocks; ++block)
             {
@@ -310,7 +310,7 @@ TEST_SUITE ("tracktion_engine")
             }
         });
 
-        juce::AudioBuffer<float> dest (numChannels, blockSize);
+        yup::AudioBuffer<float> dest (numChannels, blockSize);
         bool readFailed = false, dataMismatch = false, consumerTimedOut = false;
 
         for (int block = 0; block < numBlocks; ++block)

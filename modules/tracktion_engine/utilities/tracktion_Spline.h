@@ -16,7 +16,7 @@ namespace tracktion::inline engine {
 struct Spline
 {
     int getNumPoints() const noexcept               { return points.size(); }
-    juce::Point<float> getPoint (int index) const   { return points.getReference (index); }
+    yup::Point<float> getPoint (int index) const   { return points.getReference (index); }
 
     float getY (float x) const
     {
@@ -33,10 +33,10 @@ struct Spline
         if (i < 0)
             return points.getFirst().y;
 
-        auto p0 = points.getReference (juce::jmax (0, i - 1));
+        auto p0 = points.getReference (yup::jmax (0, i - 1));
         auto p1 = points.getReference (i);
         auto p2 = points.getReference (i + 1);
-        auto p3 = points.getReference (juce::jmin (num - 1, i + 2));
+        auto p3 = points.getReference (yup::jmin (num - 1, i + 2));
 
         const float alpha = (x - p1.x) / (p2.x - p1.x);
         const float alpha2 = alpha * alpha;
@@ -54,7 +54,7 @@ struct Spline
 
         while (--i >= 0)
         {
-            juce::Point<float>& p = points.getReference(i);
+            yup::Point<float>& p = points.getReference(i);
 
             if (p.x <= x)
             {
@@ -73,7 +73,7 @@ struct Spline
 
 
 private:
-    juce::Array<juce::Point<float>> points;
+    yup::Array<yup::Point<float>> points;
 };
 
 } // namespace tracktion::inline engine

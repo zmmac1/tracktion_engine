@@ -27,15 +27,15 @@ public:
     };
 
     ExportJob (Edit*,
-               const juce::File& destDir,
+               const yup::File& destDir,
                const Project::Ptr& newProject,
                const Project::Ptr& srcProject,
                TracktionArchiveFile*,
                double handleSize_,
                bool keepEntireFiles,
                TracktionArchiveFile::CompressionType,
-               juce::Array<juce::File>& filesForDeletion,
-               juce::StringArray& failedFiles,
+               yup::Array<yup::File>& filesForDeletion,
+               yup::StringArray& failedFiles,
                bool includeLibraryFiles,
                bool includeClips);
 
@@ -48,15 +48,15 @@ public:
 private:
     Edit* edit = nullptr;
     float progress = 0;
-    juce::File destDir;
+    yup::File destDir;
     Project::Ptr newProject, srcProject;
     double handleSize = 0;
     bool keepEntireFiles = false;
     TracktionArchiveFile::CompressionType compressionType;
     TracktionArchiveFile* archive = nullptr;
-    juce::Array<juce::File>& filesForDeletion;
-    juce::OwnedArray<Edit> edits;
-    juce::StringArray& failedFiles;
+    yup::Array<yup::File>& filesForDeletion;
+    yup::OwnedArray<Edit> edits;
+    yup::StringArray& failedFiles;
     bool includeLibraryFiles = false;
     bool includeClips = false;
 
@@ -64,7 +64,7 @@ private:
     void copyProjectFilesToTempDir();
     void createArchiveFromTempFiles();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExportJob)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExportJob)
 };
 
 } // namespace legacy

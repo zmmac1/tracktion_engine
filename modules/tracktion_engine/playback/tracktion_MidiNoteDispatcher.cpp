@@ -31,7 +31,7 @@ void MidiNoteDispatcher::masterTimeUpdate (TimePosition editTime)
 {
     const std::scoped_lock s (timeLock);
     masterTime = editTime;
-    hiResClockOfMasterTime = juce::Time::getMillisecondCounterHiRes();
+    hiResClockOfMasterTime = yup::Time::getMillisecondCounterHiRes();
 }
 
 void MidiNoteDispatcher::prepareToPlay (TimePosition editTime)
@@ -42,7 +42,7 @@ void MidiNoteDispatcher::prepareToPlay (TimePosition editTime)
 TimePosition MidiNoteDispatcher::getCurrentTime() const
 {
     const std::scoped_lock s (timeLock);
-    return masterTime + TimeDuration::fromSeconds ((juce::Time::getMillisecondCounterHiRes() - hiResClockOfMasterTime) * 0.001);
+    return masterTime + TimeDuration::fromSeconds ((yup::Time::getMillisecondCounterHiRes() - hiResClockOfMasterTime) * 0.001);
 }
 
 void MidiNoteDispatcher::dispatchPendingMessages (DeviceState& state, TimePosition editTime)
@@ -59,10 +59,10 @@ void MidiNoteDispatcher::dispatchPendingMessages (DeviceState& state, TimePositi
     }
 }
 
-void MidiNoteDispatcher::setMidiDeviceList (const juce::OwnedArray<MidiOutputDeviceInstance>& newList)
+void MidiNoteDispatcher::setMidiDeviceList (const yup::OwnedArray<MidiOutputDeviceInstance>& newList)
 {
     CRASH_TRACER
-    juce::OwnedArray<DeviceState> newDevices;
+    yup::OwnedArray<DeviceState> newDevices;
 
     for (auto d : newList)
         newDevices.add (new DeviceState (*d));
@@ -87,10 +87,10 @@ void MidiNoteDispatcher::hiResTimerCallback()
     struct MessageToSend
     {
         MidiOutputDeviceInstance* device;
-        juce::MidiMessage message;
+        yup::MidiMessage message;
     };
 
-    juce::Array<MessageToSend> messagesToSend;
+    yup::Array<MessageToSend> messagesToSend;
     messagesToSend.ensureStorageAllocated (32);
 
     {

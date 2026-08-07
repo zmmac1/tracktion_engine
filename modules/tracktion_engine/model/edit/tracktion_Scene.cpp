@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-Scene::Scene (const juce::ValueTree& v, SceneList& sl)
+Scene::Scene (const yup::ValueTree& v, SceneList& sl)
     : state (v), edit (sl.edit), sceneList (sl)
 {
     assert (v.hasType (IDs::SCENE));
@@ -32,12 +32,12 @@ int Scene::getIndex()
     return sceneList.getScenes().indexOf (this);
 }
 
-juce::String Scene::getSelectableDescription()
+yup::String Scene::getSelectableDescription()
 {
     return TRANS("Scene");
 }
 
-void Scene::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void Scene::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v != state)
         return;
@@ -47,7 +47,7 @@ void Scene::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier
 }
 
 //==============================================================================
-SceneWatcher::SceneWatcher (const juce::ValueTree& scenesState_, Edit& e)
+SceneWatcher::SceneWatcher (const yup::ValueTree& scenesState_, Edit& e)
     : scenesState (scenesState_), edit (e)
 {
     checkForScenes();
@@ -164,13 +164,13 @@ void SceneWatcher::timerCallback()
     callback++;
 }
 
-void SceneWatcher::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
+void SceneWatcher::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c)
 {
     if (p == scenesState && c.hasType (IDs::SCENE))
         checkForScenes();
 }
 
-void SceneWatcher::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int)
+void SceneWatcher::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int)
 {
     if (p == scenesState && c.hasType (IDs::SCENE))
         checkForScenes();
@@ -179,7 +179,7 @@ void SceneWatcher::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c
 
 //==============================================================================
 //==============================================================================
-SceneList::SceneList (const juce::ValueTree& v, Edit& e)
+SceneList::SceneList (const yup::ValueTree& v, Edit& e)
     : ValueTreeObjectList (v),
       state (v),
       edit (e)
@@ -194,7 +194,7 @@ SceneList::~SceneList()
 }
 
 //==============================================================================
-juce::Array<Scene*> SceneList::getScenes()
+yup::Array<Scene*> SceneList::getScenes()
 {
     return objects;
 }
@@ -202,7 +202,7 @@ juce::Array<Scene*> SceneList::getScenes()
 void SceneList::ensureNumberOfScenes (int numScenes)
 {
     for (int i = size(); i < numScenes; ++i)
-        parent.appendChild (juce::ValueTree (IDs::SCENE), &edit.getUndoManager());
+        parent.appendChild (yup::ValueTree (IDs::SCENE), &edit.getUndoManager());
 
     assert (objects.size() >= numScenes);
 
@@ -212,7 +212,7 @@ void SceneList::ensureNumberOfScenes (int numScenes)
 
 Scene* SceneList::insertScene (int idx)
 {
-    parent.addChild (juce::ValueTree (IDs::SCENE), idx, &edit.getUndoManager());
+    parent.addChild (yup::ValueTree (IDs::SCENE), idx, &edit.getUndoManager());
 
     for (auto at : getAudioTracks (edit))
         at->getClipSlotList().insertSlot (idx);
@@ -240,12 +240,12 @@ void SceneList::deleteScene (Scene& scene)
 }
 
 //==============================================================================
-bool SceneList::isSuitableType (const juce::ValueTree& v) const
+bool SceneList::isSuitableType (const yup::ValueTree& v) const
 {
     return v.hasType (IDs::SCENE);
 }
 
-Scene* SceneList::createNewObject (const juce::ValueTree& v)
+Scene* SceneList::createNewObject (const yup::ValueTree& v)
 {
     return new Scene (v, *this);
 }

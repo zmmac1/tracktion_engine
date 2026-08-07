@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-PitchSetting::PitchSetting (Edit& ed, const juce::ValueTree& v)
+PitchSetting::PitchSetting (Edit& ed, const yup::ValueTree& v)
     : TrackItem (ed, {}, Type::pitch), state (v)
 {
     auto um = &ed.getUndoManager();
@@ -30,13 +30,13 @@ PitchSetting::~PitchSetting()
     notifyListenersOfDeletion();
 }
 
-juce::String PitchSetting::getName() const
+yup::String PitchSetting::getName() const
 {
-    return juce::MidiMessage::getMidiNoteName (pitch, accidentalsSharp, false,
+    return yup::MidiMessage::getMidiNoteName (pitch, accidentalsSharp, false,
                                                edit.engine.getEngineBehaviour().getMiddleCOctave());
 }
 
-juce::String PitchSetting::getSelectableDescription()
+yup::String PitchSetting::getSelectableDescription()
 {
     return TRANS("Key");
 }
@@ -67,7 +67,7 @@ void PitchSetting::setStartBeat (BeatPosition beat)
 
 void PitchSetting::setPitch (int p)
 {
-    pitch = juce::jlimit (0, 127, p);
+    pitch = yup::jlimit (0, 127, p);
 }
 
 void PitchSetting::setScaleID (Scale::ScaleType st)

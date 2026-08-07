@@ -46,22 +46,22 @@ public:
     void cleanUp();
 
     /** */
-    const juce::File& getTempDirectory() const;
+    const yup::File& getTempDirectory() const;
 
     /** */
-    bool setTempDirectory (const juce::File& newFile);
+    bool setTempDirectory (const yup::File& newFile);
 
     /** */
     void ressetToDefaultLocation();
 
     /** */
-    juce::File getThumbnailsFolder() const;
+    yup::File getThumbnailsFolder() const;
 
     /** */
-    juce::File getTempFile (const juce::String& filename) const;
+    yup::File getTempFile (const yup::String& filename) const;
 
     /** */
-    juce::File getUniqueTempFile (const juce::String& prefix, const juce::String& ext) const;
+    yup::File getUniqueTempFile (const yup::String& prefix, const yup::String& ext) const;
 
     //==============================================================================
     /** */
@@ -74,16 +74,16 @@ public:
     static AudioFile getFileForCachedFileRender (Edit&, HashCode hash);
 
     /** */
-    static juce::File getFreezeFileForDevice (Edit&, OutputDevice&);
+    static yup::File getFreezeFileForDevice (Edit&, OutputDevice&);
 
     /** */
-    static juce::String getDeviceIDFromFreezeFile (Edit&, const juce::File& deviceFreezeFile);
+    static yup::String getDeviceIDFromFreezeFile (Edit&, const yup::File& deviceFreezeFile);
 
     /** */
-    static juce::File getFreezeFileForTrack (const AudioTrack&);
+    static yup::File getFreezeFileForTrack (const AudioTrack&);
 
     /** */
-    static juce::Array<juce::File> getFrozenTrackFiles (Edit&);
+    static yup::Array<yup::File> getFrozenTrackFiles (Edit&);
 
     /** */
     static void purgeOrphanFreezeAndProxyFiles (Edit&);
@@ -94,11 +94,11 @@ public:
     //==============================================================================
 private:
     Engine& engine;
-    juce::File tempDir;
+    yup::File tempDir;
 
     void updateDir();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryFileManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TemporaryFileManager)
 };
 
 } // namespace tracktion::inline engine

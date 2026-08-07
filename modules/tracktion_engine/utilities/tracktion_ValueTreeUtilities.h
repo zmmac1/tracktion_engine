@@ -8,13 +8,13 @@
     Tracktion Engine uses a GPL/commercial licence - see LICENCE.md for details.
 */
 
-namespace juce
+namespace yup
 {
     template <>
-    struct VariantConverter<Colour>
+    struct VariantConverter<Color>
     {
-        static Colour fromVar (const var& v)           { return Colour::fromString (v.toString()); }
-        static var toVar (const Colour& c)             { return c.toString(); }
+        static Color fromVar (const var& v)           { return Color::fromString (v.toString()); }
+        static var toVar (const Color& c)             { return c.toString(); }
     };
 }
 
@@ -25,11 +25,11 @@ namespace tracktion::inline engine {
     every time it is read after loading from XML.
 */
 template<typename VarType>
-inline void convertPropertyToType (juce::ValueTree& v, const juce::Identifier& id)
+inline void convertPropertyToType (yup::ValueTree& v, const yup::Identifier& id)
 {
     if (const auto* prop = v.getPropertyPointer (id))
         if (prop->isString())
-            (*const_cast<juce::var*> (prop)) = static_cast<VarType> (*prop);
+            (*const_cast<yup::var*> (prop)) = static_cast<VarType> (*prop);
 }
 
 /** Sets a value if it is different and returns true, otherwise simply returns false. */
@@ -56,7 +56,7 @@ bool matchesAnyOf (const Type& needle, const std::initializer_list<Type>& haysta
 
 /** Calls a function object on each item in an array. */
 template<typename Type, typename UnaryFunction>
-inline void forEachItem (const juce::Array<Type*>& items, const UnaryFunction& fn)
+inline void forEachItem (const yup::Array<Type*>& items, const UnaryFunction& fn)
 {
     for (auto f : items)
         fn (f);
@@ -64,7 +64,7 @@ inline void forEachItem (const juce::Array<Type*>& items, const UnaryFunction& f
 
 //==============================================================================
 template <typename... Others>
-void addValueTreeProperties (juce::ValueTree& v, const juce::Identifier& name, const juce::var& value, Others&&... others)
+void addValueTreeProperties (yup::ValueTree& v, const yup::Identifier& name, const yup::var& value, Others&&... others)
 {
     static_assert ((sizeof...(others) & 1) == 0, "The property list must be a sequence of name, value pairs");
 
@@ -75,22 +75,22 @@ void addValueTreeProperties (juce::ValueTree& v, const juce::Identifier& name, c
 }
 
 template <typename... Properties>
-juce::ValueTree createValueTree (const juce::Identifier& name, Properties&&... properties)
+yup::ValueTree createValueTree (const yup::Identifier& name, Properties&&... properties)
 {
     static_assert ((sizeof...(properties) & 1) == 0, "The property list must be a sequence of name, value pairs");
 
-    juce::ValueTree v (name);
+    yup::ValueTree v (name);
     addValueTreeProperties (v, std::forward<Properties> (properties)...);
     return v;
 }
 
 
 //==============================================================================
-template<typename ObjectType, typename CriticalSectionType = juce::DummyCriticalSection>
-class ValueTreeObjectList   : public juce::ValueTree::Listener
+template<typename ObjectType, typename CriticalSectionType = yup::DummyCriticalSection>
+class ValueTreeObjectList   : public yup::ValueTree::Listener
 {
 public:
-    ValueTreeObjectList (const juce::ValueTree& parentTree)  : parent (parentTree)
+    ValueTreeObjectList (const yup::ValueTree& parentTree)  : parent (parentTree)
     {
         parent.addListener (this);
     }
@@ -128,8 +128,8 @@ public:
     }
 
     //==============================================================================
-    virtual bool isSuitableType (const juce::ValueTree&) const = 0;
-    virtual ObjectType* createNewObject (const juce::ValueTree&) = 0;
+    virtual bool isSuitableType (const yup::ValueTree&) const = 0;
+    virtual ObjectType* createNewObject (const yup::ValueTree&) = 0;
     virtual void deleteObject (ObjectType*) = 0;
 
     virtual void newObjectAdded (ObjectType*) = 0;
@@ -137,12 +137,12 @@ public:
     virtual void objectOrderChanged() = 0;
 
     //==============================================================================
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree& tree) override
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree& tree) override
     {
         if (isChildTree (tree))
         {
             auto index = parent.indexOf (tree);
-            juce::ignoreUnused (index);
+            yup::ignoreUnused (index);
             jassert (index >= 0);
 
             if (auto* newObject = createNewObject (tree))
@@ -163,7 +163,7 @@ public:
         }
     }
 
-    void valueTreeChildRemoved (juce::ValueTree& exParent, juce::ValueTree& tree, int) override
+    void valueTreeChildRemoved (yup::ValueTree& exParent, yup::ValueTree& tree, int) override
     {
         if (parent == exParent && isSuitableType (tree))
         {
@@ -184,7 +184,7 @@ public:
         }
     }
 
-    void valueTreeChildOrderChanged (juce::ValueTree& tree, int, int) override
+    void valueTreeChildOrderChanged (yup::ValueTree& tree, int, int) override
     {
         if (tree == parent)
         {
@@ -197,17 +197,17 @@ public:
         }
     }
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override {}
-    void valueTreeParentChanged (juce::ValueTree&) override {}
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override {}
+    void valueTreeParentChanged (yup::ValueTree&) override {}
 
-    void valueTreeRedirected (juce::ValueTree&) override { jassertfalse; } // may need to add handling if this is hit
+    void valueTreeRedirected (yup::ValueTree&) override { jassertfalse; } // may need to add handling if this is hit
 
-    juce::Array<ObjectType*> objects;
+    yup::Array<ObjectType*> objects;
     CriticalSectionType arrayLock;
     using ScopedLockType = typename CriticalSectionType::ScopedLockType;
 
 protected:
-    juce::ValueTree parent;
+    yup::ValueTree parent;
 
     void deleteAllObjects()
     {
@@ -217,12 +217,12 @@ protected:
             deleteObject (objects.removeAndReturn (objects.size() - 1));
     }
 
-    bool isChildTree (juce::ValueTree& v) const
+    bool isChildTree (yup::ValueTree& v) const
     {
         return isSuitableType (v) && v.getParent() == parent;
     }
 
-    int indexOf (const juce::ValueTree& v) const noexcept
+    int indexOf (const yup::ValueTree& v) const noexcept
     {
         for (int i = 0; i < objects.size(); ++i)
             if (objects.getUnchecked(i)->state == v)
@@ -245,26 +245,26 @@ public:
         return index1 - index2;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreeObjectList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreeObjectList)
 };
 
 //==============================================================================
 template<typename ObjectType>
 struct SortedValueTreeObjectList    : protected ValueTreeObjectList<ObjectType>
 {
-    SortedValueTreeObjectList (const juce::ValueTree& v)
+    SortedValueTreeObjectList (const yup::ValueTree& v)
         : ValueTreeObjectList<ObjectType> (v)
     {
     }
 
     /** Must sort the given array. */
-    virtual void sortObjects (juce::Array<ObjectType*>& objectsToBeSorted) const = 0;
+    virtual void sortObjects (yup::Array<ObjectType*>& objectsToBeSorted) const = 0;
 
     /** Should return true if the given Identifier is used to sort the tree.
         This will be called when one of the items properties changes so this should
         return true if that property means the objects should now be in a different order.
     */
-    virtual bool isSortableProperty (juce::ValueTree&, const juce::Identifier&) = 0;
+    virtual bool isSortableProperty (yup::ValueTree&, const yup::Identifier&) = 0;
 
     /** Should return true if the objects are in a sorted order.
         This might look at a property of the objects (i.e. a start time) to determine their order.
@@ -273,7 +273,7 @@ struct SortedValueTreeObjectList    : protected ValueTreeObjectList<ObjectType>
 
     //==============================================================================
     /** Returns the object for a given state. */
-    const juce::Array<ObjectType*>& getSortedObjects() const
+    const yup::Array<ObjectType*>& getSortedObjects() const
     {
         TRACKTION_ASSERT_MESSAGE_THREAD
         jassert (! insidePropertyChangedMethod);
@@ -292,9 +292,9 @@ struct SortedValueTreeObjectList    : protected ValueTreeObjectList<ObjectType>
     void newObjectAdded (ObjectType* o) override                    { triggerSortIfNeeded (o, -1); }
     void objectOrderChanged() override                              { triggerSort(); }
 
-    void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id) override
+    void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id) override
     {
-        const juce::ScopedValueSetter<bool> svs (insidePropertyChangedMethod, true);
+        const yup::ScopedValueSetter<bool> svs (insidePropertyChangedMethod, true);
 
         if (! (this->isChildTree (v) && isSortableProperty (v, id)))
             return;
@@ -305,10 +305,10 @@ struct SortedValueTreeObjectList    : protected ValueTreeObjectList<ObjectType>
 
 private:
     mutable bool needsSorting = true;
-    mutable juce::Array<ObjectType*> sortedObjects;
+    mutable yup::Array<ObjectType*> sortedObjects;
     bool insidePropertyChangedMethod = false;
 
-    int getSortedIndex (const juce::ValueTree& v) const noexcept
+    int getSortedIndex (const yup::ValueTree& v) const noexcept
     {
         for (int i = sortedObjects.size(); --i >= 0;)
             if (sortedObjects.getUnchecked (i)->state == v)
@@ -342,13 +342,13 @@ private:
                 return triggerSort();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SortedValueTreeObjectList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SortedValueTreeObjectList)
 };
 
 //==============================================================================
 /** Returns the object for a given state if it exists. */
 template<typename ObjectType>
-static ObjectType* getObjectFor (const ValueTreeObjectList<ObjectType>& objectList, const juce::ValueTree& v)
+static ObjectType* getObjectFor (const ValueTreeObjectList<ObjectType>& objectList, const yup::ValueTree& v)
 {
     for (auto* o : objectList.objects)
         if (o->state == v)
@@ -359,40 +359,40 @@ static ObjectType* getObjectFor (const ValueTreeObjectList<ObjectType>& objectLi
 
 //==============================================================================
 // Easy way to get one callback for all value tree change events
-struct ValueTreeAllEventListener  : public juce::ValueTree::Listener
+struct ValueTreeAllEventListener  : public yup::ValueTree::Listener
 {
     virtual void valueTreeChanged() = 0;
 
     //==============================================================================
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override  { valueTreeChanged(); }
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override              { valueTreeChanged(); }
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override       { valueTreeChanged(); }
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override               { valueTreeChanged(); }
-    void valueTreeParentChanged (juce::ValueTree&) override                             { valueTreeChanged(); }
-    void valueTreeRedirected (juce::ValueTree&) override                                { valueTreeChanged(); }
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override  { valueTreeChanged(); }
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override              { valueTreeChanged(); }
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override       { valueTreeChanged(); }
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override               { valueTreeChanged(); }
+    void valueTreeParentChanged (yup::ValueTree&) override                             { valueTreeChanged(); }
+    void valueTreeRedirected (yup::ValueTree&) override                                { valueTreeChanged(); }
 };
 
 //==============================================================================
 class LambdaValueTreeAllEventListener   : private ValueTreeAllEventListener
 {
 public:
-    LambdaValueTreeAllEventListener (const juce::ValueTree& v)
+    LambdaValueTreeAllEventListener (const yup::ValueTree& v)
         : LambdaValueTreeAllEventListener (v, {})
     {}
 
-    LambdaValueTreeAllEventListener (const juce::ValueTree& v, std::function<void()> callback)
+    LambdaValueTreeAllEventListener (const yup::ValueTree& v, std::function<void()> callback)
         : onValueTreeChanged (std::move (callback)), state (v)
     {
         state.addListener (this);
     }
 
     std::function<void()> onValueTreeChanged;
-    std::function<void (juce::ValueTree&, const juce::Identifier&)> onPropertyChanged;
-    std::function<void (juce::ValueTree&, juce::ValueTree&)> onChildAdded;
-    std::function<void (juce::ValueTree&, juce::ValueTree&, int)> onChildRemoved;
+    std::function<void (yup::ValueTree&, const yup::Identifier&)> onPropertyChanged;
+    std::function<void (yup::ValueTree&, yup::ValueTree&)> onChildAdded;
+    std::function<void (yup::ValueTree&, yup::ValueTree&, int)> onChildRemoved;
 
 private:
-    juce::ValueTree state;
+    yup::ValueTree state;
 
     void valueTreeChanged() override
     {
@@ -400,7 +400,7 @@ private:
             onValueTreeChanged();
     }
 
-    void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id) override
+    void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id) override
     {
         if (onPropertyChanged)
             onPropertyChanged (v, id);
@@ -408,7 +408,7 @@ private:
         valueTreeChanged();
     }
 
-    void valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c) override
+    void valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c) override
     {
         if (onChildAdded)
             onChildAdded (p, c);
@@ -416,7 +416,7 @@ private:
         valueTreeChanged();
     }
 
-    void valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int i) override
+    void valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int i) override
     {
         if (onChildRemoved)
             onChildRemoved (p, c, i);
@@ -426,16 +426,16 @@ private:
 };
 
 //==============================================================================
-class ValueTreePropertyChangedListener : private juce::ValueTree::Listener
+class ValueTreePropertyChangedListener : private yup::ValueTree::Listener
 {
 public:
-    ValueTreePropertyChangedListener (const juce::ValueTree& v, std::vector<juce::Identifier> propertiesToListenTo)
+    ValueTreePropertyChangedListener (const yup::ValueTree& v, std::vector<yup::Identifier> propertiesToListenTo)
         : ValueTreePropertyChangedListener (v, std::move (propertiesToListenTo), {})
     {
     }
 
-    ValueTreePropertyChangedListener (const juce::ValueTree& v, std::vector<juce::Identifier> propertiesToListenTo,
-                                     std::function<void (const juce::Identifier&)> callback)
+    ValueTreePropertyChangedListener (const yup::ValueTree& v, std::vector<yup::Identifier> propertiesToListenTo,
+                                     std::function<void (const yup::Identifier&)> callback)
         : onPropertyChanged (std::move (callback)),
           state (v), properties (std::move (propertiesToListenTo))
     {
@@ -449,13 +449,13 @@ public:
         state.addListener (this);
     }
 
-    std::function<void (const juce::Identifier&)> onPropertyChanged;
+    std::function<void (const yup::Identifier&)> onPropertyChanged;
 
 private:
-    juce::ValueTree state;
-    std::vector<juce::Identifier> properties;
+    yup::ValueTree state;
+    std::vector<yup::Identifier> properties;
 
-    void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id) override
+    void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id) override
     {
         if (v != state)
             return;
@@ -474,11 +474,11 @@ template<typename Type>
 struct ValueTreeComparator
 {
 public:
-    ValueTreeComparator (const juce::Identifier& attributeToSort_, bool forwards)
+    ValueTreeComparator (const yup::Identifier& attributeToSort_, bool forwards)
         : attributeToSort (attributeToSort_), direction (forwards ? 1 : -1)
     {}
 
-    inline int compareElements (const juce::ValueTree& first, const juce::ValueTree& second) const
+    inline int compareElements (const yup::ValueTree& first, const yup::ValueTree& second) const
     {
         const int result = (Type (first[attributeToSort]) > Type (second[attributeToSort])) ? 1 : -1;
 
@@ -486,14 +486,14 @@ public:
     }
 
 private:
-    const juce::Identifier attributeToSort;
+    const yup::Identifier attributeToSort;
     const int direction;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreeComparator)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueTreeComparator)
 };
 
 template<>
-inline int ValueTreeComparator<juce::String>::compareElements (const juce::ValueTree& first, const juce::ValueTree& second) const
+inline int ValueTreeComparator<yup::String>::compareElements (const yup::ValueTree& first, const yup::ValueTree& second) const
 {
     const int result = first[attributeToSort].toString().compareNatural (second[attributeToSort].toString());
 
@@ -507,11 +507,11 @@ inline int ValueTreeComparator<juce::String>::compareElements (const juce::Value
     This is somewhat obfuscated but makes it easy to transfer ValueTrees as var objects
     such as when using them as DragAndDropTarget::SourceDetails::description members.
 */
-class ReferenceCountedValueTree  : public juce::ReferenceCountedObject
+class ReferenceCountedValueTree  : public yup::ReferenceCountedObject
 {
 public:
     /** Creates a ReferenceCountedValueTree for a given ValueTree. */
-    ReferenceCountedValueTree (const juce::ValueTree& treeToReference) noexcept
+    ReferenceCountedValueTree (const yup::ValueTree& treeToReference) noexcept
         : tree (treeToReference)
     {}
 
@@ -519,17 +519,17 @@ public:
     ~ReferenceCountedValueTree() {}
 
     /** Sets the ValueTree being held. */
-    void setValueTree (juce::ValueTree newTree)   { tree = newTree; }
+    void setValueTree (yup::ValueTree newTree)   { tree = newTree; }
 
     /** Returns the ValueTree being held. */
-    juce::ValueTree getValueTree() noexcept       { return tree; }
+    yup::ValueTree getValueTree() noexcept       { return tree; }
 
-    using Ptr = juce::ReferenceCountedObjectPtr<ReferenceCountedValueTree>;
+    using Ptr = yup::ReferenceCountedObjectPtr<ReferenceCountedValueTree>;
 
     /** Provides a simple way of getting the tree from a var object which
         is a ReferencedCountedValueTree.
     */
-    static juce::ValueTree getTreeFromObject (const juce::var& treeObject) noexcept
+    static yup::ValueTree getTreeFromObject (const yup::var& treeObject) noexcept
     {
         if (auto refTree = dynamic_cast<ReferenceCountedValueTree*> (treeObject.getObject()))
             return refTree->getValueTree();
@@ -538,25 +538,25 @@ public:
     }
 
 private:
-    juce::ValueTree tree;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReferenceCountedValueTree)
+    yup::ValueTree tree;
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReferenceCountedValueTree)
 };
 
 //==============================================================================
 /** Attempts to load a ValueTree from a file. */
-static inline juce::ValueTree loadValueTree (const juce::File& file, bool asXml)
+static inline yup::ValueTree loadValueTree (const yup::File& file, bool asXml)
 {
     if (asXml)
     {
-        if (auto xml = juce::parseXML (file))
-            return juce::ValueTree::fromXml (*xml);
+        if (auto xml = yup::parseXML (file))
+            return yup::ValueTree::fromXml (*xml);
     }
     else
     {
-        juce::FileInputStream is (file);
+        yup::FileInputStream is (file);
 
         if (is.openedOk())
-            return juce::ValueTree::readFromStream (is);
+            return yup::ValueTree::readFromStream (is);
     }
 
     return {};
@@ -565,25 +565,25 @@ static inline juce::ValueTree loadValueTree (const juce::File& file, bool asXml)
 /** Attempts to load a ValueTree from a file if the outer tag matches a given name.
     This will first try to read as XML and the fall back to binary.
 */
-static inline juce::ValueTree loadValueTree (const juce::File& file, const juce::Identifier& requiredTag)
+static inline yup::ValueTree loadValueTree (const yup::File& file, const yup::Identifier& requiredTag)
 {
-    if (auto xml = juce::parseXMLIfTagMatches (file, requiredTag))
-        return juce::ValueTree::fromXml (*xml);
+    if (auto xml = yup::parseXMLIfTagMatches (file, requiredTag))
+        return yup::ValueTree::fromXml (*xml);
 
-    if (juce::FileInputStream is (file); is.openedOk())
-        if (auto vt = juce::ValueTree::readFromStream (is); vt.hasType (requiredTag))
+    if (yup::FileInputStream is (file); is.openedOk())
+        if (auto vt = yup::ValueTree::readFromStream (is); vt.hasType (requiredTag))
             return vt;
 
     return {};
 }
 
 /** Saves a ValueTree to a File. */
-static inline bool saveValueTree (const juce::File& file, const juce::ValueTree& v, bool asXml)
+static inline bool saveValueTree (const yup::File& file, const yup::ValueTree& v, bool asXml)
 {
-    const juce::TemporaryFile temp (file);
+    const yup::TemporaryFile temp (file);
 
     {
-        juce::FileOutputStream os (temp.getFile());
+        yup::FileOutputStream os (temp.getFile());
 
         if (! os.getStatus().wasOk())
             return false;
@@ -605,15 +605,15 @@ static inline bool saveValueTree (const juce::File& file, const juce::ValueTree&
     return false;
 }
 
-static inline void setPropertyIfMissing (juce::ValueTree& v, const juce::Identifier& id,
-                                         const juce::var& value, juce::UndoManager* um)
+static inline void setPropertyIfMissing (yup::ValueTree& v, const yup::Identifier& id,
+                                         const yup::var& value, juce::UndoManager* um)
 {
     if (! v.hasProperty (id))
         v.setProperty (id, value, um);
 }
 
 /** Creates a deep copy of another ValueTree in an undoable way, maintaining the destination's parent. */
-static inline juce::ValueTree copyValueTree (juce::ValueTree& dest, const juce::ValueTree& src, juce::UndoManager* um)
+static inline yup::ValueTree copyValueTree (yup::ValueTree& dest, const yup::ValueTree& src, juce::UndoManager* um)
 {
     if (! dest.getParent().isValid())
     {
@@ -632,7 +632,7 @@ static inline juce::ValueTree copyValueTree (juce::ValueTree& dest, const juce::
 }
 
 template <typename Predicate>
-static inline void copyValueTreeProperties (juce::ValueTree& dest, const juce::ValueTree& src,
+static inline void copyValueTreeProperties (yup::ValueTree& dest, const yup::ValueTree& src,
                                             juce::UndoManager* um, Predicate&& shouldCopyProperty)
 {
     for (int i = 0; i < src.getNumProperties(); ++i)
@@ -644,9 +644,9 @@ static inline void copyValueTreeProperties (juce::ValueTree& dest, const juce::V
     }
 }
 
-static inline juce::ValueTree getChildWithPropertyRecursively (const juce::ValueTree& p,
-                                                               const juce::Identifier& propertyName,
-                                                               const juce::var& propertyValue)
+static inline yup::ValueTree getChildWithPropertyRecursively (const yup::ValueTree& p,
+                                                               const yup::Identifier& propertyName,
+                                                               const yup::var& propertyValue)
 {
     const int numChildren = p.getNumChildren();
 
@@ -667,7 +667,7 @@ static inline juce::ValueTree getChildWithPropertyRecursively (const juce::Value
 }
 
 template<typename ValueType, typename... CachedValues>
-static void copyPropertiesToCachedValues (const juce::ValueTree& v, juce::CachedValue<ValueType>& cachedValue, CachedValues&&... cachedValues)
+static void copyPropertiesToCachedValues (const yup::ValueTree& v, juce::CachedValue<ValueType>& cachedValue, CachedValues&&... cachedValues)
 {
     if (auto p = v.getPropertyPointer (cachedValue.getPropertyID()))
         cachedValue = p->operator ValueType();
@@ -679,7 +679,7 @@ static void copyPropertiesToCachedValues (const juce::ValueTree& v, juce::Cached
 }
 
 /** Strips out any invalid trees from the array. */
-inline juce::Array<juce::ValueTree>& removeInvalidValueTrees (juce::Array<juce::ValueTree>& trees)
+inline yup::Array<yup::ValueTree>& removeInvalidValueTrees (yup::Array<yup::ValueTree>& trees)
 {
     for (int i = trees.size(); --i >= 0;)
         if (! trees.getReference (i).isValid())
@@ -689,10 +689,10 @@ inline juce::Array<juce::ValueTree>& removeInvalidValueTrees (juce::Array<juce::
 }
 
 /** Returns a new array with any trees without the given type removed. */
-inline juce::Array<juce::ValueTree> getTreesOfType (const juce::Array<juce::ValueTree>& trees,
-                                                    const juce::Identifier& type)
+inline yup::Array<yup::ValueTree> getTreesOfType (const yup::Array<yup::ValueTree>& trees,
+                                                    const yup::Identifier& type)
 {
-    juce::Array<juce::ValueTree> newTrees;
+    yup::Array<yup::ValueTree> newTrees;
 
     for (const auto& v : trees)
         if (v.hasType (type))
@@ -701,8 +701,8 @@ inline juce::Array<juce::ValueTree> getTreesOfType (const juce::Array<juce::Valu
     return newTrees;
 }
 
-inline void getChildTreesRecursive (juce::Array<juce::ValueTree>& result,
-                                    const juce::ValueTree& tree)
+inline void getChildTreesRecursive (yup::Array<yup::ValueTree>& result,
+                                    const yup::ValueTree& tree)
 {
     for (auto child : tree)
     {
@@ -711,9 +711,9 @@ inline void getChildTreesRecursive (juce::Array<juce::ValueTree>& result,
     }
 }
 
-inline void renamePropertyRecursive (juce::ValueTree& tree,
-                                     const juce::Identifier& oldName,
-                                     const juce::Identifier& newName,
+inline void renamePropertyRecursive (yup::ValueTree& tree,
+                                     const yup::Identifier& oldName,
+                                     const yup::Identifier& newName,
                                      juce::UndoManager* um)
 {
     if (auto oldProp = tree.getPropertyPointer (oldName))
@@ -729,17 +729,17 @@ inline void renamePropertyRecursive (juce::ValueTree& tree,
 /** Looks for a chile with the given name and property,
    if one doesn't exist, creates it.
 */
-inline juce::ValueTree getOrCreateChildWithTypeAndProperty (juce::ValueTree& tree,
-                                                            const juce::Identifier& type,
-                                                            const juce::Identifier& property,
-                                                            const juce::var& propertyValue,
+inline yup::ValueTree getOrCreateChildWithTypeAndProperty (yup::ValueTree& tree,
+                                                            const yup::Identifier& type,
+                                                            const yup::Identifier& property,
+                                                            const yup::var& propertyValue,
                                                             juce::UndoManager* undoManager)
 {
     for (auto v : tree)
         if (v.hasType (type) && v.hasProperty (property) && v[property] == propertyValue)
             return v;
 
-    juce::ValueTree newTree { type, {{ property, propertyValue }} };
+    yup::ValueTree newTree { type, {{ property, propertyValue }} };
     tree.appendChild (newTree, undoManager);
 
     return newTree;

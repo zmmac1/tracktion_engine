@@ -11,9 +11,9 @@
 namespace tracktion::inline engine {
 
 static void getPossibleInputDeviceNames (Engine& e,
-                                         juce::StringArray& s, juce::StringArray& a,
-                                         juce::BigInteger& hasAudio,
-                                         juce::BigInteger& hasMidi)
+                                         yup::StringArray& s, yup::StringArray& a,
+                                         yup::BigInteger& hasAudio,
+                                         yup::BigInteger& hasMidi)
 {
     auto& dm = e.getDeviceManager();
 
@@ -36,9 +36,9 @@ static void getPossibleInputDeviceNames (Engine& e,
 }
 
 static void getPossibleOutputDeviceNames (Engine& e,
-                                          juce::StringArray& s, juce::StringArray& a,
-                                          juce::BigInteger& hasAudio,
-                                          juce::BigInteger& hasMidi)
+                                          yup::StringArray& s, yup::StringArray& a,
+                                          yup::BigInteger& hasAudio,
+                                          yup::BigInteger& hasMidi)
 {
     auto& dm = e.getDeviceManager();
 
@@ -88,17 +88,17 @@ InsertPlugin::~InsertPlugin()
 //==============================================================================
 const char* InsertPlugin::xmlTypeName ("insert");
 
-juce::ValueTree InsertPlugin::create()
+yup::ValueTree InsertPlugin::create()
 {
     return createValueTree (IDs::PLUGIN,
                             IDs::type, xmlTypeName);
 }
 
-juce::String InsertPlugin::getName() const                                   { return name.get().isNotEmpty() ? name : TRANS("Insert Plugin"); }
-juce::String InsertPlugin::getPluginType()                                   { return xmlTypeName; }
-juce::String InsertPlugin::getShortName (int)                                { return TRANS("Insert"); }
+yup::String InsertPlugin::getName() const                                   { return name.get().isNotEmpty() ? name : TRANS("Insert Plugin"); }
+yup::String InsertPlugin::getPluginType()                                   { return xmlTypeName; }
+yup::String InsertPlugin::getShortName (int)                                { return TRANS("Insert"); }
 double InsertPlugin::getLatencySeconds()                                     { return latencySeconds; }
-void InsertPlugin::getChannelNames (juce::StringArray*, juce::StringArray*)  {}
+void InsertPlugin::getChannelNames (yup::StringArray*, yup::StringArray*)  {}
 bool InsertPlugin::takesMidiInput()                                          { return true; }
 bool InsertPlugin::canBeAddedToClip()                                        { return false; }
 bool InsertPlugin::needsConstantBufferSize()                                 { return true; }
@@ -141,12 +141,12 @@ void InsertPlugin::applyToBuffer (const PluginRenderContext&)
     jassertfalse; // This shouldn't be called anymore, it's handled directly by the playback graph
 }
 
-juce::String InsertPlugin::getSelectableDescription()
+yup::String InsertPlugin::getSelectableDescription()
 {
     return TRANS("Insert Plugin");
 }
 
-void InsertPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void InsertPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     if (v.hasProperty (IDs::name))
         name = v.getProperty (IDs::name).toString();
@@ -166,10 +166,10 @@ void InsertPlugin::updateDeviceTypes()
     CRASH_TRACER
     TRACKTION_ASSERT_MESSAGE_THREAD
 
-    juce::StringArray devices, aliases;
-    juce::BigInteger hasAudio, hasMidi;
+    yup::StringArray devices, aliases;
+    yup::BigInteger hasAudio, hasMidi;
 
-    auto setDeviceType = [] (DeviceType& deviceType, juce::BigInteger& audio, juce::BigInteger& midi, int index)
+    auto setDeviceType = [] (DeviceType& deviceType, yup::BigInteger& audio, yup::BigInteger& midi, int index)
     {
         if (audio[index])       deviceType = audioDevice;
         else if (midi[index])   deviceType = midiDevice;
@@ -187,9 +187,9 @@ void InsertPlugin::updateDeviceTypes()
 }
 
 void InsertPlugin::getPossibleDeviceNames (Engine& e,
-                                           juce::StringArray& s, juce::StringArray& a,
-                                           juce::BigInteger& hasAudio,
-                                           juce::BigInteger& hasMidi,
+                                           yup::StringArray& s, yup::StringArray& a,
+                                           yup::BigInteger& hasAudio,
+                                           yup::BigInteger& hasMidi,
                                            bool forInput)
 {
     if (forInput)
@@ -206,11 +206,11 @@ int InsertPlugin::getLatencyNumSamples() const
     return latencyNumSamples.load (std::memory_order_acquire);
 }
 
-void InsertPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void InsertPlugin::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v == state)
     {
-        auto update = [&i] (juce::CachedValue<juce::String>& deviceName) -> bool
+        auto update = [&i] (juce::CachedValue<yup::String>& deviceName) -> bool
         {
             if (i != deviceName.getPropertyID())
                 return false;

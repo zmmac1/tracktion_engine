@@ -49,14 +49,14 @@ public:
     ~ProjectItemID() noexcept = default;
 
     /** takes a string created by toString(). */
-    explicit ProjectItemID (const juce::String& stringID) noexcept;
+    explicit ProjectItemID (const yup::String& stringID) noexcept;
 
     /** Creates an ID from the item ID and project ID. */
     ProjectItemID (int itemID, ProjectID projectID) noexcept;
 
     /** Generates a new ID for a given project. */
     static ProjectItemID createNewID (ProjectID projectID) noexcept;
-    static ProjectItemID fromProperty (const juce::ValueTree&, const juce::Identifier&);
+    static ProjectItemID fromProperty (const yup::ValueTree&, const yup::Identifier&);
 
     ProjectItemID withNewProjectID (ProjectID newProjectID) const;
 
@@ -74,8 +74,8 @@ public:
     bool isInvalid() const noexcept                     { return combinedID == 0; }
 
     //==============================================================================
-    juce::String toString() const;
-    juce::String toStringSuitableForFilename() const;
+    yup::String toString() const;
+    yup::String toStringSuitableForFilename() const;
 
     //==============================================================================
     bool operator== (ProjectItemID other) const         { return combinedID == other.combinedID; }
@@ -86,12 +86,12 @@ private:
     int64_t combinedID = 0;
 
     // (NB: this is disallowed because it's ambiguous whether a string or int64 format is intended)
-    ProjectItemID (const juce::var&) = delete;
+    ProjectItemID (const yup::var&) = delete;
 };
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
 template <>
 struct VariantConverter<tracktion::engine::ProjectItemID>

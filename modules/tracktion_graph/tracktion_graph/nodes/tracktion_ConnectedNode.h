@@ -233,7 +233,7 @@ inline void ConnectedNode::process (ProcessContext& pc)
     auto& destMIDI = pc.buffers.midi;
 
     const int numSamples = (int) pc.referenceSampleRange.getLength();
-    juce::ignoreUnused (numSamples);
+    yup::ignoreUnused (numSamples);
     jassert (destAudio.getNumChannels() == 0 || numSamples == (int) destAudio.getNumFrames());
 
     for (const auto& connection : connections)

@@ -17,7 +17,7 @@ DAWprojectExporter::DAWprojectExporter (Edit& e, const WriteOptions& opts)
 }
 
 //==============================================================================
-tl::expected<std::unique_ptr<juce::XmlElement>, juce::String> DAWprojectExporter::createProjectXml()
+tl::expected<std::unique_ptr<yup::XmlElement>, yup::String> DAWprojectExporter::createProjectXml()
 {
     auto project = createXmlElement (xml::Project);
     project->setAttribute (xml::version, "1.0");
@@ -43,7 +43,7 @@ tl::expected<std::unique_ptr<juce::XmlElement>, juce::String> DAWprojectExporter
 }
 
 //==============================================================================
-std::unique_ptr<juce::XmlElement> DAWprojectExporter::createMetadataXml()
+std::unique_ptr<yup::XmlElement> DAWprojectExporter::createMetadataXml()
 {
     auto metadata = createXmlElement ("MetaData");
 
@@ -64,12 +64,12 @@ std::unique_ptr<juce::XmlElement> DAWprojectExporter::createMetadataXml()
 }
 
 //==============================================================================
-juce::Result DAWprojectExporter::writeToFile (const juce::File& file)
+yup::Result DAWprojectExporter::writeToFile (const yup::File& file)
 {
     // Create the project XML
     auto projectXmlResult = createProjectXml();
     if (! projectXmlResult.has_value())
-        return juce::Result::fail (projectXmlResult.error());
+        return yup::Result::fail (projectXmlResult.error());
 
     auto& projectXml = *projectXmlResult.value();
 
@@ -77,19 +77,19 @@ juce::Result DAWprojectExporter::writeToFile (const juce::File& file)
     auto metadataXml = createMetadataXml();
 
     // Build the ZIP file
-    juce::ZipFile::Builder zipBuilder;
+    yup::ZipFile::Builder zipBuilder;
 
     // Add project.xml
     auto projectXmlString = projectXml.toString();
-    auto projectXmlData = juce::MemoryBlock (projectXmlString.toRawUTF8(), projectXmlString.getNumBytesAsUTF8());
-    zipBuilder.addEntry (std::make_unique<juce::MemoryInputStream> (projectXmlData, false),
-                         9, "project.xml", juce::Time::getCurrentTime());
+    auto projectXmlData = yup::MemoryBlock (projectXmlString.toRawUTF8(), projectXmlString.getNumBytesAsUTF8());
+    zipBuilder.addEntry (std::make_unique<yup::MemoryInputStream>(projectXmlData, false).release(),
+                         9, "project.xml", yup::Time::getCurrentTime());
 
     // Add metadata.xml
     auto metadataXmlString = metadataXml->toString();
-    auto metadataXmlData = juce::MemoryBlock (metadataXmlString.toRawUTF8(), metadataXmlString.getNumBytesAsUTF8());
-    zipBuilder.addEntry (std::make_unique<juce::MemoryInputStream> (metadataXmlData, false),
-                         9, "metadata.xml", juce::Time::getCurrentTime());
+    auto metadataXmlData = yup::MemoryBlock (metadataXmlString.toRawUTF8(), metadataXmlString.getNumBytesAsUTF8());
+    zipBuilder.addEntry (std::make_unique<yup::MemoryInputStream>(metadataXmlData, false).release(),
+                         9, "metadata.xml", yup::Time::getCurrentTime());
 
     // Add audio files
     writeAudioFiles (zipBuilder);
@@ -98,18 +98,18 @@ juce::Result DAWprojectExporter::writeToFile (const juce::File& file)
     writePluginStates (zipBuilder);
 
     // Write the ZIP file
-    juce::FileOutputStream output (file);
+    yup::FileOutputStream output (file);
     if (! output.openedOk())
-        return juce::Result::fail ("Failed to create output file: " + file.getFullPathName());
+        return yup::Result::fail ("Failed to create output file: " + file.getFullPathName());
 
     if (! zipBuilder.writeToStream (output, nullptr))
-        return juce::Result::fail ("Failed to write ZIP archive");
+        return yup::Result::fail ("Failed to write ZIP archive");
 
-    return juce::Result::ok();
+    return yup::Result::ok();
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createTransport (juce::XmlElement& parent)
+yup::XmlElement* DAWprojectExporter::createTransport (yup::XmlElement& parent)
 {
     auto* transport = addChildElement (parent, xml::Transport);
 
@@ -134,7 +134,7 @@ juce::XmlElement* DAWprojectExporter::createTransport (juce::XmlElement& parent)
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createStructure (juce::XmlElement& parent)
+yup::XmlElement* DAWprojectExporter::createStructure (yup::XmlElement& parent)
 {
     auto* structure = addChildElement (parent, xml::Structure);
 
@@ -175,7 +175,7 @@ juce::XmlElement* DAWprojectExporter::createStructure (juce::XmlElement& parent)
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createTrackElement (juce::XmlElement& parent, Track& track)
+yup::XmlElement* DAWprojectExporter::createTrackElement (yup::XmlElement& parent, Track& track)
 {
     auto* trackElement = addChildElement (parent, xml::Track);
 
@@ -186,7 +186,7 @@ juce::XmlElement* DAWprojectExporter::createTrackElement (juce::XmlElement& pare
     trackElement->setAttribute (xml::contentType, getTrackContentType (track));
 
     // Color
-    auto colour = track.getColour();
+    auto colour = track.getColor();
     if (! colour.isTransparent())
         trackElement->setAttribute (xml::color, colourToDAWprojectString (colour));
 
@@ -204,7 +204,7 @@ juce::XmlElement* DAWprojectExporter::createTrackElement (juce::XmlElement& pare
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createChannelElement (juce::XmlElement& parent, Track& track)
+yup::XmlElement* DAWprojectExporter::createChannelElement (yup::XmlElement& parent, Track& track)
 {
     auto* channel = addChildElement (parent, xml::Channel);
 
@@ -245,7 +245,7 @@ juce::XmlElement* DAWprojectExporter::createChannelElement (juce::XmlElement& pa
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createArrangement (juce::XmlElement& parent)
+yup::XmlElement* DAWprojectExporter::createArrangement (yup::XmlElement& parent)
 {
     auto* arrangement = addChildElement (parent, xml::Arrangement);
     arrangement->setAttribute (xml::id, idGenerator.generateID());
@@ -286,7 +286,7 @@ juce::XmlElement* DAWprojectExporter::createArrangement (juce::XmlElement& paren
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createTempoAutomation (juce::XmlElement& parent)
+yup::XmlElement* DAWprojectExporter::createTempoAutomation (yup::XmlElement& parent)
 {
     auto& tempoSeq = edit.tempoSequence;
     if (tempoSeq.getNumTempos() <= 1)
@@ -314,7 +314,7 @@ juce::XmlElement* DAWprojectExporter::createTempoAutomation (juce::XmlElement& p
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createTimeSignatureAutomation (juce::XmlElement& parent)
+yup::XmlElement* DAWprojectExporter::createTimeSignatureAutomation (yup::XmlElement& parent)
 {
     auto& tempoSeq = edit.tempoSequence;
     if (tempoSeq.getNumTimeSigs() <= 1)
@@ -338,7 +338,7 @@ juce::XmlElement* DAWprojectExporter::createTimeSignatureAutomation (juce::XmlEl
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createMarkersElement (juce::XmlElement& parent)
+yup::XmlElement* DAWprojectExporter::createMarkersElement (yup::XmlElement& parent)
 {
     auto* markerTrack = edit.getMarkerTrack();
     if (markerTrack == nullptr)
@@ -358,7 +358,7 @@ juce::XmlElement* DAWprojectExporter::createMarkersElement (juce::XmlElement& pa
             marker->setAttribute (xml::name, markerClip->getName());
             marker->setAttribute (xml::time, markerClip->getPosition().getStart().inSeconds());
 
-            auto colour = markerClip->getColour();
+            auto colour = markerClip->getColor();
             if (! colour.isTransparent())
                 marker->setAttribute (xml::color, colourToDAWprojectString (colour));
         }
@@ -368,7 +368,7 @@ juce::XmlElement* DAWprojectExporter::createMarkersElement (juce::XmlElement& pa
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createScenes (juce::XmlElement& parent)
+yup::XmlElement* DAWprojectExporter::createScenes (yup::XmlElement& parent)
 {
     auto& sceneList = edit.getSceneList();
     auto scenes = sceneList.getScenes();
@@ -431,7 +431,7 @@ juce::XmlElement* DAWprojectExporter::createScenes (juce::XmlElement& parent)
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createClipsElement (juce::XmlElement& parent, ClipTrack& track)
+yup::XmlElement* DAWprojectExporter::createClipsElement (yup::XmlElement& parent, ClipTrack& track)
 {
     auto* clips = addChildElement (parent, xml::Clips);
 
@@ -442,7 +442,7 @@ juce::XmlElement* DAWprojectExporter::createClipsElement (juce::XmlElement& pare
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createClipElement (juce::XmlElement& parent, Clip& clip)
+yup::XmlElement* DAWprojectExporter::createClipElement (yup::XmlElement& parent, Clip& clip)
 {
     auto* clipElement = addChildElement (parent, xml::Clip);
 
@@ -452,7 +452,7 @@ juce::XmlElement* DAWprojectExporter::createClipElement (juce::XmlElement& paren
     setAttributeIfNotEmpty (*clipElement, xml::name, clip.getName());
 
     // Color
-    auto colour = clip.getColour();
+    auto colour = clip.getColor();
     if (! colour.isTransparent())
         clipElement->setAttribute (xml::color, colourToDAWprojectString (colour));
 
@@ -470,7 +470,7 @@ juce::XmlElement* DAWprojectExporter::createClipElement (juce::XmlElement& paren
 }
 
 //==============================================================================
-void DAWprojectExporter::exportAudioClip (juce::XmlElement& clipElement, WaveAudioClip& clip)
+void DAWprojectExporter::exportAudioClip (yup::XmlElement& clipElement, WaveAudioClip& clip)
 {
     auto sourceFile = clip.getOriginalFile();
     if (! sourceFile.existsAsFile())
@@ -516,7 +516,7 @@ void DAWprojectExporter::exportAudioClip (juce::XmlElement& clipElement, WaveAud
 }
 
 //==============================================================================
-void DAWprojectExporter::exportMidiClip (juce::XmlElement& clipElement, MidiClip& clip)
+void DAWprojectExporter::exportMidiClip (yup::XmlElement& clipElement, MidiClip& clip)
 {
     clipElement.setAttribute (xml::contentTimeUnit, xml::beats);
 
@@ -545,7 +545,7 @@ void DAWprojectExporter::exportMidiClip (juce::XmlElement& clipElement, MidiClip
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createNotesElement (juce::XmlElement& parent, MidiClip& clip)
+yup::XmlElement* DAWprojectExporter::createNotesElement (yup::XmlElement& parent, MidiClip& clip)
 {
     auto* notes = addChildElement (parent, xml::Notes);
     notes->setAttribute (xml::timeUnit, xml::beats);
@@ -562,13 +562,13 @@ juce::XmlElement* DAWprojectExporter::createNotesElement (juce::XmlElement& pare
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createNoteElement (juce::XmlElement& parent, const MidiNote& note)
+yup::XmlElement* DAWprojectExporter::createNoteElement (yup::XmlElement& parent, const MidiNote& note)
 {
     auto* noteElement = addChildElement (parent, xml::Note);
 
     noteElement->setAttribute (xml::time, note.getStartBeat().inBeats());
     noteElement->setAttribute (xml::duration, note.getLengthBeats().inBeats());
-    noteElement->setAttribute (xml::channel, note.getColour()); // MIDI channel is stored in colour
+    noteElement->setAttribute (xml::channel, note.getColor()); // MIDI channel is stored in colour
     noteElement->setAttribute (xml::key, note.getNoteNumber());
     noteElement->setAttribute (xml::vel, velocityToNormalized (note.getVelocity()));
 
@@ -576,7 +576,7 @@ juce::XmlElement* DAWprojectExporter::createNoteElement (juce::XmlElement& paren
 }
 
 //==============================================================================
-void DAWprojectExporter::createControllerLanes (juce::XmlElement& parent, MidiClip& clip)
+void DAWprojectExporter::createControllerLanes (yup::XmlElement& parent, MidiClip& clip)
 {
     auto& sequence = clip.getSequence();
     auto& controllerEvents = sequence.getControllerEvents();
@@ -585,7 +585,7 @@ void DAWprojectExporter::createControllerLanes (juce::XmlElement& parent, MidiCl
         return;
 
     // Group events by controller type
-    std::map<int, juce::Array<MidiControllerEvent*>> eventsByType;
+    std::map<int, yup::Array<MidiControllerEvent*>> eventsByType;
 
     for (auto* event : controllerEvents)
     {
@@ -621,7 +621,7 @@ void DAWprojectExporter::createControllerLanes (juce::XmlElement& parent, MidiCl
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createDevices (juce::XmlElement& parent, Track& track)
+yup::XmlElement* DAWprojectExporter::createDevices (yup::XmlElement& parent, Track& track)
 {
     auto* audioTrack = dynamic_cast<AudioTrack*> (&track);
     if (audioTrack == nullptr)
@@ -646,7 +646,7 @@ juce::XmlElement* DAWprojectExporter::createDevices (juce::XmlElement& parent, T
 }
 
 //==============================================================================
-juce::XmlElement* DAWprojectExporter::createPluginElement (juce::XmlElement& parent, Plugin& plugin)
+yup::XmlElement* DAWprojectExporter::createPluginElement (yup::XmlElement& parent, Plugin& plugin)
 {
     auto pluginType = getPluginType (plugin);
     if (pluginType.isEmpty())
@@ -663,8 +663,8 @@ juce::XmlElement* DAWprojectExporter::createPluginElement (juce::XmlElement& par
         auto& desc = externalPlugin->desc;
         pluginElement->setAttribute (xml::deviceID, createIdentifierString (desc));
 
-        if (desc.manufacturerName.isNotEmpty())
-            pluginElement->setAttribute (xml::deviceVendor, desc.manufacturerName);
+        if (desc.vendor.isNotEmpty())
+            pluginElement->setAttribute (xml::deviceVendor, desc.vendor);
         if (desc.version.isNotEmpty())
             pluginElement->setAttribute (xml::pluginVersion, desc.version);
 
@@ -675,12 +675,12 @@ juce::XmlElement* DAWprojectExporter::createPluginElement (juce::XmlElement& par
         // Save plugin state
         if (options.embedPluginState)
         {
-            juce::MemoryBlock stateData;
+            yup::MemoryBlock stateData;
             externalPlugin->getPluginStateFromTree (stateData);
 
             if (stateData.getSize() > 0)
             {
-                auto statePath = "plugins/" + juce::String (pluginStatesToEmbed.size()) + ".bin";
+                auto statePath = "plugins/" + yup::String (pluginStatesToEmbed.size()) + ".bin";
                 pluginStatesToEmbed.push_back ({ stateData, statePath });
 
                 auto* stateElement = addChildElement (*pluginElement, xml::State);
@@ -693,7 +693,7 @@ juce::XmlElement* DAWprojectExporter::createPluginElement (juce::XmlElement& par
 }
 
 //==============================================================================
-juce::String DAWprojectExporter::addAudioFile (const juce::File& file)
+yup::String DAWprojectExporter::addAudioFile (const yup::File& file)
 {
     // Check if already added
     for (const auto& entry : audioFilesToEmbed)
@@ -722,7 +722,7 @@ juce::String DAWprojectExporter::addAudioFile (const juce::File& file)
             break;
 
         archivePath = "audio/" + file.getFileNameWithoutExtension() + "_" +
-                      juce::String (counter++) + file.getFileExtension();
+                      yup::String (counter++) + file.getFileExtension();
     }
 
     audioFilesToEmbed.push_back ({ file, archivePath });
@@ -730,7 +730,7 @@ juce::String DAWprojectExporter::addAudioFile (const juce::File& file)
 }
 
 //==============================================================================
-void DAWprojectExporter::writeAudioFiles (juce::ZipFile::Builder& zipBuilder)
+void DAWprojectExporter::writeAudioFiles (yup::ZipFile::Builder& zipBuilder)
 {
     if (! options.embedAudioFiles)
         return;
@@ -745,20 +745,20 @@ void DAWprojectExporter::writeAudioFiles (juce::ZipFile::Builder& zipBuilder)
 }
 
 //==============================================================================
-void DAWprojectExporter::writePluginStates (juce::ZipFile::Builder& zipBuilder)
+void DAWprojectExporter::writePluginStates (yup::ZipFile::Builder& zipBuilder)
 {
     if (! options.embedPluginState)
         return;
 
     for (const auto& entry : pluginStatesToEmbed)
     {
-        zipBuilder.addEntry (std::make_unique<juce::MemoryInputStream> (entry.state, false),
-                             9, entry.archivePath, juce::Time::getCurrentTime());
+        zipBuilder.addEntry (std::make_unique<yup::MemoryInputStream>(entry.state, false).release(),
+                             9, entry.archivePath, yup::Time::getCurrentTime());
     }
 }
 
 //==============================================================================
-juce::String DAWprojectExporter::getTrackContentType (Track& track) const
+yup::String DAWprojectExporter::getTrackContentType (Track& track) const
 {
     if (dynamic_cast<FolderTrack*> (&track) != nullptr)
         return xml::tracks;
@@ -786,7 +786,7 @@ juce::String DAWprojectExporter::getTrackContentType (Track& track) const
 }
 
 //==============================================================================
-juce::String DAWprojectExporter::getMixerRole (Track& track) const
+yup::String DAWprojectExporter::getMixerRole (Track& track) const
 {
     if (dynamic_cast<FolderTrack*> (&track) != nullptr)
     {
@@ -800,17 +800,17 @@ juce::String DAWprojectExporter::getMixerRole (Track& track) const
 }
 
 //==============================================================================
-juce::String DAWprojectExporter::getPluginType (Plugin& plugin) const
+yup::String DAWprojectExporter::getPluginType (Plugin& plugin) const
 {
     if (auto* externalPlugin = dynamic_cast<ExternalPlugin*> (&plugin))
     {
         auto& desc = externalPlugin->desc;
 
-        if (desc.pluginFormatName == "VST3")
+        if (desc.name == "VST3")
             return xml::Vst3Plugin;
-        if (desc.pluginFormatName == "VST")
+        if (desc.name == "VST")
             return xml::Vst2Plugin;
-        if (desc.pluginFormatName == "AudioUnit")
+        if (desc.name == "AudioUnit")
             return xml::AuPlugin;
     }
 
@@ -818,7 +818,7 @@ juce::String DAWprojectExporter::getPluginType (Plugin& plugin) const
 }
 
 //==============================================================================
-juce::String DAWprojectExporter::getDeviceRole (Plugin& plugin) const
+yup::String DAWprojectExporter::getDeviceRole (Plugin& plugin) const
 {
     if (plugin.takesMidiInput() && ! plugin.producesAudioWhenNoAudioInput())
         return xml::noteFX;

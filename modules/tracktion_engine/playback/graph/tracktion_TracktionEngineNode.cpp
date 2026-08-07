@@ -27,7 +27,7 @@ ProcessState::ProcessState (tracktion::graph::PlayHeadState& phs, const tempo::S
 {
 }
 
-void ProcessState::update (double newSampleRate, juce::Range<int64_t> newReferenceSampleRange, UpdateContinuityFlags updateContinuityFlags)
+void ProcessState::update (double newSampleRate, yup::Range<int64_t> newReferenceSampleRange, UpdateContinuityFlags updateContinuityFlags)
 {
     if (sampleRate != newSampleRate)
         playHeadState.playHead.setScrubbingBlockLength (toSamples (TimeDuration (0.08s), newSampleRate));

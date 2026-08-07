@@ -28,7 +28,7 @@ namespace tracktion::inline engine
 
             // Sin file must outlive everything!
             auto fileLength = 5_td;
-            context->squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds());
+            context->squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds());
             context->track = getAudioTracks (*context->edit)[0];
             context->clip = insertWaveClip (*context->track, {}, context->squareFile->getFile(), { .time = { 0_tp, fileLength } },
                                            DeleteExistingClips::no);
@@ -43,7 +43,7 @@ namespace tracktion::inline engine
         }
 
         std::unique_ptr<Edit> edit;
-        std::unique_ptr<juce::TemporaryFile> squareFile;
+        std::unique_ptr<yup::TemporaryFile> squareFile;
         AudioTrack::Ptr track;
         WaveAudioClip::Ptr clip;
 
@@ -1137,7 +1137,7 @@ TEST_SUITE("tracktion_engine")
         SUBCASE ("Empty AutomationPoints returns false on paste")
         {
             // Create empty content by constructing with empty track array
-            juce::Array<Track*> emptyTracks;
+            yup::Array<Track*> emptyTracks;
             Clipboard::AutomationPoints emptyContent (emptyTracks, TimeRange (0_tp, 2_tp));
 
             CHECK (emptyContent.curves.empty());
@@ -1147,7 +1147,7 @@ TEST_SUITE("tracktion_engine")
             CHECK_FALSE (emptyContent.pasteAutomationCurve (*volParam2, curve2, TimeRange (0_tp, 2_tp)));
             CHECK_FALSE (emptyContent.pasteAutomationCurveAtIndex (*volParam2, curve2, TimeRange (0_tp, 2_tp), 0));
 
-            juce::Array<Track*> targetTracks;
+            yup::Array<Track*> targetTracks;
             targetTracks.add (at2);
             CHECK_FALSE (emptyContent.pasteIntoTracks (targetTracks, 0_tp));
         }
@@ -1179,7 +1179,7 @@ TEST_SUITE("tracktion_engine")
             panCurve1.addPoint (0_tp, 0.0f, 0.0f, nullptr);
             panCurve1.addPoint (1_tp, 0.5f, 0.0f, nullptr);
 
-            juce::Array<AutomatableParameter*> params;
+            yup::Array<AutomatableParameter*> params;
             params.add (volParam1.get());
             params.add (panParam1.get());
 
@@ -1332,7 +1332,7 @@ TEST_SUITE("tracktion_engine")
             }
         };
 
-        juce::ValueTree oldEditState;
+        yup::ValueTree oldEditState;
 
         // Original Edit
         // Track 1 clip automating track volume

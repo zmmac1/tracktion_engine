@@ -33,9 +33,9 @@ public:
     T getNextValue()
     {
         if (currentValue < targetValue)
-            currentValue = juce::jmin (targetValue, currentValue + delta);
+            currentValue = yup::jmin (targetValue, currentValue + delta);
         else if (currentValue > targetValue)
-            currentValue = juce::jmax (targetValue, currentValue - delta);
+            currentValue = yup::jmax (targetValue, currentValue - delta);
         return currentValue;
     }
 
@@ -128,7 +128,7 @@ public:
         switch (parameters.waveShape)
         {
             case none:      val = 0; break;
-            case sine:      val = std::sin (localPhase * juce::MathConstants<float>::pi * 2); break;
+            case sine:      val = std::sin (localPhase * yup::MathConstants<float>::pi * 2); break;
             case triangle:  val = (localPhase < 0.5f) ? (4.0f * localPhase - 1.0f) : (-4.0f * localPhase + 3.0f); break;
             case sawUp:     val = localPhase * 2.0f - 1.0f; break;
             case sawDown:   val = (1.0f - localPhase) * 2.0f - 1.0f; break;
@@ -145,7 +145,7 @@ private:
     double phase = 0, lastLocalPhase = 1, sampleRate = 0;
     float lastRandomVal = 0;
 
-    juce::Random randomSource {1};
+    yup::Random randomSource {1};
 
     inline float wrapValue (float v, float range)
     {
@@ -157,8 +157,8 @@ private:
 
 //==============================================================================
 class FourOscPlugin  : public Plugin,
-                       private juce::MPESynthesiser,
-                       private juce::AsyncUpdater,
+                       private yup::MPESynthesiser,
+                       private yup::AsyncUpdater,
                        private LevelMeasurer::Client
 {
 public:
@@ -173,10 +173,10 @@ public:
     static const char* getPluginName()                  { return NEEDS_TRANS("4OSC"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return TRANS("4OSC"); }
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getShortName (int) override            { return "4OSC"; }
-    juce::String getSelectableDescription() override    { return TRANS("4OSC Plugin"); }
+    yup::String getName() const override               { return TRANS("4OSC"); }
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getShortName (int) override            { return "4OSC"; }
+    yup::String getSelectableDescription() override    { return TRANS("4OSC Plugin"); }
 
     int getNumOutputChannelsGivenInputs (int) override                 { return 2; }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
@@ -195,12 +195,12 @@ public:
     bool producesAudioWhenNoAudioInput() override       { return true; }
     double getTailLength() const override               { return ampRelease->getCurrentValue(); }
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     float getCurrentTempo()                             { return currentTempo; }
 
 private:
-    std::unordered_map<juce::String, juce::String> labels;
+    std::unordered_map<yup::String, yup::String> labels;
 
 public:
     //==============================================================================
@@ -216,14 +216,14 @@ public:
 
         AutomatableParameter::Ptr tune, fineTune, level, pulseWidth, detune, spread, pan;
 
-        void restorePluginStateFromValueTree (const juce::ValueTree& v)
+        void restorePluginStateFromValueTree (const yup::ValueTree& v)
         {
             copyPropertiesToCachedValues (v, tuneValue, fineTuneValue, levelValue, pulseWidthValue,
                                           detuneValue, spreadValue, panValue, waveShapeValue, voicesValue);
         }
     };
 
-    juce::OwnedArray<OscParams> oscParams;
+    yup::OwnedArray<OscParams> oscParams;
 
     //==============================================================================
     struct LFOParams
@@ -238,13 +238,13 @@ public:
 
         AutomatableParameter::Ptr rate, depth;
 
-        void restorePluginStateFromValueTree (const juce::ValueTree& v)
+        void restorePluginStateFromValueTree (const yup::ValueTree& v)
         {
             copyPropertiesToCachedValues (v, rateValue, beatValue, depthValue, waveShapeValue, syncValue);
         }
     };
 
-    juce::OwnedArray<LFOParams> lfoParams;
+    yup::OwnedArray<LFOParams> lfoParams;
 
     //==============================================================================
     struct MODEnvParams
@@ -256,13 +256,13 @@ public:
         juce::CachedValue<float> modAttackValue, modDecayValue, modSustainValue, modReleaseValue;
         AutomatableParameter::Ptr modAttack, modDecay, modSustain, modRelease;
 
-        void restorePluginStateFromValueTree (const juce::ValueTree& v)
+        void restorePluginStateFromValueTree (const yup::ValueTree& v)
         {
             copyPropertiesToCachedValues (v, modAttackValue, modDecayValue, modSustainValue, modReleaseValue);
         }
     };
 
-    juce::OwnedArray<MODEnvParams> modEnvParams;
+    yup::OwnedArray<MODEnvParams> modEnvParams;
 
     //==============================================================================
     juce::CachedValue<float> ampAttackValue, ampDecayValue, ampSustainValue, ampReleaseValue, ampVelocityValue;
@@ -310,12 +310,12 @@ public:
         numModSources
     };
 
-    juce::String modulationSourceToName (ModSource src);
-    juce::String modulationSourceToID (ModSource src);
-    ModSource idToModulationSource (juce::String idStr);
+    yup::String modulationSourceToName (ModSource src);
+    yup::String modulationSourceToID (ModSource src);
+    ModSource idToModulationSource (yup::String idStr);
     bool isModulated (AutomatableParameter::Ptr param);
-    juce::Array<float> getLiveModulationPositions (AutomatableParameter::Ptr param);
-    juce::Array<ModSource> getModulationSources (AutomatableParameter::Ptr param);
+    yup::Array<float> getLiveModulationPositions (AutomatableParameter::Ptr param);
+    yup::Array<ModSource> getModulationSources (AutomatableParameter::Ptr param);
     float getModulationDepth (ModSource src, AutomatableParameter::Ptr param);
     void setModulationDepth (ModSource src, AutomatableParameter::Ptr param, float depth);
     void clearModulation (ModSource src, AutomatableParameter::Ptr param);
@@ -332,7 +332,7 @@ public:
         inline void updateCachedInfo()
         {
             int f = -1, l = -1;
-            for (int i = 0; i < juce::numElementsInArray (depths); i++)
+            for (int i = 0; i < yup::numElementsInArray (depths); i++)
             {
                 if (depths[i] >= -1.0f && f == -1)  f = i;
                 if (depths[i] >= -1.0)              l = i;
@@ -359,9 +359,9 @@ public:
 private:
     //==============================================================================
     void valueTreeChanged() override;
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
     void handleAsyncUpdate() override;
     void handleController (int midiChannel, int controllerNumber, int controllerValue) override;
 
@@ -369,15 +369,15 @@ private:
 
     void loadModMatrix();
     void setupTextFunctions();
-    AutomatableParameter* addParam (const juce::String& paramID, const juce::String& name, juce::NormalisableRange<float> valueRange, juce::String label = {});
+    AutomatableParameter* addParam (const yup::String& paramID, const yup::String& name, yup::NormalisableRange<float> valueRange, yup::String label = {});
 
-    void applyToBuffer (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midi);
-    void updateParams (juce::AudioBuffer<float>& buffer);
-    void applyEffects (juce::AudioBuffer<float>& buffer);
+    void applyToBuffer (yup::AudioBuffer<float>& buffer, yup::MidiBuffer& midi);
+    void updateParams (yup::AudioBuffer<float>& buffer);
+    void applyEffects (yup::AudioBuffer<float>& buffer);
     float paramValue (AutomatableParameter::Ptr param);
 
     tempo::Sequence::Position currentPos { createPosition (edit.tempoSequence) };
-    juce::Reverb reverb;
+    yup::Reverb reverb;
     std::unique_ptr<FODelay> delay;
     std::unique_ptr<FOChorus> chorus;
     std::unordered_map<AutomatableParameter*, ValueSmoother<float>> smoothers;
@@ -387,7 +387,7 @@ private:
     LevelMeasurer levelMeasurer;
     DbTimePair levels[2];
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FourOscPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FourOscPlugin)
 };
 
 } // namespace tracktion::inline engine

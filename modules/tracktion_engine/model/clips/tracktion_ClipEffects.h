@@ -34,18 +34,18 @@ public:
         lastEffect      = filter
     };
 
-    static juce::ValueTree create (EffectType);
-    static ClipEffect* create (const juce::ValueTree&, ClipEffects&);
+    static yup::ValueTree create (EffectType);
+    static ClipEffect* create (const yup::ValueTree&, ClipEffects&);
 
-    static void createEffectAndAddToValueTree (Edit&, juce::ValueTree parent,
+    static void createEffectAndAddToValueTree (Edit&, yup::ValueTree parent,
                                                ClipEffect::EffectType, int index);
 
     virtual void initialise() {}
 
-    static juce::String getTypeDisplayName (EffectType);
-    static void addEffectsToMenu (juce::PopupMenu&);
+    static yup::String getTypeDisplayName (EffectType);
+    static void addEffectsToMenu (yup::PopupMenu&);
 
-    ClipEffect (const juce::ValueTree&, ClipEffects&);
+    ClipEffect (const yup::ValueTree&, ClipEffects&);
 
     EffectType getType() const;
 
@@ -55,7 +55,7 @@ public:
         N.B. because the sourceFile may not be valid at the time of job creation you should use
         the sourceLength parameter to determine how to build the render node.
     */
-    virtual juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) = 0;
+    virtual yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) = 0;
 
     /** Return true here to show a properties button in the editor and enable the propertiesButtonPressed callback. */
     virtual bool hasProperties()                                { return false; }
@@ -81,7 +81,7 @@ public:
     AudioClipBase& getClip();
 
     Edit& edit;
-    juce::ValueTree state;
+    yup::ValueTree state;
     ClipEffects& clipEffects;
 
 protected:
@@ -94,23 +94,23 @@ private:
 
     void invalidateDestination();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEffect)
 };
 
 //==============================================================================
 /**
 */
 class ClipEffects   : public ValueTreeObjectList<ClipEffect>,
-                      private juce::Timer
+                      private yup::Timer
 {
 public:
-    static juce::ValueTree create()
+    static yup::ValueTree create()
     {
-        return juce::ValueTree (IDs::EFFECTS);
+        return yup::ValueTree (IDs::EFFECTS);
     }
 
     //==============================================================================
-    ClipEffects (const juce::ValueTree&, AudioClipBase&);
+    ClipEffects (const yup::ValueTree&, AudioClipBase&);
     ~ClipEffects() override;
 
     void flushStateToValueTree()
@@ -119,7 +119,7 @@ public:
             ce->flushStateToValueTree();
     }
 
-    ClipEffect* getClipEffect (const juce::ValueTree& v)
+    ClipEffect* getClipEffect (const yup::ValueTree& v)
     {
         for (auto ce : objects)
             if (ce->state == v)
@@ -187,12 +187,12 @@ public:
 
     RenderManager::Job::Ptr createRenderJob (const AudioFile& destFile, const AudioFile& sourceFile) const;
 
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return v.hasType (IDs::EFFECT);
     }
 
-    ClipEffect* createNewObject (const juce::ValueTree& v) override
+    ClipEffect* createNewObject (const yup::ValueTree& v) override
     {
         auto ce = ClipEffect::create (v, *this);
         jassert (ce != nullptr);
@@ -244,11 +244,11 @@ public:
 
     private:
         ClipEffects& effects;
-        JUCE_DECLARE_NON_COPYABLE (RenderInhibitor)
+        YUP_DECLARE_NON_COPYABLE (RenderInhibitor)
     };
 
     AudioClipBase& clip;
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     enum { hashNeedsRecaching = -1 };
@@ -281,7 +281,7 @@ private:
     struct ClipPropertyWatcher;
     friend class ClipEffect;
 
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
     std::unique_ptr<ClipPropertyWatcher> clipPropertyWatcher;
     mutable std::unique_ptr<CachedClipProperties> cachedClipProperties;
     mutable HashCode cachedHash = hashNeedsRecaching;
@@ -320,8 +320,8 @@ private:
         stopTimer();
     }
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (ClipEffects)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEffects)
+    YUP_DECLARE_WEAK_REFERENCEABLE (ClipEffects)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipEffects)
 };
 
 //==============================================================================
@@ -333,17 +333,17 @@ struct ScopedPluginUnloadInhibitor
     ~ScopedPluginUnloadInhibitor();
 
     PluginUnloadInhibitor& owner;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedPluginUnloadInhibitor)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedPluginUnloadInhibitor)
 };
 
 //==============================================================================
 /**
 */
 struct VolumeEffect : public ClipEffect,
-                      private juce::Timer
+                      private yup::Timer
 {
-    VolumeEffect (const juce::ValueTree&, ClipEffects&);
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
+    VolumeEffect (const yup::ValueTree&, ClipEffects&);
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
 
     void initialise() override
     {
@@ -356,14 +356,14 @@ struct VolumeEffect : public ClipEffect,
     void propertiesButtonPressed (SelectionManager&) override;
     HashCode getIndividualHash() const override;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
     void valueTreeChanged() override;
     void timerCallback() override;
 
     VolumeAndPanPlugin::Ptr plugin;
     std::unique_ptr<ClipEffects::RenderInhibitor> inhibitor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VolumeEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VolumeEffect)
 };
 
 //==============================================================================
@@ -371,12 +371,12 @@ struct VolumeEffect : public ClipEffect,
 */
 struct FadeInOutEffect  : public ClipEffect
 {
-    FadeInOutEffect (const juce::ValueTree&, ClipEffects&);
+    FadeInOutEffect (const yup::ValueTree&, ClipEffects&);
 
     void setFadeIn (TimeDuration);
     void setFadeOut (TimeDuration);
 
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
 
     juce::CachedValue<TimeDuration> fadeIn, fadeOut;
     juce::CachedValue<AudioFadeCurve::Type> fadeInType, fadeOutType;
@@ -384,7 +384,7 @@ struct FadeInOutEffect  : public ClipEffect
 protected:
     HashCode getIndividualHash() const override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FadeInOutEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FadeInOutEffect)
 };
 
 //==============================================================================
@@ -393,17 +393,17 @@ protected:
 struct StepVolumeEffect  : public ClipEffect,
                            public Selectable
 {
-    StepVolumeEffect (const juce::ValueTree&, ClipEffects&);
+    StepVolumeEffect (const yup::ValueTree&, ClipEffects&);
     ~StepVolumeEffect() override;
 
     int getMaxNumNotes();
 
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
 
     bool hasProperties() override;
     void propertiesButtonPressed (SelectionManager&) override;
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     //==============================================================================
     struct Pattern
@@ -414,8 +414,8 @@ struct StepVolumeEffect  : public ClipEffect,
         bool getNote (int index) const noexcept;
         void setNote (int index, bool value);
 
-        juce::BigInteger getPattern() const noexcept;
-        void setPattern (const juce::BigInteger&) noexcept;
+        yup::BigInteger getPattern() const noexcept;
+        void setPattern (const yup::BigInteger&) noexcept;
 
         void clear();
         int getNumNotes() const;
@@ -425,47 +425,47 @@ struct StepVolumeEffect  : public ClipEffect,
         void randomiseChannel();
 
         StepVolumeEffect& effect;
-        juce::ValueTree state;
+        yup::ValueTree state;
 
     private:
         Pattern& operator= (const Pattern&) = delete;
-        JUCE_LEAK_DETECTOR (Pattern)
+        YUP_LEAK_DETECTOR (Pattern)
     };
 
     juce::CachedValue<BeatDuration> noteLength;
     juce::CachedValue<double> crossfade;
-    juce::CachedValue<juce::String> pattern;
+    juce::CachedValue<yup::String> pattern;
 
 protected:
     HashCode getIndividualHash() const override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StepVolumeEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StepVolumeEffect)
 };
 
 //==============================================================================
 /**
 */
 struct PitchShiftEffect  : public ClipEffect,
-                           private juce::Timer
+                           private yup::Timer
 {
-    PitchShiftEffect (const juce::ValueTree&, ClipEffects&);
+    PitchShiftEffect (const yup::ValueTree&, ClipEffects&);
 
     void initialise() override;
 
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
 
     bool hasProperties() override;
     void propertiesButtonPressed (SelectionManager&) override;
     HashCode getIndividualHash() const override;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
     void valueTreeChanged() override;
     void timerCallback() override;
 
-    juce::ReferenceCountedObjectPtr<PitchShiftPlugin> plugin;
+    yup::ReferenceCountedObjectPtr<PitchShiftPlugin> plugin;
     std::unique_ptr<ClipEffects::RenderInhibitor> inhibitor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PitchShiftEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PitchShiftEffect)
 };
 
 //==============================================================================
@@ -473,9 +473,9 @@ struct PitchShiftEffect  : public ClipEffect,
 */
 struct WarpTimeEffect   : public ClipEffect
 {
-    WarpTimeEffect (const juce::ValueTree&, ClipEffects&);
+    WarpTimeEffect (const yup::ValueTree&, ClipEffects&);
 
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
 
     HashCode getIndividualHash() const override;
     void sourceChanged() override;
@@ -485,7 +485,7 @@ struct WarpTimeEffect   : public ClipEffect
 
     void editFinishedLoading();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpTimeEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WarpTimeEffect)
 };
 
 //==============================================================================
@@ -493,11 +493,11 @@ struct WarpTimeEffect   : public ClipEffect
 */
 struct PluginEffect  : public ClipEffect,
                        public AutomatableParameter::Listener,
-                       private juce::Timer
+                       private yup::Timer
 {
-    PluginEffect (const juce::ValueTree&, ClipEffects&);
+    PluginEffect (const yup::ValueTree&, ClipEffects&);
 
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
 
     void initialise() override
     {
@@ -511,7 +511,7 @@ struct PluginEffect  : public ClipEffect,
     void propertiesButtonPressed (SelectionManager&) override;
     HashCode getIndividualHash() const override;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
     void valueTreeChanged() override;
 
     void timerCallback() override;
@@ -521,9 +521,9 @@ struct PluginEffect  : public ClipEffect,
     std::unique_ptr<ClipEffects::RenderInhibitor> inhibitor;
     std::unique_ptr<PluginUnloadInhibitor> pluginUnloadInhibitor;
     juce::CachedValue<int> currentCurve;
-    mutable juce::CachedValue<juce::int64> lastHash;
+    mutable juce::CachedValue<yup::int64> lastHash;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginEffect)
 };
 
 //==============================================================================
@@ -532,21 +532,21 @@ struct PluginEffect  : public ClipEffect,
 struct NormaliseEffect  : public ClipEffect,
                           public Selectable
 {
-    NormaliseEffect (const juce::ValueTree&, ClipEffects&);
+    NormaliseEffect (const yup::ValueTree&, ClipEffects&);
     ~NormaliseEffect() override;
 
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile& sourceFile, TimeDuration sourceLength) override;
 
     bool hasProperties() override;
     void propertiesButtonPressed (SelectionManager&) override;
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     juce::CachedValue<double> maxLevelDB;
 
 private:
     struct NormaliseRenderJob;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NormaliseEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NormaliseEffect)
 };
 
 //==============================================================================
@@ -562,21 +562,21 @@ struct MakeMonoEffect : public ClipEffect,
         chR  = 2
     };
 
-    MakeMonoEffect (const juce::ValueTree&, ClipEffects&);
+    MakeMonoEffect (const yup::ValueTree&, ClipEffects&);
     ~MakeMonoEffect() override;
 
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
 
     bool hasProperties() override;
     void propertiesButtonPressed (SelectionManager&) override;
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     juce::CachedValue<int> channels;
 
 private:
     struct MakeMonoRenderJob;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MakeMonoEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MakeMonoEffect)
 };
 
 //==============================================================================
@@ -584,13 +584,13 @@ private:
 */
 struct ReverseEffect  : public ClipEffect
 {
-    ReverseEffect (const juce::ValueTree&, ClipEffects&);
+    ReverseEffect (const yup::ValueTree&, ClipEffects&);
 
-    juce::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
 
     struct ReverseRenderJob;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverseEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverseEffect)
 };
 
 //==============================================================================
@@ -598,13 +598,13 @@ struct ReverseEffect  : public ClipEffect
 */
 struct InvertEffect  : public ClipEffect
 {
-    InvertEffect (const juce::ValueTree&, ClipEffects&);
+    InvertEffect (const yup::ValueTree&, ClipEffects&);
 
-    juce::ReferenceCountedObjectPtr<ClipEffect::ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
+    yup::ReferenceCountedObjectPtr<ClipEffect::ClipEffectRenderJob> createRenderJob (const AudioFile&, TimeDuration sourceLength) override;
 
     struct InvertRenderJob;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InvertEffect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InvertEffect)
 };
 
 } // namespace tracktion::inline engine

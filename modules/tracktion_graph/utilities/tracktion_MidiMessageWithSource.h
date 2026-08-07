@@ -15,10 +15,10 @@ namespace tracktion::inline engine {
 using MPESourceID = uint32_t;
 
 
-struct MidiMessageWithSource  : public juce::MidiMessage
+struct MidiMessageWithSource  : public yup::MidiMessage
 {
-    MidiMessageWithSource (const juce::MidiMessage& m, MPESourceID source) : juce::MidiMessage (m), mpeSourceID (source) {}
-    MidiMessageWithSource (juce::MidiMessage&& m, MPESourceID source) : juce::MidiMessage (std::move (m)), mpeSourceID (source) {}
+    MidiMessageWithSource (const yup::MidiMessage& m, MPESourceID source) : yup::MidiMessage (m), mpeSourceID (source) {}
+    MidiMessageWithSource (yup::MidiMessage&& m, MPESourceID source) : yup::MidiMessage (std::move (m)), mpeSourceID (source) {}
 
     MidiMessageWithSource (const MidiMessageWithSource&) = default;
     MidiMessageWithSource (MidiMessageWithSource&&) = default;

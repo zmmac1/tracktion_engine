@@ -15,10 +15,10 @@ class ClipTrack   : public Track,
                     public ClipOwner
 {
 public:
-    ClipTrack (Edit&, const juce::ValueTree&, bool hasModifierList);
+    ClipTrack (Edit&, const yup::ValueTree&, bool hasModifierList);
     ~ClipTrack() override;
 
-    using Ptr   = juce::ReferenceCountedObjectPtr<ClipTrack>;
+    using Ptr   = yup::ReferenceCountedObjectPtr<ClipTrack>;
 
     /** @internal */
     void initialise() override;
@@ -54,31 +54,31 @@ public:
     //==============================================================================
     bool addClip (const Clip::Ptr&);
 
-    Clip* insertClipWithState (juce::ValueTree);
+    Clip* insertClipWithState (yup::ValueTree);
 
-    Clip* insertClipWithState (const juce::ValueTree& stateToUse,
-                               const juce::String& name, TrackItem::Type type,
+    Clip* insertClipWithState (const yup::ValueTree& stateToUse,
+                               const yup::String& name, TrackItem::Type type,
                                ClipPosition position,
                                bool deleteExistingClips,
                                bool allowSpottingAdjustment);
 
     Clip* insertNewClip (TrackItem::Type, TimeRange position, SelectionManager* selectionManagerToSelectWith);
-    Clip* insertNewClip (TrackItem::Type, const juce::String& name, TimeRange position, SelectionManager* selectionManagerToSelectWith);
-    Clip* insertNewClip (TrackItem::Type, const juce::String& name, ClipPosition position, SelectionManager* selectionManagerToSelectWith);
+    Clip* insertNewClip (TrackItem::Type, const yup::String& name, TimeRange position, SelectionManager* selectionManagerToSelectWith);
+    Clip* insertNewClip (TrackItem::Type, const yup::String& name, ClipPosition position, SelectionManager* selectionManagerToSelectWith);
 
-    juce::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (const juce::String& name, const juce::File& sourceFile,
+    yup::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (const yup::String& name, const yup::File& sourceFile,
                                                                    ClipPosition position, bool deleteExistingClips);
 
-    juce::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (const juce::String& name, ProjectItemRef sourceID,
+    yup::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (const yup::String& name, ProjectItemRef sourceID,
                                                                    ClipPosition position, bool deleteExistingClips);
 
-    juce::ReferenceCountedObjectPtr<MidiClip> insertMIDIClip (TimeRange position,
+    yup::ReferenceCountedObjectPtr<MidiClip> insertMIDIClip (TimeRange position,
                                                               SelectionManager* selectionManagerToSelectWith);
 
-    juce::ReferenceCountedObjectPtr<MidiClip> insertMIDIClip (const juce::String& name, TimeRange position,
+    yup::ReferenceCountedObjectPtr<MidiClip> insertMIDIClip (const yup::String& name, TimeRange position,
                                                               SelectionManager* selectionManagerToSelectWith);
 
-    juce::ReferenceCountedObjectPtr<EditClip> insertEditClip (TimeRange position, ProjectItemRef sourceID);
+    yup::ReferenceCountedObjectPtr<EditClip> insertEditClip (TimeRange position, ProjectItemRef sourceID);
 
     void deleteRegion (TimeRange, SelectionManager*);
     void deleteRegionOfClip (Clip::Ptr, TimeRange, SelectionManager*);
@@ -104,7 +104,7 @@ public:
     bool containsAnyMIDIClips() const;
 
     /** @internal */
-    juce::ValueTree& getClipOwnerState() override;
+    yup::ValueTree& getClipOwnerState() override;
     /** @internal */
     EditItemID getClipOwnerID() override;
     /** @internal */
@@ -123,7 +123,7 @@ public:
 protected:
     friend class Clip;
 
-    juce::Array<TimePosition> findAllTimesOfInterest();
+    yup::Array<TimePosition> findAllTimesOfInterest();
 
     struct CollectionClipList;
     friend struct CollectionClipList;
@@ -132,9 +132,9 @@ protected:
     void refreshTrackItems() const;
 
     mutable bool trackItemsDirty = false;
-    mutable juce::Array<TrackItem*> trackItems;
+    mutable yup::Array<TrackItem*> trackItems;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipTrack)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipTrack)
 };
 
 } // namespace tracktion::inline engine

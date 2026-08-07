@@ -14,12 +14,12 @@ namespace tracktion::inline engine
 //==============================================================================
 struct DiscreteLabelledParameter  : public AutomatableParameter
 {
-    DiscreteLabelledParameter (const juce::String& xmlTag,
-                               const juce::String& name,
+    DiscreteLabelledParameter (const yup::String& xmlTag,
+                               const yup::String& name,
                                AutomatableEditItem& owner,
-                               juce::Range<float> valueRangeToUse,
+                               yup::Range<float> valueRangeToUse,
                                int numStatesToUse = 0,
-                               juce::StringArray labelsToUse = {})
+                               yup::StringArray labelsToUse = {})
         : AutomatableParameter (xmlTag, name, owner, valueRangeToUse),
           numStates (numStatesToUse), labels (labelsToUse)
     {
@@ -39,7 +39,7 @@ struct DiscreteLabelledParameter  : public AutomatableParameter
         if (numStates == 0)
             return 0.0;
 
-        return juce::jmap ((float) i, 0.0f, float (numStates - 1), valueRange.start, valueRange.end);
+        return yup::jmap ((float) i, 0.0f, float (numStates - 1), valueRange.start, valueRange.end);
     }
 
     int getStateForValue (float value) const override
@@ -47,37 +47,37 @@ struct DiscreteLabelledParameter  : public AutomatableParameter
         if (numStates == 0)
             return 0;
 
-        return juce::roundToInt (juce::jmap (value, valueRange.start, valueRange.end, 0.0f, float (numStates - 1)));
+        return yup::roundToInt (yup::jmap (value, valueRange.start, valueRange.end, 0.0f, float (numStates - 1)));
     }
 
     bool hasLabels()  const override                   { return labels.size() > 0; }
-    juce::StringArray getAllLabels() const override    { return labels; }
+    yup::StringArray getAllLabels() const override    { return labels; }
 
-    juce::String getLabelForValue (float val) const override
+    yup::String getLabelForValue (float val) const override
     {
         const int s = getStateForValue (val);
 
-        return juce::isPositiveAndBelow (s, getNumberOfStates()) ? labels[s] : juce::String();
+        return yup::isPositiveAndBelow (s, getNumberOfStates()) ? labels[s] : yup::String();
     }
 
     float snapToState (float val) const override
     {
-        return getValueForState (juce::jlimit (0, getNumberOfStates() - 1, juce::roundToInt (val)));
+        return getValueForState (yup::jlimit (0, getNumberOfStates() - 1, yup::roundToInt (val)));
     }
 
 private:
     const int numStates = 0;
-    const juce::StringArray labels;
+    const yup::StringArray labels;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DiscreteLabelledParameter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DiscreteLabelledParameter)
 };
 
 //==============================================================================
 struct SuffixedParameter    : public AutomatableParameter
 {
-    SuffixedParameter (const juce::String& xmlTag, const juce::String& name,
-                       AutomatableEditItem& owner, juce::NormalisableRange<float> valueRangeToUse,
-                       juce::String suffixToUse = {})
+    SuffixedParameter (const yup::String& xmlTag, const yup::String& name,
+                       AutomatableEditItem& owner, yup::NormalisableRange<float> valueRangeToUse,
+                       yup::String suffixToUse = {})
         : AutomatableParameter (xmlTag, name, owner, valueRangeToUse),
           suffix (suffixToUse)
     {
@@ -88,19 +88,19 @@ struct SuffixedParameter    : public AutomatableParameter
         notifyListenersOfDeletion();
     }
 
-    juce::String valueToString (float value) override
+    yup::String valueToString (float value) override
     {
         if (valueRange.interval == 1.0f)
-            return juce::String (juce::roundToInt (value));
+            return yup::String (yup::roundToInt (value));
 
         return AutomatableParameter::valueToString (value);
     }
 
-    juce::String getLabel() override           { return suffix; }
+    yup::String getLabel() override           { return suffix; }
 
-    const juce::String suffix;
+    const yup::String suffix;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SuffixedParameter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SuffixedParameter)
 };
 
 
@@ -113,13 +113,13 @@ struct ParameterWithStateValue
     ParameterWithStateValue() = default;
 
     ParameterWithStateValue (Plugin&,
-                             const juce::String& paramID,
-                             const juce::Identifier& propertyName,
-                             const juce::String& description,
+                             const yup::String& paramID,
+                             const yup::Identifier& propertyName,
+                             const yup::String& description,
                              float defaultValue,
-                             juce::NormalisableRange<float> valueRange,
-                             std::function<juce::String(float)> valueToStringFunction = {},
-                             std::function<float(const juce::String&)> stringToValueFunction = {});
+                             yup::NormalisableRange<float> valueRange,
+                             std::function<yup::String(float)> valueToStringFunction = {},
+                             std::function<float(const yup::String&)> stringToValueFunction = {});
 
     ~ParameterWithStateValue();
     ParameterWithStateValue (ParameterWithStateValue&&) = default;
@@ -131,13 +131,13 @@ struct ParameterWithStateValue
     /// Returns the current value from the AutomatableParameter
     float getCurrentValue() const                   { return parameter->getCurrentValue(); }
     /// Sets a new value via the AutomatableParameter
-    void setParameter (float newValue, juce::NotificationType);
+    void setParameter (float newValue, yup::NotificationType);
 
     /// Releases the parameter and CachedValue
     void reset();
 
     /// Copies the matching property from the given ValueTree to this parameter
-    void setFromValueTree (const juce::ValueTree&);
+    void setFromValueTree (const yup::ValueTree&);
 
     AutomatableParameter::Ptr parameter;
     std::unique_ptr<juce::CachedValue<float>> value;

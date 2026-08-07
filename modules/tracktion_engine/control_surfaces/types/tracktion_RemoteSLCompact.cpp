@@ -41,6 +41,6 @@ bool RemoteSLCompact::showingPluginParams()                             { return
 bool RemoteSLCompact::showingMarkers()                                  { return false; }
 bool RemoteSLCompact::showingTracks()                                   { return false; }
 bool RemoteSLCompact::isPluginSelected (Plugin*)                        { return false; }
-bool RemoteSLCompact::wantsMessage (int, const juce::MidiMessage& m)    { return m.isController(); }
+bool RemoteSLCompact::wantsMessage (int, const yup::MidiMessage& m)    { return m.isController(); }
 
 } // namespace tracktion::inline engine

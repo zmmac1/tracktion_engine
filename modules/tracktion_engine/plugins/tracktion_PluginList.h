@@ -24,7 +24,7 @@ public:
     Clip* getOwnerClip() const                              { return ownerClip; }
     Track* getOwnerTrack() const                            { return ownerTrack; }
 
-    void initialise (const juce::ValueTree&);
+    void initialise (const yup::ValueTree&);
     void releaseObjects();
 
     void setTrackAndClip (Track*, Clip*);
@@ -46,10 +46,10 @@ public:
     bool needsConstantBufferSize();
     bool canInsertPlugin();
 
-    Plugin::Ptr insertPlugin (const juce::ValueTree&, int index);
+    Plugin::Ptr insertPlugin (const yup::ValueTree&, int index);
     void insertPlugin (const Plugin::Ptr&, int index, SelectionManager* selectionManagerToSelect);
     void addDefaultTrackPlugins (bool useVCA);
-    void addPluginsFrom (const juce::ValueTree&, bool clearFirst, bool atStart);
+    void addPluginsFrom (const yup::ValueTree&, bool clearFirst, bool atStart);
 
     template <typename PluginType>
     PluginType* findFirstPluginOfType() const
@@ -62,9 +62,9 @@ public:
     }
 
     template <typename PluginType>
-    juce::Array<PluginType*> getPluginsOfType() const
+    yup::Array<PluginType*> getPluginsOfType() const
     {
-        juce::Array<PluginType*> plugins;
+        yup::Array<PluginType*> plugins;
 
         for (auto af : *this)
             if (auto f = dynamic_cast<PluginType*> (af))
@@ -74,7 +74,7 @@ public:
     }
 
     //==============================================================================
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     //==============================================================================
@@ -87,7 +87,7 @@ private:
 
     juce::UndoManager* getUndoManager() const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginList)
 };
 
 } // namespace tracktion::inline engine

@@ -14,16 +14,16 @@ namespace tracktion::inline engine {
 /**
 */
 class ChordClip   : public Clip,
-                    private juce::AsyncUpdater
+                    private yup::AsyncUpdater
 {
 public:
-    ChordClip (const juce::ValueTree&, EditItemID, ClipOwner& targetParent);
+    ChordClip (const yup::ValueTree&, EditItemID, ClipOwner& targetParent);
     ~ChordClip() override;
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     bool canBeAddedTo (ClipOwner&) override;
-    juce::Colour getColour() const override;
-    juce::Colour getDefaultColour() const override;
+    yup::Color getColor() const override;
+    yup::Color getDefaultColor() const override;
     void initialise() override;
 
     bool isMidi() const override         { return false; }
@@ -35,14 +35,14 @@ public:
 protected:
     void handleAsyncUpdate() override;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
-    void valueTreeParentChanged (juce::ValueTree&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
+    void valueTreeParentChanged (yup::ValueTree&) override;
 
 private:
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChordClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChordClip)
 };
 
 } // namespace tracktion::inline engine

@@ -19,9 +19,9 @@ public:
     //==============================================================================
     struct Wire
     {
-        Wire (const juce::ValueTree&, juce::UndoManager*);
+        Wire (const yup::ValueTree&, juce::UndoManager*);
 
-        juce::ValueTree state;
+        yup::ValueTree state;
         juce::CachedValue<int> sourceChannelIndex, destChannelIndex;
         juce::CachedValue<float> gainDb;
     };
@@ -37,10 +37,10 @@ public:
     static const char* getPluginName()                  { return NEEDS_TRANS("Patch Bay"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return TRANS("Patch Bay Plugin"); }
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getShortName (int) override            { return TRANS("Patch"); }
-    juce::String getSelectableDescription() override    { return TRANS("Patch Bay Plugin"); }
+    yup::String getName() const override               { return TRANS("Patch Bay Plugin"); }
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getShortName (int) override            { return TRANS("Patch"); }
+    yup::String getSelectableDescription() override    { return TRANS("Patch Bay Plugin"); }
     bool canBeAddedToClip() override                    { return false; }
     bool canBeAddedToRack() override                    { return false; }
     bool canBeDisabled() override                       { return false; }
@@ -50,9 +50,9 @@ public:
 
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
-    void valueTreeParentChanged (juce::ValueTree&) override;
+    void valueTreeParentChanged (yup::ValueTree&) override;
 
-    void getChannelNames (juce::StringArray*, juce::StringArray*) override;
+    void getChannelNames (yup::StringArray*, yup::StringArray*) override;
     void applyToBuffer (const PluginRenderContext&) override;
 
 private:
@@ -66,7 +66,7 @@ private:
     void cacheInputAndOutputPlugins();
     void listenToParentList();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PatchBayPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PatchBayPlugin)
 };
 
 } // namespace tracktion::inline engine

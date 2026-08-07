@@ -11,7 +11,7 @@
 #pragma once
 
 #include <thread>
-#if JUCE_INTEL
+#if YUP_INTEL
  #include <emmintrin.h>
 #endif
 
@@ -370,7 +370,7 @@ void MultiThreadedNodePlayer::buildNodesOutputLists (std::vector<Node*>& allNode
     // Create a PlaybackNode for each Node
     for (auto n : allNodes)
     {
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         for (auto& pn : playbackNodes)
             jassert (&pn->node != n);
        #endif
@@ -411,7 +411,7 @@ void MultiThreadedNodePlayer::resetProcessQueue()
         playbackNode->numInputsToBeProcessed.store (playbackNode->numInputs, std::memory_order_release);
 
         // Check only ready nodes will be queued
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         if (playbackNode->node.isReadyToProcess())
             jassert (playbackNode->numInputsToBeProcessed == 0);
 
@@ -420,7 +420,7 @@ void MultiThreadedNodePlayer::resetProcessQueue()
        #endif
     }
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     for (auto& playbackNode : preparedNode->playbackNodes)
     {
         playbackNode->hasBeenDequeued = false;
@@ -527,7 +527,7 @@ void MultiThreadedNodePlayer::processNode (Node& node)
     // to reduce context switches and overhead
     for (;;)
     {
-        #if JUCE_DEBUG
+        #if YUP_DEBUG
          jassert (! static_cast<PlaybackNode*> (nodeToProcess->internal)->hasBeenDequeued);
          static_cast<PlaybackNode*> (nodeToProcess->internal)->hasBeenDequeued = true;
         #endif

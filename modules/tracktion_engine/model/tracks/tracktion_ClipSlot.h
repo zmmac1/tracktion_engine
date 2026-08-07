@@ -20,7 +20,7 @@ class ClipSlot : public EditItem,
 {
 public:
     /** Creates a ClipSlot for a given Track. */
-    ClipSlot (const juce::ValueTree&, Track&);
+    ClipSlot (const yup::ValueTree&, Track&);
     /** Destructor. */
     ~ClipSlot() override;
 
@@ -38,11 +38,11 @@ public:
 
     //==============================================================================
     /** @internal. */
-    juce::String getName() const override;
+    yup::String getName() const override;
     /** @internal. */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     /** @internal. */
-    juce::ValueTree& getClipOwnerState() override;
+    yup::ValueTree& getClipOwnerState() override;
     /** @internal. */
     EditItemID getClipOwnerID() override;
     /** @internal. */
@@ -50,7 +50,7 @@ public:
     /** @internal. */
     Edit& getClipOwnerEdit() override;
 
-    juce::ValueTree state;    /**< The state of this ClipSlot. */
+    yup::ValueTree state;    /**< The state of this ClipSlot. */
     Track& track;             /**< The Track this ClipSlot belongs to. */
 
 private:
@@ -70,12 +70,12 @@ class ClipSlotList  : private ValueTreeObjectList<ClipSlot>
 {
 public:
     /** Creates a ClipSlotList for a Track. */
-    ClipSlotList (const juce::ValueTree&, Track&);
+    ClipSlotList (const yup::ValueTree&, Track&);
     /** Destructor. */
     ~ClipSlotList() override;
 
     /** Returns the ClipSlot* on this Track. */
-    juce::Array<ClipSlot*> getClipSlots() const;
+    yup::Array<ClipSlot*> getClipSlots() const;
 
     /** Adds Slots to ensure at least numSlots exist. */
     void ensureNumberOfSlots (int numSlots);
@@ -88,15 +88,15 @@ public:
      */
     ClipSlot* insertSlot (int index);
 
-    juce::ValueTree state;  /**< The state of this ClipSlotList. */
+    yup::ValueTree state;  /**< The state of this ClipSlotList. */
     Track& track;           /**< The Track this ClipSlotList belongs to. */
 
     /** @internal. */
     void deleteSlot (ClipSlot&);
 
 private:
-    bool isSuitableType (const juce::ValueTree&) const override;
-    ClipSlot* createNewObject (const juce::ValueTree&) override;
+    bool isSuitableType (const yup::ValueTree&) const override;
+    ClipSlot* createNewObject (const yup::ValueTree&) override;
     void deleteObject (ClipSlot*) override;
 
     void newObjectAdded (ClipSlot*) override;

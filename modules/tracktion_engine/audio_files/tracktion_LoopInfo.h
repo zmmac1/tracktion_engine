@@ -26,13 +26,13 @@ public:
     /** Creates a LoopInfo from some existing state.
         N.B. this references the given state, it doesn't make a deep copy.
     */
-    LoopInfo (Engine&, const juce::ValueTree&, juce::UndoManager*);
+    LoopInfo (Engine&, const yup::ValueTree&, juce::UndoManager*);
 
     /** Creates a LoopInfo for an audio file. */
-    LoopInfo (Engine&, const juce::File&);
+    LoopInfo (Engine&, const yup::File&);
 
     /** Creates a LoopInfo for a reader. Optionally pass filename to extract metadata from name */
-    LoopInfo (Engine&, const juce::AudioFormatReader*, const juce::AudioFormat*, const juce::File& f);
+    LoopInfo (Engine&, const yup::AudioFormatReader*, const yup::AudioFormat*, const yup::File& f);
 
     /** Creates a copy of another LoopInfo. */
     LoopInfo& operator= (const LoopInfo&);
@@ -139,54 +139,54 @@ public:
     void clearTags();
 
     /** Returns the tag at a given index. */
-    juce::String getTag (int index) const;
+    yup::String getTag (int index) const;
 
     /** Adds a tag. This could be descriptive info like major/minor etc. */
-    void addTag (const juce::String& tag);
+    void addTag (const yup::String& tag);
 
     /** Adds multiple tags. @see addTag */
-    void addTags (const juce::StringArray& tags);
+    void addTags (const yup::StringArray& tags);
 
     Engine& engine;         /**< The engine this belongs to. */
-    juce::ValueTree state;  /**< @internal */
+    yup::ValueTree state;  /**< @internal */
 
 private:
-    juce::CriticalSection lock;
+    yup::CriticalSection lock;
     juce::UndoManager* um = nullptr;
     bool maintainParent = false;
 
-    void init (const juce::AudioFormatReader*, const juce::AudioFormat*, const juce::File& file);
+    void init (const yup::AudioFormatReader*, const yup::AudioFormat*, const yup::File& file);
     void initialiseMissingProps();
     void duplicateIfShared();
-    LoopInfo& copyFrom (const juce::ValueTree&);
-    void removeChildIfEmpty (const juce::Identifier&);
-    juce::ValueTree getLoopPoints() const;
-    juce::ValueTree getOrCreateLoopPoints();
-    juce::ValueTree getTags() const;
-    juce::ValueTree getOrCreateTags();
+    LoopInfo& copyFrom (const yup::ValueTree&);
+    void removeChildIfEmpty (const yup::Identifier&);
+    yup::ValueTree getLoopPoints() const;
+    yup::ValueTree getOrCreateLoopPoints();
+    yup::ValueTree getTags() const;
+    yup::ValueTree getOrCreateTags();
     void setBpm (double newBpm, double currentBpm);
     
-    bool deduceTempo (const juce::File& file, const juce::AudioFormatReader&);
-    std::optional<float> getCueTempo (const juce::StringPairArray& metadata);
-    std::optional<float> getFileNameTempo (const juce::String& rawName);
-    std::optional<int> getFileNameRootNote (const juce::String& rawName);
+    bool deduceTempo (const yup::File& file, const yup::AudioFormatReader&);
+    std::optional<float> getCueTempo (const yup::StringPairArray& metadata);
+    std::optional<float> getFileNameTempo (const yup::String& rawName);
+    std::optional<int> getFileNameRootNote (const yup::String& rawName);
 
     template<typename Type>
-    void setProp (const juce::Identifier& i, Type v)
+    void setProp (const yup::Identifier& i, Type v)
     {
         duplicateIfShared();
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
         state.setProperty (i, v, um);
     }
 
     template<typename Type>
-    Type getProp (const juce::Identifier& i) const
+    Type getProp (const yup::Identifier& i) const
     {
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
         return state.getProperty (i);
     }
 
-    JUCE_LEAK_DETECTOR (LoopInfo)
+    YUP_LEAK_DETECTOR (LoopInfo)
 };
 
 } // namespace tracktion::inline engine

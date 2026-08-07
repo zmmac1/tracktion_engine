@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-TempoTrack::TempoTrack (Edit& e, const juce::ValueTree& v)
+TempoTrack::TempoTrack (Edit& e, const yup::ValueTree& v)
     : Track (e, v, true)
 {
 }
@@ -21,8 +21,8 @@ TempoTrack::~TempoTrack()
 }
 
 bool TempoTrack::isTempoTrack() const                  { return true; }
-juce::String TempoTrack::getName() const               { return TRANS ("Tempo"); }
-juce::String TempoTrack::getSelectableDescription()    { return TRANS("Global Track"); }
+yup::String TempoTrack::getName() const               { return TRANS ("Tempo"); }
+yup::String TempoTrack::getSelectableDescription()    { return TRANS("Global Track"); }
 bool TempoTrack::canContainPlugin (Plugin*) const      { return false; }
 
 int TempoTrack::getNumTrackItems() const
@@ -51,9 +51,9 @@ TrackItem* TempoTrack::getNextTrackItemAt (TimePosition time)
     return getTrackItem (getIndexOfNextTrackItemAt (time));
 }
 
-juce::Array<TrackItem*> TempoTrack::buildTrackItemList() const
+yup::Array<TrackItem*> TempoTrack::buildTrackItemList() const
 {
-    juce::Array<TrackItem*> items;
+    yup::Array<TrackItem*> items;
 
     items.addArray (edit.tempoSequence.getTimeSigs());
     items.addArray (edit.pitchSequence.getPitches());

@@ -31,7 +31,7 @@ public:
     /** Creates an NodePlayer to process a Node. */
     TracktionNodePlayer (ProcessState& processStateToUse,
                          tracktion::graph::LockFreeMultiThreadedNodePlayer::ThreadPoolCreator poolCreator,
-                         juce::AudioWorkgroup audioWorkgroup = {})
+                         yup::AudioWorkgroup audioWorkgroup = {})
         : playHeadState (processStateToUse.playHeadState),
           processState (processStateToUse),
           nodePlayer (std::move (poolCreator), std::move (audioWorkgroup))
@@ -139,13 +139,13 @@ private:
     MidiMessageArray scratchMidi;
     tracktion::graph::LockFreeMultiThreadedNodePlayer nodePlayer;
 
-    tracktion::graph::Node::ProcessContext getSubProcessContext (const tracktion::graph::Node::ProcessContext& pc, juce::Range<int64_t> subReferenceSampleRange)
+    tracktion::graph::Node::ProcessContext getSubProcessContext (const tracktion::graph::Node::ProcessContext& pc, yup::Range<int64_t> subReferenceSampleRange)
     {
         jassert (! pc.referenceSampleRange.isEmpty());
         jassert (pc.referenceSampleRange.contains (subReferenceSampleRange));
 
         const auto originalReferenceLength = (double) pc.referenceSampleRange.getLength();
-        const juce::Range<double> proportion ((double (subReferenceSampleRange.getStart() - pc.referenceSampleRange.getStart())) / originalReferenceLength,
+        const yup::Range<double> proportion ((double (subReferenceSampleRange.getStart() - pc.referenceSampleRange.getStart())) / originalReferenceLength,
                                               (double (subReferenceSampleRange.getEnd() - pc.referenceSampleRange.getStart())) / originalReferenceLength);
 
         const auto startSample  = (choc::buffer::FrameCount) std::llround (proportion.getStart() * pc.numSamples);
@@ -157,7 +157,7 @@ private:
         return { sampleRange.size(), subReferenceSampleRange, { destAudio, pc.buffers.midi } };
     }
 
-    int processReferenceRange (const tracktion::graph::Node::ProcessContext& pc, juce::Range<int64_t> referenceSampleRange)
+    int processReferenceRange (const tracktion::graph::Node::ProcessContext& pc, yup::Range<int64_t> referenceSampleRange)
     {
         return processTempoChanges (getSubProcessContext (pc, referenceSampleRange));
     }
@@ -210,7 +210,7 @@ private:
         return numMisses;
     }
 
-    int processSubRange (const tracktion::graph::Node::ProcessContext& pc, juce::Range<double> proportion)
+    int processSubRange (const tracktion::graph::Node::ProcessContext& pc, yup::Range<double> proportion)
     {
         assert (pc.numSamples > 0);
         assert (proportion.getStart() >= 0.0);
@@ -219,7 +219,7 @@ private:
 
         const auto startReferenceSample = pc.referenceSampleRange.getStart() + (int64_t) std::llround (proportion.getStart() * double (pc.referenceSampleRange.getLength()));
         const auto endReferenceSample   = pc.referenceSampleRange.getStart() + (int64_t) std::llround (proportion.getEnd()   * double (pc.referenceSampleRange.getLength()));
-        const juce::Range<int64_t> referenceRange (startReferenceSample, endReferenceSample);
+        const yup::Range<int64_t> referenceRange (startReferenceSample, endReferenceSample);
 
         const auto startSample  = (choc::buffer::FrameCount) std::llround (proportion.getStart() * pc.numSamples);
         const auto endSample    = (choc::buffer::FrameCount) std::llround (proportion.getEnd() * pc.numSamples);

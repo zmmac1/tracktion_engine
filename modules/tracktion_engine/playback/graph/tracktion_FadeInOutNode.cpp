@@ -107,8 +107,8 @@ namespace fade_utils
                 AudioFadeCurve::applyCrossfadeSection (buffer,
                                                        startSamp, endSamp - startSamp,
                                                        fadeOutType,
-                                                       juce::jlimit (0.0f, 1.0f, (float) (1.0 - alpha1)),
-                                                       juce::jlimit (0.0f, 1.0f, (float) (1.0 - alpha2)));
+                                                       yup::jlimit (0.0f, 1.0f, (float) (1.0 - alpha1)),
+                                                       yup::jlimit (0.0f, 1.0f, (float) (1.0 - alpha2)));
             }
         }
         else if (clearExtraSamples && editTime.getEnd() >= fadeOut.getEnd())

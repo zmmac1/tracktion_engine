@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-PluginRenderContext::PluginRenderContext (juce::AudioBuffer<float>* buffer,
+PluginRenderContext::PluginRenderContext (yup::AudioBuffer<float>* buffer,
                                           int bufferStart, int bufferSize,
                                           MidiMessageArray* midiBuffer, double midiOffset,
                                           TimeRange editTimeRange, bool playing, bool scrubbing, bool rendering,
@@ -23,8 +23,8 @@ PluginRenderContext::PluginRenderContext (juce::AudioBuffer<float>* buffer,
       allowBypassedProcessing (shouldAllowBypassedProcessing)
 {}
 
-PluginRenderContext::PluginRenderContext (juce::AudioBuffer<float>* buffer,
-                                          const juce::AudioChannelSet& bufferChannels,
+PluginRenderContext::PluginRenderContext (yup::AudioBuffer<float>* buffer,
+                                          const yup::AudioChannelSet& bufferChannels,
                                           int bufferStart, int bufferSize,
                                           MidiMessageArray* midiBuffer, double midiOffset,
                                           TimeRange editTimeRange, bool playing, bool scrubbing, bool rendering,
@@ -38,17 +38,17 @@ PluginRenderContext::PluginRenderContext (juce::AudioBuffer<float>* buffer,
 {}
 
 //==============================================================================
-Plugin::Wire::Wire (const juce::ValueTree& v, juce::UndoManager* um)  : state (v)
+Plugin::Wire::Wire (const yup::ValueTree& v, juce::UndoManager* um)  : state (v)
 {
     sourceChannelIndex.referTo (state, IDs::srcChan, um);
     destChannelIndex.referTo (state, IDs::dstChan, um);
 }
 
-struct Plugin::WireList : public ValueTreeObjectList<Plugin::Wire, juce::CriticalSection>,
-                          private juce::AsyncUpdater
+struct Plugin::WireList : public ValueTreeObjectList<Plugin::Wire, yup::CriticalSection>,
+                          private yup::AsyncUpdater
 {
-    WireList (Plugin& p, const juce::ValueTree& parentTree)
-       : ValueTreeObjectList<Wire, juce::CriticalSection> (parentTree), plugin (p)
+    WireList (Plugin& p, const yup::ValueTree& parentTree)
+       : ValueTreeObjectList<Wire, yup::CriticalSection> (parentTree), plugin (p)
     {
         rebuildObjects();
     }
@@ -58,14 +58,14 @@ struct Plugin::WireList : public ValueTreeObjectList<Plugin::Wire, juce::Critica
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override { return v.hasType (IDs::SIDECHAINCONNECTION); }
-    Wire* createNewObject (const juce::ValueTree& v) override     { return new Wire (v, plugin.getUndoManager()); }
+    bool isSuitableType (const yup::ValueTree& v) const override { return v.hasType (IDs::SIDECHAINCONNECTION); }
+    Wire* createNewObject (const yup::ValueTree& v) override     { return new Wire (v, plugin.getUndoManager()); }
     void deleteObject (Wire* w) override                          { delete w; }
 
     void newObjectAdded (Wire*) override                    { triggerAsyncUpdate(); }
     void objectRemoved (Wire*) override                     { triggerAsyncUpdate(); }
     void objectOrderChanged() override                      {}
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override  { triggerAsyncUpdate(); }
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override  { triggerAsyncUpdate(); }
 
     void handleAsyncUpdate() override                       { plugin.changed(); }
 
@@ -114,7 +114,7 @@ Plugin::Plugin (PluginCreationInfo info)
     {
         auto& e = engine;
 
-        juce::MessageManager::callAsync ([ref = makeSafeRef (*this), &e]() mutable
+        yup::MessageManager::callAsync ([ref = makeSafeRef (*this), &e]() mutable
         {
             if (auto plugin = ref.get())
                 if (auto na = e.getExternalControllerManager().getAutomap())
@@ -124,7 +124,7 @@ Plugin::Plugin (PluginCreationInfo info)
    #endif
 
     if (state.hasProperty (IDs::windowX))
-        windowState->lastWindowBounds = juce::Rectangle<int> (state[IDs::windowX],
+        windowState->lastWindowBounds = yup::Rectangle<int> (state[IDs::windowX],
                                                               state[IDs::windowY], 1, 1);
 }
 
@@ -150,7 +150,7 @@ void Plugin::selectableAboutToBeDeleted()
 
 int Plugin::getNumOutputChannelsGivenInputs (int)
 {
-    juce::StringArray outs;
+    yup::StringArray outs;
     getChannelNames (nullptr, &outs);
     return outs.size();
 }
@@ -189,14 +189,14 @@ Plugin::Wire* Plugin::getWire (int index) const
     return {};
 }
 
-juce::ValueTree Plugin::getConnectionsTree()
+yup::ValueTree Plugin::getConnectionsTree()
 {
     auto p = state.getChildWithName (IDs::SIDECHAINCONNECTIONS);
 
     if (p.isValid())
         return p;
 
-    p = juce::ValueTree (IDs::SIDECHAINCONNECTIONS);
+    p = yup::ValueTree (IDs::SIDECHAINCONNECTIONS);
     state.addChild (p, -2, getUndoManager());
     return p;
 }
@@ -239,7 +239,7 @@ bool Plugin::canSidechain()
 {
     if (! isInRack())
     {
-        juce::StringArray ins, outs;
+        yup::StringArray ins, outs;
         getChannelNames (&ins, &outs);
         return ins.size() > 2 || ins.size() > outs.size();
     }
@@ -247,9 +247,9 @@ bool Plugin::canSidechain()
     return false;
 }
 
-juce::StringArray Plugin::getSidechainSourceNames (bool allowNone)
+yup::StringArray Plugin::getSidechainSourceNames (bool allowNone)
 {
-    juce::StringArray srcNames;
+    yup::StringArray srcNames;
 
     if (allowNone)
         srcNames.add (TRANS("<none>"));
@@ -261,20 +261,20 @@ juce::StringArray Plugin::getSidechainSourceNames (bool allowNone)
         idx++;
 
         if (at != getOwnerTrack())
-            srcNames.add (juce::String::formatted ("%d. ", idx) + at->getName());
+            srcNames.add (yup::String::formatted ("%d. ", idx) + at->getName());
     }
 
     return srcNames;
 }
 
-void Plugin::setSidechainSourceByName (const juce::String& name)
+void Plugin::setSidechainSourceByName (const yup::String& name)
 {
     bool found = false;
     int idx = 0;
 
     for (AudioTrack* at : getAudioTracks (edit))
     {
-        if (juce::String::formatted ("%d. ", ++idx) + at->getName() == name)
+        if (yup::String::formatted ("%d. ", ++idx) + at->getName() == name)
         {
             sidechainSourceID = at->itemID;
 
@@ -294,7 +294,7 @@ void Plugin::setSidechainSourceByName (const juce::String& name)
 
 void Plugin::guessSidechainRouting()
 {
-    juce::StringArray ins;
+    yup::StringArray ins;
     getChannelNames (&ins, nullptr);
 
     auto* um = getUndoManager();
@@ -330,7 +330,7 @@ void Plugin::guessSidechainRouting()
     }
 }
 
-juce::String Plugin::getSidechainSourceName()
+yup::String Plugin::getSidechainSourceName()
 {
     if (sidechainSourceID->isValid())
         if (auto t = findTrackForID (edit, sidechainSourceID))
@@ -339,14 +339,14 @@ juce::String Plugin::getSidechainSourceName()
     return {};
 }
 
-void Plugin::getChannelNames (juce::StringArray* ins, juce::StringArray* outs)
+void Plugin::getChannelNames (yup::StringArray* ins, yup::StringArray* outs)
 {
     getLeftRightChannelNames (ins, outs);
 }
 
-juce::StringArray Plugin::getInputChannelNames()
+yup::StringArray Plugin::getInputChannelNames()
 {
-    juce::StringArray ins;
+    yup::StringArray ins;
     getChannelNames (&ins, nullptr);
 
     return ins;
@@ -401,7 +401,7 @@ bool Plugin::isClipEffectPlugin() const
     return isClipEffect;
 }
 
-void Plugin::valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier& i)
+void Plugin::valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier& i)
 {
     if (i == IDs::process)
         processingChanged();
@@ -414,7 +414,7 @@ void Plugin::valueTreeChanged()
     changed();
 }
 
-void Plugin::valueTreeChildAdded (juce::ValueTree&, juce::ValueTree& c)
+void Plugin::valueTreeChildAdded (yup::ValueTree&, yup::ValueTree& c)
 {
     if (c.getType() == IDs::SIDECHAINCONNECTIONS)
         sidechainWireList = std::make_unique<WireList> (*this, c);
@@ -422,7 +422,7 @@ void Plugin::valueTreeChildAdded (juce::ValueTree&, juce::ValueTree& c)
     valueTreeChanged();
 }
 
-void Plugin::valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree& c, int)
+void Plugin::valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree& c, int)
 {
     if (c.getType() == IDs::SIDECHAINCONNECTIONS)
         sidechainWireList = nullptr;
@@ -430,7 +430,7 @@ void Plugin::valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree& c, int)
     valueTreeChanged();
 }
 
-void Plugin::valueTreeParentChanged (juce::ValueTree& v)
+void Plugin::valueTreeParentChanged (yup::ValueTree& v)
 {
     isClipEffect = state.getParent().hasType (IDs::EFFECT);
 
@@ -463,23 +463,23 @@ void Plugin::setFrozen (bool shouldBeFrozen)
         cpuUsageMs = 0.0;
 }
 
-juce::String Plugin::getTooltip()
+yup::String Plugin::getTooltip()
 {
     return getDisplayName() + "$genericfilter";
 }
 
-juce::String Plugin::getDisplayName() const
+yup::String Plugin::getDisplayName() const
 {
     auto cn = customName.get().trim();
     return cn.isNotEmpty() ? cn : getName();
 }
 
-juce::String Plugin::getCustomName() const
+yup::String Plugin::getCustomName() const
 {
     return customName.get();
 }
 
-void Plugin::setCustomName (const juce::String& name)
+void Plugin::setCustomName (const yup::String& name)
 {
     auto trimmed = name.trim();
 
@@ -625,18 +625,18 @@ PluginList* Plugin::getOwnerList() const
 }
 
 //==============================================================================
-AutomatableParameter* Plugin::addParam (const juce::String& paramID, const juce::String& name,
-                                        juce::NormalisableRange<float> valueRange)
+AutomatableParameter* Plugin::addParam (const yup::String& paramID, const yup::String& name,
+                                        yup::NormalisableRange<float> valueRange)
 {
     auto p = new AutomatableParameter (paramID, name, *this, valueRange);
     addAutomatableParameter (*p);
     return p;
 }
 
-AutomatableParameter* Plugin::addParam (const juce::String& paramID, const juce::String& name,
-                                        juce::NormalisableRange<float> valueRange,
-                                        std::function<juce::String(float)> valueToStringFn,
-                                        std::function<float(const juce::String&)> stringToValueFn)
+AutomatableParameter* Plugin::addParam (const yup::String& paramID, const yup::String& name,
+                                        yup::NormalisableRange<float> valueRange,
+                                        std::function<yup::String(float)> valueToStringFn,
+                                        std::function<float(const yup::String&)> stringToValueFn)
 {
     auto p = addParam (paramID, name, valueRange);
     p->valueToStringFunction = valueToStringFn;
@@ -646,7 +646,7 @@ AutomatableParameter* Plugin::addParam (const juce::String& paramID, const juce:
 
 AutomatableParameter::Ptr Plugin::getQuickControlParameter() const
 {
-    juce::String currentID = quickParamName;
+    yup::String currentID = quickParamName;
 
     if (currentID.isEmpty())
     {
@@ -722,7 +722,7 @@ void Plugin::applyToBufferWithAutomation (const PluginRenderContext& pc)
 
     auto& arm = edit.getAutomationRecordManager();
     jassert (initialiseCount > 0);
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     jassert (! isInitialisingFlag);
    #endif
 
@@ -755,25 +755,25 @@ void Plugin::applyToBufferWithAutomation (const PluginRenderContext& pc)
 }
 
 //==============================================================================
-bool Plugin::hasNameForMidiNoteNumber (int, int midiChannel, juce::String&)
+bool Plugin::hasNameForMidiNoteNumber (int, int midiChannel, yup::String&)
 {
     jassert (midiChannel >= 1 && midiChannel <= 16);
-    juce::ignoreUnused (midiChannel);
+    yup::ignoreUnused (midiChannel);
     return false;
 }
 
-bool Plugin::hasNameForMidiProgram (int, int, juce::String&)
+bool Plugin::hasNameForMidiProgram (int, int, yup::String&)
 {
     return false;
 }
 
-bool Plugin::hasNameForMidiBank (int, juce::String&)
+bool Plugin::hasNameForMidiBank (int, yup::String&)
 {
     return false;
 }
 
 //==============================================================================
-juce::Array<Exportable::ReferencedItem> Plugin::getReferencedItems()  { return {}; }
+yup::Array<Exportable::ReferencedItem> Plugin::getReferencedItems()  { return {}; }
 void Plugin::reassignReferencedItem (const ReferencedItem&, ProjectItemRef, double) {}
 
 //==============================================================================
@@ -849,8 +849,8 @@ static Plugin::Array getRackablePlugins (SelectionManager& selectionManager)
 {
     Plugin::Array result;
 
-    juce::SortedSet<SelectedPluginIndex> pluginIndex;
-    juce::ValueTree lastList;
+    yup::SortedSet<SelectedPluginIndex> pluginIndex;
+    yup::ValueTree lastList;
 
     for (auto plugin : selectionManager.getItemsOfType<Plugin>())
     {
@@ -947,7 +947,7 @@ void Plugin::sortPlugins (std::vector<Plugin*>& plugins)
                });
 }
 
-void Plugin::getLeftRightChannelNames (juce::StringArray* chans)
+void Plugin::getLeftRightChannelNames (yup::StringArray* chans)
 {
     if (chans != nullptr)
     {
@@ -956,8 +956,8 @@ void Plugin::getLeftRightChannelNames (juce::StringArray* chans)
     }
 }
 
-void Plugin::getLeftRightChannelNames (juce::StringArray* ins,
-                                       juce::StringArray* outs)
+void Plugin::getLeftRightChannelNames (yup::StringArray* ins,
+                                       yup::StringArray* outs)
 {
     getLeftRightChannelNames (ins);
     getLeftRightChannelNames (outs);

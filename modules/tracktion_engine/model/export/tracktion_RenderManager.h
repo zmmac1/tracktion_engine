@@ -15,8 +15,8 @@ namespace tracktion::inline engine {
     Manages a set of reference counted render jobs and can be used to retrieve
     matching jobs or create new ones.
 */
-class RenderManager   : private juce::DeletedAtShutdown,
-                        private juce::AsyncUpdater
+class RenderManager   : private yup::DeletedAtShutdown,
+                        private yup::AsyncUpdater
 {
 public:
     //==============================================================================
@@ -26,12 +26,12 @@ public:
         a job is started or completed.
     */
     class Job  : public ThreadPoolJobWithProgress,
-                 private juce::MessageListener,
-                 private juce::Timer
+                 private yup::MessageListener,
+                 private yup::Timer
     {
     public:
         //==============================================================================
-        using Ptr = juce::ReferenceCountedObjectPtr<Job>;
+        using Ptr = yup::ReferenceCountedObjectPtr<Job>;
 
         ~Job() override;
 
@@ -93,7 +93,7 @@ public:
 
     private:
         //==============================================================================
-        struct UpdateMessage  : public juce::Message
+        struct UpdateMessage  : public yup::Message
         {
             enum Type
             {
@@ -105,7 +105,7 @@ public:
 
             UpdateMessage (Type t) : type (t) {}
 
-            static Type getType (const juce::Message& message)
+            static Type getType (const yup::Message& message)
             {
                 if (auto um = dynamic_cast<const UpdateMessage*> (&message))
                     return um->type;
@@ -115,25 +115,25 @@ public:
 
             Type type;
 
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UpdateMessage)
+            YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UpdateMessage)
         };
 
         //==============================================================================
         enum { messageRetryTimeout = 50 };
 
-        juce::ListenerList<Listener> listeners;
-        juce::Atomic<int> refCount;
+        yup::ListenerList<Listener> listeners;
+        yup::Atomic<int> refCount;
         Ptr selfReference;
-        juce::CriticalSection messageLock, finishedLock;
-        juce::Array<UpdateMessage::Type> messagesToResend;
+        yup::CriticalSection messageLock, finishedLock;
+        yup::Array<UpdateMessage::Type> messagesToResend;
         bool isInitialised = false, hasFinished = false;
 
         void sendCompletionMessages (bool success);
 
-        void handleMessage (const juce::Message&) override;
+        void handleMessage (const yup::Message&) override;
         void timerCallback() override;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Job)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Job)
     };
 
     //==============================================================================
@@ -148,20 +148,20 @@ public:
         then start a new job using getOrCreateRenderJob.
         You should always check this first, never start a new job unnecessarily.
     */
-    static AudioFile getAudioFileForHash (Engine&, const juce::File& directory, HashCode hash);
+    static AudioFile getAudioFileForHash (Engine&, const yup::File& directory, HashCode hash);
 
     /** This will return a Ptr to an existing render job for an audio file or nullptr if no job is in progress. */
     Job::Ptr getRenderJobWithoutCreating (const AudioFile& audioFile)       { return findJob (audioFile); }
 
     /** Returns all the jobs that may be processing the given file. */
-    juce::ReferenceCountedArray<Job> getRenderJobsWithoutCreating (const AudioFile&);
+    yup::ReferenceCountedArray<Job> getRenderJobsWithoutCreating (const AudioFile&);
 
     /** Returns the number of jobs in the pool. */
     int getNumJobs() noexcept;
 
     //==============================================================================
     /** Returns the prefix used for render files. */
-    static juce::StringRef getFileRenderPrefix()      { return "render_"; }
+    static yup::StringRef getFileRenderPrefix()      { return "render_"; }
 
     /** Returns true if a render is currently being performed for this AudioFile. */
     bool isProxyBeingGenerated (const AudioFile& proxyFile) noexcept;
@@ -173,9 +173,9 @@ public:
 
 private:
     //==============================================================================
-    juce::Array<Job*> jobs, danglingJobs;
-    juce::OwnedArray<Job> jobsToDelete;
-    juce::CriticalSection jobListLock, deleteListLock;
+    yup::Array<Job*> jobs, danglingJobs;
+    yup::OwnedArray<Job> jobsToDelete;
+    yup::CriticalSection jobListLock, deleteListLock;
 
     Job::Ptr findJob (const AudioFile&) noexcept;
     void addJobInternal (Job*) noexcept;
@@ -185,7 +185,7 @@ private:
 
     void handleAsyncUpdate() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderManager)
 };
 
 } // namespace tracktion::inline engine

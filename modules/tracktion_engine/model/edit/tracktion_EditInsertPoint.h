@@ -35,7 +35,7 @@ public:
     bool setNextInsertPoint (ClipOwner*, std::optional<TimePosition>);
 
     /** Sets the next insertion point to a given time and track. */
-    void setNextInsertPoint (TimePosition, const juce::ReferenceCountedObjectPtr<Track>&);
+    void setNextInsertPoint (TimePosition, const yup::ReferenceCountedObjectPtr<Track>&);
 
     /** Updates the time but not the track. */
     void setNextInsertPoint (TimePosition);
@@ -53,21 +53,21 @@ public:
                                     SelectionManager to set the insert point
         @param SelectionManger      The SelectionManager to use
     */
-    virtual void chooseInsertPoint (juce::ReferenceCountedObjectPtr<Track>&,
+    virtual void chooseInsertPoint (yup::ReferenceCountedObjectPtr<Track>&,
                                     TimePosition& start, bool pasteAfterSelection, SelectionManager*);
 
     /** This is the same as the other overload except you can supply a predicate to determine if tracks are
         allowed to be considered or not. Useful for when they are hidden etc.
         @param allowedTrackPredicate    A predicate to determine if the track can be pasted in to
     */
-    void chooseInsertPoint (juce::ReferenceCountedObjectPtr<Track>&,
+    void chooseInsertPoint (yup::ReferenceCountedObjectPtr<Track>&,
                             TimePosition& start, bool pasteAfterSelection, SelectionManager*,
                             std::function<bool (Track&)> allowedTrackPredicate);
 
     /** A struct representing a resolved insertion point. */
     struct Placement
     {
-        juce::ReferenceCountedObjectPtr<Track> track;   /**< The track to insert in to. */
+        yup::ReferenceCountedObjectPtr<Track> track;   /**< The track to insert in to. */
         ClipOwner* clipOwner = nullptr;                 /**< The clip owner to insert to (might be the same as track). */
         std::optional<TimePosition> time;               /**< The time to insert at. */
     };

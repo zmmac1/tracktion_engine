@@ -19,9 +19,9 @@ public:
         endEdge
     };
 
-    static juce::ValueTree createNote (const MidiNote&, BeatPosition newStart, BeatDuration newLength);
+    static yup::ValueTree createNote (const MidiNote&, BeatPosition newStart, BeatDuration newLength);
 
-    MidiNote (const juce::ValueTree&);
+    MidiNote (const yup::ValueTree&);
     MidiNote (MidiNote&&) = default;
 
     bool operator== (const MidiNote& other) const noexcept  { return state == other.state; }
@@ -68,14 +68,14 @@ public:
     int getNoteOffVelocity() const noexcept;
     void setNoteOffVelocity (int newOffVelocity, juce::UndoManager*);
 
-    int getColour() const noexcept                  { return (int) colour; }
-    void setColour (int newColourIndex, juce::UndoManager*);
+    int getColor() const noexcept                  { return (int) colour; }
+    void setColor (int newColorIndex, juce::UndoManager*);
 
     bool isMute() const noexcept                    { return mute != 0; }
     void setMute (bool shouldMute, juce::UndoManager*);
 
     //==============================================================================
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     //==============================================================================
@@ -91,7 +91,7 @@ private:
     MidiNote() = delete;
     MidiNote (const MidiNote&) = delete;
 
-    JUCE_LEAK_DETECTOR (MidiNote)
+    YUP_LEAK_DETECTOR (MidiNote)
 };
 
 } // namespace tracktion::inline engine

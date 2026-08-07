@@ -23,10 +23,10 @@ enum class AutomationMode
 };
 
 /** Converts an AutomationMode from a string. */
-std::optional<AutomationMode> automationModeFromString (juce::String);
+std::optional<AutomationMode> automationModeFromString (yup::String);
 
 /** Converts an AutomationMode to string. */
-juce::String toString (AutomationMode);
+yup::String toString (AutomationMode);
 
 } // namespace tracktion::inline engine
 
@@ -42,7 +42,7 @@ juce::String toString (AutomationMode);
 //
 //==============================================================================
 
-namespace juce
+namespace yup
 {
     template<>
     struct VariantConverter<tracktion::engine::AutomationMode>

@@ -11,7 +11,7 @@
 namespace tracktion::inline engine {
 
 class NovationRemoteSl  : public ControlSurface,
-                          private juce::AsyncUpdater
+                          private yup::AsyncUpdater
 {
 public:
     NovationRemoteSl (ExternalControllerManager&);
@@ -20,7 +20,7 @@ public:
     void initialiseDevice (bool connect) override;
     void shutDownDevice() override;
     void updateMiscFeatures() override;
-    void acceptMidiMessage (int, const juce::MidiMessage&) override;
+    void acceptMidiMessage (int, const yup::MidiMessage&) override;
     void moveFader (int channelNum, float newSliderPos) override;
     void movePanPot (int channelNum, float newPan) override;
     void updateSoloAndMute (int channelNum, Track::MuteAndSoloLightState, bool isBright) override;
@@ -29,13 +29,13 @@ public:
     void recordStateChanged (bool isRecording) override;
     void automationReadModeChanged (bool isReading) override;
     void automationWriteModeChanged (bool isWriting) override;
-    void faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames) override;
+    void faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames) override;
     void parameterChanged (int parameterNumber, const ParameterSetting&) override;
     void clearParameter (int parameterNumber) override;
-    bool wantsMessage (int, const juce::MidiMessage&) override;
+    bool wantsMessage (int, const yup::MidiMessage&) override;
     bool eatsAllMessages() override;
     bool canChangeSelectedPlugin() override;
-    void currentSelectionChanged (juce::String) override;
+    void currentSelectionChanged (yup::String) override;
     bool showingPluginParams() override;
     bool showingTracks() override;
 
@@ -72,13 +72,13 @@ private:
 
     bool mute[8];
     bool solo[8];
-    juce::String trackNames[8];
+    yup::String trackNames[8];
     float pan[8];
     float level[8];
     ParameterSetting param[16];
     bool online = true;
 
-    juce::String screenContents[4];
+    yup::String screenContents[4];
 
     void setRightMode (RightMode);
     void setLeftMode (LeftMode);
@@ -88,12 +88,12 @@ private:
     void clearAllLights();
     void refreshLeft (bool includeTitle);
     void refreshRight (bool includeTitle);
-    void drawString (const juce::String&, int panel);
-    juce::String padAndLimit (const juce::String&, int max);
+    void drawString (const yup::String&, int panel);
+    yup::String padAndLimit (const yup::String&, int max);
 
     void handleAsyncUpdate() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NovationRemoteSl)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NovationRemoteSl)
 };
 
 } // namespace tracktion::inline engine

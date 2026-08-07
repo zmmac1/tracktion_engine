@@ -14,12 +14,12 @@ namespace tracktion::inline engine {
 class MidiOutputDevice   : public OutputDevice
 {
 public:
-    MidiOutputDevice (Engine&, juce::MidiDeviceInfo);
+    MidiOutputDevice (Engine&, yup::MidiDeviceInfo);
     ~MidiOutputDevice() override;
 
-    juce::String getDeviceTypeDescription() const override          { return NEEDS_TRANS("MIDI Output"); }
+    yup::String getDeviceTypeDescription() const override          { return NEEDS_TRANS("MIDI Output"); }
 
-    juce::String openDevice() override;
+    yup::String openDevice() override;
     void closeDevice() override;
 
     void setEnabled (bool) override;
@@ -28,14 +28,14 @@ public:
     virtual MidiOutputDeviceInstance* createInstance (EditPlaybackContext&);
 
     //==============================================================================
-    juce::String prepareToPlay (Edit*, TimePosition);
+    yup::String prepareToPlay (Edit*, TimePosition);
     bool start();
     void stop();
 
     static void setControllerOffMessagesSent (Engine&, bool);
     static bool getControllerOffMessagesSent (Engine&);
 
-    juce::String getNameForMidiNoteNumber (int note, int midiChannel, bool useSharp = true) const;
+    yup::String getNameForMidiNoteNumber (int note, int midiChannel, bool useSharp = true) const;
 
     bool isConnectedToExternalController() const { return externalController != nullptr; }
 
@@ -58,7 +58,7 @@ public:
     bool isSendingControllerMidiClock() const noexcept  { return sendControllerMidiClock; }
 
     //==============================================================================
-    void fireMessage (const juce::MidiMessage&);
+    void fireMessage (const yup::MidiMessage&);
     void sendNoteOffMessages();
 
     TimeDuration getDeviceDelay() const noexcept;
@@ -67,15 +67,15 @@ public:
     void setPreDelayMs (int);
 
     //==============================================================================
-    juce::StringArray getProgramSets() const;
+    yup::StringArray getProgramSets() const;
     int getCurrentSetIndex() const;
-    void setCurrentProgramSet (const juce::String&);
-    juce::String getCurrentProgramSet() const           { return programNameSet; }
-    juce::String getProgramName (int programNumber, int bank);
+    void setCurrentProgramSet (const yup::String&);
+    yup::String getCurrentProgramSet() const           { return programNameSet; }
+    yup::String getProgramName (int programNumber, int bank);
     bool canEditProgramSet (int index) const;
     bool canDeleteProgramSet (int index) const;
 
-    juce::String getBankName (int bank);
+    yup::String getBankName (int bank);
     int getBankID (int bank);
     bool areMidiPatchesZeroBased();
 
@@ -88,34 +88,34 @@ protected:
     //==============================================================================
     friend class MidiOutputDeviceInstance;
 
-    virtual void sendMessageNow (const juce::MidiMessage& message);
+    virtual void sendMessageNow (const yup::MidiMessage& message);
 
     void loadProps();
     void saveProps();
 
-    juce::MidiDeviceInfo deviceInfo;
+    yup::MidiDeviceInfo deviceInfo;
     int preDelayMillisecs = 0, audioAdjustmentDelay = 0;
     std::unique_ptr<MidiTimecodeGenerator> timecodeGenerator;
     std::unique_ptr<MidiClockGenerator> midiClockGenerator;
     bool sendTimecode = false, sendMidiClock = false;
     bool playing = false;
-    juce::String programNameSet;
+    yup::String programNameSet;
 
     double sampleRate = 0;
 
-    std::unique_ptr<juce::MidiOutput> outputDevice;
-    juce::SpinLock outputDeviceLock;
+    std::unique_ptr<yup::MidiOutput> outputDevice;
+    yup::SpinLock outputDeviceLock;
     bool sendingMMC = false;
     bool sendControllerMidiClock = false;
     bool softDevice = false;
     ExternalController* externalController = nullptr;
 
-    juce::BigInteger midiNotesOn, channelsUsed;
+    yup::BigInteger midiNotesOn, channelsUsed;
     int sustain = 0;
 
     MidiMessageArray midiMessages;
 
-    juce::CriticalSection noteOnLock;
+    yup::CriticalSection noteOnLock;
 };
 
 //==============================================================================
@@ -123,8 +123,8 @@ protected:
 class SoftwareMidiOutputDevice  : public MidiOutputDevice
 {
 public:
-    SoftwareMidiOutputDevice (Engine& e, const juce::String& deviceName)
-       : MidiOutputDevice (e, { deviceName, juce::String() })
+    SoftwareMidiOutputDevice (Engine& e, const yup::String& deviceName)
+       : MidiOutputDevice (e, { deviceName, yup::String() })
     {
         softDevice = true;
     }
@@ -138,7 +138,7 @@ public:
     MidiOutputDeviceInstance (MidiOutputDevice&, EditPlaybackContext&);
     ~MidiOutputDeviceInstance();
 
-    juce::String prepareToPlay (TimePosition start, bool shouldSendMidiTC);
+    yup::String prepareToPlay (TimePosition start, bool shouldSendMidiTC);
     bool start();
     void stop();
 
@@ -162,7 +162,7 @@ private:
 
     MidiMessageArray midiMessages;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDeviceInstance)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiOutputDeviceInstance)
 };
 
 } // namespace tracktion::inline engine

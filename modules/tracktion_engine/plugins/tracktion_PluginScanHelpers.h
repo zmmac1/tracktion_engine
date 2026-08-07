@@ -20,7 +20,7 @@ static constexpr const char* commandLineUID = "PluginScan";
 struct CustomScanner;
 
 //==============================================================================
-struct PluginScanMasterProcess  : private juce::ChildProcessCoordinator
+struct PluginScanMasterProcess  : private yup::ChildProcessCoordinator
 {
     PluginScanMasterProcess (Engine& e) : engine (e) {}
 
@@ -31,7 +31,7 @@ struct PluginScanMasterProcess  : private juce::ChildProcessCoordinator
 
         crashed = false;
         // don't get stdout or strerr from the child process. We don't do anything with it and it fills up the pipe and hangs
-        launched = launchWorkerProcess (juce::File::getSpecialLocation (juce::File::currentExecutableFile),
+        launched = launchWorkerProcess (yup::File::getSpecialLocation (yup::File::currentExecutableFile),
                                         commandLineUID, 0, 0);
 
         if (launched)
@@ -47,10 +47,10 @@ struct PluginScanMasterProcess  : private juce::ChildProcessCoordinator
         return launched;
     }
 
-    bool sendScanRequest (juce::AudioPluginFormat& format,
-                          const juce::String& fileOrIdentifier, int requestID)
+    bool sendScanRequest (yup::AudioPluginFormat& format,
+                          const yup::String& fileOrIdentifier, int requestID)
     {
-        juce::XmlElement m ("SCAN");
+        yup::XmlElement m ("SCAN");
         m.setAttribute ("id", requestID);
         m.setAttribute ("type", format.getName());
         m.setAttribute ("file", fileOrIdentifier);
@@ -58,21 +58,21 @@ struct PluginScanMasterProcess  : private juce::ChildProcessCoordinator
         return sendMessageToWorker (createScanMessage (m));
     }
 
-    bool waitForReply (int requestID, const juce::String& fileOrIdentifier,
-                       juce::OwnedArray<juce::PluginDescription>& result,
+    bool waitForReply (int requestID, const yup::String& fileOrIdentifier,
+                       yup::OwnedArray<yup::PluginDescription>& result,
                        CustomScanner& scanner)
     {
       #if ! TRACKTION_LOG_ENABLED
-        juce::ignoreUnused (fileOrIdentifier);
+        yup::ignoreUnused (fileOrIdentifier);
       #endif
 
-        auto start = juce::Time::getCurrentTime();
+        auto start = yup::Time::getCurrentTime();
 
         for (;;)
         {
             auto reply = findReply (requestID);
 
-            auto elapsed = juce::Time::getCurrentTime() - start;
+            auto elapsed = yup::Time::getCurrentTime() - start;
 
             if (reply == nullptr || ! reply->hasTagName ("FOUND"))
             {
@@ -88,7 +88,7 @@ struct PluginScanMasterProcess  : private juce::ChildProcessCoordinator
                     return false;
                 }
 
-                juce::Thread::sleep (10);
+                yup::Thread::sleep (10);
                 continue;
             }
 
@@ -97,15 +97,15 @@ struct PluginScanMasterProcess  : private juce::ChildProcessCoordinator
 
             for (auto e : reply->getChildIterator())
             {
-                juce::PluginDescription desc;
+                yup::PluginDescription desc;
 
                 if (desc.loadFromXml (*e))
                 {
-                    auto newDesc = new juce::PluginDescription (desc);
-                    newDesc->lastInfoUpdateTime = juce::Time::getCurrentTime();
+                    auto newDesc = new yup::PluginDescription (desc);
+                    newDesc->lastInfoUpdateTime = yup::Time::getCurrentTime();
                     result.add (newDesc);
 
-                    TRACKTION_LOG ("Added " + desc.pluginFormatName + ": " + desc.name + "  [" + elapsed.getDescription() + "]");
+                    TRACKTION_LOG ("Added " + desc.name + ": " + desc.name + "  [" + elapsed.getDescription() + "]");
                 }
                 else
                 {
@@ -117,12 +117,12 @@ struct PluginScanMasterProcess  : private juce::ChildProcessCoordinator
         }
     }
 
-    void handleMessage (const juce::XmlElement& xml)
+    void handleMessage (const yup::XmlElement& xml)
     {
         if (xml.hasTagName ("FOUND"))
         {
-            const juce::ScopedLock sl (replyLock);
-            replies.add (new juce::XmlElement (xml));
+            const yup::ScopedLock sl (replyLock);
+            replies.add (new yup::XmlElement (xml));
         }
     }
 
@@ -135,8 +135,8 @@ struct PluginScanMasterProcess  : private juce::ChildProcessCoordinator
 
 private:
     Engine& engine;
-    juce::OwnedArray<juce::XmlElement> replies;
-    juce::CriticalSection replyLock;
+    yup::OwnedArray<yup::XmlElement> replies;
+    yup::CriticalSection replyLock;
     bool hasShownVirusCheckerWarning = false;
 
     void showVirusCheckerWarning()
@@ -153,31 +153,31 @@ private:
         }
     }
 
-    std::unique_ptr<juce::XmlElement> findReply (int requestID)
+    std::unique_ptr<yup::XmlElement> findReply (int requestID)
     {
         for (int i = replies.size(); --i >= 0;)
             if (replies.getUnchecked(i)->getIntAttribute ("id") == requestID)
-                return std::unique_ptr<juce::XmlElement> (replies.removeAndReturn (i));
+                return std::unique_ptr<yup::XmlElement> (replies.removeAndReturn (i));
 
         return {};
     }
 
-    void handleMessageFromWorker (const juce::MemoryBlock& mb) override
+    void handleMessageFromWorker (const yup::MemoryBlock& mb) override
     {
-        if (auto xml = juce::parseXML (mb.toString()))
+        if (auto xml = yup::parseXML (mb.toString()))
             handleMessage (*xml);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginScanMasterProcess)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginScanMasterProcess)
 };
 
 //==============================================================================
-struct PluginScanChildProcess  : public juce::ChildProcessWorker,
-                                 private juce::AsyncUpdater
+struct PluginScanChildProcess  : public yup::ChildProcessWorker,
+                                 private yup::AsyncUpdater
 {
     PluginScanChildProcess()
     {
-        juce::addDefaultFormatsToManager (pluginFormatManager);
+        yup::addDefaultFormatsToManager (pluginFormatManager);
     }
 
     void handleConnectionMade() override {}
@@ -187,9 +187,9 @@ struct PluginScanChildProcess  : public juce::ChildProcessWorker,
         std::exit (0);
     }
 
-    void handleScanMessage (int requestID, const juce::String& formatName, const juce::String& fileOrIdentifier)
+    void handleScanMessage (int requestID, const yup::String& formatName, const yup::String& fileOrIdentifier)
     {
-        juce::XmlElement result ("FOUND");
+        yup::XmlElement result ("FOUND");
         result.setAttribute ("id", requestID);
 
         for (int i = 0; i < pluginFormatManager.getNumFormats(); ++i)
@@ -198,7 +198,7 @@ struct PluginScanChildProcess  : public juce::ChildProcessWorker,
 
             if (format->getName() == formatName)
             {
-                juce::OwnedArray<juce::PluginDescription> found;
+                yup::OwnedArray<yup::PluginDescription> found;
                 format->findAllTypesForFile (found, fileOrIdentifier);
 
                 for (auto pd : found)
@@ -211,7 +211,7 @@ struct PluginScanChildProcess  : public juce::ChildProcessWorker,
         sendMessageToCoordinator (createScanMessage (result));
     }
 
-    void handleMessage (const juce::XmlElement& xml)
+    void handleMessage (const yup::XmlElement& xml)
     {
         if (xml.hasTagName ("SCAN"))
             handleScanMessage (xml.getIntAttribute ("id"),
@@ -220,19 +220,19 @@ struct PluginScanChildProcess  : public juce::ChildProcessWorker,
     }
 
 private:
-    juce::AudioPluginFormatManager pluginFormatManager;
-    juce::OwnedArray<juce::XmlElement, juce::CriticalSection> pendingMessages;
+    yup::AudioPluginFormatManager pluginFormatManager;
+    yup::OwnedArray<yup::XmlElement, yup::CriticalSection> pendingMessages;
 
-    void handleMessageFromCoordinator (const juce::MemoryBlock& mb) override
+    void handleMessageFromCoordinator (const yup::MemoryBlock& mb) override
     {
-        if (auto xml = juce::parseXML (mb.toString()))
+        if (auto xml = yup::parseXML (mb.toString()))
         {
             pendingMessages.add (xml.release());
             triggerAsyncUpdate();
         }
     }
 
-    void handleMessageSafely (const juce::XmlElement& m)
+    void handleMessageSafely (const yup::XmlElement& m)
     {
        #if JUCE_WINDOWS
         __try
@@ -245,7 +245,7 @@ private:
         }
         __except (1)
         {
-            juce::Process::terminate();
+            yup::Process::terminate();
         }
        #endif
     }
@@ -257,17 +257,17 @@ private:
                 handleMessageSafely (*xml);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginScanChildProcess)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginScanChildProcess)
 };
 
 //==============================================================================
-struct CustomScanner  : public juce::KnownPluginList::CustomScanner
+struct CustomScanner  : public yup::KnownPluginList::CustomScanner
 {
     CustomScanner (Engine& e) : engine (e) {}
 
-    bool findPluginTypesFor (juce::AudioPluginFormat& format,
-                             juce::OwnedArray<juce::PluginDescription>& result,
-                             const juce::String& fileOrIdentifier) override
+    bool findPluginTypesFor (yup::AudioPluginFormat& format,
+                             yup::OwnedArray<yup::PluginDescription>& result,
+                             const yup::String& fileOrIdentifier) override
     {
         CRASH_TRACER
 
@@ -282,7 +282,7 @@ struct CustomScanner  : public juce::KnownPluginList::CustomScanner
 
             if (masterProcess->ensureChildProcessLaunched())
             {
-                auto requestID = juce::Random().nextInt();
+                auto requestID = yup::Random().nextInt();
 
                 if (! shouldAbortScan()
                      && masterProcess->sendScanRequest (format, fileOrIdentifier, requestID)
@@ -318,7 +318,7 @@ struct CustomScanner  : public juce::KnownPluginList::CustomScanner
         return true;
     }
 
-    static bool shouldUseSeparateProcessToScan (juce::AudioPluginFormat& format, const juce::String fileOrIdentifier)
+    static bool shouldUseSeparateProcessToScan (yup::AudioPluginFormat& format, const yup::String fileOrIdentifier)
     {
         auto name = format.getName();
 
@@ -330,9 +330,9 @@ struct CustomScanner  : public juce::KnownPluginList::CustomScanner
                 || name.containsIgnoreCase ("LADSPA");
     }
 
-    static bool requiresUnblockedMessageThread (juce::AudioPluginFormat& format, const juce::String fileOrIdentifier)
+    static bool requiresUnblockedMessageThread (yup::AudioPluginFormat& format, const yup::String fileOrIdentifier)
     {
-        juce::PluginDescription desc;
+        yup::PluginDescription desc;
         desc.fileOrIdentifier = fileOrIdentifier;
         desc.uniqueId = desc.deprecatedUid = 0;
 
@@ -365,10 +365,10 @@ struct CustomScanner  : public juce::KnownPluginList::CustomScanner
 };
 
 
-static juce::MemoryBlock createScanMessage (const juce::XmlElement& xml)
+static yup::MemoryBlock createScanMessage (const yup::XmlElement& xml)
 {
-    juce::MemoryOutputStream mo;
-    xml.writeTo (mo, juce::XmlElement::TextFormat().withoutHeader().singleLine());
+    yup::MemoryOutputStream mo;
+    xml.writeTo (mo, yup::XmlElement::TextFormat().withoutHeader().singleLine());
     return mo.getMemoryBlock();
 }
 

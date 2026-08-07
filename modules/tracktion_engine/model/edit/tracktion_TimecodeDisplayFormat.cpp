@@ -120,7 +120,7 @@ static TimeAndName getMinSecDivisions (int level) noexcept
     return minSecDivisions [std::min (13, level)];
 }
 
-juce::String TimecodeSnapType::getDescription (const TempoSetting& tempo, bool isTripletOverride) const
+yup::String TimecodeSnapType::getDescription (const TempoSetting& tempo, bool isTripletOverride) const
 {
     if (type == TimecodeType::barsBeats)
     {
@@ -134,7 +134,7 @@ juce::String TimecodeSnapType::getDescription (const TempoSetting& tempo, bool i
         if (level == 9)   return TRANS("Beat");
         if (level == 10)  return TRANS("Bar");
 
-        return TRANS("33 bars").replace ("33", juce::String (barMultiples[std::min (level, 19) - 10]));
+        return TRANS("33 bars").replace ("33", yup::String (barMultiples[std::min (level, 19) - 10]));
     }
 
     if (type == TimecodeType::millisecs)
@@ -194,7 +194,7 @@ TimeDuration TimecodeSnapType::getIntervalNonBarsBeats() const
     return TimeDuration::fromSeconds (getMinSecDivisions (level + 2).time);
 }
 
-juce::String TimecodeSnapType::getTimecodeString (TimePosition time, const TempoSequence& sequence, bool useStartLabelIfZero) const
+yup::String TimecodeSnapType::getTimecodeString (TimePosition time, const TempoSequence& sequence, bool useStartLabelIfZero) const
 {
     if (type == TimecodeType::barsBeats)
     {
@@ -205,10 +205,10 @@ juce::String TimecodeSnapType::getTimecodeString (TimePosition time, const Tempo
         auto bars = barsBeats.bars + 1;
         auto beats = barsBeats.getWholeBeats() + 1;
 
-        if (level < 9)  return juce::String::formatted ("%d|%d|%03d", bars, beats, (int) (barsBeats.getFractionalBeats().inBeats() * Edit::ticksPerQuarterNote));
-        if (level == 9) return juce::String::formatted ("%d|%d", bars, beats);
+        if (level < 9)  return yup::String::formatted ("%d|%d|%03d", bars, beats, (int) (barsBeats.getFractionalBeats().inBeats() * Edit::ticksPerQuarterNote));
+        if (level == 9) return yup::String::formatted ("%d|%d", bars, beats);
 
-        return TRANS("Bar") + " " + juce::String (bars);
+        return TRANS("Bar") + " " + yup::String (bars);
     }
 
     if (type == TimecodeType::millisecs)
@@ -217,7 +217,7 @@ juce::String TimecodeSnapType::getTimecodeString (TimePosition time, const Tempo
             return "0";
 
         if (level >= 9)
-            return juce::RelativeTime (time.inSeconds()).getDescription();
+            return yup::RelativeTime (time.inSeconds()).getDescription();
 
         if (level >= 4)
             return TimecodeDisplayFormat::toFullTimecode (time, 0, false);
@@ -229,7 +229,7 @@ juce::String TimecodeSnapType::getTimecodeString (TimePosition time, const Tempo
         return "0";
 
     if (level >= 7)
-        return juce::RelativeTime (time.inSeconds()).getDescription();
+        return yup::RelativeTime (time.inSeconds()).getDescription();
 
     if (level >= 2)
         return TimecodeDisplayFormat::toFullTimecode (time, 0, false);
@@ -361,7 +361,7 @@ int TimecodeDisplayFormat::getFPS() const
     }
 }
 
-juce::String TimecodeDisplayFormat::getRoundingDescription() const
+yup::String TimecodeDisplayFormat::getRoundingDescription() const
 {
     switch (type)
     {
@@ -381,7 +381,7 @@ int TimecodeDisplayFormat::getSubSecondDivisions() const
     return subSecDivisionsForType[static_cast<int> (type)];
 }
 
-juce::String TimecodeDisplayFormat::getString (const TempoSequence& tempo, const TimePosition time, bool isRelative) const
+yup::String TimecodeDisplayFormat::getString (const TempoSequence& tempo, const TimePosition time, bool isRelative) const
 {
     if (type == TimecodeType::barsBeats)
     {
@@ -411,7 +411,7 @@ juce::String TimecodeDisplayFormat::getString (const TempoSequence& tempo, const
             fraction = barsBeats.getFractionalBeats();
         }
 
-        auto s = juce::String::formatted ("%d|%d|%03d", bars, beats, (int) (fraction.inBeats() * Edit::ticksPerQuarterNote));
+        auto s = yup::String::formatted ("%d|%d|%03d", bars, beats, (int) (fraction.inBeats() * Edit::ticksPerQuarterNote));
         return time < 0s ? ("-" + s) : s;
     }
 
@@ -423,7 +423,7 @@ int TimecodeDisplayFormat::getNumParts() const
     return type == TimecodeType::barsBeats ? 3 : 4;
 }
 
-juce::String TimecodeDisplayFormat::getSeparator (int part) const
+yup::String TimecodeDisplayFormat::getSeparator (int part) const
 {
     return (type == TimecodeType::barsBeats) ? ","
                                              : ((part == 0 && type == TimecodeType::millisecs) ? "." : ":");
@@ -475,18 +475,18 @@ int TimecodeDisplayFormat::getMinValueOfPart (int part, bool isRelative) const
     return (type == TimecodeType::barsBeats && part > 0 && ! isRelative) ? 1 : 0;
 }
 
-static juce::String twoCharString (int n)
+static yup::String twoCharString (int n)
 {
     if (n < 10)
-        return juce::String::charToString ('0') + (juce::juce_wchar) (n + '0');
+        return yup::String::charToString ('0') + (yup::juce_wchar) (n + '0');
 
-    return juce::String (n);
+    return yup::String (n);
 }
 
 void TimecodeDisplayFormat::getPartStrings (TimecodeDuration duration,
                                             const TempoSequence& tempo,
                                             bool isRelative,
-                                            juce::String results[4]) const
+                                            yup::String results[4]) const
 {
     if (type == TimecodeType::barsBeats)
     {
@@ -648,25 +648,25 @@ TimecodeDuration TimecodeDisplayFormat::getNewTimeWithPartValue (TimecodeDuratio
 }
 
 //==============================================================================
-juce::String TimecodeDisplayFormat::toFullTimecode (TimePosition seconds, int subSecondDivisions, bool showHours)
+yup::String TimecodeDisplayFormat::toFullTimecode (TimePosition seconds, int subSecondDivisions, bool showHours)
 {
-    juce::String result = (seconds < 0s) ? "-" : "";
+    yup::String result = (seconds < 0s) ? "-" : "";
     auto absSecs = tracktion::abs (seconds).inSeconds();
 
     if (showHours || (absSecs >= 60.0 * 60.0))
-        result += juce::String::formatted ("%02d:%02d:%02d",
+        result += yup::String::formatted ("%02d:%02d:%02d",
                                            (int) (absSecs / (60.0 * 60.0)),
                                            ((int) (absSecs / 60.0)) % 60,
                                            ((int) absSecs) % 60);
     else
-        result += juce::String::formatted ("%d:%02d",
+        result += yup::String::formatted ("%d:%02d",
                                            ((int) (absSecs / 60.0)) % 60,
                                            ((int) absSecs) % 60);
 
     if (subSecondDivisions > 0)
-        result += juce::String::formatted (":%0*d",
-                                           juce::String (subSecondDivisions - 1).length(),
-                                           juce::roundToInt (absSecs * subSecondDivisions) % subSecondDivisions);
+        result += yup::String::formatted (":%0*d",
+                                           yup::String (subSecondDivisions - 1).length(),
+                                           yup::roundToInt (absSecs * subSecondDivisions) % subSecondDivisions);
 
     return result;
 }
@@ -702,7 +702,7 @@ int TimecodeDisplayFormat::getNumSnapTypes() const
 
 TimecodeSnapType TimecodeDisplayFormat::getSnapType (int index) const
 {
-    return TimecodeSnapType (type, juce::jlimit (0, getNumSnapTypes() - 1, index));
+    return TimecodeSnapType (type, yup::jlimit (0, getNumSnapTypes() - 1, index));
 }
 
 //==============================================================================
@@ -731,7 +731,7 @@ TimePosition TimecodeDisplayIterator::next()
     return time;
 }
 
-juce::String TimecodeDisplayIterator::getTimecodeAsString() const
+yup::String TimecodeDisplayIterator::getTimecodeAsString() const
 {
     return currentSnapType.getTimecodeString (time, sequence, true);
 }

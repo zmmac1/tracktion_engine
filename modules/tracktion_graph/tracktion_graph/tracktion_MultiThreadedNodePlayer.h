@@ -80,7 +80,7 @@ private:
     //==============================================================================
     std::atomic<size_t> numThreadsToUse { std::max ((size_t) 0, (size_t) std::thread::hardware_concurrency() - 1) };
     choc::buffer::FrameCount numSamplesToProcess;
-    juce::Range<int64_t> referenceSampleRange;
+    yup::Range<int64_t> referenceSampleRange;
     std::atomic<bool> threadsShouldExit { false };
 
     class ThreadPool;
@@ -97,7 +97,7 @@ private:
         std::vector<Node*> outputs;
         std::atomic<size_t> numInputsToBeProcessed { 0 };
         std::atomic<bool> hasBeenQueued { true };
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         std::atomic<bool> hasBeenDequeued { false };
        #endif
     };

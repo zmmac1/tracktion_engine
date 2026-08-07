@@ -18,20 +18,20 @@ namespace tracktion::inline engine {
 */
 struct OldEditConversion
 {
-    static juce::ValueTree convert (const juce::ValueTree& v)
+    static yup::ValueTree convert (const yup::ValueTree& v)
     {
         jassert (v.isValid());
 
         if (auto xml = v.createXml())
         {
             convert (*xml);
-            return juce::ValueTree::fromXml (*xml);
+            return yup::ValueTree::fromXml (*xml);
         }
 
         return v;
     }
 
-    static void convert (juce::XmlElement& editXML)
+    static void convert (yup::XmlElement& editXML)
     {
         CRASH_TRACER
 
@@ -52,7 +52,7 @@ struct OldEditConversion
 
 private:
     //==============================================================================
-    static void renameAttribute (juce::XmlElement& e, const juce::Identifier& oldAtt, const juce::Identifier& newAtt)
+    static void renameAttribute (yup::XmlElement& e, const yup::Identifier& oldAtt, const yup::Identifier& newAtt)
     {
         if (e.hasAttribute (oldAtt))
         {
@@ -61,7 +61,7 @@ private:
         }
     }
 
-    static void moveAttribute (juce::XmlElement& oldXML, juce::XmlElement& newXML, const juce::Identifier& name)
+    static void moveAttribute (yup::XmlElement& oldXML, yup::XmlElement& newXML, const yup::Identifier& name)
     {
         if (oldXML.hasAttribute (name))
         {
@@ -70,7 +70,7 @@ private:
         }
     }
 
-    static void moveAttribute (juce::XmlElement& oldXML, juce::XmlElement& newXML, const juce::Identifier& oldName, const juce::Identifier& newName)
+    static void moveAttribute (yup::XmlElement& oldXML, yup::XmlElement& newXML, const yup::Identifier& oldName, const yup::Identifier& newName)
     {
         if (oldXML.hasAttribute (oldName))
         {
@@ -78,7 +78,7 @@ private:
             oldXML.removeAttribute (oldName);
         }
     }
-    static void convertSequenceMidiVersion (juce::XmlElement& xml, double timeToBeatFactor)
+    static void convertSequenceMidiVersion (yup::XmlElement& xml, double timeToBeatFactor)
     {
         for (auto seq : xml.getChildWithTagNameIterator ("MIDISEQUENCE"))
         {
@@ -89,7 +89,7 @@ private:
                     if (e->hasTagName (IDs::NOTE))
                     {
                         const double startBeat = timeToBeatFactor * e->getDoubleAttribute (IDs::t);
-                        const double lengthInBeats = juce::jmax (0.0, timeToBeatFactor * e->getDoubleAttribute (IDs::l));
+                        const double lengthInBeats = yup::jmax (0.0, timeToBeatFactor * e->getDoubleAttribute (IDs::l));
                         e->removeAttribute (IDs::t);
                         e->setAttribute (IDs::b, startBeat);
                         e->setAttribute (IDs::l, lengthInBeats);
@@ -134,7 +134,7 @@ private:
                             // Timbre
                             if (control->getIntAttribute (IDs::type) == 71)
                             {
-                                auto expression = new juce::XmlElement (IDs::TIMBRE);
+                                auto expression = new yup::XmlElement (IDs::TIMBRE);
 
                                 expression->setAttribute (IDs::b, control->getDoubleAttribute (IDs::b));
                                 expression->setAttribute (IDs::v, control->getIntAttribute (IDs::val) / 16383.0);
@@ -144,9 +144,9 @@ private:
                             // Pitch wheel
                             if (control->getIntAttribute (IDs::type) == 4101)
                             {
-                                auto range = juce::NormalisableRange<float> (-48.0f, 48.0f);
+                                auto range = yup::NormalisableRange<float> (-48.0f, 48.0f);
 
-                                auto expression = new juce::XmlElement (IDs::PITCHBEND);
+                                auto expression = new yup::XmlElement (IDs::PITCHBEND);
                                 expression->setAttribute (IDs::b, control->getDoubleAttribute (IDs::b));
                                 expression->setAttribute (IDs::v, range.convertFrom0to1 (float (control->getIntAttribute (IDs::val)) / 16383.0f));
                                 note->addChildElement (expression);
@@ -154,7 +154,7 @@ private:
                             // Channel Pressure
                             if (control->getIntAttribute (IDs::type) == 4103)
                             {
-                                auto expression = new juce::XmlElement (IDs::PRESSURE);
+                                auto expression = new yup::XmlElement (IDs::PRESSURE);
                                 expression->setAttribute (IDs::b, control->getDoubleAttribute (IDs::b));
                                 expression->setAttribute (IDs::v, float (control->getIntAttribute (IDs::val)) / 16383.0f);
                                 note->addChildElement (expression);
@@ -167,7 +167,7 @@ private:
         }
     }
 
-    static void convertTrackMidiVersion (juce::XmlElement& track, double editTempo)
+    static void convertTrackMidiVersion (yup::XmlElement& track, double editTempo)
     {
         for (auto clip : track.getChildWithTagNameIterator ("CLIP"))
         {
@@ -177,7 +177,7 @@ private:
         }
     }
 
-    static void convertMidiVersion (juce::XmlElement& editXml)
+    static void convertMidiVersion (yup::XmlElement& editXml)
     {
         CRASH_TRACER
 
@@ -190,7 +190,7 @@ private:
         }
     }
 
-    static void convertMpeVersion (juce::XmlElement& xmlToSearchRecursively)
+    static void convertMpeVersion (yup::XmlElement& xmlToSearchRecursively)
     {
         // We recursively search for CLIP elements, because NOISE's clips
         // live in SLOTs, whose Identifier isn't available here.
@@ -224,16 +224,16 @@ private:
         }
     }
 
-    static void updateOldStepClip (juce::XmlElement& xml)
+    static void updateOldStepClip (yup::XmlElement& xml)
     {
-        auto patterns = new juce::XmlElement (IDs::PATTERNS);
-        auto channels = new juce::XmlElement (IDs::CHANNELS);
+        auto patterns = new yup::XmlElement (IDs::PATTERNS);
+        auto channels = new yup::XmlElement (IDs::CHANNELS);
 
         for (auto e : xml.getChildWithTagNameIterator (IDs::PATTERN))
-            patterns->addChildElement (new juce::XmlElement (*e));
+            patterns->addChildElement (new yup::XmlElement (*e));
 
         for (auto e : xml.getChildWithTagNameIterator (IDs::CHANNEL))
-            channels->addChildElement (new juce::XmlElement (*e));
+            channels->addChildElement (new yup::XmlElement (*e));
 
         xml.deleteAllChildElements();
 
@@ -257,7 +257,7 @@ private:
         }
     }
 
-    static void convertPluginsAndClips (juce::XmlElement& xml)
+    static void convertPluginsAndClips (yup::XmlElement& xml)
     {
         for (auto e : xml.getChildIterator())
         {
@@ -287,9 +287,9 @@ private:
         }
     }
 
-    static void updateV2TempoData (juce::XmlElement& xml)
+    static void updateV2TempoData (yup::XmlElement& xml)
     {
-        juce::Array<juce::XmlElement*> oldTempos;
+        yup::Array<yup::XmlElement*> oldTempos;
 
         for (auto e : xml.getChildWithTagNameIterator (IDs::TEMPO))
             oldTempos.add (e);
@@ -303,19 +303,19 @@ private:
 
             for (auto* e : oldTempos)
             {
-                juce::XmlElement tempo (IDs::TEMPO);
+                yup::XmlElement tempo (IDs::TEMPO);
                 tempo.setAttribute (IDs::startBeat, e->getIntAttribute (IDs::startBeat));
                 tempo.setAttribute (IDs::bpm, e->getDoubleAttribute (IDs::bpm));
                 tempo.setAttribute (IDs::curve, e->getIntAttribute (IDs::ramped) ? 0.0f : 1.0f);
 
-                juce::XmlElement timesig (IDs::TIMESIG);
+                yup::XmlElement timesig (IDs::TIMESIG);
                 timesig.setAttribute (IDs::startBeat, e->getIntAttribute (IDs::startBeat));
                 timesig.setAttribute (IDs::numerator, e->getIntAttribute (IDs::numerator));
                 timesig.setAttribute (IDs::denominator, e->getIntAttribute (IDs::denominator));
                 timesig.setAttribute (IDs::triplets, e->getIntAttribute (IDs::triplets));
 
-                tempoSequence->addChildElement (new juce::XmlElement (tempo));
-                tempoSequence->addChildElement (new juce::XmlElement (timesig));
+                tempoSequence->addChildElement (new yup::XmlElement (tempo));
+                tempoSequence->addChildElement (new yup::XmlElement (timesig));
 
                 xml.removeChildElement (e, true);
             }
@@ -337,7 +337,7 @@ private:
             {
                 for (auto e : oldTempos)
                 {
-                    juce::XmlElement timesig (IDs::TIMESIG);
+                    yup::XmlElement timesig (IDs::TIMESIG);
                     timesig.setAttribute (IDs::startBeat, e->getIntAttribute (IDs::startBeat));
                     timesig.setAttribute (IDs::numerator, e->getIntAttribute (IDs::numerator));
                     timesig.setAttribute (IDs::denominator, e->getIntAttribute (IDs::denominator));
@@ -350,18 +350,18 @@ private:
                     e->removeAttribute (IDs::triplets);
                     e->removeAttribute (IDs::ramped);
 
-                    tempoSequence->addChildElement (new juce::XmlElement (timesig));
+                    tempoSequence->addChildElement (new yup::XmlElement (timesig));
                 }
             }
         }
     }
 
-    static void convertV2Markers (juce::XmlElement& xml)
+    static void convertV2Markers (yup::XmlElement& xml)
     {
         if (auto viewStateXML = xml.getChildByName ("VIEWSTATE"))
         {
-            juce::Array<int> numbers;
-            juce::Array<double> times;
+            yup::Array<int> numbers;
+            yup::Array<double> times;
 
             for (auto e : viewStateXML->getChildWithTagNameIterator (IDs::MARKER))
             {
@@ -394,7 +394,7 @@ private:
         }
     }
 
-    static void convertVideo (juce::XmlElement& xml)
+    static void convertVideo (yup::XmlElement& xml)
     {
         if (xml.getChildByName (IDs::VIDEO) != nullptr)
             return;
@@ -410,7 +410,7 @@ private:
         }
     }
 
-    static void convertOldView (juce::XmlElement& xml)
+    static void convertOldView (yup::XmlElement& xml)
     {
         if (auto viewStateXML = xml.getChildByName ("VIEWSTATE"))
         {
@@ -436,18 +436,18 @@ private:
         }
     }
 
-    static void convertV9PitchSequence (juce::XmlElement& xml)
+    static void convertV9PitchSequence (yup::XmlElement& xml)
     {
         if (auto pitchSequence = xml.getChildByName (IDs::PITCHSEQUENCE))
             for (auto e : pitchSequence->getChildWithTagNameIterator (IDs::PITCH))
                 renameAttribute (*e, IDs::start, IDs::startBeat);
     }
 
-    static void convertV9Markers (juce::XmlElement& xml)
+    static void convertV9Markers (yup::XmlElement& xml)
     {
         if (auto firstMarkerTrack = xml.getChildByName (IDs::MARKERTRACK))
         {
-            juce::Array<juce::XmlElement*> tracksToRemove;
+            yup::Array<yup::XmlElement*> tracksToRemove;
 
             for (auto markerTrack : xml.getChildWithTagNameIterator (IDs::MARKERTRACK))
             {
@@ -455,7 +455,7 @@ private:
                     continue;
 
                 for (auto clip : markerTrack->getChildWithTagNameIterator ("CLIP"))
-                    firstMarkerTrack->addChildElement (new juce::XmlElement (*clip));
+                    firstMarkerTrack->addChildElement (new yup::XmlElement (*clip));
 
                 tracksToRemove.add (markerTrack);
             }
@@ -467,7 +467,7 @@ private:
         }
     }
 
-    static juce::XmlElement* getParentWithId (juce::Array<juce::XmlElement*>& tracks, EditItemID parentID)
+    static yup::XmlElement* getParentWithId (yup::Array<yup::XmlElement*>& tracks, EditItemID parentID)
     {
         for (auto e : tracks)
             if (EditItemID::fromXML (*e, "mediaId") == parentID)
@@ -476,7 +476,7 @@ private:
         return {};
     }
 
-    static void addTracks (juce::Array<juce::XmlElement*>& tracks, juce::XmlElement& xml)
+    static void addTracks (yup::Array<yup::XmlElement*>& tracks, yup::XmlElement& xml)
     {
         for (auto e : xml.getChildIterator())
         {
@@ -488,9 +488,9 @@ private:
         }
     }
 
-    static void fixTrackTags (juce::XmlElement& xml)
+    static void fixTrackTags (yup::XmlElement& xml)
     {
-        juce::Array<juce::XmlElement*> tracks;
+        yup::Array<yup::XmlElement*> tracks;
         addTracks (tracks, xml);
 
         for (auto e : tracks)
@@ -501,9 +501,9 @@ private:
             auto tagsString = e->getStringAttribute (IDs::tags);
 
             if (tagsString.contains (","))
-                tagsString = juce::StringArray::fromTokens (tagsString, ",", "\"").joinIntoString ("|");
+                tagsString = yup::StringArray::fromTokens (tagsString, ",", "\"").joinIntoString ("|");
 
-            auto tags = juce::StringArray::fromTokens (tagsString, "|", "\"");
+            auto tags = yup::StringArray::fromTokens (tagsString, "|", "\"");
 
             for (auto& tag : tags)
                 tag = tag.trimCharactersAtStart ("_").trimCharactersAtEnd ("_");
@@ -514,9 +514,9 @@ private:
         }
     }
 
-    static void convertFolderTracks (juce::XmlElement& xml)
+    static void convertFolderTracks (yup::XmlElement& xml)
     {
-        juce::Array<juce::XmlElement*> tracks;
+        yup::Array<yup::XmlElement*> tracks;
         addTracks (tracks, xml);
 
         for (auto e : tracks)
@@ -543,8 +543,8 @@ private:
         }
     }
 
-    static void addNodeRecursively (juce::Array<juce::XmlElement*>& plugins,
-                                    juce::XmlElement& xml, const juce::Identifier& tagName)
+    static void addNodeRecursively (yup::Array<yup::XmlElement*>& plugins,
+                                    yup::XmlElement& xml, const yup::Identifier& tagName)
     {
         if (xml.hasTagName (tagName))
             plugins.add (&xml);
@@ -553,9 +553,9 @@ private:
             addNodeRecursively (plugins, *e, tagName);
     }
 
-    static void convertLegacyLFOs (juce::XmlElement& xml)
+    static void convertLegacyLFOs (yup::XmlElement& xml)
     {
-        juce::Array<juce::XmlElement*> tracks, plugins, lfosToDelete, automationSourcesToDelete;
+        yup::Array<yup::XmlElement*> tracks, plugins, lfosToDelete, automationSourcesToDelete;
         addTracks (tracks, xml);
         addNodeRecursively (plugins, xml, IDs::PLUGIN);
 
@@ -585,7 +585,7 @@ private:
 
                 for (auto lfo : lfos->getChildWithTagNameIterator (IDs::LFO))
                 {
-                    auto newLFO = new juce::XmlElement (*lfo);
+                    auto newLFO = new yup::XmlElement (*lfo);
                     modifiers->addChildElement (newLFO);
                     newLFO->setAttribute (IDs::syncType, 1);
                     newLFO->setAttribute (IDs::depth, lfo->getDoubleAttribute (IDs::intensity, 50.0) / 100.0);
@@ -645,7 +645,7 @@ private:
                 p->removeChildElement (automationSource, true);
     }
 
-    static void convertLegacyIDs (juce::XmlElement& xml)
+    static void convertLegacyIDs (yup::XmlElement& xml)
     {
         renameLegacyIDs (xml);
 
@@ -655,7 +655,7 @@ private:
         recurseDoingLegacyConversions (xml);
     }
 
-    static void convertLegacyIDsIfNeeded (juce::XmlElement& xml)
+    static void convertLegacyIDsIfNeeded (yup::XmlElement& xml)
     {
         if (xml.hasTagName (IDs::EDIT))
         {
@@ -677,13 +677,13 @@ private:
         }
     }
 
-    static void tidyIDListDelimiters (juce::XmlElement& xml, const juce::Identifier& att)
+    static void tidyIDListDelimiters (yup::XmlElement& xml, const yup::Identifier& att)
     {
         if (xml.hasAttribute (att))
             xml.setAttribute (att, xml.getStringAttribute (att).replace ("|", ","));
     }
 
-    static void renameLegacyIDs (juce::XmlElement& xml)
+    static void renameLegacyIDs (yup::XmlElement& xml)
     {
         for (auto e : xml.getChildIterator())
             renameLegacyIDs (*e);
@@ -759,7 +759,7 @@ private:
         moveXMLAttributeToStart (xml, IDs::id);
     }
 
-    static void convertLegacyFilterTagsToPlugin (juce::XmlElement& xml)
+    static void convertLegacyFilterTagsToPlugin (yup::XmlElement& xml)
     {
         if (xml.hasTagName ("FILTER"))            xml.setTagName (IDs::PLUGIN);
         if (xml.hasTagName ("FILTERINSTANCE"))    xml.setTagName (IDs::PLUGININSTANCE);
@@ -769,7 +769,7 @@ private:
         if (xml.hasTagName ("RACKFILTERS"))       xml.setTagName (IDs::RACKS);
     }
 
-    static void convertLegacyRackConnectionIDs (juce::XmlElement& xml)
+    static void convertLegacyRackConnectionIDs (yup::XmlElement& xml)
     {
         if (! xml.hasTagName (IDs::CONNECTION))
             return;
@@ -778,7 +778,7 @@ private:
         if (xml.getStringAttribute (IDs::dst) == "0/0") xml.setAttribute (IDs::dst, "0");
     }
 
-    static void convertLegacyClipFormat (juce::XmlElement& xml)
+    static void convertLegacyClipFormat (yup::XmlElement& xml)
     {
         if (xml.hasTagName ("CLIP"))
         {
@@ -788,12 +788,12 @@ private:
         }
     }
 
-    static void setNewTimecode (juce::XmlElement& xml, TimecodeType type)
+    static void setNewTimecode (yup::XmlElement& xml, TimecodeType type)
     {
-        xml.setAttribute (IDs::timecodeFormat, juce::VariantConverter<TimecodeDisplayFormat>::toVar (type).toString());
+        xml.setAttribute (IDs::timecodeFormat, yup::VariantConverter<TimecodeDisplayFormat>::toVar (type).toString());
     }
 
-    static void convertLegacyTimecodes (juce::XmlElement& xml)
+    static void convertLegacyTimecodes (yup::XmlElement& xml)
     {
         auto timeFormat = xml.getStringAttribute (IDs::timecodeFormat);
         auto fps = xml.getIntAttribute (IDs::fps);
@@ -814,7 +814,7 @@ private:
         }
     }
 
-    static void convertLegacyMidiSequences (juce::XmlElement& xml)
+    static void convertLegacyMidiSequences (yup::XmlElement& xml)
     {
         if (xml.hasTagName ("MIDISEQUENCE"))
         {
@@ -842,7 +842,7 @@ private:
         }
     }
 
-    static void convertLegacyInputTargets (juce::XmlElement& xml)
+    static void convertLegacyInputTargets (yup::XmlElement& xml)
     {
         for (auto e : xml.getChildIterator())
             convertLegacyInputTargets (*e);
@@ -851,7 +851,7 @@ private:
             renameAttribute (xml, "targetTrack", IDs::targetID);
     }
 
-    static void recurseDoingLegacyConversions (juce::XmlElement& xml)
+    static void recurseDoingLegacyConversions (yup::XmlElement& xml)
     {
         for (auto e : xml.getChildIterator())
             recurseDoingLegacyConversions (*e);
@@ -863,7 +863,7 @@ private:
     }
 };
 
-juce::ValueTree updateLegacyEdit (const juce::ValueTree& v)   { return OldEditConversion::convert (v); }
-void updateLegacyEdit (juce::XmlElement& editXML)             { OldEditConversion::convert (editXML); }
+yup::ValueTree updateLegacyEdit (const yup::ValueTree& v)   { return OldEditConversion::convert (v); }
+void updateLegacyEdit (yup::XmlElement& editXML)             { OldEditConversion::convert (editXML); }
 
 } // namespace tracktion::inline engine

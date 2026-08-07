@@ -16,16 +16,16 @@ public:
     RackInstance (PluginCreationInfo);
     ~RackInstance() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<RackInstance>;
+    using Ptr = yup::ReferenceCountedObjectPtr<RackInstance>;
 
-    static juce::ValueTree create (RackType&);
+    static yup::ValueTree create (RackType&);
 
     //==============================================================================
     static const char* xmlTypeName;
 
-    juce::String getName() const override;
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getTooltip() override;
+    yup::String getName() const override;
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getTooltip() override;
 
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
@@ -44,16 +44,16 @@ public:
     void applyToBuffer (const PluginRenderContext&) override;
     void updateAutomatableParamPosition (TimePosition) override;
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     void replaceRackWithPluginSequence (SelectionManager*);
 
     //==============================================================================
     /** Returns the available rack input pin names (for UI dropdowns). */
-    juce::StringArray getInputChoices (bool includeNumberPrefix);
+    yup::StringArray getInputChoices (bool includeNumberPrefix);
     /** Returns the available rack output pin names (for UI dropdowns). */
-    juce::StringArray getOutputChoices (bool includeNumberPrefix);
-    juce::String getNoPinName();
+    yup::StringArray getOutputChoices (bool includeNumberPrefix);
+    yup::String getNoPinName();
 
     //==============================================================================
     const EditItemID rackTypeID;
@@ -81,17 +81,17 @@ public:
     void setOutputMapping (int channelIndex, int rackPinIndex);
 
     /** Sets the input mapping by name (from getInputChoices). */
-    void setInputMappingByName (int channelIndex, const juce::String& inputName);
+    void setInputMappingByName (int channelIndex, const yup::String& inputName);
     /** Sets the output mapping by name (from getOutputChoices). */
-    void setOutputMappingByName (int channelIndex, const juce::String& outputName);
+    void setOutputMappingByName (int channelIndex, const yup::String& outputName);
 
     /** Returns the input/output gain parameter for a channel. */
     AutomatableParameter::Ptr getInputGainParam (int channelIndex) const;
     AutomatableParameter::Ptr getOutputGainParam (int channelIndex) const;
 
     /** Returns the display name for an input/output mapping. */
-    juce::String getInputMappingName (int channelIndex);
-    juce::String getOutputMappingName (int channelIndex);
+    yup::String getInputMappingName (int channelIndex);
+    yup::String getOutputMappingName (int channelIndex);
 
     void setInputLevel (int channelIndex, float value);
     void setOutputLevel (int channelIndex, float value);
@@ -121,13 +121,13 @@ private:
         AutomatableParameter::Ptr outputGainDb;
     };
 
-    juce::OwnedArray<ChannelMapping> channelMappings;
+    yup::OwnedArray<ChannelMapping> channelMappings;
 
     void createChannelMapping (int channelIndex, int defaultInput, int defaultOutput);
     void trimChannelMappingsToSize (int needed);
     void migrateFromLegacyFormat();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RackInstance)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RackInstance)
 };
 
 } // namespace tracktion::inline engine

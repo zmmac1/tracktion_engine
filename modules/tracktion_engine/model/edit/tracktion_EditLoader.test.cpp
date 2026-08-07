@@ -20,7 +20,7 @@ TEST_SUITE("tracktion_engine")
     TEST_CASE ("EditLoad")
     {
         auto& engine = *Engine::getEngines()[0];
-        juce::TemporaryFile tempEditFile;
+        yup::TemporaryFile tempEditFile;
 
         // Create Edit with 100 tracks and save to file
         {
@@ -98,7 +98,7 @@ TEST_SUITE("tracktion_engine")
     {
         auto& engine = *Engine::getEngines()[0];
 
-        juce::File invalidFile;
+        yup::File invalidFile;
         std::atomic<bool> done { false };
 
         auto editLoader = EditLoader::loadEdit (engine, invalidFile, [&done] (auto) { done = true; });

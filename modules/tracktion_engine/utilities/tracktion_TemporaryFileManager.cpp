@@ -19,12 +19,12 @@ TemporaryFileManager::~TemporaryFileManager()
 {
 }
 
-static juce::File getDefaultTempFolder (Engine& engine)
+static yup::File getDefaultTempFolder (Engine& engine)
 {
     return engine.getPropertyStorage().getAppCacheFolder().getChildFile ("Temporary");
 }
 
-static bool isDangerousPath (const juce::File& f)
+static bool isDangerousPath (const yup::File& f)
 {
     if (! f.isDirectory() && ! f.getParentDirectory().isDirectory())
         return false;
@@ -33,7 +33,7 @@ static bool isDangerousPath (const juce::File& f)
     if (f.getParentDirectory() == f)
         return true;
 
-    using SL = juce::File::SpecialLocationType;
+    using SL = yup::File::SpecialLocationType;
 
     for (auto loc : { SL::userHomeDirectory,
                       SL::userDesktopDirectory,
@@ -48,14 +48,14 @@ static bool isDangerousPath (const juce::File& f)
                      #endif
                     })
     {
-        auto special = juce::File::getSpecialLocation (loc);
+        auto special = yup::File::getSpecialLocation (loc);
 
         if (special == f)
             return true;
     }
 
     // Also check Downloads (no JUCE constant for this)
-    auto downloads = juce::File::getSpecialLocation (SL::userHomeDirectory).getChildFile ("Downloads");
+    auto downloads = yup::File::getSpecialLocation (SL::userHomeDirectory).getChildFile ("Downloads");
 
     if (downloads == f)
         return true;
@@ -63,12 +63,12 @@ static bool isDangerousPath (const juce::File& f)
     return false;
 }
 
-const juce::File& TemporaryFileManager::getTempDirectory() const
+const yup::File& TemporaryFileManager::getTempDirectory() const
 {
     return tempDir;
 }
 
-bool TemporaryFileManager::setTempDirectory (const juce::File& newFile)
+bool TemporaryFileManager::setTempDirectory (const yup::File& newFile)
 {
     if (isDangerousPath (newFile))
     {
@@ -155,13 +155,13 @@ int TemporaryFileManager::getMaxNumTempFiles() const
     return 1000;
 }
 
-static bool isRecognisedTempFile (const juce::File&);
-static bool shouldDeleteTempFile (const juce::File&, bool);
+static bool isRecognisedTempFile (const yup::File&);
+static bool shouldDeleteTempFile (const yup::File&, bool);
 
-static void deleteEditPreviewsNotInUse (Engine& engine, juce::Array<juce::File>& files)
+static void deleteEditPreviewsNotInUse (Engine& engine, yup::Array<yup::File>& files)
 {
     auto& pm = engine.getProjectManager();
-    juce::StringArray ids;
+    yup::StringArray ids;
 
     for (auto& p : pm.getAllProjects (pm.folders))
         for (auto item : p->getAllProjectItems())
@@ -194,10 +194,10 @@ void TemporaryFileManager::cleanUp()
 
     // Only search immediate children and one level of known subdirs (edit_*, thumbnails)
     // to avoid catastrophic enumeration if the temp dir is misconfigured
-    auto tempFiles = tempDir.findChildFiles (juce::File::findFiles, false);
+    auto tempFiles = tempDir.findChildFiles (yup::File::findFiles, false);
 
-    for (auto entry : juce::RangedDirectoryIterator (tempDir, false, "*", juce::File::findDirectories))
-        tempFiles.addArray (entry.getFile().findChildFiles (juce::File::findFiles, false));
+    for (auto entry : yup::RangedDirectoryIterator (tempDir, false, "*", yup::File::findDirectories))
+        tempFiles.addArray (entry.getFile().findChildFiles (yup::File::findFiles, false));
 
     deleteEditPreviewsNotInUse (engine, tempFiles);
 
@@ -207,7 +207,7 @@ void TemporaryFileManager::cleanUp()
         totalBytes += f.getSize();
 
     std::sort (tempFiles.begin(), tempFiles.end(),
-               [] (const juce::File& first, const juce::File& second) -> bool
+               [] (const yup::File& first, const yup::File& second) -> bool
                {
                    return first.getLastAccessTime().toMilliseconds() < second.getLastAccessTime().toMilliseconds();
                });
@@ -226,36 +226,36 @@ void TemporaryFileManager::cleanUp()
         }
     }
 
-    for (auto entry : juce::RangedDirectoryIterator (getTempDirectory(), false, "edit_*", juce::File::findDirectories))
-        if (entry.getFile().getNumberOfChildFiles (juce::File::findFilesAndDirectories) == 0)
+    for (auto entry : yup::RangedDirectoryIterator (getTempDirectory(), false, "edit_*", yup::File::findDirectories))
+        if (entry.getFile().getNumberOfChildFiles (yup::File::findFilesAndDirectories) == 0)
             entry.getFile().deleteRecursively();
 }
 
-juce::File TemporaryFileManager::getTempFile (const juce::String& filename) const
+yup::File TemporaryFileManager::getTempFile (const yup::String& filename) const
 {
     return tempDir.getChildFile (filename);
 }
 
-juce::File TemporaryFileManager::getUniqueTempFile (const juce::String& prefix, const juce::String& ext) const
+yup::File TemporaryFileManager::getUniqueTempFile (const yup::String& prefix, const yup::String& ext) const
 {
-    return tempDir.getChildFile (prefix + juce::String::toHexString (juce::Random::getSystemRandom().nextInt64()))
+    return tempDir.getChildFile (prefix + yup::String::toHexString (yup::Random::getSystemRandom().nextInt64()))
                   .withFileExtension (ext)
                   .getNonexistentSibling();
 }
 
-juce::File TemporaryFileManager::getThumbnailsFolder() const
+yup::File TemporaryFileManager::getThumbnailsFolder() const
 {
     return getTempDirectory().getChildFile ("thumbnails");
 }
 
 //==============================================================================
-static juce::String getClipProxyPrefix()                { return "clip_"; }
-static juce::String getFileProxyPrefix()                { return "proxy_"; }
-static juce::String getDeviceFreezePrefix (Edit& edit)  { return "freeze_" + edit.getProjectItemRef().toIDForFilename() + "_"; }
-static juce::String getTrackFreezePrefix()              { return "trackFreeze_"; }
-static juce::String getCompPrefix()                     { return "comp_"; }
+static yup::String getClipProxyPrefix()                { return "clip_"; }
+static yup::String getFileProxyPrefix()                { return "proxy_"; }
+static yup::String getDeviceFreezePrefix (Edit& edit)  { return "freeze_" + edit.getProjectItemRef().toIDForFilename() + "_"; }
+static yup::String getTrackFreezePrefix()              { return "trackFreeze_"; }
+static yup::String getCompPrefix()                     { return "comp_"; }
 
-static bool isRecognisedTempFile (const juce::File& f)
+static bool isRecognisedTempFile (const yup::File& f)
 {
     auto fileName = f.getFileName();
 
@@ -278,7 +278,7 @@ static bool isRecognisedTempFile (const juce::File& f)
     return false;
 }
 
-static bool shouldDeleteTempFile (const juce::File& f, bool spaceIsShort)
+static bool shouldDeleteTempFile (const yup::File& f, bool spaceIsShort)
 {
     if (! isRecognisedTempFile (f))
         return false;
@@ -291,17 +291,17 @@ static bool shouldDeleteTempFile (const juce::File& f, bool spaceIsShort)
     if (fileName.startsWith ("temp_"))
         return true;
 
-    auto daysOld = (juce::Time::getCurrentTime() - f.getLastAccessTime()).inDays();
+    auto daysOld = (yup::Time::getCurrentTime() - f.getLastAccessTime()).inDays();
 
     return daysOld > 60.0 || (spaceIsShort && daysOld > 1.0);
 }
 
-static AudioFile getCachedEditFile (Edit& edit, const juce::String& prefix, HashCode hash)
+static AudioFile getCachedEditFile (Edit& edit, const yup::String& prefix, HashCode hash)
 {
-    return AudioFile (edit.engine, edit.getTempDirectory (true).getChildFile (prefix + juce::String::toHexString (hash) + ".wav"));
+    return AudioFile (edit.engine, edit.getTempDirectory (true).getChildFile (prefix + yup::String::toHexString (hash) + ".wav"));
 }
 
-static AudioFile getCachedClipFileWithPrefix (const AudioClipBase& clip, const juce::String& prefix, HashCode hash)
+static AudioFile getCachedClipFileWithPrefix (const AudioClipBase& clip, const yup::String& prefix, HashCode hash)
 {
     return getCachedEditFile (clip.edit, prefix + "0_" + clip.itemID.toString() + "_", hash);
 }
@@ -321,13 +321,13 @@ AudioFile TemporaryFileManager::getFileForCachedFileRender (Edit& edit, HashCode
     return getCachedEditFile (edit, getFileProxyPrefix(), hash);
 }
 
-juce::File TemporaryFileManager::getFreezeFileForDevice (Edit& edit, OutputDevice& device)
+yup::File TemporaryFileManager::getFreezeFileForDevice (Edit& edit, OutputDevice& device)
 {
     return edit.getTempDirectory (true)
-             .getChildFile (getDeviceFreezePrefix (edit) + juce::String (device.getDeviceID()) + ".freeze");
+             .getChildFile (getDeviceFreezePrefix (edit) + yup::String (device.getDeviceID()) + ".freeze");
 }
 
-juce::String TemporaryFileManager::getDeviceIDFromFreezeFile (Edit& edit, const juce::File& deviceFreezeFile)
+yup::String TemporaryFileManager::getDeviceIDFromFreezeFile (Edit& edit, const yup::File& deviceFreezeFile)
 {
     const auto fileName = deviceFreezeFile.getFileName();
     jassert (fileName.startsWith (getDeviceFreezePrefix (edit)));
@@ -337,21 +337,21 @@ juce::String TemporaryFileManager::getDeviceIDFromFreezeFile (Edit& edit, const 
                    .upToFirstOccurrenceOf (".", false, false);
 }
 
-juce::File TemporaryFileManager::getFreezeFileForTrack (const AudioTrack& track)
+yup::File TemporaryFileManager::getFreezeFileForTrack (const AudioTrack& track)
 {
     return track.edit.getTempDirectory (true)
              .getChildFile (getTrackFreezePrefix() + "0_" + track.itemID.toString() + ".freeze");
 }
 
-juce::Array<juce::File> TemporaryFileManager::getFrozenTrackFiles (Edit& edit)
+yup::Array<yup::File> TemporaryFileManager::getFrozenTrackFiles (Edit& edit)
 {
     return edit.getTempDirectory (false)
-             .findChildFiles (juce::File::findFiles, false, getDeviceFreezePrefix (edit) + "*");
+             .findChildFiles (yup::File::findFiles, false, getDeviceFreezePrefix (edit) + "*");
 }
 
-static ProjectItemID getProjectItemIDFromFilename (const juce::String& name)
+static ProjectItemID getProjectItemIDFromFilename (const yup::String& name)
 {
-    auto tokens = juce::StringArray::fromTokens (name.fromFirstOccurrenceOf ("_", false, false), "_", {});
+    auto tokens = yup::StringArray::fromTokens (name.fromFirstOccurrenceOf ("_", false, false), "_", {});
 
     if (tokens.size() <= 1)
         return {};
@@ -362,10 +362,10 @@ static ProjectItemID getProjectItemIDFromFilename (const juce::String& name)
 void TemporaryFileManager::purgeOrphanEditTempFolders (ProjectManager& pm)
 {
     CRASH_TRACER
-    juce::Array<juce::File> filesToDelete;
-    juce::StringArray reasonsForDeletion;
+    yup::Array<yup::File> filesToDelete;
+    yup::StringArray reasonsForDeletion;
 
-    for (auto entry : juce::RangedDirectoryIterator (getTempDirectory(), false, "edit_*", juce::File::findDirectories))
+    for (auto entry : yup::RangedDirectoryIterator (getTempDirectory(), false, "edit_*", yup::File::findDirectories))
     {
         auto itemID = getProjectItemIDFromFilename (entry.getFile().getFileName());
 
@@ -396,9 +396,9 @@ void TemporaryFileManager::purgeOrphanEditTempFolders (ProjectManager& pm)
     }
 }
 
-static EditItemID getEditItemIDFromFilename (const juce::String& name)
+static EditItemID getEditItemIDFromFilename (const yup::String& name)
 {
-   auto tokens = juce::StringArray::fromTokens (name.fromFirstOccurrenceOf ("_", false, false), "_", {});
+   auto tokens = yup::StringArray::fromTokens (name.fromFirstOccurrenceOf ("_", false, false), "_", {});
 
     if (tokens.isEmpty())
         return {};
@@ -411,9 +411,9 @@ static EditItemID getEditItemIDFromFilename (const juce::String& name)
 void TemporaryFileManager::purgeOrphanFreezeAndProxyFiles (Edit& edit)
 {
     CRASH_TRACER
-    juce::Array<juce::File> filesToDelete;
+    yup::Array<yup::File> filesToDelete;
 
-    for (auto entry : juce::RangedDirectoryIterator (edit.getTempDirectory (false), false, "*"))
+    for (auto entry : yup::RangedDirectoryIterator (edit.getTempDirectory (false), false, "*"))
     {
         auto name = entry.getFile().getFileName();
         auto itemID = getEditItemIDFromFilename (name);

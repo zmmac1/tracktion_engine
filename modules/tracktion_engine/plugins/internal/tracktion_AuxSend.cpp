@@ -19,8 +19,8 @@ AuxSendPlugin::AuxSendPlugin (PluginCreationInfo info) : Plugin (info)
     lastVolumeBeforeMute.referTo (state, IDs::lastVolumeBeforeMuteDb, um, 0.0f);
 
     gain = addParam ("send level", TRANS("Send level"), { 0.0f, 1.0f },
-                     [] (float value)             { return juce::Decibels::toString (volumeFaderPositionToDB (value)); },
-                     [] (const juce::String& s)   { return decibelsToVolumeFaderPosition (dbStringToDb (s)); });
+                     [] (float value)             { return yup::Decibels::toString (volumeFaderPositionToDB (value)); },
+                     [] (const yup::String& s)   { return decibelsToVolumeFaderPosition (dbStringToDb (s)); });
 
     gain->attachToCurrentValue (gainLevel);
 
@@ -35,7 +35,7 @@ AuxSendPlugin::~AuxSendPlugin()
 
 bool AuxSendPlugin::shouldProcess()
 {
-    const juce::ScopedLock sl (ownerTrackLock);
+    const yup::ScopedLock sl (ownerTrackLock);
 
     if (ownerTrack != nullptr)
     {
@@ -53,30 +53,30 @@ bool AuxSendPlugin::shouldProcess()
 
 const char* AuxSendPlugin::xmlTypeName = "auxsend";
 
-juce::ValueTree AuxSendPlugin::create()
+yup::ValueTree AuxSendPlugin::create()
 {
     return createValueTree (IDs::PLUGIN,
                             IDs::type, xmlTypeName);
 }
 
-juce::String AuxSendPlugin::getName() const
+yup::String AuxSendPlugin::getName() const
 {
-    juce::String nm (edit.getAuxBusName (busNumber));
+    yup::String nm (edit.getAuxBusName (busNumber));
 
     if (nm.isNotEmpty())
         return "S:" + nm;
 
-    return TRANS("Aux Send") + " #" + juce::String (busNumber + 1);
+    return TRANS("Aux Send") + " #" + yup::String (busNumber + 1);
 }
 
-juce::String AuxSendPlugin::getShortName (int)
+yup::String AuxSendPlugin::getShortName (int)
 {
     auto nm = edit.getAuxBusName (busNumber);
 
     if (nm.isNotEmpty())
         return "S:" + nm;
 
-    return TRANS("Send") + ":" + juce::String (busNumber + 1);
+    return TRANS("Send") + ":" + yup::String (busNumber + 1);
 }
 
 void AuxSendPlugin::initialise (const PluginInitialisationInfo& info)
@@ -91,7 +91,7 @@ void AuxSendPlugin::initialiseWithoutStopping (const PluginInitialisationInfo&)
     TRACKTION_ASSERT_MESSAGE_THREAD
     auto newOwnerTrack = getOwnerTrack();
 
-    const juce::ScopedLock sl (ownerTrackLock);
+    const yup::ScopedLock sl (ownerTrackLock);
     ownerTrack = newOwnerTrack;
 }
 
@@ -103,7 +103,7 @@ void AuxSendPlugin::applyToBuffer (const PluginRenderContext&)
 {
 }
 
-juce::String AuxSendPlugin::getBusName()
+yup::String AuxSendPlugin::getBusName()
 {
     auto busName = edit.getAuxBusName (busNumber);
 
@@ -119,7 +119,7 @@ void AuxSendPlugin::setGainDb (float newDb)
 
     if (gain->getCurrentValue() != newPos)
     {
-        gain->setParameter (newPos, juce::sendNotification);
+        gain->setParameter (newPos, yup::sendNotification);
         changed();
     }
 }
@@ -147,14 +147,14 @@ bool AuxSendPlugin::isMute()
     return getGainDb() <= -90.0f;
 }
 
-juce::String AuxSendPlugin::getDefaultBusName (int index)
+yup::String AuxSendPlugin::getDefaultBusName (int index)
 {
-    return "Bus #" + juce::String (index + 1);
+    return "Bus #" + yup::String (index + 1);
 }
 
-juce::StringArray AuxSendPlugin::getBusNames (Edit& ed, int maxNumBusses)
+yup::StringArray AuxSendPlugin::getBusNames (Edit& ed, int maxNumBusses)
 {
-    juce::StringArray buses;
+    yup::StringArray buses;
 
     for (int i = 0; i < maxNumBusses; ++i)
     {
@@ -169,7 +169,7 @@ juce::StringArray AuxSendPlugin::getBusNames (Edit& ed, int maxNumBusses)
     return buses;
 }
 
-void AuxSendPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void AuxSendPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, gainLevel, busNumber, invertPhase);
 
@@ -179,7 +179,7 @@ void AuxSendPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
 
 bool AuxSendPlugin::isOwnedBy (Track& t)
 {
-    const juce::ScopedLock sl (ownerTrackLock);
+    const yup::ScopedLock sl (ownerTrackLock);
     return &t == ownerTrack;
 }
 

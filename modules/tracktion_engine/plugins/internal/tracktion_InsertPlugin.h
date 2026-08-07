@@ -26,13 +26,13 @@ public:
     //==============================================================================
     static const char* getPluginName()          { return NEEDS_TRANS("Insert"); }
     static const char* xmlTypeName;
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
-    juce::String getName() const override;
-    juce::String getPluginType() override;
-    juce::String getShortName (int) override;
+    yup::String getName() const override;
+    yup::String getPluginType() override;
+    yup::String getShortName (int) override;
     double getLatencySeconds() override;
-    void getChannelNames (juce::StringArray*, juce::StringArray*) override;
+    void getChannelNames (yup::StringArray*, yup::StringArray*) override;
     bool takesMidiInput() override;
     bool canBeAddedToClip() override;
     bool needsConstantBufferSize() override;
@@ -42,14 +42,14 @@ public:
     void initialiseWithoutStopping (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     DeviceType getSendDeviceType() const        { return sendDeviceType; }
     DeviceType getReturnDeviceType() const      { return returnDeviceType; }
 
-    juce::CachedValue<juce::String> name, inputDevice, outputDevice;
+    juce::CachedValue<yup::String> name, inputDevice, outputDevice;
     juce::CachedValue<double> manualAdjustMs;
 
     void updateDeviceTypes();
@@ -61,10 +61,10 @@ public:
     bool hasMidi() const;
 
     static void getPossibleDeviceNames (Engine&,
-                                        juce::StringArray& devices,
-                                        juce::StringArray& aliases,
-                                        juce::BigInteger& hasAudio,
-                                        juce::BigInteger& hasMidi,
+                                        yup::StringArray& devices,
+                                        yup::StringArray& aliases,
+                                        yup::BigInteger& hasAudio,
+                                        yup::BigInteger& hasMidi,
                                         bool forInput);
 
     /** @internal */
@@ -76,9 +76,9 @@ private:
     std::atomic<double> latencySeconds { 0.0 };
     DeviceType sendDeviceType = noDevice, returnDeviceType = noDevice;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InsertPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InsertPlugin)
 };
 
 } // namespace tracktion::inline engine

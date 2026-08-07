@@ -19,7 +19,7 @@ struct ScopedCpuMeter
 
     ~ScopedCpuMeter() noexcept
     {
-        const double msTaken = juce::Time::getMillisecondCounterHiRes() - callbackStartTime;
+        const double msTaken = yup::Time::getMillisecondCounterHiRes() - callbackStartTime;
         const auto lastValue = valueToUpdate.load (std::memory_order_acquire);
         valueToUpdate.store (lastValue + filterAmount * (msTaken - lastValue),
                              std::memory_order_release);
@@ -27,22 +27,22 @@ struct ScopedCpuMeter
 
 private:
     std::atomic<double>& valueToUpdate;
-    const double filterAmount, callbackStartTime { juce::Time::getMillisecondCounterHiRes() };
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedCpuMeter)
+    const double filterAmount, callbackStartTime { yup::Time::getMillisecondCounterHiRes() };
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedCpuMeter)
 };
 
 //==============================================================================
 struct StopwatchTimer
 {
-    StopwatchTimer() noexcept    : time (juce::Time::getCurrentTime()) {}
+    StopwatchTimer() noexcept    : time (yup::Time::getCurrentTime()) {}
 
-    juce::RelativeTime getTime() const noexcept  { return juce::Time::getCurrentTime() - time; }
-    juce::String getDescription() const          { return getTime().getDescription(); }
+    yup::RelativeTime getTime() const noexcept  { return yup::Time::getCurrentTime() - time; }
+    yup::String getDescription() const          { return getTime().getDescription(); }
     double getSeconds() const noexcept           { return getTime().inSeconds(); }
 
 private:
-    const juce::Time time;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StopwatchTimer)
+    const yup::Time time;
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StopwatchTimer)
 };
 
 //==============================================================================
@@ -50,7 +50,7 @@ private:
  struct RealtimeCheck
  {
     RealtimeCheck (const char* f, int l, double maxMillisecs) noexcept
-        : start (juce::Time::getMillisecondCounterHiRes()),
+        : start (yup::Time::getMillisecondCounterHiRes()),
           end (start + maxMillisecs),
           file (f), line (l)
     {
@@ -58,10 +58,10 @@ private:
 
     ~RealtimeCheck() noexcept
     {
-        const double now = juce::Time::getMillisecondCounterHiRes();
+        const double now = yup::Time::getMillisecondCounterHiRes();
 
         if (now > end)
-            juce::Logger::outputDebugString (juce::String (now - start) + " " + file + ":" + juce::String (line));
+            yup::Logger::outputDebugString (yup::String (now - start) + " " + file + ":" + yup::String (line));
     }
 
     double start, end;

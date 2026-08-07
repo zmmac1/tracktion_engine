@@ -50,7 +50,7 @@ public:
             return {};
 
         const int deltaIndex = int (headIndex) - int (sampleDelta);
-        const size_t valueIndex = (size_t) juce::negativeAwareModulo (deltaIndex, (int) values.size());
+        const size_t valueIndex = (size_t) yup::negativeAwareModulo (deltaIndex, (int) values.size());
 
         return values[valueIndex];
     }
@@ -85,12 +85,12 @@ private:
 
 //==============================================================================
 //==============================================================================
-Modifier::Modifier (Edit& e, const juce::ValueTree& v)
+Modifier::Modifier (Edit& e, const yup::ValueTree& v)
     : AutomatableEditItem (e, v),
       state (v)
 {
     auto um = &edit.getUndoManager();
-    colour.referTo (state, IDs::colour, um, juce::Colours::red.withHue (1.0f / 9.0f));
+    colour.referTo (state, IDs::colour, um, yup::Colors::red.withHue (1.0f / 9.0f));
     enabled.referTo (state, IDs::enabled, um, true);
 
     enabledParam = new DiscreteLabelledParameter ("enabled", TRANS("Enabled"), *this, { 0.0f, 1.0f },
@@ -230,7 +230,7 @@ void Modifier::selectableAboutToBeDeleted()
 }
 
 //==============================================================================
-ModifierList::ModifierList (Edit& e, const juce::ValueTree& parentTree)
+ModifierList::ModifierList (Edit& e, const yup::ValueTree& parentTree)
     : ValueTreeObjectList<Modifier> (parentTree),
       edit (e), state (parent)
 {
@@ -244,19 +244,19 @@ ModifierList::~ModifierList()
     freeObjects();
 }
 
-bool ModifierList::isModifier (const juce::Identifier& i)
+bool ModifierList::isModifier (const yup::Identifier& i)
 {
     return i == IDs::LFO || i == IDs::BREAKPOINTOSCILLATOR
         || i == IDs::STEP || i == IDs::ENVELOPEFOLLOWER
         || i == IDs::RANDOM || i == IDs::MIDITRACKER;
 }
 
-juce::ReferenceCountedArray<Modifier> ModifierList::getModifiers() const
+yup::ReferenceCountedArray<Modifier> ModifierList::getModifiers() const
 {
     if (! edit.isLoading())
         TRACKTION_ASSERT_MESSAGE_THREAD
 
-    juce::ReferenceCountedArray<Modifier> mods;
+    yup::ReferenceCountedArray<Modifier> mods;
 
     for (auto m : objects)
         mods.add (m);
@@ -265,7 +265,7 @@ juce::ReferenceCountedArray<Modifier> ModifierList::getModifiers() const
 }
 
 //==============================================================================
-juce::ReferenceCountedObjectPtr<Modifier> ModifierList::insertModifier (juce::ValueTree v, int index, SelectionManager* sm)
+yup::ReferenceCountedObjectPtr<Modifier> ModifierList::insertModifier (yup::ValueTree v, int index, SelectionManager* sm)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     jassert (isSuitableType (v));
@@ -296,12 +296,12 @@ juce::ReferenceCountedObjectPtr<Modifier> ModifierList::insertModifier (juce::Va
 }
 
 //==============================================================================
-bool ModifierList::isSuitableType (const juce::ValueTree& v) const
+bool ModifierList::isSuitableType (const yup::ValueTree& v) const
 {
     return isModifier (v.getType());
 }
 
-Modifier* ModifierList::createNewObject (const juce::ValueTree& v)
+Modifier* ModifierList::createNewObject (const yup::ValueTree& v)
 {
     CRASH_TRACER
     // Look up the cache rather than the lists so that a Modifier being moved between

@@ -19,8 +19,8 @@
  #endif
 
   // If you get a build error here you'll need to add the Elastique SDK to your header search path!
-  #include "elastique_pro/incl/elastiqueProV3API.h"
-  #include "elastique_pro/incl/elastiqueProV3DirectAPI.h"
+// EXCLUDED:   #include "elastique_pro/incl/elastiqueProV3API.h"
+// EXCLUDED:   #include "elastique_pro/incl/elastiqueProV3DirectAPI.h"
 
  #ifdef __GNUC__
   #pragma GCC diagnostic pop
@@ -74,25 +74,25 @@
 #include "timestretch/tracktion_ReadAheadTimeStretcher.cpp"
 
 namespace tracktion::inline engine {
-    #include "3rd_party/soundtouch/source/SoundTouch/BPMDetect.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/BPMDetect.cpp"
     #undef max
-    #include "3rd_party/soundtouch/source/SoundTouch/PeakFinder.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/PeakFinder.cpp"
     #undef max
-    #include "3rd_party/soundtouch/source/SoundTouch/FIFOSampleBuffer.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/FIFOSampleBuffer.cpp"
 
    #if TRACKTION_ENABLE_TIMESTRETCH_SOUNDTOUCH
-    #include "3rd_party/soundtouch/source/SoundTouch/AAFilter.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/AAFilter.cpp"
     #undef PI
-    #include "3rd_party/soundtouch/source/SoundTouch/cpu_detect_x86.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/FIRFilter.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/InterpolateCubic.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/InterpolateLinear.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/InterpolateShannon.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/mmx_optimized.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/RateTransposer.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/SoundTouch.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/sse_optimized.cpp"
-    #include "3rd_party/soundtouch/source/SoundTouch/TDStretch.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/cpu_detect_x86.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/FIRFilter.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/InterpolateCubic.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/InterpolateLinear.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/InterpolateShannon.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/mmx_optimized.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/RateTransposer.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/SoundTouch.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/sse_optimized.cpp"
+// EXCLUDED:     #include "3rd_party/soundtouch/source/SoundTouch/TDStretch.cpp"
    #endif
 } // namespace tracktion::inline engine
 

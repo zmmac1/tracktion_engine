@@ -25,7 +25,7 @@
 #if TRACKTION_ENABLE_REWIRE
  extern "C"
  {
-   #include "ReWire/ReWireSDK/ReWireMixerAPI.c"
+// EXCLUDED:    #include "ReWire/ReWireSDK/ReWireMixerAPI.c"
  }
 #endif
 
@@ -38,13 +38,13 @@
 #include "tracktion_engine.h"
 
 //==============================================================================
-#if JUCE_MAC && TRACKTION_ENABLE_REX
+#if YUP_MAC && TRACKTION_ENABLE_REX
 extern "C" char MacGetMacFSRefForREXDLL (FSRef* fsRef)
 {
-    juce::File f ("~/Library/Application Support/Propellerhead Software/Rex/REX Shared Library.bundle");
+    yup::File f ("~/Library/Application Support/Propellerhead Software/Rex/REX Shared Library.bundle");
 
     if (! f.exists())
-        f = juce::File ("/Library/Application Support/Propellerhead Software/Rex/REX Shared Library.bundle");
+        f = yup::File ("/Library/Application Support/Propellerhead Software/Rex/REX Shared Library.bundle");
 
    #pragma clang diagnostic push
    #pragma clang diagnostic ignored "-Wdeprecated"

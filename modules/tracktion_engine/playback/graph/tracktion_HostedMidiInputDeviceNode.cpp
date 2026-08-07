@@ -62,7 +62,7 @@ void HostedMidiInputDeviceNode::process (ProcessContext& pc)
             incomingMessages.remove (i);
 }
 
-void HostedMidiInputDeviceNode::handleIncomingMidiMessage (const juce::MidiMessage& message, MPESourceID sourceID)
+void HostedMidiInputDeviceNode::handleIncomingMidiMessage (const yup::MidiMessage& message, MPESourceID sourceID)
 {
     const auto globalStreamTime = instance.edit.engine.getDeviceManager().getCurrentStreamTime();
 

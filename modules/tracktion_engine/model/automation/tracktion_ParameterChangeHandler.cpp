@@ -92,7 +92,7 @@ bool ParameterChangeHandler::isActionFunctionPending() const noexcept
 int ParameterChangeHandler::getPendingActionFunctionId (bool consumeEvent) noexcept
 {
     std::scoped_lock sl (eventLock);
-    const juce::ScopedValueSetter<int> actionResetter (pendingActionId, pendingActionId,
+    const yup::ScopedValueSetter<int> actionResetter (pendingActionId, pendingActionId,
                                                        consumeEvent ? -1 : pendingActionId);
 
     if (consumeEvent)

@@ -78,7 +78,7 @@ void TrackOutput::updateOutput()
 }
 
 //==============================================================================
-bool TrackOutput::outputsToDevice (const juce::String& deviceName, bool compareDefaultDevices) const
+bool TrackOutput::outputsToDevice (const yup::String& deviceName, bool compareDefaultDevices) const
 {
     if (auto destTrack = getDestinationTrack())
         return deviceName.startsWithIgnoreCase (TRANS("Track") + " ")
@@ -176,7 +176,7 @@ OutputDevice* TrackOutput::getOutputDevice (bool traceThroughDestTracks) const
     return dev;
 }
 
-juce::String TrackOutput::getOutputDeviceID() const
+yup::String TrackOutput::getOutputDeviceID() const
 {
     if (destTrackID.isValid())
         return {};
@@ -187,7 +187,7 @@ juce::String TrackOutput::getOutputDeviceID() const
     return outputDevice;
 }
 
-juce::String TrackOutput::getOutputName() const
+yup::String TrackOutput::getOutputName() const
 {
     if (auto t = getDestinationTrack())
         return t->getNameAsTrackNumber();
@@ -195,17 +195,17 @@ juce::String TrackOutput::getOutputName() const
     return outputDevice;
 }
 
-juce::String TrackOutput::getDescriptiveOutputName() const
+yup::String TrackOutput::getDescriptiveOutputName() const
 {
     if (auto t = getDestinationTrack())
     {
         if (! t->getName().startsWithIgnoreCase (TRANS("Track") + " "))
             return TRANS("Feeds into track 123 (XZZX)")
-                     .replace ("123", juce::String (t->getAudioTrackNumber()))
+                     .replace ("123", yup::String (t->getAudioTrackNumber()))
                      .replace ("XZZX", "(" + t->getName() + ")");
 
         return TRANS("Feeds into track 123")
-                 .replace ("123", juce::String (t->getAudioTrackNumber()));
+                 .replace ("123", yup::String (t->getAudioTrackNumber()));
     }
 
     if (auto dev = getOutputDevice (false))
@@ -214,7 +214,7 @@ juce::String TrackOutput::getDescriptiveOutputName() const
     return outputDevice;
 }
 
-void TrackOutput::setOutputToDeviceID (const juce::String& deviceID)
+void TrackOutput::setOutputToDeviceID (const yup::String& deviceID)
 {
     outputDevice = deviceID;
 }
@@ -245,8 +245,8 @@ bool TrackOutput::canPlayMidi() const
 
 void TrackOutput::setOutputToTrack (AudioTrack* track)
 {
-    outputDevice = track != nullptr ? juce::String ("track") + " " + juce::String (track->getAudioTrackNumber())
-                                    : juce::String();
+    outputDevice = track != nullptr ? yup::String ("track") + " " + yup::String (track->getAudioTrackNumber())
+                                    : yup::String();
 }
 
 void TrackOutput::setOutputToDefaultDevice (bool isMidi)
@@ -260,10 +260,10 @@ void TrackOutput::setOutputToNone()
     outputDevice = "(none)";
 }
 
-void TrackOutput::getPossibleOutputDeviceNames (const juce::Array<AudioTrack*>& tracks,
-                                                juce::StringArray& s, juce::StringArray& a,
-                                                juce::BigInteger& hasAudio,
-                                                juce::BigInteger& hasMidi)
+void TrackOutput::getPossibleOutputDeviceNames (const yup::Array<AudioTrack*>& tracks,
+                                                yup::StringArray& s, yup::StringArray& a,
+                                                yup::BigInteger& hasAudio,
+                                                yup::BigInteger& hasMidi)
 {
     if (tracks.isEmpty())
         return;
@@ -311,7 +311,7 @@ bool TrackOutput::feedsInto (const Track* dest) const
     return false;
 }
 
-bool TrackOutput::injectLiveMidiMessage (const juce::MidiMessage& message)
+bool TrackOutput::injectLiveMidiMessage (const yup::MidiMessage& message)
 {
     auto dev = owner.edit.engine.getDeviceManager().findOutputDeviceWithName (outputDevice);
 
@@ -335,7 +335,7 @@ bool TrackOutput::injectLiveMidiMessage (const juce::MidiMessage& message)
     return false;
 }
 
-void TrackOutput::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& ident)
+void TrackOutput::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& ident)
 {
     if (v.hasType (IDs::DEVICE) && ident == IDs::name)
     {

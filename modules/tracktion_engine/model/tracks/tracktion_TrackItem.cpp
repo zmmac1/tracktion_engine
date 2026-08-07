@@ -41,7 +41,7 @@ const char* TrackItem::typeToString (TrackItem::Type t)
     }
 }
 
-TrackItem::Type TrackItem::stringToType (const juce::String& s)
+TrackItem::Type TrackItem::stringToType (const yup::String& s)
 {
     if (s == "wave")            return Type::wave;
     if (s == "midi")            return Type::midi;
@@ -61,7 +61,7 @@ TrackItem::Type TrackItem::stringToType (const juce::String& s)
     return Type::unknown;
 }
 
-juce::Identifier TrackItem::clipTypeToXMLType (TrackItem::Type t)
+yup::Identifier TrackItem::clipTypeToXMLType (TrackItem::Type t)
 {
     switch (t)
     {
@@ -83,7 +83,7 @@ juce::Identifier TrackItem::clipTypeToXMLType (TrackItem::Type t)
     }
 }
 
-TrackItem::Type TrackItem::xmlTagToType (juce::StringRef tag)
+TrackItem::Type TrackItem::xmlTagToType (yup::StringRef tag)
 {
     if (tag == IDs::AUDIOCLIP)      return Type::wave;
     if (tag == IDs::MIDICLIP)       return Type::midi;
@@ -98,7 +98,7 @@ TrackItem::Type TrackItem::xmlTagToType (juce::StringRef tag)
     return Type::unknown;
 }
 
-juce::String TrackItem::getSuggestedNameForNewItem (Type t)
+yup::String TrackItem::getSuggestedNameForNewItem (Type t)
 {
     switch (t)
     {

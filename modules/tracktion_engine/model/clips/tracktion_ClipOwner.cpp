@@ -11,9 +11,9 @@
 namespace tracktion::inline engine {
 
 struct ClipOwner::ClipList : public ValueTreeObjectList<Clip>,
-                             private juce::AsyncUpdater
+                             private yup::AsyncUpdater
 {
-    ClipList (ClipOwner& co, Edit& e, const juce::ValueTree& parentTree)
+    ClipList (ClipOwner& co, Edit& e, const yup::ValueTree& parentTree)
         : ValueTreeObjectList<Clip> (parentTree),
           edit (e),
           clipOwner (co)
@@ -34,12 +34,12 @@ struct ClipOwner::ClipList : public ValueTreeObjectList<Clip>,
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return Clip::isClipState (v);
     }
 
-    Clip* createNewObject (const juce::ValueTree& v) override
+    Clip* createNewObject (const yup::ValueTree& v) override
     {
         if (auto newClip = Clip::createClipForState (v, clipOwner))
         {
@@ -106,7 +106,7 @@ struct ClipOwner::ClipList : public ValueTreeObjectList<Clip>,
     ClipOwner& clipOwner;
     std::unique_ptr<Edit::LoadFinishedCallback<ClipList>> editLoadedCallback;
 
-    void valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id) override
+    void valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id) override
     {
         if (Clip::isClipState (v))
         {
@@ -125,11 +125,11 @@ struct ClipOwner::ClipList : public ValueTreeObjectList<Clip>,
         sortClips (parent, &edit.getUndoManager());
     }
 
-    static void sortClips (juce::ValueTree& state, juce::UndoManager* um)
+    static void sortClips (yup::ValueTree& state, juce::UndoManager* um)
     {
         struct Sorter
         {
-            static int getPriority (const juce::Identifier& i)
+            static int getPriority (const yup::Identifier& i)
             {
                 if (i == IDs::AUTOMATIONTRACK)  return 0;
                 if (Clip::isClipState (i))      return 1;
@@ -140,7 +140,7 @@ struct ClipOwner::ClipList : public ValueTreeObjectList<Clip>,
                 return -1;
             }
 
-            int compareElements (const juce::ValueTree& first, const juce::ValueTree& second) const noexcept
+            int compareElements (const yup::ValueTree& first, const yup::ValueTree& second) const noexcept
             {
                 auto priority = getPriority (first.getType()) - getPriority (second.getType());
 
@@ -173,7 +173,7 @@ struct ClipOwner::ClipList : public ValueTreeObjectList<Clip>,
         clipOwner.clipPositionChanged();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClipList)
 };
 
 
@@ -182,7 +182,7 @@ struct ClipOwner::ClipList : public ValueTreeObjectList<Clip>,
 ClipOwner::ClipOwner() {}
 ClipOwner::~ClipOwner() {}
 
-void ClipOwner::initialiseClipOwner (Edit& edit, juce::ValueTree clipParentState)
+void ClipOwner::initialiseClipOwner (Edit& edit, yup::ValueTree clipParentState)
 {
     if (clipList)
         return;
@@ -193,7 +193,7 @@ void ClipOwner::initialiseClipOwner (Edit& edit, juce::ValueTree clipParentState
     clipList = std::make_unique<ClipList> (*this, edit, clipParentState);
 }
 
-const juce::Array<Clip*>& ClipOwner::getClips() const
+const yup::Array<Clip*>& ClipOwner::getClips() const
 {
     assert (clipList && "You must call initialiseClipOwner before any other methods");
     return clipList->objects;
@@ -201,7 +201,7 @@ const juce::Array<Clip*>& ClipOwner::getClips() const
 
 //==============================================================================
 //==============================================================================
-Clip* findClipForState (ClipOwner& co, const juce::ValueTree& v)
+Clip* findClipForState (ClipOwner& co, const yup::ValueTree& v)
 {
     for (auto c : co.getClips())
         if (c->state == v)
@@ -222,7 +222,7 @@ Clip* findClipForID (ClipOwner& co, EditItemID id)
 //==============================================================================
 namespace clip_owner
 {
-    inline void updateClipState (juce::ValueTree& state, const juce::String& name,
+    inline void updateClipState (yup::ValueTree& state, const yup::String& name,
                                  EditItemID itemID, ClipPosition position)
     {
         addValueTreeProperties (state,
@@ -234,21 +234,21 @@ namespace clip_owner
         itemID.writeID (state, nullptr);
     }
 
-    inline juce::ValueTree createNewClipState (const juce::String& name, TrackItem::Type type,
+    inline yup::ValueTree createNewClipState (const yup::String& name, TrackItem::Type type,
                                                EditItemID itemID, ClipPosition position)
     {
-        juce::ValueTree state (TrackItem::clipTypeToXMLType (type));
+        yup::ValueTree state (TrackItem::clipTypeToXMLType (type));
         updateClipState (state, name, itemID, position);
         return state;
     }
 
-    inline juce::String incrementLastDigit (const juce::String& in)
+    inline yup::String incrementLastDigit (const yup::String& in)
     {
         int digitCount = 0;
 
         for (int i = in.length(); --i >= 0;)
         {
-            if (juce::CharacterFunctions::isDigit (in[i]))
+            if (yup::CharacterFunctions::isDigit (in[i]))
                 digitCount++;
             else
                 break;
@@ -258,11 +258,11 @@ namespace clip_owner
             return in + " 2";
 
         return in.dropLastCharacters (digitCount)
-                + juce::String (in.getTrailingIntValue() + 1);
+                + yup::String (in.getTrailingIntValue() + 1);
     }
 }
 
-Clip* insertClipWithState (ClipOwner& clipOwner, juce::ValueTree clipState)
+Clip* insertClipWithState (ClipOwner& clipOwner, yup::ValueTree clipState)
 {
     CRASH_TRACER
     jassert (clipState.isValid());
@@ -342,12 +342,12 @@ Clip* insertClipWithState (ClipOwner& clipOwner, juce::ValueTree clipState)
         {
             if (auto at = dynamic_cast<AudioTrack*> (clipOwner.getClipOwnerSelectable()))
             {
-                if (newClip->getColour() == newClip->getDefaultColour())
+                if (newClip->getColor() == newClip->getDefaultColor())
                 {
-                    auto col = at->getColour();
+                    auto col = at->getColor();
 
                     float hue = col.isTransparent() ? ((at->getIndexInEditTrackList() % 18) * 1.0f / 18.0f) : col.getHue();
-                    newClip->setColour (newClip->getDefaultColour().withHue (hue));
+                    newClip->setColor (newClip->getDefaultColor().withHue (hue));
                 }
 
                 if (auto acb = dynamic_cast<AudioClipBase*> (newClip))
@@ -367,11 +367,11 @@ Clip* insertClipWithState (ClipOwner& clipOwner, juce::ValueTree clipState)
             }
             else if (auto cs = dynamic_cast<ClipSlot*> (clipOwner.getClipOwnerSelectable()))
             {
-                if (newClip->getColour() == newClip->getDefaultColour())
+                if (newClip->getColor() == newClip->getDefaultColor())
                 {
-                    auto col = cs->track.getColour();
+                    auto col = cs->track.getColor();
                     float hue = col.isTransparent() ? ((cs->track.getIndexInEditTrackList() % 18) * 1.0f / 18.0f) : col.getHue();
-                    newClip->setColour (newClip->getDefaultColour().withHue (hue));
+                    newClip->setColor (newClip->getDefaultColor().withHue (hue));
                 }
 
                 if (auto acb = dynamic_cast<AudioClipBase*> (newClip))
@@ -442,7 +442,7 @@ Clip* insertClipWithState (ClipOwner& clipOwner, juce::ValueTree clipState)
 }
 
 Clip* insertClipWithState (ClipOwner& parent,
-                           const juce::ValueTree& stateToUse, const juce::String& name, TrackItem::Type type,
+                           const yup::ValueTree& stateToUse, const yup::String& name, TrackItem::Type type,
                            ClipPosition position, DeleteExistingClips deleteExistingClips, bool allowSpottingAdjustment)
 {
     CRASH_TRACER
@@ -462,7 +462,7 @@ Clip* insertClipWithState (ClipOwner& parent,
 
     auto newClipID = edit.createNewItemID();
 
-    juce::ValueTree newState;
+    yup::ValueTree newState;
 
     if (stateToUse.isValid())
     {
@@ -486,7 +486,7 @@ Clip* insertClipWithState (ClipOwner& parent,
     return {};
 }
 
-Clip* insertNewClip (ClipOwner& parent, TrackItem::Type type, const juce::String& name, EditTimeRange pos)
+Clip* insertNewClip (ClipOwner& parent, TrackItem::Type type, const yup::String& name, EditTimeRange pos)
 {
     return insertNewClip (parent, type, name, { toTime (pos, parent.getClipOwnerEdit().tempoSequence), 0_td });
 }
@@ -496,7 +496,7 @@ Clip* insertNewClip (ClipOwner& parent, TrackItem::Type type, EditTimeRange pos)
     return insertNewClip (parent, type, TrackItem::getSuggestedNameForNewItem (type), pos);
 }
 
-Clip* insertNewClip (ClipOwner& parent, TrackItem::Type type, const juce::String& name, ClipPosition position)
+Clip* insertNewClip (ClipOwner& parent, TrackItem::Type type, const yup::String& name, ClipPosition position)
 {
     CRASH_TRACER
 
@@ -506,7 +506,7 @@ Clip* insertNewClip (ClipOwner& parent, TrackItem::Type type, const juce::String
     return {};
 }
 
-juce::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (ClipOwner& parent, const juce::String& name, const juce::File& sourceFile,
+yup::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (ClipOwner& parent, const yup::String& name, const yup::File& sourceFile,
                                                                ClipPosition position, DeleteExistingClips deleteExistingClips)
 {
     auto& edit = parent.getClipOwnerEdit();
@@ -556,7 +556,7 @@ juce::ReferenceCountedObjectPtr<WaveAudioClip> insertWaveClip (ClipOwner& parent
     return {};
 }
 
-WaveAudioClip::Ptr insertWaveClip (ClipOwner& parent, const juce::String& name, ProjectItemRef sourceID,
+WaveAudioClip::Ptr insertWaveClip (ClipOwner& parent, const yup::String& name, ProjectItemRef sourceID,
                                    ClipPosition position, DeleteExistingClips deleteExistingClips)
 {
     CRASH_TRACER
@@ -591,7 +591,7 @@ WaveAudioClip::Ptr insertWaveClip (ClipOwner& parent, const juce::String& name, 
     return {};
 }
 
-MidiClip::Ptr insertMIDIClip (ClipOwner& parent, const juce::String& name, TimeRange position)
+MidiClip::Ptr insertMIDIClip (ClipOwner& parent, const yup::String& name, TimeRange position)
 {
     if (auto t = dynamic_cast<AudioTrack*> (&parent))
         if (! t->containsAnyMIDIClips())
@@ -633,9 +633,9 @@ EditClip::Ptr insertEditClip (ClipOwner& parent, TimeRange position, ProjectItem
 }
 
 //==============================================================================
-juce::Array<Clip*> deleteRegion (ClipOwner& parent, TimeRange range)
+yup::Array<Clip*> deleteRegion (ClipOwner& parent, TimeRange range)
 {
-    juce::Array<Clip*> newClips;
+    yup::Array<Clip*> newClips;
 
     CRASH_TRACER
     if (auto track = dynamic_cast<Track*> (&parent))
@@ -657,9 +657,9 @@ juce::Array<Clip*> deleteRegion (ClipOwner& parent, TimeRange range)
     return newClips;
 }
 
-juce::Array<Clip*> deleteRegion (Clip& c, TimeRange range)
+yup::Array<Clip*> deleteRegion (Clip& c, TimeRange range)
 {
-    juce::Array<Clip*> newClips;
+    yup::Array<Clip*> newClips;
 
     CRASH_TRACER
     if (auto track = dynamic_cast<Track*> (c.getParent()))
@@ -693,10 +693,10 @@ juce::Array<Clip*> deleteRegion (Clip& c, TimeRange range)
     return newClips;
 }
 
-juce::Array<Clip*> split (ClipOwner& parent, TimePosition time)
+yup::Array<Clip*> split (ClipOwner& parent, TimePosition time)
 {
     CRASH_TRACER
-    juce::Array<Clip*> newClips;
+    yup::Array<Clip*> newClips;
 
     // Make a copied list first, as they'll get moved out-of-order..
     Clip::Array clipsToDo;
@@ -754,8 +754,8 @@ Clip* split (Clip& clip, const TimePosition time)
                     auto id = edit.getMarkerManager().getNextUniqueID (mc1->getMarkerID());
                     mc2->setMarkerID (id);
 
-                    if (mc1->getName() == (TRANS("Marker") + " " + juce::String (mc1->getMarkerID())))
-                        mc2->setName (TRANS("Marker") + " " + juce::String (id));
+                    if (mc1->getName() == (TRANS("Marker") + " " + yup::String (mc1->getMarkerID())))
+                        mc2->setName (TRANS("Marker") + " " + yup::String (id));
                     else
                         mc2->setName (clip_owner::incrementLastDigit (mc1->getName()));
                 }
@@ -764,7 +764,7 @@ Clip* split (Clip& clip, const TimePosition time)
             // fiddle with offsets for looped clips
             if (newClip->getLoopLengthBeats() > BeatDuration())
             {
-                auto extra = juce::roundToInt (std::floor ((newClip->getOffsetInBeats()
+                auto extra = yup::roundToInt (std::floor ((newClip->getOffsetInBeats()
                                                             / newClip->getLoopLengthBeats()) + 0.00001));
 
                 if (extra != 0)

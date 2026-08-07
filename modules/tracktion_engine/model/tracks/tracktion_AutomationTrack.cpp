@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-AutomationTrack::AutomationTrack (Edit& e, const juce::ValueTree& v)
+AutomationTrack::AutomationTrack (Edit& e, const yup::ValueTree& v)
     : Track (e, v, false)
 {
 }
@@ -21,13 +21,13 @@ AutomationTrack::~AutomationTrack()
 }
 
 //==============================================================================
-juce::String AutomationTrack::getSelectableDescription()
+yup::String AutomationTrack::getSelectableDescription()
 {
     auto n = getName();
-    return TRANS("Automation") + (n.isEmpty() ? juce::String() : " - \"" + getName() + "\"");
+    return TRANS("Automation") + (n.isEmpty() ? yup::String() : " - \"" + getName() + "\"");
 }
 
-juce::String AutomationTrack::getName() const
+yup::String AutomationTrack::getName() const
 {
     if (auto ap = getCurrentlyShownAutoParam())
         return ap->getFullName();

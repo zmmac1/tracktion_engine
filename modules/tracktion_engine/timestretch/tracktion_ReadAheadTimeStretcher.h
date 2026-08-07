@@ -126,7 +126,7 @@ private:
         std::mutex instancesMutex;
 
         std::thread thread;
-        juce::WaitableEvent event;
+        yup::WaitableEvent event;
         std::atomic_flag waitingToExitFlag = ATOMIC_FLAG_INIT;
         std::atomic_flag breakForAddRemoveInstance = ATOMIC_FLAG_INIT;
         std::atomic<std::uint64_t> processEpoch { 0 };
@@ -145,7 +145,7 @@ private:
     mutable std::atomic<float> pendingSpeedRatio { 1.0f }, pendingSemitonesUp { 0.0f };
     mutable std::atomic<bool> newSpeedAndPitchPending { false }, hasBeenReset { true };
 
-    juce::SharedResourcePointer<ProcessThread> processThread;
+    yup::SharedResourcePointer<ProcessThread> processThread;
 
     void tryToSetNewSpeedAndPitch() const;
     int processNextBlock (bool shouldBlock);

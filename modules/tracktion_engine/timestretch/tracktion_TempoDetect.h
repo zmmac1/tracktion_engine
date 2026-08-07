@@ -61,7 +61,7 @@ public:
     /** Processes an entire AudioFormatReader returning the tempo for it.
         @returns the tempo in BPM for the block.
     */
-    float processReader (juce::AudioFormatReader& reader)
+    float processReader (yup::AudioFormatReader& reader)
     {
         jassert ((int) reader.numChannels == numChannels);
 
@@ -69,7 +69,7 @@ public:
         const bool useRightChan = numChannels > 1;
 
         // can't use an AudioScratchBuffer yet
-        juce::AudioBuffer<float> buffer (numChannels, blockSize);
+        yup::AudioBuffer<float> buffer (numChannels, blockSize);
 
         SampleCount numLeft = reader.lengthInSamples;
         int startSample = 0;
@@ -101,11 +101,11 @@ public:
     float getBpm() const                            { return  bpm; }
 
     bool isBpmSensible() const                      { return getSensibleRange().contains (bpm); }
-    static juce::Range<float> getSensibleRange()    { return { 29, 200 }; }
+    static yup::Range<float> getSensibleRange()    { return { 29, 200 }; }
 
     //==============================================================================
     /** Processes a non-interleaved buffer section.  */
-    void processSection (juce::AudioBuffer<float>& buffer, int numSamplesToProcess)
+    void processSection (yup::AudioBuffer<float>& buffer, int numSamplesToProcess)
     {
         processSection (buffer.getArrayOfReadPointers(), numSamplesToProcess);
     }
@@ -121,9 +121,9 @@ public:
         AudioScratchBuffer scratch (1, numChannels * numSamples);
         float* interleaved = scratch.buffer.getWritePointer (0);
 
-        using Format = juce::AudioData::Format<juce::AudioData::Float32, juce::AudioData::NativeEndian>;
-        juce::AudioData::interleaveSamples (juce::AudioData::NonInterleavedSource<Format> { inputSamples,   numChannels },
-                                            juce::AudioData::InterleavedDest<Format>      { interleaved,    numChannels },
+        using Format = yup::AudioData::Format<yup::AudioData::Float32, yup::AudioData::NativeEndian>;
+        yup::AudioData::interleaveSamples (yup::AudioData::NonInterleavedSource<Format> { inputSamples,   numChannels },
+                                            yup::AudioData::InterleavedDest<Format>      { interleaved,    numChannels },
                                             numSamples);
 
         bpmDetect.inputSamples (interleaved, numSamples);
@@ -135,7 +135,7 @@ private:
     soundtouch::BPMDetect bpmDetect;
     float bpm = -1.0f;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoDetect)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoDetect)
 };
 
 } // namespace tracktion::inline engine

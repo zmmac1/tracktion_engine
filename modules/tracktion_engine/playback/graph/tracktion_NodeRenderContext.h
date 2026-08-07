@@ -25,7 +25,7 @@ public:
                        std::unique_ptr<tracktion::graph::PlayHead>,
                        std::unique_ptr<tracktion::graph::PlayHeadState>,
                        std::unique_ptr<ProcessState>,
-                       juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* sourceToUpdate);
+                       yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* sourceToUpdate);
 
     /** Destructor. */
     ~NodeRenderContext();
@@ -34,14 +34,14 @@ public:
     /** Returns the opening status of the render.
         If something went wrong during set-up this will contain the error message to display.
     */
-    juce::Result getStatus() const noexcept                { return status; }
+    yup::Result getStatus() const noexcept                { return status; }
 
     /** Renders the next block of audio. Returns true when finished, false if it needs to run again. */
     bool renderNextBlock (std::atomic<float>& progressToUpdate);
 
     //==============================================================================
     /** Renders the MIDI of an Edit to a sequence. */
-    static juce::String renderMidi (Renderer::RenderTask&, Renderer::Parameters&,
+    static yup::String renderMidi (Renderer::RenderTask&, Renderer::Parameters&,
                                     std::unique_ptr<tracktion::graph::Node>,
                                     std::unique_ptr<tracktion::graph::PlayHead>,
                                     std::unique_ptr<tracktion::graph::PlayHeadState>,
@@ -61,7 +61,7 @@ private:
                 d.reset (bitDepth);
         }
 
-        void apply (juce::AudioBuffer<float>& buffer, int numSamples)
+        void apply (yup::AudioBuffer<float>& buffer, int numSamples)
         {
             auto numChannels = buffer.getNumChannels();
 
@@ -69,7 +69,7 @@ private:
                 ditherers.getReference (i).process (buffer.getWritePointer (i), numSamples);
         }
 
-        juce::Array<Ditherer> ditherers;
+        yup::Array<Ditherer> ditherers;
     };
 
     //==============================================================================
@@ -86,7 +86,7 @@ private:
     ChannelMap outputChannelMap;
     std::unique_ptr<AudioFileWriter> writer;
     Plugin::Array plugins;
-    juce::Result status;
+    yup::Result status;
 
     //==============================================================================
     Ditherers ditherers;
@@ -113,8 +113,8 @@ private:
     bool hasStartedSavingToFile = 0;
     int64_t samplesToWrite = 0, numSamplesWrittenToSource = 0;
 
-    std::unique_ptr<juce::TemporaryFile> intermediateFile;
-    juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* sourceToUpdate;
+    std::unique_ptr<yup::TemporaryFile> intermediateFile;
+    yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* sourceToUpdate;
 
     //==============================================================================
     enum class WriteResult

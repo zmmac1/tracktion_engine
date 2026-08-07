@@ -15,15 +15,15 @@
 namespace tracktion::inline graph {
 
 //==============================================================================
-/** Creates a juce::AudioBuffer from a choc::buffer::BufferView. */
-inline juce::AudioBuffer<float> toAudioBuffer (choc::buffer::ChannelArrayView<float> view)
+/** Creates a yup::AudioBuffer from a choc::buffer::BufferView. */
+inline yup::AudioBuffer<float> toAudioBuffer (choc::buffer::ChannelArrayView<float> view)
 {
-    return juce::AudioBuffer<float> (view.data.channels, (int) view.getNumChannels(), (int) view.data.offset, (int) view.getNumFrames());
+    return yup::AudioBuffer<float> (view.data.channels, (int) view.getNumChannels(), (int) view.data.offset, (int) view.getNumFrames());
 }
 
-/** Converts a juce::AudioBuffer<SampleType> to a choc::buffer::BufferView. */
+/** Converts a yup::AudioBuffer<SampleType> to a choc::buffer::BufferView. */
 template<typename SampleType>
-inline choc::buffer::BufferView<SampleType, choc::buffer::SeparateChannelLayout> toBufferView (juce::AudioBuffer<SampleType>& buffer)
+inline choc::buffer::BufferView<SampleType, choc::buffer::SeparateChannelLayout> toBufferView (yup::AudioBuffer<SampleType>& buffer)
 {
     return choc::buffer::createChannelArrayView (buffer.getArrayOfWritePointers(),
                                                  (choc::buffer::ChannelCount) buffer.getNumChannels(),
@@ -39,16 +39,16 @@ inline choc::buffer::FrameRange createFrameRange (std::integral auto start, std:
 
 
 //==============================================================================
-/** Converts a choc::midi event to a juce::MidiMessage */
-inline juce::MidiMessage toMidiMessage (const choc::midi::Sequence::Event& e)
+/** Converts a choc::midi event to a yup::MidiMessage */
+inline yup::MidiMessage toMidiMessage (const choc::midi::Sequence::Event& e)
 {
     return { e.message.data(), (int) e.message.length(), e.timeStamp };
 }
 
 //==============================================================================
-/** Mutiplies a choc::buffer::BufferView by a juce::SmoothedValue. */
+/** Mutiplies a choc::buffer::BufferView by a yup::SmoothedValue. */
 template<typename BufferViewType, typename SampleType, typename SmoothingType>
-void multiplyBy (BufferViewType& view, juce::SmoothedValue<SampleType, SmoothingType>& value) noexcept
+void multiplyBy (BufferViewType& view, yup::SmoothedValue<SampleType, SmoothingType>& value) noexcept
 {
     if (! value.isSmoothing())
     {
@@ -74,7 +74,7 @@ template<typename BufferType, typename GainType>
 void applyGainRamp (BufferType&& buffer,
                     GainType startGain, GainType endGain) noexcept
 {
-    if (juce::approximatelyEqual (startGain, endGain))
+    if (yup::approximatelyEqual (startGain, endGain))
     {
         choc::buffer::applyGain (buffer, startGain);
     }
@@ -199,9 +199,9 @@ static void copyIfNotAliased (DestBuffer&& dest, const SourceBuffer& source)
 } // namespace tracktion::inline graph
 #ifndef DOXYGEN
 template<>
-struct std::hash<juce::MidiMessageSequence>
+struct std::hash<yup::MidiMessageSequence>
 {
-    size_t operator() (const juce::MidiMessageSequence& sequence) const noexcept
+    size_t operator() (const yup::MidiMessageSequence& sequence) const noexcept
     {
         size_t seed = 0;
 
@@ -217,9 +217,9 @@ struct std::hash<juce::MidiMessageSequence>
 };
 
 template<>
-struct std::hash<std::vector<juce::MidiMessageSequence>>
+struct std::hash<std::vector<yup::MidiMessageSequence>>
 {
-    size_t operator() (const std::vector<juce::MidiMessageSequence>& sequences) const noexcept
+    size_t operator() (const std::vector<yup::MidiMessageSequence>& sequences) const noexcept
     {
         return tracktion::hash_range (sequences);
     }

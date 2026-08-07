@@ -21,7 +21,7 @@ TEST_SUITE ("tracktion_engine")
     TEST_CASE ("LoopInfo: JUCE undo behaviour")
     {
         juce::UndoManager um;
-        juce::ValueTree v ("ROOT"), c ("CHILD");
+        yup::ValueTree v ("ROOT"), c ("CHILD");
 
         um.beginNewTransaction();
         CHECK (! um.canUndo());
@@ -72,7 +72,7 @@ TEST_SUITE ("tracktion_engine")
         auto edit = createTestEdit (engine);
         auto track = getAudioTracks (*edit)[0];
 
-        juce::ValueTree newClipState {
+        yup::ValueTree newClipState {
             IDs::CONTAINERCLIP,
             {
                 { IDs::autoTempo, true },

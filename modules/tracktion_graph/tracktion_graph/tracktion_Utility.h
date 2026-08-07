@@ -29,14 +29,14 @@ constexpr int64_t timeToSample (std::floating_point auto timeInSeconds, double s
 
 /** Converts an integer sample range to a time range in seconds. */
 template<typename IntType>
-constexpr juce::Range<double> sampleToTime (juce::Range<IntType> sampleRange, double sampleRate)
+constexpr yup::Range<double> sampleToTime (yup::Range<IntType> sampleRange, double sampleRate)
 {
     return { sampleToTime (sampleRange.getStart(), sampleRate),
              sampleToTime (sampleRange.getEnd(), sampleRate) };
 }
 
 /** Converts a time range in seconds to a range of sample numbers. */
-constexpr juce::Range<int64_t> timeToSample (juce::Range<double> timeInSeconds, double sampleRate)
+constexpr yup::Range<int64_t> timeToSample (yup::Range<double> timeInSeconds, double sampleRate)
 {
     return { timeToSample (timeInSeconds.getStart(), sampleRate),
              timeToSample (timeInSeconds.getEnd(), sampleRate) };
@@ -44,7 +44,7 @@ constexpr juce::Range<int64_t> timeToSample (juce::Range<double> timeInSeconds, 
 
 /** Converts a time range in seconds to a range of sample numbers. */
 template<typename RangeType>
-constexpr juce::Range<int64_t> timeToSample (RangeType timeInSeconds, double sampleRate)
+constexpr yup::Range<int64_t> timeToSample (RangeType timeInSeconds, double sampleRate)
 {
     return { timeToSample (timeInSeconds.getStart(), sampleRate),
              timeToSample (timeInSeconds.getEnd(), sampleRate) };

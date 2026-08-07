@@ -29,7 +29,7 @@ TEST_SUITE ("tracktion_engine")
         // getActiveChannelConfiguration() accidentally returns mono — masking the bug.
         // With a project item, getWaveInfo() always returns the original stereo info
         // even after the proxy is rendered, so the mismatch is exposed.
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
         auto projectFile = tempDir.getChildFile ("test.tracktion");
 
@@ -51,7 +51,7 @@ TEST_SUITE ("tracktion_engine")
         auto track = getAudioTracks (*edit)[0];
 
         // Short clip to keep render fast
-        auto stereoFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 0.1, 2);
+        auto stereoFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 0.1, 2);
         auto clip = insertWaveClip (*track, {}, stereoFile->getFile(),
                                     { .time = { 0_tp, 0.1_tp } },
                                     DeleteExistingClips::no);
@@ -63,7 +63,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (effectsState.isValid());
 
         auto makeMonoState = createValueTree (IDs::EFFECT,
-                                              IDs::type, juce::VariantConverter<ClipEffect::EffectType>::toVar (ClipEffect::EffectType::makeMono));
+                                              IDs::type, yup::VariantConverter<ClipEffect::EffectType>::toVar (ClipEffect::EffectType::makeMono));
         effectsState.addChild (makeMonoState, -1, nullptr);
 
         // Determine the expected proxy path and trigger the render job directly
@@ -72,11 +72,11 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (job != nullptr);
 
         // Process one tick so the 'started' message submits the job to the thread pool
-        juce::MessageManager::getInstance()->runDispatchLoopUntil (1);
+        yup::MessageManager::getInstance()->runDispatchLoopUntil (1);
 
         // Spin until the job completes — fast for a 0.1s clip, no fixed delay
         while (engine.getRenderManager().getNumJobs() > 0)
-            juce::MessageManager::getInstance()->runDispatchLoopUntil (1);
+            yup::MessageManager::getInstance()->runDispatchLoopUntil (1);
 
         REQUIRE (proxyFile.getFile().existsAsFile());
 
@@ -111,7 +111,7 @@ TEST_SUITE ("tracktion_engine")
         auto track1 = tracks[1];
 
         // Create a sin wave file and insert clip on track 0
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
         auto clip = insertWaveClip (*track0, {}, sinFile->getFile(),
                                     { .time = { 0_tp, 1_tp } },
                                     DeleteExistingClips::no);
@@ -128,7 +128,7 @@ TEST_SUITE ("tracktion_engine")
         reverbPlugin->flushPluginStateToValueTree();
 
         auto effectState = createValueTree (IDs::EFFECT,
-                                            IDs::type, juce::VariantConverter<ClipEffect::EffectType>::toVar (ClipEffect::EffectType::filter));
+                                            IDs::type, yup::VariantConverter<ClipEffect::EffectType>::toVar (ClipEffect::EffectType::filter));
         effectState.addChild (reverbPlugin->state, -1, nullptr);
 
         auto effectsState = clip->state.getChildWithName (IDs::EFFECTS);

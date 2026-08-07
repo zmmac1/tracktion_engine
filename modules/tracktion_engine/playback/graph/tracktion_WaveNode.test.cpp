@@ -30,13 +30,13 @@ namespace wavenode_test_helpers
     }
 
     template<typename NodeType>
-    static void runBasicTests (juce::String /*nodeTypeName*/, graph::test_utilities::TestSetup ts, bool playSyncedToRange)
+    static void runBasicTests (yup::String /*nodeTypeName*/, graph::test_utilities::TestSetup ts, bool playSyncedToRange)
     {
         using namespace tracktion::graph::test_utilities;
         auto& engine = *tracktion_engine::Engine::getEngines()[0];
 
         const double fileLengthSeconds = 5.0;
-        auto sinFile = getSinFile<juce::WavAudioFormat> (ts.sampleRate, fileLengthSeconds);
+        auto sinFile = getSinFile<yup::WavAudioFormat> (ts.sampleRate, fileLengthSeconds);
         AudioFile sinAudioFile (engine, sinFile->getFile());
 
         tracktion::graph::PlayHead playHead;
@@ -136,13 +136,13 @@ namespace wavenode_test_helpers
     }
 
     template<typename NodeType>
-    static void runLoopedTimelineTests (juce::String /*nodeTypeName*/, graph::test_utilities::TestSetup ts)
+    static void runLoopedTimelineTests (yup::String /*nodeTypeName*/, graph::test_utilities::TestSetup ts)
     {
         using namespace tracktion::graph::test_utilities;
         auto& engine = *tracktion_engine::Engine::getEngines()[0];
 
         const double fileLengthSeconds = 1.0;
-        auto sinFile = getSinFile<juce::WavAudioFormat> (ts.sampleRate, fileLengthSeconds);
+        auto sinFile = getSinFile<yup::WavAudioFormat> (ts.sampleRate, fileLengthSeconds);
         AudioFile sinAudioFile (engine, sinFile->getFile());
 
         tracktion::graph::PlayHead playHead;
@@ -203,7 +203,7 @@ namespace wavenode_test_helpers
                                            {{ 0_bp, 4, 4, false }},
                                            tempo::LengthOfOneBeat::dependsOnTimeSignature);
 
-        auto squareFile = getSquareFile<juce::WavAudioFormat> (ts.sampleRate, fileLength.inSeconds());
+        auto squareFile = getSquareFile<yup::WavAudioFormat> (ts.sampleRate, fileLength.inSeconds());
         AudioFile sinAudioFile (engine, squareFile->getFile());
 
         tracktion::graph::PlayHead playHead;
@@ -286,7 +286,7 @@ namespace wavenode_test_helpers
                                            {{ 0_bp, 4, 4, false }},
                                            tempo::LengthOfOneBeat::dependsOnTimeSignature);
 
-        auto squareFile = getSquareFile<juce::WavAudioFormat> (ts.sampleRate, fileLength.inSeconds());
+        auto squareFile = getSquareFile<yup::WavAudioFormat> (ts.sampleRate, fileLength.inSeconds());
         AudioFile squareAudioFile (engine, squareFile->getFile());
 
         tracktion::graph::PlayHead playHead;
@@ -317,7 +317,7 @@ namespace wavenode_test_helpers
 
                 auto testContext = createTracktionTestContext (processState, std::move (node), ts, 1, (fileLength * 3.0).inSeconds());
 
-                auto f = writeToTemporaryFile<juce::WavAudioFormat> (toBufferView (testContext->buffer), ts.sampleRate, 0);
+                auto f = writeToTemporaryFile<yup::WavAudioFormat> (toBufferView (testContext->buffer), ts.sampleRate, 0);
 
                 expectAudioBuffer (testContext->buffer, 0, toSamples ({ 0s, fileLength }, ts.sampleRate), 0.0f, 0.0f);
                 expectAudioBuffer (testContext->buffer, 0, toSamples ({ toPosition (fileLength), fileLength }, ts.sampleRate), 1.0f, 1.0f);
@@ -351,7 +351,7 @@ namespace wavenode_test_helpers
 
                 auto testContext = createTracktionTestContext (processState, std::move (node), ts, 1, (fileLength * 3.0).inSeconds());
 
-                auto f = writeToTemporaryFile<juce::WavAudioFormat> (toBufferView (testContext->buffer), ts.sampleRate, 0);
+                auto f = writeToTemporaryFile<yup::WavAudioFormat> (toBufferView (testContext->buffer), ts.sampleRate, 0);
 
                 expectAudioBuffer (testContext->buffer, 0, toSamples ({ 0s, fileLength }, ts.sampleRate), 0.0f, 0.0f);
                 expectAudioBuffer (testContext->buffer, 0, toSamples ({ toPosition (fileLength), fileLength }, ts.sampleRate), 1.0f, 1.0f);
@@ -403,7 +403,7 @@ namespace wavenode_test_helpers
 
             // During clip (middle 80%): should have signal energy.
             auto clipRange = toSamples ({ 1.1_tp, 1.9_tp }, ts.sampleRate);
-            juce::AudioBuffer<float> clipSection (testContext->buffer.getArrayOfWritePointers(),
+            yup::AudioBuffer<float> clipSection (testContext->buffer.getArrayOfWritePointers(),
                                                   testContext->buffer.getNumChannels(),
                                                   (int) clipRange.getStart(), (int) clipRange.getLength());
             float rms = clipSection.getRMSLevel (0, 0, clipSection.getNumSamples());
@@ -459,7 +459,7 @@ TEST_SUITE("tracktion_engine")
 
         auto edit = engine::test_utilities::createTestEdit (engine, 1, Edit::EditRole::forEditing);
         auto& tc = edit->getTransport();
-        auto squareFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 5.0);
+        auto squareFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 5.0);
         auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
 
         AudioFile af (engine, squareFile->getFile());
@@ -534,7 +534,7 @@ TEST_SUITE ("tracktion_engine")
             return testProcess.processAll();
         };
 
-        auto checkChannel = [] (const juce::AudioBuffer<float>& buffer, int channel,
+        auto checkChannel = [] (const yup::AudioBuffer<float>& buffer, int channel,
                                 float expectedMag, float expectedRMS)
         {
             auto mag = buffer.getMagnitude (channel, 0, buffer.getNumSamples());
@@ -543,11 +543,11 @@ TEST_SUITE ("tracktion_engine")
             CHECK (rms == doctest::Approx (expectedRMS).epsilon (0.02));
         };
 
-        std::unique_ptr<juce::TemporaryFile> sinFile;
+        std::unique_ptr<yup::TemporaryFile> sinFile;
 
         auto createEditWithClip = [&] (int numSourceChannels) -> std::unique_ptr<Edit>
         {
-            sinFile = getSinFile<juce::WavAudioFormat> (sampleRate, fileLength.inSeconds(), numSourceChannels);
+            sinFile = getSinFile<yup::WavAudioFormat> (sampleRate, fileLength.inSeconds(), numSourceChannels);
             auto edit = test_utilities::createTestEdit (engine);
             auto track = getAudioTracks (*edit)[0];
             auto clip = insertWaveClip (*track, {}, sinFile->getFile(),

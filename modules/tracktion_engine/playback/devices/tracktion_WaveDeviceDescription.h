@@ -19,10 +19,10 @@ struct WaveDeviceDescription
     WaveDeviceDescription();
 
     /// Creates a WaveDeviceDescription for a given set of channels.
-    WaveDeviceDescription (const juce::String& name, ChannelConfiguration, bool isEnabled);
+    WaveDeviceDescription (const yup::String& name, ChannelConfiguration, bool isEnabled);
 
     /// Creates a canonical WaveDeviceDescription for a number of channels
-    static WaveDeviceDescription withNumChannels (const juce::String& name, uint32_t firstChannelIndexInDevice,
+    static WaveDeviceDescription withNumChannels (const yup::String& name, uint32_t firstChannelIndexInDevice,
                                                   uint32_t numChannels, bool enabled);
 
     choc::value::Value toJSON() const;
@@ -39,7 +39,7 @@ struct WaveDeviceDescription
     bool operator== (const WaveDeviceDescription&) const;
     bool operator!= (const WaveDeviceDescription&) const;
 
-    juce::String name;
+    yup::String name;
     ChannelConfiguration channels;
     bool enabled = true;
 };
@@ -49,10 +49,10 @@ struct WaveDeviceDescriptionList
 {
     WaveDeviceDescriptionList();
 
-    void initialise (Engine&, juce::AudioIODevice&, const juce::XmlElement*);
-    bool updateForDevice (juce::AudioIODevice&);
+    void initialise (Engine&, yup::AudioIODevice&, const yup::XmlElement*);
+    bool updateForDevice (yup::AudioIODevice&);
 
-    juce::XmlElement toXML() const;
+    yup::XmlElement toXML() const;
     choc::value::Value toJSON() const;
 
     uint32_t getTotalInputChannelCount() const;
@@ -62,22 +62,22 @@ struct WaveDeviceDescriptionList
     void setDeviceEnabled (const WaveDeviceDescription&, bool isInput, bool enabled);
     bool setAllInputsToNumChannels (uint32_t numChannels);
     bool setAllOutputsToNumChannels (uint32_t numChannels);
-    juce::StringArray getPossibleChannelGroupsForDevice (const WaveDeviceDescription&, uint32_t maxNumChannels, bool isInput) const;
+    yup::StringArray getPossibleChannelGroupsForDevice (const WaveDeviceDescription&, uint32_t maxNumChannels, bool isInput) const;
 
     bool operator== (const WaveDeviceDescriptionList& other) const noexcept    { return deviceName == other.deviceName && inputs == other.inputs && outputs == other.outputs; }
     bool operator!= (const WaveDeviceDescriptionList& other) const noexcept    { return ! operator== (other); }
 
-    juce::String deviceName;
+    yup::String deviceName;
     std::vector<WaveDeviceDescription> inputs, outputs;
 
 private:
-    juce::StringArray deviceInputChannelNames, deviceOutputChannelNames;
+    yup::StringArray deviceInputChannelNames, deviceOutputChannelNames;
     bool wasInitialisedFromCustomBehaviour = false;
 
-    bool initialiseFromCustomBehaviour (juce::AudioIODevice&, EngineBehaviour&);
+    bool initialiseFromCustomBehaviour (yup::AudioIODevice&, EngineBehaviour&);
     void initialiseFromDeviceDefault();
-    bool initialiseFromState (const juce::XmlElement&);
-    bool initialiseFromLegacyState (const juce::XmlElement&);
+    bool initialiseFromState (const yup::XmlElement&);
+    bool initialiseFromLegacyState (const yup::XmlElement&);
     bool setAllToNumChannels (std::vector<WaveDeviceDescription>&, uint32_t numChannels);
     void sanityCheckList();
     WaveDeviceDescription* findMatchingDevice (const WaveDeviceDescription&, bool isInput);

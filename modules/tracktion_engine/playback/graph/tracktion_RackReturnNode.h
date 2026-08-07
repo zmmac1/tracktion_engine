@@ -29,7 +29,7 @@ public:
     TransformResult transform (TransformOptions&) override;
     void prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo&) override;
     bool isReadyToProcess() override;
-    void preProcess (choc::buffer::FrameCount, juce::Range<int64_t>) override;
+    void preProcess (choc::buffer::FrameCount, yup::Range<int64_t>) override;
     void process (ProcessContext&) override;
 
 private:

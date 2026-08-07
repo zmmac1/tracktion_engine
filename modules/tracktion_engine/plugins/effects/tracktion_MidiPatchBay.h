@@ -17,23 +17,23 @@ public:
     ~MidiPatchBayPlugin() override;
 
     static const char* getPluginName()      { return NEEDS_TRANS("MIDI Patch Bay"); }
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
     //==============================================================================
     static const char* xmlTypeName;
 
-    juce::String getName() const override                                   { return TRANS("Patch Bay Plugin"); }
-    juce::String getPluginType() override                                   { return xmlTypeName; }
-    juce::String getShortName (int) override                                { return TRANS("MIDIPatch"); }
+    yup::String getName() const override                                   { return TRANS("Patch Bay Plugin"); }
+    yup::String getPluginType() override                                   { return xmlTypeName; }
+    yup::String getShortName (int) override                                { return TRANS("MIDIPatch"); }
     bool canBeAddedToClip() override                                        { return false; }
     bool canBeAddedToRack() override                                        { return true; }
     BusLayout getBusses() const override   { return {}; }
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
-    juce::String getSelectableDescription() override                        { return TRANS("MIDI Patch Bay Plugin"); }
+    yup::String getSelectableDescription() override                        { return TRANS("MIDI Patch Bay Plugin"); }
     int getNumOutputChannelsGivenInputs (int) override                      { return 0; }
-    void getChannelNames (juce::StringArray*, juce::StringArray*) override  {}
+    void getChannelNames (yup::StringArray*, yup::StringArray*) override  {}
 
     //==============================================================================
     struct Mappings
@@ -54,12 +54,12 @@ private:
     //==============================================================================
     enum { blockChannel = 0 };
 
-    juce::CriticalSection mappingsLock;
+    yup::CriticalSection mappingsLock;
     Mappings currentMappings;
 
     void valueTreeChanged() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiPatchBayPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiPatchBayPlugin)
 };
 
 } // namespace tracktion::inline engine

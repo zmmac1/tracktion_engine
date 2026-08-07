@@ -29,7 +29,7 @@ TEST_SUITE ("tracktion_graph")
             PlayHeadState playHeadState (playHead);
 
             playHead.play ({ 44'100, 176'400 }, true); // 1-4s
-            auto referenceRange = juce::Range<int64_t>::withStartAndLength (0, blockSize);
+            auto referenceRange = yup::Range<int64_t>::withStartAndLength (0, blockSize);
             playHeadState.update (referenceRange); // This is reference samples
 
             CHECK (! playHeadState.isContiguousWithPreviousBlock());
@@ -62,7 +62,7 @@ TEST_SUITE ("tracktion_graph")
             PlayHeadState playHeadState (playHead);
 
             playHead.play ({ 44'100, 176'400 }, false); // 1-4s
-            auto referenceRange = juce::Range<int64_t>::withStartAndLength (0, blockSize);
+            auto referenceRange = yup::Range<int64_t>::withStartAndLength (0, blockSize);
             playHeadState.update (referenceRange); // This is reference samples
 
             CHECK (! playHeadState.isContiguousWithPreviousBlock());

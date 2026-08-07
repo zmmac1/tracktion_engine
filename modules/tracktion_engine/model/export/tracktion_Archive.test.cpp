@@ -3440,7 +3440,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         auto tempDir = createTestTempDir();
-        auto tempDirFile = juce::File (tempDir.file.string());
+        auto tempDirFile = yup::File (tempDir.file.string());
 
         // Create a folder-based project
         auto projectFolder = tempDirFile.getChildFile ("test_project");
@@ -3452,7 +3452,7 @@ TEST_SUITE ("tracktion_engine")
         auto editItem = project->createNewEdit();
         REQUIRE (editItem != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         {
@@ -3500,7 +3500,7 @@ TEST_SUITE ("tracktion_engine")
         auto extractDir = tempDirFile.getChildFile ("extracted");
         extractDir.createDirectory();
 
-        juce::ZipFile zip (archiveFile);
+        yup::ZipFile zip (archiveFile);
         CHECK (zip.getNumEntries() > 0);
 
         // Check for .tracktionedit
@@ -3518,8 +3518,8 @@ TEST_SUITE ("tracktion_engine")
         CHECK (result.wasOk());
 
         // Should contain files
-        juce::Array<juce::File> extractedFiles;
-        extractDir.findChildFiles (extractedFiles, juce::File::findFiles, true);
+        yup::Array<yup::File> extractedFiles;
+        extractDir.findChildFiles (extractedFiles, yup::File::findFiles, true);
         CHECK (extractedFiles.size() > 0);
     }
 
@@ -3532,9 +3532,9 @@ TEST_SUITE ("tracktion_engine")
         // dedicated Engine whose behaviour reports a planted patch folder.
         struct ArchiveExtraFilesBehaviour : public EngineBehaviour
         {
-            juce::Array<juce::File> extraFiles;
+            yup::Array<yup::File> extraFiles;
             bool autoInitialiseDeviceManager() override                   { return false; }
-            juce::Array<juce::File> getExtraFilesToArchive (Edit&) override { return extraFiles; }
+            yup::Array<yup::File> getExtraFilesToArchive (Edit&) override { return extraFiles; }
         };
 
         auto behaviour = std::make_unique<ArchiveExtraFilesBehaviour>();
@@ -3542,11 +3542,11 @@ TEST_SUITE ("tracktion_engine")
 
         // NB: this temporarily becomes Engine::instance; safe here because the engine
         // TestRunner never calls Engine::getInstance() and other tests use getEngines().
-        Engine engine { juce::String ("tracktion_archive_extrafiles_test"), nullptr, std::move (behaviour) };
+        Engine engine { yup::String ("tracktion_archive_extrafiles_test"), nullptr, std::move (behaviour) };
         auto& pm = engine.getProjectManager();
 
         auto tempDir = createTestTempDir();
-        auto tempDirFile = juce::File (tempDir.file.string());
+        auto tempDirFile = yup::File (tempDir.file.string());
 
         auto projectFolder = tempDirFile.getChildFile ("test_project");
         ProjectManager::TempProject tp (pm, projectFolder, true, ProjectType::folderBased);
@@ -3593,12 +3593,12 @@ TEST_SUITE ("tracktion_engine")
         auto extractDir = tempDirFile.getChildFile ("extracted");
         extractDir.createDirectory();
 
-        juce::ZipFile zip (archiveFile);
+        yup::ZipFile zip (archiveFile);
         REQUIRE (zip.uncompressTo (extractDir).wasOk());
 
-        juce::Array<juce::File> manifestHits, viewHits;
-        extractDir.findChildFiles (manifestHits, juce::File::findFiles, true, "patch.json");
-        extractDir.findChildFiles (viewHits, juce::File::findFiles, true, "index.html");
+        yup::Array<yup::File> manifestHits, viewHits;
+        extractDir.findChildFiles (manifestHits, yup::File::findFiles, true, "patch.json");
+        extractDir.findChildFiles (viewHits, yup::File::findFiles, true, "index.html");
 
         CHECK (! manifestHits.isEmpty());
         CHECK (! viewHits.isEmpty());
@@ -3619,13 +3619,13 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         auto tempDir = createTestTempDir();
-        auto tempDirFile = juce::File (tempDir.file.string());
+        auto tempDirFile = yup::File (tempDir.file.string());
 
         // Audio file lives in the project's Imported/ folder, so the clip's
         // source string is a path-based ref ("Imported/external.wav") with
         // no owner — exactly the case that triggers the cross-project lookup
         // collision in ProjectManager::getProjectItem during consolidate.
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto projectFolder = tempDirFile.getChildFile ("test_project_open_edit");
@@ -3672,7 +3672,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK_MESSAGE (job.getError().isEmpty(), job.getError().toStdString());
         CHECK (archiveFile.existsAsFile());
 
-        const auto sysTempDir = juce::File::getSpecialLocation (juce::File::tempDirectory).getFullPathName();
+        const auto sysTempDir = yup::File::getSpecialLocation (yup::File::tempDirectory).getFullPathName();
 
         // a) The clip's stored source string must not have been rewritten
         //    to a temp-dir path.
@@ -3716,7 +3716,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         auto tempDir = createTestTempDir();
-        auto tempDirFile = juce::File (tempDir.file.string());
+        auto tempDirFile = yup::File (tempDir.file.string());
 
         // Create a folder-based project with 2 edits
         auto projectFolder = tempDirFile.getChildFile ("multi_edit_project");
@@ -3724,7 +3724,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
         REQUIRE (sinFile != nullptr);
 
         // Edit 1
@@ -3777,7 +3777,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK (isArchive (engine, archiveFile));
 
         // Decompress and verify both edits are present
-        juce::ZipFile zip (archiveFile);
+        yup::ZipFile zip (archiveFile);
         int editCount = 0;
 
         for (int i = 0; i < zip.getNumEntries(); ++i)
@@ -3794,7 +3794,7 @@ TEST_SUITE ("tracktion_engine")
 
         // Random file should not be an archive
         auto tempDir = createTestTempDir();
-        auto tempDirFile = juce::File (tempDir.file.string());
+        auto tempDirFile = yup::File (tempDir.file.string());
 
         auto randomFile = tempDirFile.getChildFile ("random.dat");
         randomFile.replaceWithText ("not an archive");
@@ -3805,8 +3805,8 @@ TEST_SUITE ("tracktion_engine")
         // An empty zip is not an archive (no .tracktionedit)
         auto emptyZip = tempDirFile.getChildFile ("empty.zip");
         {
-            juce::ZipFile::Builder builder;
-            juce::FileOutputStream out (emptyZip);
+            yup::ZipFile::Builder builder;
+            yup::FileOutputStream out (emptyZip);
             builder.writeToStream (out, nullptr);
         }
         CHECK_FALSE (isArchive (engine, emptyZip));
@@ -3835,7 +3835,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         auto tempDir = createTestTempDir();
-        auto tempDirFile = juce::File (tempDir.file.string());
+        auto tempDirFile = yup::File (tempDir.file.string());
 
         // 1. Create a file-based project with an edit + audio
         auto projectFile = tempDirFile.getChildFile ("roundtrip_project.tracktion");
@@ -3846,7 +3846,7 @@ TEST_SUITE ("tracktion_engine")
         auto editItem = project->createNewEdit();
         REQUIRE (editItem != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         {
@@ -3898,7 +3898,7 @@ TEST_SUITE ("tracktion_engine")
         auto extractDir = tempDirFile.getChildFile ("extracted");
         extractDir.createDirectory();
 
-        juce::Array<juce::File> extractedFiles;
+        yup::Array<yup::File> extractedFiles;
         {
             legacy::TracktionArchiveFile archive (engine, legacyArchiveFile);
             CHECK (archive.extractAll (extractDir, extractedFiles));
@@ -3906,7 +3906,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (extractedFiles.size() > 0);
 
         // Find the .tracktion project file
-        juce::File extractedProjectFile;
+        yup::File extractedProjectFile;
         for (auto& f : extractedFiles)
             if (f.hasFileExtension (".tracktion"))
                 extractedProjectFile = f;
@@ -3931,7 +3931,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK (zipDest.existsAsFile());
 
         // 5. Verify zip contains project_info.json with archive_type == 1
-        juce::ZipFile zip (zipDest);
+        yup::ZipFile zip (zipDest);
         CHECK (zip.getNumEntries() > 0);
 
         int infoIndex = -1;
@@ -3944,11 +3944,11 @@ TEST_SUITE ("tracktion_engine")
 
         if (infoIndex >= 0)
         {
-            auto infoStream = std::unique_ptr<juce::InputStream> (zip.createStreamForEntry (infoIndex));
+            auto infoStream = std::unique_ptr<yup::InputStream> (zip.createStreamForEntry (infoIndex));
             REQUIRE (infoStream != nullptr);
 
-            auto infoJson = juce::JSON::parse (infoStream->readEntireStreamAsString());
-            auto archiveType = infoJson.getProperty ("archive_type", juce::var());
+            auto infoJson = yup::JSON::parse (infoStream->readEntireStreamAsString());
+            auto archiveType = infoJson.getProperty ("archive_type", yup::var());
             CHECK ((int) archiveType == 1);
         }
 
@@ -3959,8 +3959,8 @@ TEST_SUITE ("tracktion_engine")
         auto unzipResult = zip.uncompressTo (extractDir2);
         CHECK (unzipResult.wasOk());
 
-        juce::Array<juce::File> finalFiles;
-        extractDir2.findChildFiles (finalFiles, juce::File::findFiles, true);
+        yup::Array<yup::File> finalFiles;
+        extractDir2.findChildFiles (finalFiles, yup::File::findFiles, true);
 
         bool hasEditFile = false;
         bool hasMediaFiles = false;
@@ -3989,7 +3989,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         auto tempDir = createTestTempDir();
-        auto tempDirFile = juce::File (tempDir.file.string());
+        auto tempDirFile = yup::File (tempDir.file.string());
 
         // 1. Write the embedded binary data to a .trkarch temp file
         auto legacyFile = tempDirFile.getChildFile ("ArchiveTest.trkarch");
@@ -4000,7 +4000,7 @@ TEST_SUITE ("tracktion_engine")
         auto extractDir = tempDirFile.getChildFile ("extracted");
         extractDir.createDirectory();
 
-        juce::Array<juce::File> extractedFiles;
+        yup::Array<yup::File> extractedFiles;
         {
             legacy::TracktionArchiveFile archive (engine, legacyFile);
             REQUIRE (archive.isValidArchive());
@@ -4009,7 +4009,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (extractedFiles.size() > 0);
 
         // Find the .tracktion project file among extracted files
-        juce::File extractedProjectFile;
+        yup::File extractedProjectFile;
         for (auto& f : extractedFiles)
             if (f.hasFileExtension (".tracktion"))
                 extractedProjectFile = f;
@@ -4038,16 +4038,16 @@ TEST_SUITE ("tracktion_engine")
         auto extractDir2 = tempDirFile.getChildFile ("extracted2");
         extractDir2.createDirectory();
 
-        juce::ZipFile zip (zipDest);
+        yup::ZipFile zip (zipDest);
         CHECK (zip.getNumEntries() > 0);
         auto unzipResult = zip.uncompressTo (extractDir2);
         CHECK (unzipResult.wasOk());
 
         // Find the project folder (contains project_info.json)
-        juce::File projectFolder;
+        yup::File projectFolder;
         {
-            juce::Array<juce::File> allDirs;
-            extractDir2.findChildFiles (allDirs, juce::File::findDirectories, true);
+            yup::Array<yup::File> allDirs;
+            extractDir2.findChildFiles (allDirs, yup::File::findDirectories, true);
 
             for (auto& d : allDirs)
                 if (d.getChildFile ("project_info.json").existsAsFile())
@@ -4067,15 +4067,15 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (project2 != nullptr);
 
         // 7. Verify audio files exist in the project folder
-        juce::Array<juce::File> audioFiles;
-        projectFolder.findChildFiles (audioFiles, juce::File::findFiles, true, "*.wav;*.flac;*.aiff;*.ogg;*.mp3");
+        yup::Array<yup::File> audioFiles;
+        projectFolder.findChildFiles (audioFiles, yup::File::findFiles, true, "*.wav;*.flac;*.aiff;*.ogg;*.mp3");
         CHECK (audioFiles.size() >= 2);
 
         // 8. Verify edit source references are relative paths
-        juce::File editFile;
+        yup::File editFile;
         {
-            juce::Array<juce::File> allFiles;
-            projectFolder.findChildFiles (allFiles, juce::File::findFiles, true);
+            yup::Array<yup::File> allFiles;
+            projectFolder.findChildFiles (allFiles, yup::File::findFiles, true);
 
             for (auto& f : allFiles)
                 if (isTracktionEditFile (f))

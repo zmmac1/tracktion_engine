@@ -19,15 +19,15 @@ public:
     CollectionClip (Track&);
     ~CollectionClip() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<CollectionClip>;
-    using Array = juce::ReferenceCountedArray<CollectionClip>;
+    using Ptr = yup::ReferenceCountedObjectPtr<CollectionClip>;
+    using Array = yup::ReferenceCountedArray<CollectionClip>;
 
     void addClip (Clip*);
     void removeClip (Clip*);
     bool removeClip (EditItemID);
     bool containsClip (Clip* clip) const noexcept       { return clips.contains (clip); }
 
-    juce::String getName() const override;
+    yup::String getName() const override;
 
     ClipPosition getPosition() const override           { return { range, TimeDuration() }; }
     Track* getTrack() const override                    { return track; }
@@ -37,7 +37,7 @@ public:
 
     FolderTrack* getFolderTrack() const noexcept;
 
-    juce::String getSelectableDescription() override    { return TRANS("Collection clips"); }
+    yup::String getSelectableDescription() override    { return TRANS("Collection clips"); }
     int getNumClips() const noexcept                    { return clips.size(); }
     Clip::Ptr getClip (int index) const                 { return clips[index]; }
     const Clip::Array& getClips() const noexcept        { return clips; }
@@ -59,7 +59,7 @@ private:
     bool dragging = false;
     EditItemID groupID;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CollectionClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CollectionClip)
 };
 
 } // namespace tracktion::inline engine

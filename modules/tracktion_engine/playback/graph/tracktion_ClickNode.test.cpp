@@ -43,7 +43,7 @@ namespace tracktion::inline engine
                 const auto totalNumSamples = toSamples (60_td, params.sampleRate);
                 auto resultBuffer = player.process (totalNumSamples);
 
-                auto f = graph::test_utilities::writeToTemporaryFile<juce::WavAudioFormat> (toBufferView (resultBuffer), params.sampleRate);
+                auto f = graph::test_utilities::writeToTemporaryFile<yup::WavAudioFormat> (toBufferView (resultBuffer), params.sampleRate);
 
                 CHECK_GT (resultBuffer.getRMSLevel (0, 0, resultBuffer.getNumSamples()), 0.01f);
                 CHECK_GT (resultBuffer.getMagnitude (0, 0, resultBuffer.getNumSamples()), 0.5f);

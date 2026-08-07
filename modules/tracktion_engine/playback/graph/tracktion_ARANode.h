@@ -19,7 +19,7 @@ namespace tracktion::inline engine {
     plugins such as Melodyne.
 */
 class ARANode final  : public tracktion::graph::Node,
-                       private juce::Timer
+                       private yup::Timer
 {
 public:
     ARANode (AudioClipBase&, tracktion::graph::PlayHead&, bool isOfflineRender);
@@ -42,8 +42,8 @@ private:
     Clip::Ptr clipPtr;
     ARAFileReader::Ptr araProxy;
     const AudioFileInfo fileInfo;
-    juce::MidiBuffer midiMessages;
-    juce::PluginDescription desc;
+    yup::MidiBuffer midiMessages;
+    yup::PluginDescription desc;
     std::unique_ptr<ARAPlayhead> playhead;
     bool isOfflineRender = false;
     std::atomic<bool> analysingContent { true };

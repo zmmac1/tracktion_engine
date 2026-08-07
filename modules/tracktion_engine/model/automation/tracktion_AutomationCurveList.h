@@ -22,9 +22,9 @@ struct MinBeatConstrainer
         return std::max (v, BeatDuration::fromBeats (minBeats));
     }
 
-    static BeatDuration constrain (const juce::var& v)
+    static BeatDuration constrain (const yup::var& v)
     {
-        return constrain (juce::VariantConverter<BeatDuration>::fromVar (v));
+        return constrain (yup::VariantConverter<BeatDuration>::fromVar (v));
     }
 };
 
@@ -34,10 +34,10 @@ struct MinBeatConstrainer
 struct AutomatableParameterID
 {
     AutomatableParameterID() = default;
-    AutomatableParameterID (EditItemID a, juce::String p) : automatableEditItemID (a), paramID (p) {}
+    AutomatableParameterID (EditItemID a, yup::String p) : automatableEditItemID (a), paramID (p) {}
     
     EditItemID automatableEditItemID;
-    juce::String paramID;
+    yup::String paramID;
 
     bool operator== (const AutomatableParameterID& other) const
     {
@@ -57,10 +57,10 @@ enum class CurveModifierType
 };
 
 /** Converts a CurveModifierType to a string if possible. */
-juce::String toString (CurveModifierType);
+yup::String toString (CurveModifierType);
 
 /** Converts a string to a CurveModifierType if possible. */
-std::optional<CurveModifierType> curveModifierTypeFromString (juce::String);
+std::optional<CurveModifierType> curveModifierTypeFromString (yup::String);
 
 
 //==============================================================================
@@ -102,11 +102,11 @@ private:
     Each curve has independent timing information so complex patterns can be set
     up with multiple curves looping at different intervals.
 */
-class AutomationCurveModifier : public juce::ReferenceCountedObject,
+class AutomationCurveModifier : public yup::ReferenceCountedObject,
                                 public EditItem,
                                 public Selectable,
                                 public AutomatableParameter::ModifierSource,
-                                private juce::ValueTree::Listener
+                                private yup::ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -115,7 +115,7 @@ public:
         @see AutomationCurveList for a detailed description of the delegates.
     */
     AutomationCurveModifier (Edit&,
-                             const juce::ValueTree&,
+                             const yup::ValueTree&,
                              AutomatableParameterID destID,
                              std::function<CurvePosition()> getCurvePositionDelegate,
                              std::function<ClipPositionInfo()> getClipPositionDelegate);
@@ -123,8 +123,8 @@ public:
     /** Destructor. */
     ~AutomationCurveModifier() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<AutomationCurveModifier>;
-    using Array = juce::ReferenceCountedArray<AutomationCurveModifier>;
+    using Ptr = yup::ReferenceCountedObjectPtr<AutomationCurveModifier>;
+    using Array = yup::ReferenceCountedArray<AutomationCurveModifier>;
 
     /** The ID of the AutomatableParameter this curve is modifying. */
     AutomatableParameterID getDestID() const;
@@ -158,7 +158,7 @@ public:
     {
         CurveModifierType type;     /**< The type of curve. */
         AutomationCurve& curve;     /**< The actual curve. */
-        juce::Range<float> limits;  /**< The limits of this curve. */
+        yup::Range<float> limits;  /**< The limits of this curve. */
     };
 
     /** Returns the CurveInfo for a given curve type. */
@@ -212,9 +212,9 @@ public:
 
     //==============================================================================
     /** @internal */
-    juce::String getName() const override;
+    yup::String getName() const override;
     /** @internal */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     //==============================================================================
     /** @internal */
@@ -225,7 +225,7 @@ public:
     class Assignment  : public AutomatableParameter::ModifierAssignment
     {
     public:
-        Assignment (AutomationCurveModifier&, const juce::ValueTree&);
+        Assignment (AutomationCurveModifier&, const yup::ValueTree&);
 
         /** Must return true if this assigment is for the given source. */
         bool isForModifierSource (const ModifierSource&) const override;
@@ -236,7 +236,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     AutomatableParameterID destID;
@@ -246,7 +246,7 @@ private:
     AutomationCurve scaleCurve { edit, AutomationCurve::TimeBase::beats };
     std::array<CurveTiming, 3> curveTimings;
     std::array<std::shared_ptr<AutomationCurvePlayhead>, 3> playheads;
-    juce::Range<float> absoluteLimits;
+    yup::Range<float> absoluteLimits;
     bool updateLimits = true;
 
     mutable RealTimeSpinLock positionDelegateMutex;
@@ -254,9 +254,9 @@ private:
     std::function<ClipPositionInfo()> getClipPositionDelegate;
 
     LambdaValueTreeAllEventListener stateListener { state };
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 
-    void curveUnlinkedStateChanged (juce::ValueTree&);
+    void curveUnlinkedStateChanged (yup::ValueTree&);
     void updateModifierAssignment();
 };
 
@@ -337,7 +337,7 @@ public:
         The CurvePosition should return where in the Edit this curve should be started at
         The ClipPositionInfo should return the clip's offset and loop range (if looping)
     */
-    AutomationCurveList (Edit&, const juce::ValueTree&,
+    AutomationCurveList (Edit&, const yup::ValueTree&,
                          std::function<CurvePosition()> getPositionDelegate,
                          std::function<ClipPositionInfo()> getClipPositionDelegate);
     /** Destructor. */
@@ -375,7 +375,7 @@ public:
 private:
     class List;
     std::unique_ptr<List> list;
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 };
 
 //==============================================================================
@@ -389,12 +389,12 @@ void updateRelativeDestinationOrRemove (AutomationCurveList&, AutomationCurveMod
     You shouldn't need to call this manually, it's done automatically when clips are split.
     @see split
 */
-void assignNewIDsToAutomationCurveModifiers (Edit&, juce::ValueTree&);
+void assignNewIDsToAutomationCurveModifiers (Edit&, yup::ValueTree&);
 
 /** Removes any assignments in the given state if they don't have the given parameter as the destination.
     You shouldn't need to call this manually, it's used internally to clean up after copy/paste operations etc..
 */
-void removeInvalidAutomationCurveModifiers (juce::ValueTree&, const AutomatableParameter&);
+void removeInvalidAutomationCurveModifiers (yup::ValueTree&, const AutomatableParameter&);
 
 //==============================================================================
 //        _        _           _  _
@@ -417,7 +417,7 @@ namespace detail
 
 //==============================================================================
 //==============================================================================
-namespace juce
+namespace yup
 {
     template<>
     struct VariantConverter<tracktion::engine::CurveModifierType>

@@ -26,7 +26,7 @@ namespace tracktion::inline engine {
 
             auto edit = engine::test_utilities::createTestEdit (engine, 1, Edit::EditRole::forEditing);
             auto& tc = edit->getTransport();
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
 
             AudioFile af (engine, squareFile->getFile());
@@ -66,7 +66,7 @@ namespace tracktion::inline engine {
             for (int i = 0; i < 25; ++i)
             {
                 player.process (512);
-                juce::MessageManager::getInstance()->runDispatchLoopUntil (20);
+                yup::MessageManager::getInstance()->runDispatchLoopUntil (20);
             }
 
             CHECK_EQ (tc.getPosition().inSeconds(), barTime.inSeconds());
@@ -144,7 +144,7 @@ struct ProcessThread
     {
         silenceBuffer.setSize (params.inputChannels, params.blockSize);
         silenceBuffer.clear();
-        auto msPerBlock = juce::roundToInt ((params.blockSize / params.sampleRate) * 1000.0);
+        auto msPerBlock = yup::roundToInt ((params.blockSize / params.sampleRate) * 1000.0);
 
         processThread = std::thread ([&, msPerBlock]
                                      {
@@ -193,17 +193,17 @@ private:
     HostedAudioDeviceInterface& audioIO;
     HostedAudioDeviceInterface::Parameters parameters;
 
-    juce::AudioBuffer<float> silenceBuffer;
-    juce::MidiBuffer emptyMidiBuffer;
+    yup::AudioBuffer<float> silenceBuffer;
+    yup::MidiBuffer emptyMidiBuffer;
 
     std::thread processThread;
     std::atomic<bool> hasStarted { false }, shouldStop { false }, insertImpulse { false };
 };
 
 template<typename ClipType>
-static juce::Array<ClipType*> getAllClipsFromTracks (Edit& edit)
+static yup::Array<ClipType*> getAllClipsFromTracks (Edit& edit)
 {
-    juce::Array<ClipType*> clips;
+    yup::Array<ClipType*> clips;
 
     for (auto audioTrack : getAudioTracks (edit))
         for (auto clip : audioTrack->getClips())
@@ -214,9 +214,9 @@ static juce::Array<ClipType*> getAllClipsFromTracks (Edit& edit)
 }
 
 template<typename ClipType>
-static juce::Array<juce::File> getSourceFilesFromClips (const juce::Array<ClipType*>& clips)
+static yup::Array<yup::File> getSourceFilesFromClips (const yup::Array<ClipType*>& clips)
 {
-    juce::Array<juce::File> files;
+    yup::Array<yup::File> files;
 
     for (auto clip : clips)
         files.add (clip->getCurrentSourceFile());
@@ -224,9 +224,9 @@ static juce::Array<juce::File> getSourceFilesFromClips (const juce::Array<ClipTy
     return files;
 }
 
-static int64_t findImpulseSampleIndex (Engine& engine, juce::File& file)
+static int64_t findImpulseSampleIndex (Engine& engine, yup::File& file)
 {
-    if (auto reader = std::unique_ptr<juce::AudioFormatReader> (tracktion::engine::AudioFileUtils::createReaderFor (engine, file)))
+    if (auto reader = std::unique_ptr<yup::AudioFormatReader> (tracktion::engine::AudioFileUtils::createReaderFor (engine, file)))
         return reader->searchForLevel (0, reader->lengthInSamples,
                                        0.9f, 1.1f,
                                        0);
@@ -234,7 +234,7 @@ static int64_t findImpulseSampleIndex (Engine& engine, juce::File& file)
     return -1;
 }
 
-static std::vector<int64_t> getSampleIndiciesOfImpulse (Engine& engine, const juce::Array<juce::File>& files)
+static std::vector<int64_t> getSampleIndiciesOfImpulse (Engine& engine, const yup::Array<yup::File>& files)
 {
     std::vector<int64_t> sampleIndicies;
 
@@ -244,9 +244,9 @@ static std::vector<int64_t> getSampleIndiciesOfImpulse (Engine& engine, const ju
     return sampleIndicies;
 }
 
-static double getFileLength (Engine& engine, const juce::File& file)
+static double getFileLength (Engine& engine, const yup::File& file)
 {
-    if (auto reader = std::unique_ptr<juce::AudioFormatReader> (tracktion::engine::AudioFileUtils::createReaderFor (engine, file)))
+    if (auto reader = std::unique_ptr<yup::AudioFormatReader> (tracktion::engine::AudioFileUtils::createReaderFor (engine, file)))
         if (reader->sampleRate > 0.0)
             return static_cast<double> (reader->lengthInSamples) / reader->sampleRate;
 
@@ -343,12 +343,12 @@ static void runSynchronisationTest (const HostedAudioDeviceInterface::Parameters
         auto tempDirCondition = tempDir.tempDir.exists() && tempDir.tempDir.isDirectory();
         CHECK_MESSAGE (tempDirCondition, "Output dir not created");
         CHECK_MESSAGE (tempDir.tempDir.hasWriteAccess(), "Output dir is read only");
-        CHECK_EQ (tempDir.tempDir.getFullPathName(), juce::File::getCurrentWorkingDirectory().getFullPathName());
+        CHECK_EQ (tempDir.tempDir.getFullPathName(), yup::File::getCurrentWorkingDirectory().getFullPathName());
         CHECK_EQ (audioFiles.size(), deviceManager.getNumWaveInDevices());
 
         for (const auto& f : audioFiles)
         {
-            CHECK_MESSAGE (f.existsAsFile(), juce::String ("File doesn't exist FILE").replace ("FILE", f.getFullPathName()).toStdString());
+            CHECK_MESSAGE (f.existsAsFile(), yup::String ("File doesn't exist FILE").replace ("FILE", f.getFullPathName()).toStdString());
             CHECK_GE (getFileLength (engine, f), 2.0);
         }
 
@@ -361,10 +361,10 @@ static void runSynchronisationTest (const HostedAudioDeviceInterface::Parameters
             CHECK_GE (index, (int64_t) 0);
 
             if (index != sampleIndicies[0])
-                CHECK_MESSAGE (false, juce::String ("Mismatch of impulse indicies (FIRST & SECOND samples, difference of DIFF)")
-                                .replace ("FIRST", juce::String (index))
-                                .replace ("SECOND", juce::String (sampleIndicies[0]))
-                                .replace ("DIFF", juce::String (index - sampleIndicies[0])).toStdString());
+                CHECK_MESSAGE (false, yup::String ("Mismatch of impulse indicies (FIRST & SECOND samples, difference of DIFF)")
+                                .replace ("FIRST", yup::String (index))
+                                .replace ("SECOND", yup::String (sampleIndicies[0]))
+                                .replace ("DIFF", yup::String (index - sampleIndicies[0])).toStdString());
 
             ++fileIndex;
         }

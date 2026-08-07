@@ -25,7 +25,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         // Use a temp directory for the whole test
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -43,7 +43,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK (project->save());
 
         // Create a sin wave file to use as audio source
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
         REQUIRE (sinFile->getFile().existsAsFile());
 
@@ -126,7 +126,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         // Create a temp folder to act as the project root
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -241,7 +241,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         // Use a temp directory for the whole test
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -260,7 +260,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK (project->isValid());
 
         // Create a sin wave file to use as audio source
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
         REQUIRE (sinFile->getFile().existsAsFile());
 
@@ -381,7 +381,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -396,7 +396,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (project != nullptr);
         REQUIRE (project->isValid());
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         // Create an edit with audio + MIDI
@@ -444,8 +444,8 @@ TEST_SUITE ("tracktion_engine")
         // Collect original item info
         struct ItemInfo
         {
-            juce::String type;
-            juce::String name;
+            yup::String type;
+            yup::String name;
         };
         std::vector<ItemInfo> originalItems;
         for (int i = 0; i < originalNumItems; ++i)
@@ -493,7 +493,7 @@ TEST_SUITE ("tracktion_engine")
         auto extractDir = tempDir.getChildFile ("extracted");
         extractDir.createDirectory();
 
-        juce::Array<juce::File> extractedFiles;
+        yup::Array<yup::File> extractedFiles;
         {
             legacy::TracktionArchiveFile archive (engine, archiveFile);
             CHECK (archive.extractAll (extractDir, extractedFiles));
@@ -502,7 +502,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK (extractedFiles.size() >= 2);
 
         // Find the extracted project file
-        juce::File extractedProjectFile;
+        yup::File extractedProjectFile;
         for (auto& f : extractedFiles)
         {
             if (f.hasFileExtension (".tracktion"))
@@ -545,7 +545,7 @@ TEST_SUITE ("tracktion_engine")
             if (item != nullptr)
             {
                 auto sourceFile = item->getSourceFile();
-                if (sourceFile != juce::File())
+                if (sourceFile != yup::File())
                     CHECK_MESSAGE (sourceFile.existsAsFile(),
                                    "Source file missing: " << sourceFile.getFullPathName());
             }
@@ -612,7 +612,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         // Use a temp directory for the whole test
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -698,7 +698,7 @@ TEST_SUITE ("tracktion_engine")
         auto& pm = engine.getProjectManager();
 
         // Use a temp directory for the whole test
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -716,7 +716,7 @@ TEST_SUITE ("tracktion_engine")
         project->setDescription ("Test project for conversion");
 
         // Create a sin wave file and copy it into the project directory so it's found after conversion
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
         REQUIRE (sinFile->getFile().existsAsFile());
 
@@ -759,8 +759,8 @@ TEST_SUITE ("tracktion_engine")
 
         struct ItemInfo
         {
-            juce::String type;
-            juce::File sourceFile;
+            yup::String type;
+            yup::File sourceFile;
         };
         std::vector<ItemInfo> oldItems;
         for (int i = 0; i < project->getNumProjectItems(); ++i)
@@ -774,7 +774,7 @@ TEST_SUITE ("tracktion_engine")
             auto editState = loadEditFromFile (engine, editItem->getSourceFile(), ProjectItemID{});
             bool foundProjectItemIdSource = false;
 
-            std::function<void (const juce::ValueTree&)> checkTree = [&] (const juce::ValueTree& v)
+            std::function<void (const yup::ValueTree&)> checkTree = [&] (const yup::ValueTree& v)
             {
                 if (v.hasProperty (IDs::source))
                 {
@@ -803,7 +803,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK (infoFile.existsAsFile());
 
         {
-            auto infoJson = juce::JSON::parse (infoFile);
+            auto infoJson = yup::JSON::parse (infoFile);
             CHECK (infoJson.isObject());
 
             if (auto* obj = infoJson.getDynamicObject())
@@ -830,7 +830,7 @@ TEST_SUITE ("tracktion_engine")
             auto editState = loadEditFromFile (engine, editFile, ProjectItemID{});
             bool foundRelativePath = false;
 
-            std::function<void (const juce::ValueTree&)> checkTree = [&] (const juce::ValueTree& v)
+            std::function<void (const yup::ValueTree&)> checkTree = [&] (const yup::ValueTree& v)
             {
                 if (v.hasProperty (IDs::source))
                 {
@@ -867,7 +867,7 @@ TEST_SUITE ("tracktion_engine")
 
                         // Files inside of the project folder should be relative
                         REQUIRE (! waveClip->getSourceFileReference().isUsingProjectReference());
-                        REQUIRE (! juce::File::isAbsolutePath (waveClip->getSourceFileReference().source.get()));
+                        REQUIRE (! yup::File::isAbsolutePath (waveClip->getSourceFileReference().source.get()));
                         REQUIRE (waveClip->getSourceFileReference().getFile() == sinWavFile);
                     }
                 }
@@ -887,7 +887,7 @@ TEST_SUITE ("tracktion_engine")
 
         auto runTest = [&] (bool fileBased)
         {
-            auto tempDir = juce::File::createTempFile ({});
+            auto tempDir = yup::File::createTempFile ({});
             tempDir.createDirectory();
 
             auto cleanup = [&tempDir]
@@ -896,7 +896,7 @@ TEST_SUITE ("tracktion_engine")
             };
 
             // Create the project
-            juce::File projectPath;
+            yup::File projectPath;
             bool createNewId = false;
 
             if (fileBased)
@@ -917,7 +917,7 @@ TEST_SUITE ("tracktion_engine")
             REQUIRE (project->isValid());
 
             // Create a wav file inside the project directory
-            auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+            auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
             REQUIRE (sinFile != nullptr);
 
             auto projectDir = project->getDefaultDirectory();
@@ -1051,7 +1051,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -1103,7 +1103,7 @@ TEST_SUITE ("tracktion_engine")
             auto project = tp.project;
             REQUIRE (project != nullptr);
 
-            auto longDesc = juce::String::repeatedString ("x", 10000);
+            auto longDesc = yup::String::repeatedString ("x", 10000);
             project->setDescription (longDesc);
             CHECK (project->getDescription().length() == 8192);
         }
@@ -1116,7 +1116,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -1185,7 +1185,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -1201,7 +1201,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (project->isValid());
 
         // Create a sin wave file outside the project folder
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
         REQUIRE (sinFile->getFile().existsAsFile());
         REQUIRE (! sinFile->getFile().isAChildOf (project->getDefaultDirectory()));
@@ -1308,7 +1308,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -1324,7 +1324,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (project->isValid());
 
         // Create a sin wave file outside the project folder
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
         REQUIRE (sinFile->getFile().existsAsFile());
         REQUIRE (! sinFile->getFile().isAChildOf (project->getDefaultDirectory()));
@@ -1487,7 +1487,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -1503,7 +1503,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (project->isValid());
 
         // Create a sin wave file outside the project folder
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
         REQUIRE (sinFile->getFile().existsAsFile());
 
@@ -1559,7 +1559,7 @@ TEST_SUITE ("tracktion_engine")
 
         auto runTest = [&] (bool fileBased)
         {
-            auto tempDir = juce::File::createTempFile ({});
+            auto tempDir = yup::File::createTempFile ({});
             tempDir.createDirectory();
 
             auto cleanup = [&tempDir]
@@ -1568,7 +1568,7 @@ TEST_SUITE ("tracktion_engine")
             };
 
             // Create the project
-            juce::File projectPath;
+            yup::File projectPath;
             bool createNewId = false;
 
             if (fileBased)
@@ -1589,7 +1589,7 @@ TEST_SUITE ("tracktion_engine")
             REQUIRE (project->isValid());
 
             // Create a wav file inside the project directory
-            auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+            auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
             REQUIRE (sinFile != nullptr);
 
             auto projectDir = project->getDefaultDirectory();
@@ -1795,13 +1795,13 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("parse invalid string returns invalid")
         {
-            ProjectItemID empty { juce::String{} };
+            ProjectItemID empty { yup::String{} };
             CHECK_FALSE (empty.isValid());
 
-            ProjectItemID garbage (juce::String ("not_a_hex_id!"));
+            ProjectItemID garbage (yup::String ("not_a_hex_id!"));
             CHECK_FALSE (garbage.isValid());
 
-            ProjectItemID justText (juce::String ("hello"));
+            ProjectItemID justText (yup::String ("hello"));
             CHECK_FALSE (justText.isValid());
         }
 
@@ -1825,7 +1825,7 @@ TEST_SUITE ("tracktion_engine")
         SUBCASE ("fromProperty")
         {
             ProjectItemID original (0x42, ProjectID (0x99));
-            juce::ValueTree vt ("test");
+            yup::ValueTree vt ("test");
             vt.setProperty ("myProp", original.toString(), nullptr);
 
             auto parsed = ProjectItemID::fromProperty (vt, "myProp");
@@ -1871,7 +1871,7 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("from absolute path")
         {
-            auto absFile = juce::File::getSpecialLocation (juce::File::tempDirectory).getChildFile ("test.wav");
+            auto absFile = yup::File::getSpecialLocation (yup::File::tempDirectory).getChildFile ("test.wav");
             auto ref = ProjectItemRef::fromAbsolutePath (absFile);
 
             CHECK (ref.isValid());
@@ -1937,7 +1937,7 @@ TEST_SUITE ("tracktion_engine")
         SUBCASE ("resolve absolute path")
         {
             auto& engine = *Engine::getEngines()[0];
-            auto absFile = juce::File::getSpecialLocation (juce::File::tempDirectory).getChildFile ("test_resolve.wav");
+            auto absFile = yup::File::getSpecialLocation (yup::File::tempDirectory).getChildFile ("test_resolve.wav");
             auto ref = ProjectItemRef::fromAbsolutePath (absFile);
 
             auto resolved = ref.resolve (engine);
@@ -1947,7 +1947,7 @@ TEST_SUITE ("tracktion_engine")
         SUBCASE ("resolve relative path with folder")
         {
             auto& engine = *Engine::getEngines()[0];
-            auto folder = juce::File::getSpecialLocation (juce::File::tempDirectory);
+            auto folder = yup::File::getSpecialLocation (yup::File::tempDirectory);
             auto ref = ProjectItemRef::fromPath ("subdir/audio.wav");
 
             auto resolved = ref.resolve (engine, folder);
@@ -1958,7 +1958,7 @@ TEST_SUITE ("tracktion_engine")
         {
             auto& engine = *Engine::getEngines()[0];
             ProjectItemRef empty;
-            CHECK (empty.resolve (engine) == juce::File());
+            CHECK (empty.resolve (engine) == yup::File());
         }
     }
 
@@ -1967,7 +1967,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -1979,7 +1979,7 @@ TEST_SUITE ("tracktion_engine")
         projectFolder.createDirectory();
 
         // Create files in various category subdirectories
-        auto createFile = [&] (const juce::String& subDir, const juce::String& filename)
+        auto createFile = [&] (const yup::String& subDir, const yup::String& filename)
         {
             auto dir = projectFolder.getChildFile (subDir);
             dir.createDirectory();
@@ -2063,7 +2063,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2113,7 +2113,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2158,7 +2158,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2200,7 +2200,7 @@ TEST_SUITE ("tracktion_engine")
             auto childFile = projectFolder.getChildFile ("subdir").getChildFile ("audio.wav");
             auto path = project->getSourcePathForFile (childFile);
 
-            CHECK_FALSE (juce::File::isAbsolutePath (path));
+            CHECK_FALSE (yup::File::isAbsolutePath (path));
             CHECK (path == "subdir/audio.wav");
         }
 
@@ -2216,7 +2216,7 @@ TEST_SUITE ("tracktion_engine")
             auto externalFile = tempDir.getChildFile ("external.wav");
             auto path = project->getSourcePathForFile (externalFile);
 
-            CHECK (juce::File::isAbsolutePath (path));
+            CHECK (yup::File::isAbsolutePath (path));
             CHECK (path == externalFile.getFullPathName());
         }
 
@@ -2228,7 +2228,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2264,7 +2264,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2309,7 +2309,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2351,7 +2351,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2403,7 +2403,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2449,7 +2449,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2480,7 +2480,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2504,7 +2504,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2531,10 +2531,10 @@ TEST_SUITE ("tracktion_engine")
         CHECK (project->getNumProjectItems() >= 1);
 
         // mergeArchiveContents is a no-op
-        project->mergeArchiveContents (juce::File());
+        project->mergeArchiveContents (yup::File());
 
         // mergeOtherProjectIntoThis is a no-op
-        project->mergeOtherProjectIntoThis (juce::File());
+        project->mergeOtherProjectIntoThis (yup::File());
 
         // refreshFolderStructure is a no-op
         project->refreshFolderStructure();
@@ -2552,7 +2552,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2587,7 +2587,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2616,7 +2616,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2659,7 +2659,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2673,7 +2673,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (project != nullptr);
 
         // Create 3 items
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile1 = project->getDefaultDirectory().getChildFile ("audio1.wav");
@@ -2707,7 +2707,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2732,7 +2732,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2758,7 +2758,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2807,7 +2807,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2839,7 +2839,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2853,7 +2853,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (project != nullptr);
 
         // Create a wav file
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile = project->getDefaultDirectory().getChildFile ("audio_to_remove.wav");
@@ -2880,7 +2880,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2936,7 +2936,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -2955,7 +2955,7 @@ TEST_SUITE ("tracktion_engine")
         CHECK (editItem->getSelectableDescription().isNotEmpty());
 
         // Create a wave item
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile = project->getDefaultDirectory().getChildFile ("desc_audio.wav");
@@ -2974,7 +2974,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3030,7 +3030,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3054,7 +3054,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3084,7 +3084,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3097,7 +3097,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile = project->getDefaultDirectory().getChildFile ("original.wav");
@@ -3123,7 +3123,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3136,7 +3136,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile = project->getDefaultDirectory().getChildFile ("name_test.wav");
@@ -3163,7 +3163,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3176,7 +3176,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile = project->getDefaultDirectory().getChildFile ("cat_audio.wav");
@@ -3202,7 +3202,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3215,7 +3215,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wav1 = project->getDefaultDirectory().getChildFile ("src.wav");
@@ -3244,7 +3244,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3257,7 +3257,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile = project->getDefaultDirectory().getChildFile ("my_audio.wav");
@@ -3277,7 +3277,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3290,7 +3290,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile = project->getDefaultDirectory().getChildFile ("length_audio.wav");
@@ -3308,7 +3308,7 @@ TEST_SUITE ("tracktion_engine")
         // the quiet variant should also update the length
         item->setLength (0.0);
         CHECK (item->getLength() == 0.0);
-        item->verifyLength (juce::dontSendNotification);
+        item->verifyLength (yup::dontSendNotification);
         CHECK (item->getLength() == doctest::Approx (2.0).epsilon (0.1));
 
         cleanup();
@@ -3319,7 +3319,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3347,7 +3347,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3362,7 +3362,7 @@ TEST_SUITE ("tracktion_engine")
             auto project = tp.project;
             REQUIRE (project != nullptr);
 
-            auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+            auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
             REQUIRE (sinFile != nullptr);
 
             auto wavFile = project->getDefaultDirectory().getChildFile ("to_delete.wav");
@@ -3406,7 +3406,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3419,7 +3419,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         auto wavFile = project->getDefaultDirectory().getChildFile ("test_match.wav");
@@ -3440,7 +3440,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3453,7 +3453,7 @@ TEST_SUITE ("tracktion_engine")
         auto project = tp.project;
         REQUIRE (project != nullptr);
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 2.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 2.0);
         REQUIRE (sinFile != nullptr);
 
         // File inside project dir should use relative path
@@ -3486,7 +3486,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto& pm = engine.getProjectManager();
 
-        auto tempDir = juce::File::createTempFile ({});
+        auto tempDir = yup::File::createTempFile ({});
         tempDir.createDirectory();
 
         auto cleanup = [&tempDir]
@@ -3504,7 +3504,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (project != nullptr);
 
         // Create a wav file inside the project directory
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0);
         REQUIRE (sinFile != nullptr);
 
         auto importedDir = origDir.getChildFile ("Imported");

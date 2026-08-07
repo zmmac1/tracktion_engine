@@ -52,8 +52,8 @@ public:
     std::vector<Node*> getDirectInputNodes() override   { return { input.get() }; }
     bool isReadyToProcess() override                    { return input->hasProcessed(); }
     void prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo&) override;
-    void prefetchBlock (juce::Range<int64_t>) override;
-    void preProcess (choc::buffer::FrameCount, juce::Range<int64_t>) override;
+    void prefetchBlock (yup::Range<int64_t>) override;
+    void preProcess (choc::buffer::FrameCount, yup::Range<int64_t>) override;
     void process (ProcessContext&) override;
 
 private:
@@ -79,7 +79,7 @@ private:
 
     //==============================================================================
     void initialisePlugin (double sampleRateToUse, int blockSizeToUse);
-    PluginRenderContext getPluginRenderContext (TimeRange, juce::AudioBuffer<float>&);
+    PluginRenderContext getPluginRenderContext (TimeRange, yup::AudioBuffer<float>&);
     void replaceLatencyProcessorIfPossible (NodeGraph*);
 };
 

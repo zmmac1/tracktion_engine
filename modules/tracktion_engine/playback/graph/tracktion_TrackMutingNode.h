@@ -59,13 +59,13 @@ public:
 private:
     //==============================================================================
     Edit& edit;
-    juce::ReferenceCountedObjectPtr<Track> track;
+    yup::ReferenceCountedObjectPtr<Track> track;
     bool wasBeingPlayedFlag = false;
     std::atomic<bool> wasJustMutedFlag { false }, wasJustUnMutedFlag { false };
 
     bool callInputWhileMuted = false;
     bool processMidiWhileMuted = false;
-    juce::Array<InputDeviceInstance*> inputDevicesToMuteFor;
+    yup::Array<InputDeviceInstance*> inputDevicesToMuteFor;
 
     //==============================================================================
     bool isBeingPlayed() const;
@@ -89,8 +89,8 @@ public:
     std::vector<Node*> getDirectInputNodes() override;
     void prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo&) override;
     bool isReadyToProcess() override;
-    void prefetchBlock (juce::Range<int64_t>) override;
-    void preProcess (choc::buffer::FrameCount, juce::Range<int64_t>) override;
+    void prefetchBlock (yup::Range<int64_t>) override;
+    void preProcess (choc::buffer::FrameCount, yup::Range<int64_t>) override;
     void process (ProcessContext&) override;
 
 private:

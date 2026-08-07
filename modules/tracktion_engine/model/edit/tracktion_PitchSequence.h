@@ -19,7 +19,7 @@ public:
     PitchSequence();
     ~PitchSequence();
 
-    void initialise (Edit&, const juce::ValueTree&);
+    void initialise (Edit&, const yup::ValueTree&);
     void freeResources();
 
     Edit& getEdit() const;
@@ -27,7 +27,7 @@ public:
     void copyFrom (const PitchSequence&);
     void clear();
 
-    const juce::Array<PitchSetting*>& getPitches() const;
+    const yup::Array<PitchSetting*>& getPitches() const;
     int getNumPitches() const;
     PitchSetting* getPitch (int index) const;
     PitchSetting& getPitchAt (TimePosition) const;
@@ -47,7 +47,7 @@ public:
 
     void sortEvents();
 
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     struct PitchList;
@@ -59,7 +59,7 @@ private:
 
     juce::UndoManager* getUndoManager() const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PitchSequence)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PitchSequence)
 };
 
 } // namespace tracktion::inline engine

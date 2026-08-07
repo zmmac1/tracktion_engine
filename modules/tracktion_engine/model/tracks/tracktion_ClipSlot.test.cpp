@@ -21,7 +21,7 @@ TEST_SUITE ("tracktion_engine")
     {
         auto& engine = *Engine::getEngines()[0];
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 5.0, 2, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 5.0, 2, 220.0f);
 
         auto edit = test_utilities::createTestEdit (engine, 1);
         auto track = getAudioTracks (*edit)[0];

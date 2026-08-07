@@ -15,14 +15,14 @@ namespace tracktion::inline engine {
 class AutoMap;
 
 class NovationAutomap  : public ControlSurface,
-                         private juce::ChangeListener,
+                         private yup::ChangeListener,
                          private ParameterChangeHandler::Listener
 {
 public:
     NovationAutomap (ExternalControllerManager&);
     ~NovationAutomap();
 
-    void changeListenerCallback (juce::ChangeBroadcaster*) override;
+    void changeListenerCallback (yup::ChangeBroadcaster*) override;
     void currentEditChanged (Edit*) override;
 
     void pluginParameterChanged (AutomatableParameter&, bool isFollowingAutomation) override;
@@ -31,10 +31,10 @@ public:
     void updateSoloAndMute (int channelNum, Track::MuteAndSoloLightState, bool isBright) override;
     void playStateChanged (bool isPlaying) override;
     void recordStateChanged (bool isRecording) override;
-    void faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames) override;
+    void faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames) override;
     void trackRecordEnabled (int channel, bool isEnabled) override;
     void timecodeChanged (int barsOrHours, int beatsOrMinutes, int ticksOrSeconds, int millisecs, bool isBarsBeats, bool isFrames) override;
-    bool wantsMessage (int, const juce::MidiMessage&) override;
+    bool wantsMessage (int, const yup::MidiMessage&) override;
     bool canSetEatsAllMessages() override;
     bool canChangeSelectedPlugin() override;
     bool showingPluginParams() override;
@@ -58,13 +58,13 @@ private:
     friend class PluginAutoMap;
 
     std::unique_ptr<AutoMap> hostAutomap;
-    juce::OwnedArray<AutoMap> pluginAutomap;
+    yup::OwnedArray<AutoMap> pluginAutomap;
 
     bool enabled = false;
     bool pluginSelected = false;
     SelectionManager* selectionManager = nullptr;
 
-    mutable juce::StringPairArray guids;
+    mutable yup::StringPairArray guids;
 };
 
 } // namespace tracktion::inline engine

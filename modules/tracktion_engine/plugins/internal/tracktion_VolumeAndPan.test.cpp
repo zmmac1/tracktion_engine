@@ -44,7 +44,7 @@ TEST_SUITE ("tracktion_engine")
         auto track = getAudioTracks (*edit)[0];
 
         const auto fileLength = 2_td;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds(), 1, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds(), 1, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, fileLength } },
                         DeleteExistingClips::no);
@@ -87,7 +87,7 @@ TEST_SUITE ("tracktion_engine")
         auto track = getAudioTracks (*edit)[0];
 
         const auto fileLength = 2_td;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds(), 2, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds(), 2, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, fileLength } },
                         DeleteExistingClips::no);

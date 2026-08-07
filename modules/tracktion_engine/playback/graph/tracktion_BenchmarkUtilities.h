@@ -32,7 +32,7 @@ namespace benchmark_utilities
     struct BenchmarkOptions
     {
         Edit* edit = nullptr;
-        juce::String editName;
+        yup::String editName;
         tracktion::graph::test_utilities::TestSetup testSetup;
         MultiThreaded isMultiThreaded;
         LockFree isLockFree;
@@ -41,11 +41,11 @@ namespace benchmark_utilities
         ShareNodeMemory shareNodeMemory = ShareNodeMemory::no;
     };
 
-    inline juce::String getDescription (const BenchmarkOptions& opts)
+    inline yup::String getDescription (const BenchmarkOptions& opts)
     {
         using namespace tracktion::graph;
         auto s = graph::test_utilities::getDescription (opts.testSetup)
-                    + juce::String (opts.isMultiThreaded == MultiThreaded::yes ? ", MT" : ", ST");
+                    + yup::String (opts.isMultiThreaded == MultiThreaded::yes ? ", MT" : ", ST");
 
         if (opts.isMultiThreaded == MultiThreaded::yes && opts.isLockFree == LockFree::yes)
             s << ", lock-free";
@@ -74,12 +74,12 @@ namespace benchmark_utilities
     }
 
     template<typename NodePlayerType>
-    void prepareRenderAndDestroy (juce::UnitTest& ut, juce::String editName, juce::String description,
+    void prepareRenderAndDestroy (yup::UnitTest& ut, yup::String editName, yup::String description,
                                   tracktion::graph::test_utilities::TestProcess<NodePlayerType>& testContext,
                                   tracktion::graph::PlayHeadState& playHeadState,
                                   MultiThreaded isMultiThreaded)
     {
-        description += ", " + juce::String (testContext.getDescription());
+        description += ", " + yup::String (testContext.getDescription());
         ut.beginTest (editName + " - preparing: " + description);
 
         if (isMultiThreaded == MultiThreaded::no)
@@ -100,7 +100,7 @@ namespace benchmark_utilities
             BenchmarkList::getInstance().addResult (bmr);
 
             std::cout << "Num nodes: " << nodes.size() << "\n";
-            std::cout << juce::File::descriptionOfSizeInBytes ((int64_t) sizeInBytes) << "\n";
+            std::cout << yup::File::descriptionOfSizeInBytes ((int64_t) sizeInBytes) << "\n";
         }
         ut.expect (true);
 
@@ -126,7 +126,7 @@ namespace benchmark_utilities
         ut.expect (true);
     }
 
-    inline void renderEdit (juce::UnitTest& ut, BenchmarkOptions opts)
+    inline void renderEdit (yup::UnitTest& ut, BenchmarkOptions opts)
     {
         assert (opts.edit != nullptr);
         assert (opts.shareNodeMemory == ShareNodeMemory::no || opts.isLockFree == LockFree::yes); // Only supported in the lock-free player atm
@@ -177,8 +177,8 @@ namespace benchmark_utilities
         ut.expect (true);
     }
 
-    inline void renderEdit (juce::UnitTest& ut,
-                            juce::String editName,
+    inline void renderEdit (yup::UnitTest& ut,
+                            yup::String editName,
                             Edit& edit,
                             tracktion::graph::test_utilities::TestSetup ts,
                             MultiThreaded isMultiThreaded,
@@ -190,12 +190,12 @@ namespace benchmark_utilities
 
    #ifdef DOCTEST_LIBRARY_INCLUDED
     template<typename NodePlayerType>
-    void prepareRenderAndDestroy (juce::String editName, juce::String description,
+    void prepareRenderAndDestroy (yup::String editName, yup::String description,
                                   tracktion::graph::test_utilities::TestProcess<NodePlayerType>& testContext,
                                   tracktion::graph::PlayHeadState& playHeadState,
                                   MultiThreaded isMultiThreaded)
     {
-        description += ", " + juce::String (testContext.getDescription());
+        description += ", " + yup::String (testContext.getDescription());
 
         // preparing
         if (isMultiThreaded == MultiThreaded::no)
@@ -215,7 +215,7 @@ namespace benchmark_utilities
             BenchmarkList::getInstance().addResult (bmr);
 
             std::cout << "Num nodes: " << nodes.size() << "\n";
-            std::cout << juce::File::descriptionOfSizeInBytes ((int64_t) sizeInBytes) << "\n";
+            std::cout << yup::File::descriptionOfSizeInBytes ((int64_t) sizeInBytes) << "\n";
         }
 
         // rendering
@@ -287,7 +287,7 @@ namespace benchmark_utilities
     inline std::unique_ptr<Edit> openEditfromArchiveData (Engine& engine, const char* data, int size)
     {
         std::unique_ptr<Edit> edit;
-        juce::TemporaryFile tempArchiveFile, tempDir;
+        yup::TemporaryFile tempArchiveFile, tempDir;
 
         {
             const auto res = tempDir.getFile().createDirectory();
@@ -299,10 +299,10 @@ namespace benchmark_utilities
             tempArchiveFile.getFile().replaceWithData (data, (size_t) size);
             legacy::TracktionArchiveFile archive (engine, tempArchiveFile.getFile());
 
-            juce::Array<juce::File> createdFiles;
+            yup::Array<yup::File> createdFiles;
             const auto res = archive.extractAll (tempDir.getFile(), createdFiles);
             jassert (res);
-            juce::ignoreUnused (res);
+            yup::ignoreUnused (res);
 
             for (const auto& f : createdFiles)
             {
@@ -320,7 +320,7 @@ namespace benchmark_utilities
     }
 
     /** Loads an Edit from a value tree with no Project file references. */
-    inline std::unique_ptr<Edit> loadEditFromValueTree (Engine& engine, const juce::ValueTree& editState)
+    inline std::unique_ptr<Edit> loadEditFromValueTree (Engine& engine, const yup::ValueTree& editState)
     {
         auto id = ProjectItemID::fromProperty (editState, IDs::projectID);
 
@@ -344,7 +344,7 @@ namespace benchmark_utilities
     /** Loads an Edit that was saved directly from the state to a GZip stream. */
     inline std::unique_ptr<Edit> openEditFromZipData (Engine& engine, const void* data, size_t numBytes)
     {
-        return loadEditFromValueTree (engine, juce::ValueTree::readFromGZIPData (data, numBytes));
+        return loadEditFromValueTree (engine, yup::ValueTree::readFromGZIPData (data, numBytes));
     }
 }
 

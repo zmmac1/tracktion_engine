@@ -10,9 +10,9 @@
 
 namespace tracktion::inline engine {
 
-juce::AudioPlayHead::CurrentPositionInfo getCurrentPositionInfo (Edit& edit)
+yup::AudioPlayHead::CurrentPositionInfo getCurrentPositionInfo (Edit& edit)
 {
-    juce::AudioPlayHead::CurrentPositionInfo info;
+    yup::AudioPlayHead::CurrentPositionInfo info;
     auto& transport = edit.getTransport();
     auto& tempoSequence = edit.tempoSequence;
 
@@ -32,7 +32,7 @@ juce::AudioPlayHead::CurrentPositionInfo getCurrentPositionInfo (Edit& edit)
     info.editOriginTime = 0.0;
     info.ppqPosition = position.getPPQTime();
     info.ppqPositionOfLastBarStart = position.getPPQTimeOfBarStart();
-    info.frameRate = juce::AudioPlayHead::fpsUnknown;
+    info.frameRate = yup::AudioPlayHead::fpsUnknown;
     info.isPlaying = transport.isPlaying();
     info.isRecording = transport.isRecording();
     info.isLooping = transport.looping;
@@ -52,7 +52,7 @@ juce::AudioPlayHead::CurrentPositionInfo getCurrentPositionInfo (Edit& edit)
 }
 
 //==============================================================================
-void synchroniseEditPosition (Edit& edit, const juce::AudioPlayHead::CurrentPositionInfo& info)
+void synchroniseEditPosition (Edit& edit, const yup::AudioPlayHead::CurrentPositionInfo& info)
 {
     if (info.bpm == 0.0)
         return;
@@ -106,7 +106,7 @@ void synchroniseEditPosition (Edit& edit, const juce::AudioPlayHead::CurrentPosi
              || timeSig.numerator != newNumerator
              || timeSig.denominator != newDenominator)
         {
-            juce::MessageManager::callAsync ([editRef = makeSafeRef (edit), newBpm, newNumerator, newDenominator]
+            yup::MessageManager::callAsync ([editRef = makeSafeRef (edit), newBpm, newNumerator, newDenominator]
             {
                  if (auto ed = editRef.get())
                  {
@@ -133,12 +133,12 @@ ExternalPlayheadSynchroniser::ExternalPlayheadSynchroniser (Edit& e)
     positionInfo.resetToDefault();
 }
 
-bool ExternalPlayheadSynchroniser::synchronise (juce::AudioPlayHead& playhead)
+bool ExternalPlayheadSynchroniser::synchronise (yup::AudioPlayHead& playhead)
 {
     if (positionInfoLock.tryEnter())
     {
         const auto pos = playhead.getPosition();
-        const bool sucess = pos.hasValue();
+        const bool sucess = pos.has_value();
 
         if (sucess)
         {
@@ -196,7 +196,7 @@ bool ExternalPlayheadSynchroniser::synchronise (juce::AudioPlayHead& playhead)
     return false;
 }
 
-bool ExternalPlayheadSynchroniser::synchronise (juce::AudioProcessor& processor)
+bool ExternalPlayheadSynchroniser::synchronise (yup::AudioProcessor& processor)
 {
     if (auto playhead = processor.getPlayHead())
         return synchronise (*playhead);
@@ -204,9 +204,9 @@ bool ExternalPlayheadSynchroniser::synchronise (juce::AudioProcessor& processor)
     return false;
 }
 
-juce::AudioPlayHead::CurrentPositionInfo ExternalPlayheadSynchroniser::getPositionInfo() const
+yup::AudioPlayHead::CurrentPositionInfo ExternalPlayheadSynchroniser::getPositionInfo() const
 {
-    juce::SpinLock::ScopedLockType lock (positionInfoLock);
+    yup::SpinLock::ScopedLockType lock (positionInfoLock);
     return positionInfo;
 }
 

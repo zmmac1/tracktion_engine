@@ -11,7 +11,7 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-juce::StringArray ToneGeneratorPlugin::getOscTypeNames()
+yup::StringArray ToneGeneratorPlugin::getOscTypeNames()
 {
     return { "Sin", "Triangle", "Saw Up", "Saw Down", "Square", "Noise" };
 }
@@ -72,7 +72,7 @@ void ToneGeneratorPlugin::applyToBuffer (const PluginRenderContext& fc)
     SCOPED_REALTIME_CHECK
     float gain = levelParam->getCurrentValue();
 
-    if (juce::isWithin (gain, 0.0f, 0.00001f))
+    if (yup::isWithin (gain, 0.0f, 0.00001f))
     {
         fc.destBuffer->clear();
         return;
@@ -90,8 +90,8 @@ void ToneGeneratorPlugin::applyToBuffer (const PluginRenderContext& fc)
     square.setFrequency (freq);
 
     scratch.clear();
-    juce::dsp::AudioBlock<float> block (scratch);
-    juce::dsp::ProcessContextReplacing<float> context (block);
+    yup::dsp::AudioBlock<float> block (scratch);
+    yup::dsp::ProcessContextReplacing<float> context (block);
 
     switch (getTypedParamValue<OscType> (*oscTypeParam))
     {
@@ -109,7 +109,7 @@ void ToneGeneratorPlugin::applyToBuffer (const PluginRenderContext& fc)
         fc.destBuffer->copyFrom (i, fc.bufferStartSample, scratch, 0, 0, numSamples);
 }
 
-void ToneGeneratorPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void ToneGeneratorPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, oscType, bandLimit, frequency, level);
 
@@ -149,10 +149,10 @@ void ToneGeneratorPlugin::initialiseOscilators()
                 k += 2;
             }
 
-            return float (8.0f / (juce::MathConstants<float>::pi * juce::MathConstants<float>::pi) * sum);
+            return float (8.0f / (yup::MathConstants<float>::pi * yup::MathConstants<float>::pi) * sum);
         }
 
-        return (in < 0 ? in / -juce::MathConstants<float>::pi : in / juce::MathConstants<float>::pi) * 2 - 1;
+        return (in < 0 ? in / -yup::MathConstants<float>::pi : in / yup::MathConstants<float>::pi) * 2 - 1;
     };
 
     auto sawUpFunc = [&] (float in) -> float
@@ -171,10 +171,10 @@ void ToneGeneratorPlugin::initialiseOscilators()
                 k++;
             }
 
-            return float (-2.0f / juce::MathConstants<float>::pi * sum);
+            return float (-2.0f / yup::MathConstants<float>::pi * sum);
         }
 
-        return ((in + juce::MathConstants<float>::pi) / (2 * juce::MathConstants<float>::pi)) * 2 - 1;
+        return ((in + yup::MathConstants<float>::pi) / (2 * yup::MathConstants<float>::pi)) * 2 - 1;
     };
 
     auto sawDownFunc = [&] (float in) -> float
@@ -193,10 +193,10 @@ void ToneGeneratorPlugin::initialiseOscilators()
                 k++;
             }
 
-            return float (2.0f / juce::MathConstants<float>::pi * sum);
+            return float (2.0f / yup::MathConstants<float>::pi * sum);
         }
 
-        return -(((in + juce::MathConstants<float>::pi) / (2 * juce::MathConstants<float>::pi)) * 2 - 1);
+        return -(((in + yup::MathConstants<float>::pi) / (2 * yup::MathConstants<float>::pi)) * 2 - 1);
     };
 
     auto squareFunc = [&] (float in) -> float
@@ -215,7 +215,7 @@ void ToneGeneratorPlugin::initialiseOscilators()
                 i++;
             }
 
-            return float (4.0f / juce::MathConstants<float>::pi * sum);
+            return float (4.0f / yup::MathConstants<float>::pi * sum);
         }
 
         return in < 0 ? -1.0f : 1.0f;

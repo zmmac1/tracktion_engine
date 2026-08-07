@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-ArrangerClip::ArrangerClip (const juce::ValueTree& v, EditItemID id, ClipOwner& targetParent)
+ArrangerClip::ArrangerClip (const yup::ValueTree& v, EditItemID id, ClipOwner& targetParent)
    : Clip (v, targetParent, id, Type::arranger)
 {
 }
@@ -25,14 +25,14 @@ void ArrangerClip::initialise()
     Clip::initialise();
 }
 
-juce::String ArrangerClip::getSelectableDescription()
+yup::String ArrangerClip::getSelectableDescription()
 {
     return TRANS("Arranger Clip") + " - \"" + getName() + "\"";
 }
 
-juce::Colour ArrangerClip::getDefaultColour() const
+yup::Color ArrangerClip::getDefaultColor() const
 {
-    return juce::Colours::red.withHue (7.0f / 9.0f);
+    return yup::Colors::red.withHue (7.0f / 9.0f);
 }
 
 //==============================================================================
@@ -41,7 +41,7 @@ bool ArrangerClip::canBeAddedTo (ClipOwner& co)
     return isArrangerTrack (co);
 }
 
-void ArrangerClip::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void ArrangerClip::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v == state)
     {

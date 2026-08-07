@@ -25,7 +25,7 @@ TextPlugin::~TextPlugin()
     notifyListenersOfDeletion();
 }
 
-juce::ValueTree TextPlugin::create()
+yup::ValueTree TextPlugin::create()
 {
     return createValueTree (IDs::PLUGIN,
                             IDs::type, xmlTypeName);

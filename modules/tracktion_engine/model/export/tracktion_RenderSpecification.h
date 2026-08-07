@@ -30,10 +30,10 @@ enum class RenderFormat
 };
 
 /** Converts a RenderFormat from its canonical name, or nullopt if unrecognised. */
-std::optional<RenderFormat> renderFormatFromString (juce::String);
+std::optional<RenderFormat> renderFormatFromString (yup::String);
 
 /** Converts a RenderFormat to its canonical name. */
-juce::String toString (RenderFormat);
+yup::String toString (RenderFormat);
 
 /** True for the format that writes notes rather than audio. */
 inline bool isMidiFormat (RenderFormat f)       { return f == RenderFormat::midi; }
@@ -51,7 +51,7 @@ inline bool isMidiFormat (RenderFormat f)       { return f == RenderFormat::midi
 
     @see Edit::getEditMetadata, translateMetadataForFormat
 */
-juce::StringPairArray createTagMetadata (Edit&);
+yup::StringPairArray createTagMetadata (Edit&);
 
 /** True if an Edit has actually been given any tags, which is what decides
     whether tagging is enabled by default. This is not the same as
@@ -73,7 +73,7 @@ bool formatSupportsTagMetadata (RenderFormat);
     Pairs outside the "id3*" family - ACID or BWAV info, say - are always passed
     through untouched, so this can be applied to a whole metadata set.
 */
-juce::StringPairArray translateMetadataForFormat (const juce::StringPairArray&, RenderFormat);
+yup::StringPairArray translateMetadataForFormat (const yup::StringPairArray&, RenderFormat);
 
 //==============================================================================
 /**
@@ -98,14 +98,14 @@ struct RenderSpecification
         Submix folder tracks are valid entries: rendering one includes its child
         tracks and its plugin chain.
     */
-    juce::Array<EditItemID> tracks;
+    yup::Array<EditItemID> tracks;
 
     /** Tracks to include in the render graph but keep silent in the output:
         they are muted in the Edit while the job renders and restored
         afterwards. Use this for sidechain/rack source tracks that must keep
         feeding the rendered tracks' processing without being heard.
     */
-    juce::Array<EditItemID> mutedTracks;
+    yup::Array<EditItemID> mutedTracks;
 
     /** If true, findStemSourceTracks() runs over the tracks list when the job
         is created and the tracks it finds - sidechain sources, aux-send
@@ -120,7 +120,7 @@ struct RenderSpecification
         the rendered tracks stays silent. The tracks' plugin chains still run.
         @see Renderer::Parameters::allowedClips
     */
-    juce::Array<EditItemID> clips;
+    yup::Array<EditItemID> clips;
 
     /** The time range to render. If unset, the whole Edit length is used. */
     std::optional<TimeRange> time;
@@ -133,7 +133,7 @@ struct RenderSpecification
 
     //==============================================================================
     /** The destination file to write to. */
-    juce::File destination;
+    yup::File destination;
 
     /** The format to write.
 
@@ -151,7 +151,7 @@ struct RenderSpecification
     /** Output channel layout: empty for auto-detect from the Edit,
         or one of "mono", "stereo", "5.1", "7.1".
     */
-    juce::String channelLayout;
+    yup::String channelLayout;
 
     //==============================================================================
     bool normalise = false;                 ///< Normalise the result by peak level
@@ -174,11 +174,11 @@ struct RenderSpecification
                                                  which doesn't pass MIDI through will swallow it;
                                                  without, the clips' own MIDI is written. */
     bool useMasterPlugins = true;           ///< Include the master plugin chain
-    juce::StringPairArray metadata;         ///< Metadata pairs to write to the file where supported
+    yup::StringPairArray metadata;         ///< Metadata pairs to write to the file where supported
 
     //==============================================================================
     /** Returns the canonical JSON representation of this specification. */
-    juce::var toJSON() const;
+    yup::var toJSON() const;
 
     /** Creates a specification from its canonical JSON representation.
         Missing keys take their default values. Unknown keys are ignored and
@@ -186,14 +186,14 @@ struct RenderSpecification
         "format" leaves the default - call renderFormatFromString() first if the
         caller needs to report that rather than silently fall back.
     */
-    static RenderSpecification fromJSON (const juce::var&, juce::StringArray* unknownKeys = nullptr);
+    static RenderSpecification fromJSON (const yup::var&, yup::StringArray* unknownKeys = nullptr);
 };
 
 //==============================================================================
 /** Checks a specification can be rendered from the given Edit, returning a
     failure result describing the first problem found.
 */
-juce::Result validateRenderSpecification (Edit&, const RenderSpecification&);
+yup::Result validateRenderSpecification (Edit&, const RenderSpecification&);
 
 //==============================================================================
 /** Finds the tracks a stem render depends on for its sound but which aren't
@@ -208,15 +208,15 @@ juce::Result validateRenderSpecification (Edit&, const RenderSpecification&);
     output into the stem's tracks are NOT returned - the render graph pulls
     those in by itself.
 */
-juce::Array<EditItemID> findStemSourceTracks (Edit&, const juce::Array<EditItemID>& stemTracks);
+yup::Array<EditItemID> findStemSourceTracks (Edit&, const yup::Array<EditItemID>& stemTracks);
 
 //==============================================================================
 /** A concrete render job created from a RenderSpecification. */
 struct PlannedRenderJob
 {
-    juce::String name;                      ///< A display name for the job, e.g. the track name
+    yup::String name;                      ///< A display name for the job, e.g. the track name
     Renderer::Parameters params;            ///< The parameters to render with
-    juce::Array<EditItemID> tracksToMute;   ///< Tracks muted in the Edit while this job renders
+    yup::Array<EditItemID> tracksToMute;   ///< Tracks muted in the Edit while this job renders
 };
 
 /** Creates the render job for a valid specification.
@@ -233,6 +233,6 @@ std::optional<PlannedRenderJob> createRenderJob (Edit&, const RenderSpecificatio
 */
 std::vector<RenderSpecification> createPerTrackSpecifications (Edit&,
                                                                const RenderSpecification& base,
-                                                               const juce::File& directory);
+                                                               const yup::File& directory);
 
 } // namespace tracktion::inline engine

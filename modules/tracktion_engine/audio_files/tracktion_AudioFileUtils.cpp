@@ -10,16 +10,16 @@
 
 namespace tracktion::inline engine {
 
-juce::AudioFormatReader* AudioFileUtils::createReaderFor (Engine& engine, const juce::File& file)
+yup::AudioFormatReader* AudioFileUtils::createReaderFor (Engine& engine, const yup::File& file)
 {
-    return engine.getAudioFileFormatManager().readFormatManager.createReaderFor (file);
+    return engine.getAudioFileFormatManager().readFormatManager.createReaderFor (file).release();
 }
 
-juce::AudioFormatReader* AudioFileUtils::createReaderFindingFormat (Engine& engine, const juce::File& file, juce::AudioFormat*& format)
+yup::AudioFormatReader* AudioFileUtils::createReaderFindingFormat (Engine& engine, const yup::File& file, yup::AudioFormat*& format)
 {
     auto& manager = engine.getAudioFileFormatManager().readFormatManager;
 
-    for (auto af : manager)
+    for (const auto& af : manager)
     {
         if (af->canHandleFile (file))
         {
@@ -27,8 +27,8 @@ juce::AudioFormatReader* AudioFileUtils::createReaderFindingFormat (Engine& engi
             {
                 if (auto r = af->createReaderFor (in.release(), true))
                 {
-                    format = af;
-                    return r;
+                    format = af.get();
+                    return static_cast<yup::MemoryMappedAudioFormatReader*>(r);
                 }
             }
         }
@@ -37,18 +37,18 @@ juce::AudioFormatReader* AudioFileUtils::createReaderFindingFormat (Engine& engi
     return {};
 }
 
-juce::MemoryMappedAudioFormatReader* AudioFileUtils::createMemoryMappedReader (Engine& engine, const juce::File& file, juce::AudioFormat*& format)
+yup::MemoryMappedAudioFormatReader* AudioFileUtils::createMemoryMappedReader (Engine& engine, const yup::File& file, yup::AudioFormat*& format)
 {
     auto& manager = engine.getAudioFileFormatManager().readFormatManager;
 
-    for (auto af : manager)
+    for (const auto& af : manager)
     {
         if (af->canHandleFile (file))
         {
             if (auto r = af->createMemoryMappedReader (file))
             {
-                format = af;
-                return r;
+                format = af.get();
+                return static_cast<yup::MemoryMappedAudioFormatReader*>(r);
             }
         }
     }
@@ -56,22 +56,22 @@ juce::MemoryMappedAudioFormatReader* AudioFileUtils::createMemoryMappedReader (E
     return {};
 }
 
-std::unique_ptr<AudioFileUtils::MappedFileAndReader> AudioFileUtils::createMappedFileAndReaderFor (Engine& engine, const juce::File& file)
+std::unique_ptr<AudioFileUtils::MappedFileAndReader> AudioFileUtils::createMappedFileAndReaderFor (Engine& engine, const yup::File& file)
 {
-    if (auto mf = std::make_unique<juce::MemoryMappedFile> (file, juce::MemoryMappedFile::readOnly))
+    if (auto mf = std::make_unique<yup::MemoryMappedFile> (file, yup::MemoryMappedFile::readOnly))
     {
         auto& fileFormatManager = engine.getAudioFileFormatManager();
-        std::unique_ptr<juce::AudioFormatReader> reader;
-        auto mis = std::make_unique<juce::MemoryInputStream> (mf->getData(), mf->getSize(), false);
+        std::unique_ptr<yup::AudioFormatReader> reader;
+        auto mis = std::make_unique<yup::MemoryInputStream> (mf->getData(), mf->getSize(), false);
 
         // Try using the file extension first as this will be quicker
         if (auto audioFormat = fileFormatManager.getFormatFromFileName (file))
-            if (reader = std::unique_ptr<juce::AudioFormatReader> (audioFormat->createReaderFor (mis.get(), false)); reader)
+            if (reader = std::unique_ptr<yup::AudioFormatReader> (audioFormat->createReaderFor (mis.get(), false)); reader)
                 mis.release();
 
         // If that doesn't work, fall back to stream
         if (! reader)
-            reader = std::unique_ptr<juce::AudioFormatReader> (fileFormatManager.readFormatManager.createReaderFor (std::move (mis)));
+            reader = std::unique_ptr<yup::AudioFormatReader> (fileFormatManager.readFormatManager.createReaderFor (mis.release()));
 
         if (reader)
         {
@@ -87,19 +87,19 @@ std::unique_ptr<AudioFileUtils::MappedFileAndReader> AudioFileUtils::createMappe
     return {};
 }
 
-juce::AudioFormatWriter* AudioFileUtils::createWriterFor (juce::AudioFormat* format, const juce::File& file,
+yup::AudioFormatWriter* AudioFileUtils::createWriterFor (yup::AudioFormat* format, const yup::File& file,
                                                           double sampleRate, unsigned int numChannels, int bitsPerSample,
-                                                          const juce::StringPairArray& metadata, int quality)
+                                                          const yup::StringPairArray& metadata, int quality)
 {
-    if (auto out = std::unique_ptr<juce::OutputStream> (file.createOutputStream()))
+    if (auto out = std::unique_ptr<yup::OutputStream> (file.createOutputStream()))
     {
-        std::unordered_map<juce::String, juce::String> metadataMap;
+        std::unordered_map<yup::String, yup::String> metadataMap;
 
         for (const auto& key : metadata.getAllKeys())
             metadataMap[key] = metadata[key];
 
         if (auto writer = format->createWriterFor (out,
-                                                   juce::AudioFormatWriterOptions()
+                                                   yup::WriteOptions()
                                                     .withSampleRate (sampleRate)
                                                     .withNumChannels (static_cast<int> (numChannels))
                                                     .withBitsPerSample (bitsPerSample)
@@ -114,10 +114,10 @@ juce::AudioFormatWriter* AudioFileUtils::createWriterFor (juce::AudioFormat* for
     return {};
 }
 
-juce::AudioFormatWriter* AudioFileUtils::createWriterFor (Engine& engine,
-                                                          const juce::File& file, double sampleRate,
+yup::AudioFormatWriter* AudioFileUtils::createWriterFor (Engine& engine,
+                                                          const yup::File& file, double sampleRate,
                                                           unsigned int numChannels, int bitsPerSample,
-                                                          const juce::StringPairArray& metadata, int quality)
+                                                          const yup::StringPairArray& metadata, int quality)
 {
     if (auto format = engine.getAudioFileFormatManager().getFormatFromFileName (file))
         return createWriterFor (format, file, sampleRate, numChannels, bitsPerSample, metadata, quality);
@@ -125,26 +125,26 @@ juce::AudioFormatWriter* AudioFileUtils::createWriterFor (Engine& engine,
     return {};
 }
 
-juce::AudioFormatWriter* AudioFileUtils::createWriterFor (juce::AudioFormat* format, const juce::File& file,
+yup::AudioFormatWriter* AudioFileUtils::createWriterFor (yup::AudioFormat* format, const yup::File& file,
                                                           double sampleRate, unsigned int numChannels, int bitsPerSample,
-                                                          const juce::StringPairArray& metadata, int quality,
-                                                          const juce::AudioChannelSet& channelLayout)
+                                                          const yup::StringPairArray& metadata, int quality,
+                                                          const yup::AudioChannelSet& channelLayout)
 {
-    if (auto out = std::unique_ptr<juce::OutputStream> (file.createOutputStream()))
+    if (auto out = std::unique_ptr<yup::OutputStream> (file.createOutputStream()))
     {
-        std::unordered_map<juce::String, juce::String> metadataMap;
+        std::unordered_map<yup::String, yup::String> metadataMap;
 
         for (const auto& key : metadata.getAllKeys())
             metadataMap[key] = metadata[key];
 
         if (auto writer = format->createWriterFor (out,
-                                                   juce::AudioFormatWriterOptions()
+                                                   yup::WriteOptions()
                                                     .withSampleRate (sampleRate)
                                                     .withNumChannels (static_cast<int> (numChannels))
                                                     .withBitsPerSample (bitsPerSample)
                                                     .withMetadataValues (metadataMap)
                                                     .withQualityOptionIndex (quality)
-                                                    .withChannelLayout (channelLayout)))
+                                                    .withChannelLayout (0)))
         {
             out.release();
             return writer.release();
@@ -154,9 +154,9 @@ juce::AudioFormatWriter* AudioFileUtils::createWriterFor (juce::AudioFormat* for
     return {};
 }
 
-SampleRange AudioFileUtils::scanForNonZeroSamples (Engine& engine, const juce::File& file, float maxZeroLevelDb)
+SampleRange AudioFileUtils::scanForNonZeroSamples (Engine& engine, const yup::File& file, float maxZeroLevelDb)
 {
-    std::unique_ptr<juce::AudioFormatReader> reader (createReaderFor (engine, file));
+    std::unique_ptr<yup::AudioFormatReader> reader (createReaderFor (engine, file));
 
     if (reader == nullptr)
         return {};
@@ -170,10 +170,10 @@ SampleRange AudioFileUtils::scanForNonZeroSamples (Engine& engine, const juce::F
     const int intMaxZeroLevel = 1 + (int) (std::numeric_limits<int>::max() * (double) floatMaxZeroLevel);
     const int sampsPerBlock = 32768;
 
-    juce::HeapBlock<int*> chans;
+    yup::HeapBlock<int*> chans;
     chans.calloc ((size_t) numChans + 2);
 
-    juce::HeapBlock<int> buffer ((size_t) numChans * sampsPerBlock);
+    yup::HeapBlock<int> buffer ((size_t) numChans * sampsPerBlock);
 
     for (int i = 0; i < numChans; ++i)
         chans[i] = buffer + i * sampsPerBlock;
@@ -234,8 +234,8 @@ SampleRange AudioFileUtils::scanForNonZeroSamples (Engine& engine, const juce::F
     return { firstNonZero, lastNonZero };
 }
 
-static SampleCount copySection (Engine& e, std::unique_ptr<juce::AudioFormatReader>& reader,
-                                const juce::File& sourceFile, const juce::File& destFile,
+static SampleCount copySection (Engine& e, std::unique_ptr<yup::AudioFormatReader>& reader,
+                                const yup::File& sourceFile, const yup::File& destFile,
                                 SampleRange range)
 {
     if (range.contains ({ 0, reader->lengthInSamples })
@@ -249,7 +249,7 @@ static SampleCount copySection (Engine& e, std::unique_ptr<juce::AudioFormatRead
         return -1;
     }
 
-    std::unique_ptr<juce::AudioFormatWriter> writer (AudioFileUtils::createWriterFor (e, destFile, reader->sampleRate,
+    std::unique_ptr<yup::AudioFormatWriter> writer (AudioFileUtils::createWriterFor (e, destFile, reader->sampleRate,
                                                                                       reader->numChannels,
                                                                                       (int) reader->bitsPerSample,
                                                                                       reader->metadataValues,
@@ -262,13 +262,13 @@ static SampleCount copySection (Engine& e, std::unique_ptr<juce::AudioFormatRead
     return -1;
 }
 
-SampleCount AudioFileUtils::copySectionToNewFile (Engine& e, const juce::File& sourceFile,
-                                                  const juce::File& destFile, SampleRange range)
+SampleCount AudioFileUtils::copySectionToNewFile (Engine& e, const yup::File& sourceFile,
+                                                  const yup::File& destFile, SampleRange range)
 {
     if (range.isEmpty())
         return -1;
 
-    std::unique_ptr<juce::AudioFormatReader> reader (createReaderFor (e, sourceFile));
+    std::unique_ptr<yup::AudioFormatReader> reader (createReaderFor (e, sourceFile));
 
     if (reader != nullptr)
         return copySection (e, reader, sourceFile, destFile, range);
@@ -277,14 +277,14 @@ SampleCount AudioFileUtils::copySectionToNewFile (Engine& e, const juce::File& s
 }
 
 SampleCount AudioFileUtils::copySectionToNewFile (Engine& e,
-                                                  const juce::File& sourceFile,
-                                                  const juce::File& destFile,
+                                                  const yup::File& sourceFile,
+                                                  const yup::File& destFile,
                                                   TimeRange range)
 {
     if (range.isEmpty())
         return -1;
 
-    std::unique_ptr<juce::AudioFormatReader> reader (createReaderFor (e, sourceFile));
+    std::unique_ptr<yup::AudioFormatReader> reader (createReaderFor (e, sourceFile));
 
     if (reader != nullptr)
         return copySection (e, reader, sourceFile, destFile,
@@ -295,8 +295,8 @@ SampleCount AudioFileUtils::copySectionToNewFile (Engine& e,
 }
 
 SampleRange AudioFileUtils::copyNonSilentSectionToNewFile (Engine& e,
-                                                           const juce::File& sourceFile,
-                                                           const juce::File& destFile,
+                                                           const yup::File& sourceFile,
+                                                           const yup::File& destFile,
                                                            float maxZeroLevelDb)
 {
     auto range = scanForNonZeroSamples (e, sourceFile, maxZeroLevelDb);
@@ -307,11 +307,11 @@ SampleRange AudioFileUtils::copyNonSilentSectionToNewFile (Engine& e,
     return {};
 }
 
-SampleRange AudioFileUtils::trimSilence (Engine& e, const juce::File& file, float maxZeroLevelDb)
+SampleRange AudioFileUtils::trimSilence (Engine& e, const yup::File& file, float maxZeroLevelDb)
 {
     if (file.hasWriteAccess())
     {
-        juce::TemporaryFile tempFile (file);
+        yup::TemporaryFile tempFile (file);
         auto range = copyNonSilentSectionToNewFile (e, file, tempFile.getFile(), maxZeroLevelDb);
 
         if (! range.isEmpty())
@@ -323,12 +323,12 @@ SampleRange AudioFileUtils::trimSilence (Engine& e, const juce::File& file, floa
 }
 
 bool AudioFileUtils::reverse (Engine& engine,
-                              const juce::File& source, const juce::File& destination,
-                              std::atomic<float>& progress, juce::ThreadPoolJob* job, bool canCreateWavIntermediate)
+                              const yup::File& source, const yup::File& destination,
+                              std::atomic<float>& progress, yup::ThreadPoolJob* job, bool canCreateWavIntermediate)
 {
     CRASH_TRACER
-    juce::AudioFormat* format;
-    const std::unique_ptr<juce::AudioFormatReader> reader (AudioFileUtils::createReaderFindingFormat (engine, source, format));
+    yup::AudioFormat* format;
+    const std::unique_ptr<yup::AudioFormatReader> reader (AudioFileUtils::createReaderFindingFormat (engine, source, format));
 
     if (reader == nullptr || format == nullptr)
         return false;
@@ -336,13 +336,13 @@ bool AudioFileUtils::reverse (Engine& engine,
     // Compressed formats don't like the random access required to reverse so make a wav copy first
     if (format->isCompressed() && canCreateWavIntermediate)
     {
-        auto f = juce::File::createTempFile (".wav");
-        juce::TemporaryFile tempFile ({}, f);
+        auto f = yup::File::createTempFile (".wav");
+        yup::TemporaryFile tempFile ({}, f);
 
         {
-            const std::unique_ptr<juce::FileOutputStream> out (tempFile.getFile().createOutputStream());
+            const std::unique_ptr<yup::FileOutputStream> out (tempFile.getFile().createOutputStream());
 
-            if (out == nullptr || (! convertToFormat<juce::WavAudioFormat> (engine, source, *out, 0, {})))
+            if (out == nullptr || (! convertToFormat<yup::WavAudioFormat> (engine, source, *out, 0, {})))
                 return false;
         }
 
@@ -375,8 +375,8 @@ bool AudioFileUtils::reverse (Engine& engine,
     auto sampleNum = samplesToDo;
 
     const int numChans = (int) reader->numChannels;
-    juce::AudioBuffer<float> buffer (numChans, bufferSize);
-    juce::HeapBlock<int*> buffers ((size_t) numChans);
+    yup::AudioBuffer<float> buffer (numChans, bufferSize);
+    yup::HeapBlock<int*> buffers ((size_t) numChans);
     bool shouldExit = false;
 
     while (! shouldExit)
@@ -413,7 +413,7 @@ bool AudioFileUtils::reverse (Engine& engine,
         samplesToDo -= numThisTime;
         sourceSample += numThisTime;
 
-        progress = juce::jlimit (0.0f, 1.0f, float (double (sourceSample) / double (reader->lengthInSamples)));
+        progress = yup::jlimit (0.0f, 1.0f, float (double (sourceSample) / double (reader->lengthInSamples)));
 
         if (job != nullptr)
             shouldExit = job->shouldExit();
@@ -422,16 +422,14 @@ bool AudioFileUtils::reverse (Engine& engine,
     return false;
 }
 
-void AudioFileUtils::addBWAVStartToMetadata (juce::StringPairArray& metadata, SampleCount time)
+void AudioFileUtils::addBWAVStartToMetadata (yup::StringPairArray& metadata, SampleCount time)
 {
-    metadata.addArray (juce::WavAudioFormat::createBWAVMetadata ({}, "tracktion",
-                                                                 {}, juce::Time::getCurrentTime(),
-                                                                 time, {}));
+    metadata.addArray (yup::WavAudioFormat::createBWAVMetadata ("tracktion"));
 }
 
-SampleCount AudioFileUtils::getFileLengthSamples (Engine& e, const juce::File& file)
+SampleCount AudioFileUtils::getFileLengthSamples (Engine& e, const yup::File& file)
 {
-    std::unique_ptr<juce::AudioFormatReader> reader (createReaderFor (e, file));
+    std::unique_ptr<yup::AudioFormatReader> reader (createReaderFor (e, file));
 
     if (reader != nullptr)
         return reader->lengthInSamples;
@@ -440,23 +438,23 @@ SampleCount AudioFileUtils::getFileLengthSamples (Engine& e, const juce::File& f
     return 0;
 }
 
-static bool isWavFile (const juce::File& file)
+static bool isWavFile (const yup::File& file)
 {
-    juce::AudioFormatManager afm;
-    afm.registerFormat (new juce::WavAudioFormat(), true);
+    yup::AudioFormatManager afm;
+    afm.registerFormat (new yup::WavAudioFormat(), true);
 
-    std::unique_ptr<juce::AudioFormatReader> reader (afm.createReaderFor (file));
+    std::unique_ptr<yup::AudioFormatReader> reader (afm.createReaderFor (file));
     return reader != nullptr;
 }
 
-void AudioFileUtils::applyBWAVStartTime (const juce::File& file, SampleCount time)
+void AudioFileUtils::applyBWAVStartTime (const yup::File& file, SampleCount time)
 {
     if (isWavFile (file))
     {
         int pos = 0;
 
         {
-            juce::FileInputStream fi (file);
+            yup::FileInputStream fi (file);
 
             if (fi.openedOk())
             {
@@ -469,7 +467,7 @@ void AudioFileUtils::applyBWAVStartTime (const juce::File& file, SampleCount tim
                     for (int j = 0; j < 4; ++j)
                         n[j] &= 127; // to avoid ASCII char assertions
 
-                    if (juce::String (n).equalsIgnoreCase ("bext"))
+                    if (yup::String (n).equalsIgnoreCase ("bext"))
                         pos = i + 8;
                 }
             }
@@ -479,7 +477,7 @@ void AudioFileUtils::applyBWAVStartTime (const juce::File& file, SampleCount tim
         {
             pos += 256 + 32 + 32 + 10 + 8;
 
-            juce::FileOutputStream fo (file);
+            yup::FileOutputStream fo (file);
 
             if (fo.openedOk())
             {

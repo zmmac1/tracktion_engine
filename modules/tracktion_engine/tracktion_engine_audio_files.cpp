@@ -16,7 +16,7 @@ extern "C"
     #define Button CarbonButton
     #define Component CarbonComponent
     #define MemoryBlock CarbonMemoryBlock
-    #include "REX/REX.h"
+// EXCLUDED:     #include "REX/REX.h"
     #undef Button
     #undef Component
     #undef MemoryBlock
@@ -42,11 +42,11 @@ extern "C"
  #pragma GCC diagnostic ignored "-Wfloat-equal"
 #endif
 
-#include "audio_files/formats/tracktion_FFmpegEncoderAudioFormat.cpp"
-#include "audio_files/formats/tracktion_LibLameEncoderAudioFormat.cpp"
+// EXCLUDED: #include "audio_files/formats/tracktion_FFmpegEncoderAudioFormat.cpp"
+// EXCLUDED: #include "audio_files/formats/tracktion_LibLameEncoderAudioFormat.cpp"
 #include "audio_files/formats/tracktion_FloatAudioFileFormat.cpp"
-#include "audio_files/formats/tracktion_RexFileFormat.cpp"
-#include "audio_files/formats/tracktion_LAMEManager.cpp"
+// EXCLUDED: #include "audio_files/formats/tracktion_RexFileFormat.cpp"
+// EXCLUDED: #include "audio_files/formats/tracktion_LAMEManager.cpp"
 
 #include "audio_files/tracktion_BufferedFileReader.h"
 #include "audio_files/tracktion_BufferedFileReader.cpp"

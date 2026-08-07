@@ -29,7 +29,7 @@ public:
         hoverTimeMillisecs = newTimeInMillisecs;
     }
 
-    void setHoverComponent (juce::Component* newSourceComponent,
+    void setHoverComponent (yup::Component* newSourceComponent,
                             bool wantsEventsForAllNestedChildComponents)
     {
         if (source != newSourceComponent)
@@ -79,45 +79,45 @@ protected:
 
 private:
     //==============================================================================
-    class HoverDetectorInternal  : public juce::MouseListener,
-                                   public juce::Timer
+    class HoverDetectorInternal  : public yup::MouseListener,
+                                   public yup::Timer
     {
     public:
         HoverDetectorInternal() = default;
 
         MouseHoverDetector* owner = nullptr;
-        juce::Point<int> lastPos;
+        yup::Point<int> lastPos;
 
         void timerCallback() override
         {
             owner->hoverTimerCallback();
         }
 
-        void mouseEnter (const juce::MouseEvent&) override
+        void mouseEnter (const yup::MouseEvent&) override
         {
             stopTimer();
             owner->checkJustHoveredCallback();
         }
 
-        void mouseExit (const juce::MouseEvent&) override
+        void mouseExit (const yup::MouseEvent&) override
         {
             stopTimer();
             owner->checkJustHoveredCallback();
         }
 
-        void mouseDown (const juce::MouseEvent&) override
+        void mouseDown (const yup::MouseEvent&) override
         {
             stopTimer();
             owner->checkJustHoveredCallback();
         }
 
-        void mouseUp (const juce::MouseEvent&) override
+        void mouseUp (const yup::MouseEvent&) override
         {
             stopTimer();
             owner->checkJustHoveredCallback();
         }
 
-        void mouseMove (const juce::MouseEvent& e) override
+        void mouseMove (const yup::MouseEvent& e) override
         {
             if (lastPos != e.getPosition()) // to avoid fake mouse-moves setting it off
             {
@@ -130,22 +130,22 @@ private:
             }
         }
 
-        void mouseWheelMove (const juce::MouseEvent&, const juce::MouseWheelDetails&) override
+        void mouseWheel (const yup::MouseEvent&, const yup::MouseWheelData&) override
         {
             stopTimer();
             owner->checkJustHoveredCallback();
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HoverDetectorInternal)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HoverDetectorInternal)
     };
 
     HoverDetectorInternal internalTimer;
-    juce::Component* source = nullptr;
+    yup::Component* source = nullptr;
     int hoverTimeMillisecs;
     bool hasJustHovered = false;
     bool wantsHoversForAllNestedChildComponents = false;
 
-    JUCE_DECLARE_NON_COPYABLE (MouseHoverDetector)
+    YUP_DECLARE_NON_COPYABLE (MouseHoverDetector)
 };
 
 } // namespace tracktion::inline engine

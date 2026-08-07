@@ -72,7 +72,7 @@ namespace AppFunctions
         return false;
     }
 
-    inline void nudgeSelected (const juce::String& commandDesc)
+    inline void nudgeSelected (const yup::String& commandDesc)
     {
         getCurrentUIBehaviour().nudgeSelected (commandDesc);
     }
@@ -129,7 +129,7 @@ namespace AppFunctions
 
     void deleteSelected()
     {
-        if (! juce::Component::isMouseButtonDownAnywhere())
+        if (! yup::Component::isMouseButtonDownAnywhere())
             if (auto sm = getCurrentUIBehaviour().getCurrentlyFocusedSelectionManager())
                 sm->deleteSelected();
     }

@@ -18,19 +18,19 @@ class TempoTrack  : public Track
 {
 public:
     /** Create the TempoTrack for an Edit with a given state. */
-    TempoTrack (Edit&, const juce::ValueTree&);
+    TempoTrack (Edit&, const yup::ValueTree&);
 
     /** Destructor. */
     ~TempoTrack() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<TempoTrack>;
+    using Ptr = yup::ReferenceCountedObjectPtr<TempoTrack>;
 
     /** @internal */
     bool isTempoTrack() const override;
     /** @internal */
-    juce::String getName() const override;
+    yup::String getName() const override;
     /** @internal */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     /** @internal */
     int getNumTrackItems() const override;
@@ -46,9 +46,9 @@ public:
     bool canContainPlugin (Plugin*) const override;
 
 private:
-    juce::Array<TrackItem*> buildTrackItemList() const;
+    yup::Array<TrackItem*> buildTrackItemList() const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoTrack)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoTrack)
 };
 
 } // namespace tracktion::inline engine

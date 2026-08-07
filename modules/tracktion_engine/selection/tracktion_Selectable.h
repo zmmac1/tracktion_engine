@@ -42,7 +42,7 @@ public:
 
     //==============================================================================
     /** Subclasses must return a description of what they are. */
-    virtual juce::String getSelectableDescription() = 0;
+    virtual yup::String getSelectableDescription() = 0;
 
     /** Can be overridden to tell this object that it has just been selected
         or deselected
@@ -71,7 +71,7 @@ public:
         void selectableObjectAboutToBeDeleted (Selectable*) override {}
 
     private:
-        juce::WeakReference<Selectable> selectable;
+        yup::WeakReference<Selectable> selectable;
     };
 
     //==============================================================================
@@ -103,26 +103,26 @@ public:
 
     //==============================================================================
     // This is deprecated: use SafeSelectable<Selectable> instead
-    using WeakRef = juce::WeakReference<Selectable>;
+    using WeakRef = yup::WeakReference<Selectable>;
     WeakRef::Master masterReference;
     [[ deprecated ("Use makeSafeRef() and SafeSelectable instead") ]] WeakRef getWeakRef() { return { this }; }
 
 private:
     //==============================================================================
-    juce::ListenerList<SelectableListener> selectableListeners;
+    yup::ListenerList<SelectableListener> selectableListeners;
 
     friend struct SelectableUpdateTimer;
     bool needsAnUpdate = false, hasNotifiedListenersOfDeletion = false, isCallingListeners = false;
 
     void sendChangeCallbackToListenersIfNeeded();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Selectable)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Selectable)
 };
 
 
 //==============================================================================
 /**
-    A list of Selectables, similar to a juce::Array but contains a cached list
+    A list of Selectables, similar to a yup::Array but contains a cached list
     of the SelectableClasses for each entry.
 */
 struct SelectableList
@@ -135,13 +135,13 @@ struct SelectableList
     }
 
     template<typename SelectableType>
-    SelectableList (const juce::Array<SelectableType*>& initialItems)
+    SelectableList (const yup::Array<SelectableType*>& initialItems)
     {
         items.addArray (initialItems);
     }
 
     template<typename SelectableType>
-    SelectableList (const juce::ReferenceCountedArray<SelectableType>& initialItems)
+    SelectableList (const yup::ReferenceCountedArray<SelectableType>& initialItems)
     {
         items.addArray (initialItems);
     }
@@ -163,9 +163,9 @@ struct SelectableList
 
     //==============================================================================
     template <typename SubclassType>
-    juce::Array<SubclassType*> getItemsOfType() const
+    yup::Array<SubclassType*> getItemsOfType() const
     {
-        juce::Array<SubclassType*> results;
+        yup::Array<SubclassType*> results;
 
         for (auto s : items)
             if (auto i = dynamic_cast<SubclassType*> (s))
@@ -242,12 +242,12 @@ struct SelectableList
     inline bool operator== (const SelectableList& other) const  { return items == other.items; }
     inline bool operator!= (const SelectableList& other) const  { return items != other.items; }
 
-    using ScopedLockType = juce::Array<Selectable*>::ScopedLockType;
-    inline const juce::DummyCriticalSection& getLock() const noexcept { return items.getLock(); }
+    using ScopedLockType = yup::Array<Selectable*>::ScopedLockType;
+    inline const yup::DummyCriticalSection& getLock() const noexcept { return items.getLock(); }
 
 private:
-    juce::Array<Selectable*> items;
-    mutable juce::Array<SelectableClass*> classes;
+    yup::Array<Selectable*> items;
+    mutable yup::Array<SelectableClass*> classes;
 };
 
 
@@ -301,7 +301,7 @@ public:
     bool operator!= (decltype(nullptr)) const noexcept              { return weakRef != nullptr; }
 
 private:
-    juce::WeakReference<Selectable> weakRef;
+    yup::WeakReference<Selectable> weakRef;
 };
 
 /** Creates a SafeSelectable for a given selectable object. */
@@ -311,7 +311,7 @@ SafeSelectable<SelectableType> makeSafeRef (SelectableType& selectable)
     return SafeSelectable<SelectableType> (selectable);
 }
 
-/** Creates a std::vector<SafeSelectable<Something>> for a given juce::Array of selectable objects. */
+/** Creates a std::vector<SafeSelectable<Something>> for a given yup::Array of selectable objects. */
 template<typename Iterable>
 auto makeSafeVector (const Iterable& selectables) -> std::vector<SafeSelectable<typename std::remove_reference<decltype(*selectables[0])>::type>>
 {
@@ -326,18 +326,18 @@ auto makeSafeVector (const Iterable& selectables) -> std::vector<SafeSelectable<
     return v;
 }
 
-/** Creates a juce::WeakReference for an object */
+/** Creates a yup::WeakReference for an object */
 template <typename WeakReferenceable>
-juce::WeakReference<WeakReferenceable> makeWeakRef (WeakReferenceable& object)
+yup::WeakReference<WeakReferenceable> makeWeakRef (WeakReferenceable& object)
 {
-    return juce::WeakReference<WeakReferenceable> (std::addressof (object));
+    return yup::WeakReference<WeakReferenceable> (std::addressof (object));
 }
 
-/** Creates a juce::WeakReference for an object pointer (which may be null) */
+/** Creates a yup::WeakReference for an object pointer (which may be null) */
 template <typename WeakReferenceable>
-juce::WeakReference<WeakReferenceable> makeWeakRef (WeakReferenceable* object)
+yup::WeakReference<WeakReferenceable> makeWeakRef (WeakReferenceable* object)
 {
-    return juce::WeakReference<WeakReferenceable> (object);
+    return yup::WeakReference<WeakReferenceable> (object);
 }
 
 

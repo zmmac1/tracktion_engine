@@ -27,7 +27,7 @@ TEST_SUITE ("tracktion_engine")
 
         // We need to pump the dispatch loop here to ensure the Edit has attached the undo manager
         // This may be handled better in a more syncronous way in the future
-        juce::MessageManager::getInstance()->runDispatchLoopUntil (20);
+        yup::MessageManager::getInstance()->runDispatchLoopUntil (20);
 
         auto um = &edit->getUndoManager();
         auto track = getAudioTracks (*edit)[0];

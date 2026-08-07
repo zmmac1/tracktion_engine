@@ -10,12 +10,12 @@
 
 namespace tracktion::inline engine {
 
-class EditInputDevices  : private juce::ChangeListener,
-                          private juce::AsyncUpdater,
-                          private juce::ValueTree::Listener
+class EditInputDevices  : private yup::ChangeListener,
+                          private yup::AsyncUpdater,
+                          private yup::ValueTree::Listener
 {
 public:
-    EditInputDevices (Edit&, const juce::ValueTree& state);
+    EditInputDevices (Edit&, const yup::ValueTree& state);
     ~EditInputDevices() override;
 
     int getMaxNumInputs() const;
@@ -25,27 +25,27 @@ public:
     void clearAllInputs (AudioTrack&, juce::UndoManager*);
     void clearInputsOfDevice (AudioTrack&, const InputDevice&, juce::UndoManager*);
     InputDeviceInstance* getInputInstance (const AudioTrack&, int index) const;
-    juce::Array<InputDeviceInstance*> getDevicesForTargetTrack (const AudioTrack&) const;
+    yup::Array<InputDeviceInstance*> getDevicesForTargetTrack (const AudioTrack&) const;
 
     /** @internal */
-    juce::ValueTree getInstanceStateForInputDevice (const InputDevice&);
+    yup::ValueTree getInstanceStateForInputDevice (const InputDevice&);
 
 private:
     Edit& edit;
-    juce::ValueTree state, editState { edit.state };
+    yup::ValueTree state, editState { edit.state };
 
     void removeNonExistantInputDeviceStates();
-    void addTrackDeviceInstanceToContext (const juce::ValueTree&) const;
-    void removeTrackDeviceInstanceToContext (const juce::ValueTree&) const;
-    InputDevice* getTrackDeviceForState (const juce::ValueTree&) const;
+    void addTrackDeviceInstanceToContext (const yup::ValueTree&) const;
+    void removeTrackDeviceInstanceToContext (const yup::ValueTree&) const;
+    InputDevice* getTrackDeviceForState (const yup::ValueTree&) const;
 
-    void changeListenerCallback (juce::ChangeBroadcaster*) override;
+    void changeListenerCallback (yup::ChangeBroadcaster*) override;
     void handleAsyncUpdate() override;
 
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditInputDevices)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditInputDevices)
 };
 
 } // namespace tracktion::inline engine

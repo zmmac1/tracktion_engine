@@ -148,8 +148,8 @@ void ReadAheadTimeStretcher::reset()
 
 bool ReadAheadTimeStretcher::setSpeedAndPitch (float speedRatio, float semitonesUp)
 {
-    const bool setSpeed = ! juce::approximatelyEqual (pendingSpeedRatio.exchange (speedRatio, std::memory_order_acq_rel), speedRatio);
-    const bool setPitch = ! juce::approximatelyEqual (pendingSemitonesUp.exchange (semitonesUp, std::memory_order_acq_rel), semitonesUp);
+    const bool setSpeed = ! yup::approximatelyEqual (pendingSpeedRatio.exchange (speedRatio, std::memory_order_acq_rel), speedRatio);
+    const bool setPitch = ! yup::approximatelyEqual (pendingSemitonesUp.exchange (semitonesUp, std::memory_order_acq_rel), semitonesUp);
 
     if (setSpeed || setPitch)
         newSpeedAndPitchPending.store (true, std::memory_order_release);
@@ -222,7 +222,7 @@ int ReadAheadTimeStretcher::popData (float* const* outChannels, int numSamples)
     }
 
     const int numToRead = std::min (numSamples, outputFifo.getNumReady());
-    juce::AudioBuffer<float> destBuffer (outChannels, numChannels, numToRead);
+    yup::AudioBuffer<float> destBuffer (outChannels, numChannels, numToRead);
     outputFifo.read (destBuffer, 0);
     return numToRead;
 }
@@ -241,7 +241,7 @@ int ReadAheadTimeStretcher::flush (float* const* outChannels)
     if (const int numReady = outputFifo.getNumReady(); numReady > 0)
     {
         const int numToReturn = std::min (numReady, numSamplesPerOutputBlock);
-        juce::AudioBuffer<float> outputView (outChannels, numChannels, numToReturn);
+        yup::AudioBuffer<float> outputView (outChannels, numChannels, numToReturn);
         [[maybe_unused]] const bool success = outputFifo.read (outputView, 0);
         jassert (success);
 

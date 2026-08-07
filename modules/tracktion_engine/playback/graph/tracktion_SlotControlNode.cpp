@@ -111,7 +111,7 @@ bool SlotControlNode::isReadyToProcess()
     return true;
 }
 
-void SlotControlNode::prefetchBlock (juce::Range<int64_t> referenceSampleRange)
+void SlotControlNode::prefetchBlock (yup::Range<int64_t> referenceSampleRange)
 {
     for (auto& node : orderedNodes)
         node->prepareForNextBlock (referenceSampleRange);
@@ -182,12 +182,12 @@ void SlotControlNode::processSplitSection (ProcessContext& pc, LaunchHandle::Spl
     const auto totalRange = status.range1.isEmpty() ? status.range2
                                                     : (status.range2.isEmpty() ? status.range1
                                                                                : status.range1.getUnionWith (status.range2));
-    const juce::NormalisableRange blockRangeBeats (totalRange.getStart().inBeats(),
+    const yup::NormalisableRange blockRangeBeats (totalRange.getStart().inBeats(),
                                                    totalRange.getEnd().inBeats());
 
     auto processSubSection = [this, &pc, &blockRangeBeats, editBeatRange = getEditBeatRange(), editTimeRange = getEditTimeRange()] (auto section, bool isPlaying, auto playStartTime)
     {
-        const auto proportion = juce::Range (blockRangeBeats.convertTo0to1 (section.getStart().inBeats()),
+        const auto proportion = yup::Range (blockRangeBeats.convertTo0to1 (section.getStart().inBeats()),
                                              blockRangeBeats.convertTo0to1 (section.getEnd().inBeats()));
         const auto startFrame  = (choc::buffer::FrameCount) std::llround (proportion.getStart() * pc.numSamples);
         const auto endFrame    = (choc::buffer::FrameCount) std::llround (proportion.getEnd() * pc.numSamples);
@@ -201,7 +201,7 @@ void SlotControlNode::processSplitSection (ProcessContext& pc, LaunchHandle::Spl
         const auto startRefSample  = pc.referenceSampleRange.getStart() + (int64_t) std::llround (proportion.getStart() * static_cast<double> (numRefSamples));
         const auto endRefSample    = pc.referenceSampleRange.getStart() + (int64_t) std::llround (proportion.getEnd() * static_cast<double> (numRefSamples));
 
-        const juce::Range subSectionReferenceSampleRange (startRefSample, endRefSample);
+        const yup::Range subSectionReferenceSampleRange (startRefSample, endRefSample);
 
         auto sectionBufferView = pc.buffers.audio.getFrameRange ({ startFrame, endFrame });
         ProcessContext subSection {
@@ -230,7 +230,7 @@ void SlotControlNode::processSplitSection (ProcessContext& pc, LaunchHandle::Spl
 void SlotControlNode::processSection (ProcessContext& pc, BeatRange editBeatRange, TimeRange editTimeRange, BeatRange unloopedClipBeatRange,
                                       bool isPlaying, std::optional<BeatPosition> playStartTime)
 {
-    const juce::ScopeGuard scope { [this, isPlaying]
+    const yup::ScopeGuard scope { [this, isPlaying]
                                    {
                                        wasPlaying = isPlaying;
                                        localPlayheadState.playheadJumped = false;

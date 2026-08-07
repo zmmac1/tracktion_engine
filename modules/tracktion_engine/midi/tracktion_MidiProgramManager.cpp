@@ -13,30 +13,30 @@ namespace tracktion::inline engine {
 struct BankSet
 {
     BankSet() noexcept {}
-    BankSet (const juce::String& nm) noexcept : name (nm) {}
+    BankSet (const yup::String& nm) noexcept : name (nm) {}
 
-    BankSet (int high, int low, const juce::String& name_) noexcept
+    BankSet (int high, int low, const yup::String& name_) noexcept
        : name (name_), hi (high), lo (low)
     {}
 
-    juce::String name;
-    juce::StringArray patches;
-    juce::Array<int> patchNumbers;
+    yup::String name;
+    yup::StringArray patches;
+    yup::Array<int> patchNumbers;
     int hi = 0, lo = 0;
 };
 
 struct ProgramSet
 {
-    juce::String name;
-    juce::OwnedArray<BankSet> banks;
+    yup::String name;
+    yup::OwnedArray<BankSet> banks;
 };
 
-inline std::unique_ptr<juce::XmlElement> exportProgramSet (ProgramSet& set)
+inline std::unique_ptr<yup::XmlElement> exportProgramSet (ProgramSet& set)
 {
     if (set.banks.isEmpty())
         return {};
 
-    auto rootXml = std::make_unique<juce::XmlElement> ("ProgramSet");
+    auto rootXml = std::make_unique<yup::XmlElement> ("ProgramSet");
     rootXml->setAttribute ("name", set.name);
 
     for (auto bankSet : set.banks)
@@ -57,7 +57,7 @@ inline std::unique_ptr<juce::XmlElement> exportProgramSet (ProgramSet& set)
     return rootXml;
 }
 
-inline BankSet* getBankSet (ProgramSet& set, const juce::String& name)
+inline BankSet* getBankSet (ProgramSet& set, const yup::String& name)
 {
     for (int i = 0; i < set.banks.size(); ++i)
         if (set.banks.getUnchecked (i)->name == name)
@@ -66,17 +66,17 @@ inline BankSet* getBankSet (ProgramSet& set, const juce::String& name)
     return set.banks.add (new BankSet (name));
 }
 
-inline std::unique_ptr<juce::XmlElement> convertMidnamToXml (const juce::File& src)
+inline std::unique_ptr<yup::XmlElement> convertMidnamToXml (const yup::File& src)
 {
-    juce::String manufacturer;
-    juce::StringArray models;
+    yup::String manufacturer;
+    yup::StringArray models;
 
-    auto rootXml = juce::parseXML (src);
+    auto rootXml = yup::parseXML (src);
 
     if (rootXml == nullptr)
     {
         // might be wacky corrupt file, search for xml
-        juce::MemoryBlock mb;
+        yup::MemoryBlock mb;
         src.loadFileAsData (mb);
 
         for (size_t i = 0; i < mb.getSize(); ++i)
@@ -91,7 +91,7 @@ inline std::unique_ptr<juce::XmlElement> convertMidnamToXml (const juce::File& s
         if (firstidx != -1 && lastidx != -1)
             str = str.substring(firstidx, lastidx);
 
-        rootXml = juce::parseXML (str);
+        rootXml = yup::parseXML (str);
 
         if (rootXml == nullptr)
             return {};
@@ -195,13 +195,13 @@ MidiProgramManager::MidiProgramSet::MidiProgramSet()
     for (int i = 0; i < 16; ++i)
     {
         midiBanks[i].id = i << 8;
-        midiBanks[i].name = TRANS("Bank") + " " + juce::String (i + 1);
+        midiBanks[i].name = TRANS("Bank") + " " + yup::String (i + 1);
     }
 }
 
-juce::XmlElement* MidiProgramManager::MidiBank::createXml()
+yup::XmlElement* MidiProgramManager::MidiBank::createXml()
 {
-    auto n = new juce::XmlElement ("bank");
+    auto n = new yup::XmlElement ("bank");
     n->setAttribute ("name", name);
     n->setAttribute ("low", id % 256);
     n->setAttribute ("high", id / 256);
@@ -216,7 +216,7 @@ juce::XmlElement* MidiProgramManager::MidiBank::createXml()
     return n;
 }
 
-void MidiProgramManager::MidiBank::updateFromXml (const juce::XmlElement& n)
+void MidiProgramManager::MidiBank::updateFromXml (const yup::XmlElement& n)
 {
     name = n.getStringAttribute ("name");
     id = n.getIntAttribute ("high") * 256 + n.getIntAttribute ("low");
@@ -229,9 +229,9 @@ void MidiProgramManager::MidiBank::updateFromXml (const juce::XmlElement& n)
 }
 
 //==============================================================================
-juce::XmlElement* MidiProgramManager::MidiProgramSet::createXml()
+yup::XmlElement* MidiProgramManager::MidiProgramSet::createXml()
 {
-    auto n = new juce::XmlElement ("ProgramSet");
+    auto n = new yup::XmlElement ("ProgramSet");
     n->setAttribute ("name", name);
     n->setAttribute ("zeroBased", zeroBased);
 
@@ -241,7 +241,7 @@ juce::XmlElement* MidiProgramManager::MidiProgramSet::createXml()
     return n;
 }
 
-void MidiProgramManager::MidiProgramSet::updateFromXml (const juce::XmlElement& n)
+void MidiProgramManager::MidiProgramSet::updateFromXml (const yup::XmlElement& n)
 {
     name = n.getStringAttribute ("name");
     zeroBased = n.getBoolAttribute ("zeroBased", false);
@@ -253,7 +253,7 @@ void MidiProgramManager::MidiProgramSet::updateFromXml (const juce::XmlElement& 
         if (currentChildXml->hasTagName ("bank"))
             midiBanks[idx++].updateFromXml (*currentChildXml);
 
-        if (idx >= juce::numElementsInArray (midiBanks))
+        if (idx >= yup::numElementsInArray (midiBanks))
             break;
     }
 }
@@ -286,7 +286,7 @@ MidiProgramManager::MidiProgramManager (Engine& e)
 
 void MidiProgramManager::saveAll()
 {
-    juce::XmlElement xml ("MidiProgramManager");
+    yup::XmlElement xml ("MidiProgramManager");
     xml.setAttribute ("createdRootGroup", true);
 
     for (int i = 0; i < programSets.size(); ++i)
@@ -299,9 +299,9 @@ void MidiProgramManager::saveAll()
     engine.getPropertyStorage().setXmlProperty (SettingID::midiProgramManager, xml);
 }
 
-juce::StringArray MidiProgramManager::getMidiProgramSetNames()
+yup::StringArray MidiProgramManager::getMidiProgramSetNames()
 {
-    juce::StringArray names;
+    yup::StringArray names;
     names.add (TRANS("General MIDI"));
 
     for (int i = 0; i < programSets.size(); ++i)
@@ -310,14 +310,14 @@ juce::StringArray MidiProgramManager::getMidiProgramSetNames()
     return names;
 }
 
-juce::String MidiProgramManager::getProgramName (int set, int bank, int program)
+yup::String MidiProgramManager::getProgramName (int set, int bank, int program)
 {
     if (set == 0)
-        return TRANS(juce::MidiMessage::getGMInstrumentName (program));
+        return TRANS(yup::MidiMessage::getGMInstrumentName (program));
 
     if (auto p = programSets[set - 1])
     {
-        if (bank >= 0 && bank < juce::numElementsInArray (p->midiBanks))
+        if (bank >= 0 && bank < yup::numElementsInArray (p->midiBanks))
         {
             auto n = p->midiBanks[bank].programNames.find (program);
 
@@ -329,11 +329,11 @@ juce::String MidiProgramManager::getProgramName (int set, int bank, int program)
     return getDefaultName (bank, program, programSets[set - 1]->zeroBased);
 }
 
-juce::String MidiProgramManager::getBankName (int set, int bank)
+yup::String MidiProgramManager::getBankName (int set, int bank)
 {
     if (auto p = programSets[set - 1])
     {
-        if (bank >= 0 && bank < juce::numElementsInArray (p->midiBanks))
+        if (bank >= 0 && bank < yup::numElementsInArray (p->midiBanks))
         {
             auto name = p->midiBanks[bank].name;
 
@@ -342,13 +342,13 @@ juce::String MidiProgramManager::getBankName (int set, int bank)
         }
     }
 
-    return TRANS("Bank") + " " + juce::String (bank + 1);
+    return TRANS("Bank") + " " + yup::String (bank + 1);
 }
 
 int MidiProgramManager::getBankID (int set, int bank)
 {
     if (auto p = programSets[set - 1])
-        if (bank >= 0 && bank < juce::numElementsInArray (p->midiBanks))
+        if (bank >= 0 && bank < yup::numElementsInArray (p->midiBanks))
             return p->midiBanks[bank].id;
 
     return bank;
@@ -357,7 +357,7 @@ int MidiProgramManager::getBankID (int set, int bank)
 void MidiProgramManager::setBankID (int set, int bank, int id)
 {
     if (auto p = programSets[set - 1])
-        if (bank >= 0 && bank < juce::numElementsInArray (p->midiBanks))
+        if (bank >= 0 && bank < yup::numElementsInArray (p->midiBanks))
             p->midiBanks[bank].id = id;
 }
 
@@ -375,34 +375,34 @@ void MidiProgramManager::setZeroBased (int set, bool zeroBased)
         p->zeroBased = zeroBased;
 }
 
-void MidiProgramManager::setProgramName (int set, int bank, int program, const juce::String& newName)
+void MidiProgramManager::setProgramName (int set, int bank, int program, const yup::String& newName)
 {
     if (auto p = programSets[set - 1])
-        if (bank >= 0 && bank < juce::numElementsInArray (p->midiBanks))
+        if (bank >= 0 && bank < yup::numElementsInArray (p->midiBanks))
             p->midiBanks[bank].programNames[program] = newName;
 }
 
-void MidiProgramManager::setBankName (int set, int bank, const juce::String& newName)
+void MidiProgramManager::setBankName (int set, int bank, const yup::String& newName)
 {
     if (auto p = programSets[set - 1])
-        if (bank >= 0 && bank < juce::numElementsInArray (p->midiBanks))
+        if (bank >= 0 && bank < yup::numElementsInArray (p->midiBanks))
             p->midiBanks[bank].name = newName;
 }
 
 void MidiProgramManager::clearProgramName (int set, int bank, int program)
 {
     if (auto p = programSets[set - 1])
-        if (bank >= 0 && bank < juce::numElementsInArray (p->midiBanks))
+        if (bank >= 0 && bank < yup::numElementsInArray (p->midiBanks))
             p->midiBanks[bank].programNames.erase (program);
 }
 
-juce::String MidiProgramManager::getDefaultName (int, int program, bool zeroBased)
+yup::String MidiProgramManager::getDefaultName (int, int program, bool zeroBased)
 {
     return TRANS("Patch") + " "
-            + juce::String (program % 128 + (zeroBased ? 1 : 0));
+            + yup::String (program % 128 + (zeroBased ? 1 : 0));
 }
 
-juce::String MidiProgramManager::getDefaultCustomName()
+yup::String MidiProgramManager::getDefaultCustomName()
 {
     for (int i = 0; i < programSets.size(); ++i)
         if (programSets.getUnchecked (i)->name == TRANS("Custom"))
@@ -411,7 +411,7 @@ juce::String MidiProgramManager::getDefaultCustomName()
     return TRANS("General MIDI");
 }
 
-int MidiProgramManager::getSetIndex (const juce::String& setName)
+int MidiProgramManager::getSetIndex (const yup::String& setName)
 {
     for (int i = 0; i < programSets.size(); ++i)
         if (programSets.getUnchecked (i)->name == setName)
@@ -420,7 +420,7 @@ int MidiProgramManager::getSetIndex (const juce::String& setName)
     return 0;
 }
 
-bool MidiProgramManager::doesSetExist (const juce::String& name) const noexcept
+bool MidiProgramManager::doesSetExist (const yup::String& name) const noexcept
 {
     if (name == TRANS("General MIDI"))
         return true;
@@ -442,14 +442,14 @@ bool MidiProgramManager::canDeleteProgramSet (int set) const noexcept
     return set > 0;
 }
 
-void MidiProgramManager::addNewSet (const juce::String& name)
+void MidiProgramManager::addNewSet (const yup::String& name)
 {
     auto newSet = programSets.add (new MidiProgramSet());
     newSet->name = name;
     saveAll();
 }
 
-void MidiProgramManager::addNewSet (const juce::String& name, const juce::XmlElement& element)
+void MidiProgramManager::addNewSet (const yup::String& name, const yup::XmlElement& element)
 {
     auto newSet = programSets.add (new MidiProgramSet());
     newSet->updateFromXml (element);
@@ -463,12 +463,12 @@ void MidiProgramManager::deleteSet (int set)
     saveAll();
 }
 
-bool MidiProgramManager::importSet (int set, const juce::File& file)
+bool MidiProgramManager::importSet (int set, const yup::File& file)
 {
     bool ok = false;
 
     if (auto xml = file.hasFileExtension("midnam") ? convertMidnamToXml (file)
-                                                   : juce::parseXML (file))
+                                                   : yup::parseXML (file))
     {
         if (auto s = programSets[set - 1])
         {
@@ -483,9 +483,9 @@ bool MidiProgramManager::importSet (int set, const juce::File& file)
     return ok;
 }
 
-bool MidiProgramManager::exportSet (int set, const juce::File& file)
+bool MidiProgramManager::exportSet (int set, const yup::File& file)
 {
-    std::unique_ptr<juce::XmlElement> xml;
+    std::unique_ptr<yup::XmlElement> xml;
 
     if (auto programSet = programSets[set - 1])
         xml.reset (programSet->createXml());
@@ -493,7 +493,7 @@ bool MidiProgramManager::exportSet (int set, const juce::File& file)
     return xml != nullptr && xml->writeTo (file);
 }
 
-static juce::File getPatchNamesZipFile (Engine& engine)
+static yup::File getPatchNamesZipFile (Engine& engine)
 {
     auto presetZipFile = engine.getTemporaryFileManager().getTempDirectory()
                             .getChildFile ("patchnames.zip");
@@ -507,10 +507,10 @@ static juce::File getPatchNamesZipFile (Engine& engine)
     return presetZipFile;
 }
 
-juce::StringArray MidiProgramManager::getListOfPresets (Engine& engine)
+yup::StringArray MidiProgramManager::getListOfPresets (Engine& engine)
 {
-    juce::StringArray presets;
-    juce::ZipFile zf (getPatchNamesZipFile (engine));
+    yup::StringArray presets;
+    yup::ZipFile zf (getPatchNamesZipFile (engine));
 
     for (int i = 0; i < zf.getNumEntries(); ++i)
     {
@@ -528,9 +528,9 @@ juce::StringArray MidiProgramManager::getListOfPresets (Engine& engine)
     return presets;
 }
 
-juce::String MidiProgramManager::getPresetXml (juce::String presetName)
+yup::String MidiProgramManager::getPresetXml (yup::String presetName)
 {
-    juce::ZipFile zf (getPatchNamesZipFile (engine));
+    yup::ZipFile zf (getPatchNamesZipFile (engine));
 
     for (int i = 0; i < zf.getNumEntries(); ++i)
     {
@@ -541,7 +541,7 @@ juce::String MidiProgramManager::getPresetXml (juce::String presetName)
 
         if (curName == presetName)
         {
-            std::unique_ptr<juce::InputStream> is (zf.createStreamForEntry(i));
+            std::unique_ptr<yup::InputStream> is (zf.createStreamForEntry(i));
 
             if (is != nullptr)
                 return is->readEntireStreamAsString();

@@ -24,7 +24,7 @@ struct AudioClipBaseChannelTestContext
         auto context = std::make_unique<AudioClipBaseChannelTestContext>();
 
         context->edit = test_utilities::createTestEdit (engine);
-        context->sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0, numSourceChannels);
+        context->sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0, numSourceChannels);
         context->track = getAudioTracks (*context->edit)[0];
         context->clip = insertWaveClip (*context->track, {}, context->sinFile->getFile(),
                                         { .time = { 0_tp, 1_tp } },
@@ -34,7 +34,7 @@ struct AudioClipBaseChannelTestContext
     }
 
     std::unique_ptr<Edit> edit;
-    std::unique_ptr<juce::TemporaryFile> sinFile;
+    std::unique_ptr<yup::TemporaryFile> sinFile;
     AudioTrack::Ptr track;
     WaveAudioClip::Ptr clip;
 };
@@ -68,7 +68,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *Engine::getEngines()[0];
         auto context = AudioClipBaseChannelTestContext::create (engine, 2);
 
-        auto rightOnly = ChannelConfiguration (std::vector<ChannelIndex> { ChannelIndex (1, juce::AudioChannelSet::right) });
+        auto rightOnly = ChannelConfiguration (std::vector<ChannelIndex> { ChannelIndex (1, yup::AudioChannelSet::right) });
         context->clip->setActiveChannelConfiguration (rightOnly);
 
         auto active = context->clip->getActiveChannelConfiguration();

@@ -13,8 +13,8 @@ namespace tracktion::inline engine {
 class VcaAutomatableParameter : public AutomatableParameter
 {
 public:
-    VcaAutomatableParameter (const juce::String& xmlTag, const juce::String& name,
-                             Plugin& owner, juce::Range<float> valueRangeToUse)
+    VcaAutomatableParameter (const yup::String& xmlTag, const yup::String& name,
+                             Plugin& owner, yup::Range<float> valueRangeToUse)
         : AutomatableParameter (xmlTag, name, owner, valueRangeToUse)
     {
     }
@@ -24,12 +24,12 @@ public:
         notifyListenersOfDeletion();
     }
 
-    juce::String valueToString (float value) override
+    yup::String valueToString (float value) override
     {
-        return juce::Decibels::toString (volumeFaderPositionToDB (value) + 0.001);
+        return yup::Decibels::toString (volumeFaderPositionToDB (value) + 0.001);
     }
 
-    float stringToValue (const juce::String& str) override
+    float stringToValue (const yup::String& str) override
     {
         return decibelsToVolumeFaderPosition (dbStringToDb (str));
     }
@@ -51,9 +51,9 @@ VCAPlugin::~VCAPlugin()
     volParam->detachFromCurrentValue();
 }
 
-juce::ValueTree VCAPlugin::create()
+yup::ValueTree VCAPlugin::create()
 {
-    juce::ValueTree v (IDs::PLUGIN);
+    yup::ValueTree v (IDs::PLUGIN);
     v.setProperty (IDs::type, xmlTypeName, nullptr);
     return v;
 }
@@ -81,7 +81,7 @@ float VCAPlugin::getVolumeDb() const
 
 void VCAPlugin::setSliderPos (float newV)
 {
-    volParam->setParameter (juce::jlimit (0.0f, 1.0f, newV), juce::sendNotification);
+    volParam->setParameter (yup::jlimit (0.0f, 1.0f, newV), yup::sendNotification);
 }
 
 void VCAPlugin::muteOrUnmute()
@@ -121,7 +121,7 @@ bool VCAPlugin::canBeMoved()
     return false;
 }
 
-void VCAPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void VCAPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, volumeValue);
 

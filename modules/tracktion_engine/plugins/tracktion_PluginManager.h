@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-class PluginManager  : private juce::ChangeListener
+class PluginManager  : private yup::ChangeListener
 {
 public:
     PluginManager (Engine&);
@@ -25,7 +25,7 @@ public:
     /// This is called by a child process in the app's start-up code, to invoke
     /// the actual scan. Returns true if the command-line params invoke a scan,
     /// or false if this is a normal run.
-    static bool startChildProcessPluginScan (const juce::String& commandLine);
+    static bool startChildProcessPluginScan (const yup::String& commandLine);
 
     //==============================================================================
     bool doubleClickToOpenWindows();
@@ -38,14 +38,14 @@ public:
     void setUsesSeparateProcessForScanning (bool);
 
     //==============================================================================
-    Plugin::Ptr createExistingPlugin (Edit&, const juce::ValueTree&);
-    Plugin::Ptr createNewPlugin (Edit&, const juce::ValueTree&);
-    Plugin::Ptr createNewPlugin (Edit&, const juce::String& type, const juce::PluginDescription&);
+    Plugin::Ptr createExistingPlugin (Edit&, const yup::ValueTree&);
+    Plugin::Ptr createNewPlugin (Edit&, const yup::ValueTree&);
+    Plugin::Ptr createNewPlugin (Edit&, const yup::String& type, const yup::PluginDescription&);
 
-    juce::Array<juce::PluginDescription> getARACompatiblePlugDescriptions();
+    yup::Array<yup::PluginDescription> getARACompatiblePlugDescriptions();
 
-    juce::AudioPluginFormatManager pluginFormatManager;
-    juce::KnownPluginList knownPluginList;
+    yup::AudioPluginFormatManager pluginFormatManager;
+    yup::KnownPluginList knownPluginList;
 
     /// May be called by clients to cancel a scan if one is active
     std::function<void()> abortCurrentPluginScan;
@@ -53,10 +53,10 @@ public:
     //==============================================================================
     struct BuiltInType
     {
-        BuiltInType (const juce::String& type);
+        BuiltInType (const yup::String& type);
         virtual ~BuiltInType();
 
-        const juce::String type;
+        const yup::String type;
 
         virtual Plugin::Ptr create (PluginCreationInfo) = 0;
     };
@@ -76,19 +76,19 @@ public:
 
     static constexpr const char* builtInPluginFormatName = "TracktionInternal";
 
-    static bool isBuiltInPlugin (const juce::PluginDescription& d)
+    static bool isBuiltInPlugin (const yup::PluginDescription& d)
     {
-        return d.pluginFormatName == builtInPluginFormatName;
+        return d.name == builtInPluginFormatName;
     }
 
     template<class PluginClass>
-    static juce::PluginDescription createBuiltInPluginDescription (bool synth = false)
+    static yup::PluginDescription createBuiltInPluginDescription (bool synth = false)
     {
-        juce::PluginDescription desc;
+        yup::PluginDescription desc;
         desc.name = TRANS(PluginClass::getPluginName());
-        desc.pluginFormatName = builtInPluginFormatName;
+        desc.name = builtInPluginFormatName;
         desc.category = synth ? TRANS("Synth") : TRANS("Effect");
-        desc.manufacturerName = "Tracktion Software Corporation";
+        desc.vendor = "Tracktion Software Corporation";
         desc.fileOrIdentifier = PluginClass::xmlTypeName;
         return desc;
     }
@@ -98,9 +98,9 @@ public:
         By default this simply uses the PluginManager's pluginFormatManager but it
         can be set to provide custom behaviour.
     */
-    std::function<std::unique_ptr<juce::AudioPluginInstance> (const juce::PluginDescription&,
+    std::function<std::unique_ptr<yup::AudioPluginInstance> (const yup::PluginDescription&,
                                                               double rate, int blockSize,
-                                                              juce::String& errorMessage)> createPluginInstance;
+                                                              yup::String& errorMessage)> createPluginInstance;
 
     /** Callback that is used to determine if a plugin should use fine-grain automation or not. */
     std::function<bool (Plugin&)> canUseFineGrainAutomation;
@@ -111,19 +111,19 @@ public:
 private:
     Engine& engine;
 
-    juce::CriticalSection existingListLock;
-    juce::OwnedArray<BuiltInType> builtInTypes;
+    yup::CriticalSection existingListLock;
+    yup::OwnedArray<BuiltInType> builtInTypes;
     bool initialised = false;
 
-    Plugin::Ptr createPlugin (Edit&, const juce::ValueTree&, bool isNew);
+    Plugin::Ptr createPlugin (Edit&, const yup::ValueTree&, bool isNew);
 
-    void changeListenerCallback (juce::ChangeBroadcaster*) override;
+    void changeListenerCallback (yup::ChangeBroadcaster*) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginManager)
 };
 
 //==============================================================================
-class PluginCache  : private juce::Timer
+class PluginCache  : private yup::Timer
 {
 public:
     PluginCache (Edit&);
@@ -131,11 +131,11 @@ public:
 
     //==============================================================================
     Plugin::Ptr getPluginFor (EditItemID pluginID) const;
-    Plugin::Ptr getPluginFor (const juce::ValueTree&) const;
-    Plugin::Ptr getPluginFor (juce::AudioProcessor&) const;
-    Plugin::Ptr getOrCreatePluginFor (const juce::ValueTree&);
-    Plugin::Ptr createNewPlugin (const juce::ValueTree&);
-    Plugin::Ptr createNewPlugin (const juce::String& type, const juce::PluginDescription&);
+    Plugin::Ptr getPluginFor (const yup::ValueTree&) const;
+    Plugin::Ptr getPluginFor (yup::AudioProcessor&) const;
+    Plugin::Ptr getOrCreatePluginFor (const yup::ValueTree&);
+    Plugin::Ptr createNewPlugin (const yup::ValueTree&);
+    Plugin::Ptr createNewPlugin (const yup::String& type, const yup::PluginDescription&);
 
     Plugin::Array getPlugins() const;
 
@@ -146,12 +146,12 @@ public:
 private:
     Edit& edit;
     Plugin::Array activePlugins;
-    juce::CriticalSection lock;
+    yup::CriticalSection lock;
 
     Plugin::Ptr addPluginToCache (Plugin::Ptr);
     void timerCallback() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginCache)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginCache)
 };
 
 } // namespace tracktion::inline engine

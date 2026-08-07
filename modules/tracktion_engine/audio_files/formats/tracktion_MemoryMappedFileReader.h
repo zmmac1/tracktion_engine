@@ -36,7 +36,7 @@ struct MemoryMappedFileReader    : public AudioFormatReaderWithTimeout
 
     /** @internal */
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override
+                      yup::int64 startSampleInFile, int numSamples) override
     {
         return source->reader->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer,
                                             startSampleInFile, numSamples);
@@ -55,7 +55,7 @@ private:
 class BufferingAudioReaderWrapper   : public AudioFormatReaderWithTimeout
 {
 public:
-    BufferingAudioReaderWrapper (std::unique_ptr<juce::BufferingAudioReader> sourceReader)
+    BufferingAudioReaderWrapper (std::unique_ptr<yup::BufferingAudioReader> sourceReader)
         : source (std::move (sourceReader))
     {
         sampleRate              = source->sampleRate;
@@ -74,14 +74,14 @@ public:
 
     /** @internal */
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override
+                      yup::int64 startSampleInFile, int numSamples) override
     {
         return source->readSamples (destSamples, numDestChannels, startOffsetInDestBuffer,
                                     startSampleInFile, numSamples);
     }
 
 private:
-    std::unique_ptr<juce::BufferingAudioReader> source;
+    std::unique_ptr<yup::BufferingAudioReader> source;
 };
 
 

@@ -16,23 +16,23 @@ namespace tracktion::inline engine {
 struct AudioFileInfo
 {
     AudioFileInfo (Engine&);
-    AudioFileInfo (const AudioFile&, juce::AudioFormatReader*, juce::AudioFormat*);
+    AudioFileInfo (const AudioFile&, yup::AudioFormatReader*, yup::AudioFormat*);
 
     static AudioFileInfo parse (const AudioFile&);
 
     Engine* engine = nullptr;
     bool wasParsedOk = false;
     HashCode hashCode = 0;
-    juce::AudioFormat* format = nullptr;
+    yup::AudioFormat* format = nullptr;
     double sampleRate = 0;
     SampleCount lengthInSamples = 0;
     int numChannels = 0;
     int bitsPerSample = 0;
     bool isFloatingPoint = false;
     bool needsCachedProxy = false;
-    juce::AudioChannelSet channelLayout;
-    juce::StringPairArray metadata;
-    juce::Time fileModificationTime;
+    yup::AudioChannelSet channelLayout;
+    yup::StringPairArray metadata;
+    yup::Time fileModificationTime;
     LoopInfo loopInfo;
 
     double getLengthInSeconds() const noexcept
@@ -43,7 +43,7 @@ struct AudioFileInfo
         return 0.0;
     }
 
-    juce::String getLongDescription() const;
+    yup::String getLongDescription() const;
 };
 
 //==============================================================================
@@ -54,20 +54,20 @@ class AudioFile
 public:
     AudioFile() = delete;
     inline AudioFile (Engine& e) noexcept : engine (&e) {}
-    explicit AudioFile (Engine&, const juce::File&) noexcept;
+    explicit AudioFile (Engine&, const yup::File&) noexcept;
     AudioFile (const AudioFile&) noexcept;
     AudioFile& operator= (const AudioFile&) noexcept;
     ~AudioFile();
 
-    const juce::File& getFile() const noexcept  { return file; }
+    const yup::File& getFile() const noexcept  { return file; }
     HashCode getHash() const noexcept           { return hash; }
-    juce::String getHashString() const          { return juce::String::toHexString (hash); }
+    yup::String getHashString() const          { return yup::String::toHexString (hash); }
 
     inline bool operator== (const AudioFile& other) const noexcept      { return hash == other.hash; }
     inline bool operator!= (const AudioFile& other) const noexcept      { return hash != other.hash; }
 
     bool deleteFile() const;
-    static bool deleteFiles (Engine&, const juce::Array<juce::File>& files);
+    static bool deleteFiles (Engine&, const yup::Array<yup::File>& files);
 
     bool moveToTrash() const;
 
@@ -83,9 +83,9 @@ public:
     double getSampleRate() const;
     int getBitsPerSample() const;
     bool isFloatingPoint() const;
-    juce::StringPairArray getMetadata() const;
+    yup::StringPairArray getMetadata() const;
 
-    juce::AudioFormat* getFormat() const;
+    yup::AudioFormat* getFormat() const;
 
     bool isWavFile() const;
     bool isAiffFile() const;
@@ -97,7 +97,7 @@ public:
     Engine* engine = nullptr;
 
 private:
-    juce::File file;
+    yup::File file;
     HashCode hash = 0;
 };
 

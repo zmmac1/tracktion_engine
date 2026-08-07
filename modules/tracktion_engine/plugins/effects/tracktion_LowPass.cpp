@@ -18,8 +18,8 @@ LowPassPlugin::LowPassPlugin (PluginCreationInfo info) : Plugin (info)
     mode.referTo (state, IDs::mode, um, "lowpass");
 
     frequency = addParam ("frequency", TRANS("Frequency"), { 10.0f, 22000.0f },
-                          [] (float value)              { return juce::String (juce::roundToInt (value)) + " Hz"; },
-                          [] (const juce::String& s)    { return s.getFloatValue(); });
+                          [] (float value)              { return yup::String (yup::roundToInt (value)) + " Hz"; },
+                          [] (const yup::String& s)    { return s.getFloatValue(); });
 
     frequency->attachToCurrentValue (frequencyValue);
 }
@@ -43,8 +43,8 @@ void LowPassPlugin::updateFilters()
         currentFilterFreq = newFreq;
         isCurrentlyLowPass = nowLowPass;
 
-        auto c = nowLowPass ? juce::IIRCoefficients::makeLowPass  (sampleRate, newFreq)
-                            : juce::IIRCoefficients::makeHighPass (sampleRate, newFreq);
+        auto c = nowLowPass ? yup::IIRCoefficients::makeLowPass  (sampleRate, newFreq)
+                            : yup::IIRCoefficients::makeHighPass (sampleRate, newFreq);
 
         filter[0].setCoefficients (c);
         filter[1].setCoefficients (c);

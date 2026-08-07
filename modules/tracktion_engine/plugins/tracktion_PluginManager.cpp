@@ -27,16 +27,16 @@ inline SettingID getPluginListPropertyName()
 }
 
 //==============================================================================
-PluginManager::BuiltInType::BuiltInType (const juce::String& t) : type (t) {}
+PluginManager::BuiltInType::BuiltInType (const yup::String& t) : type (t) {}
 PluginManager::BuiltInType::~BuiltInType() {}
 
 //==============================================================================
 PluginManager::PluginManager (Engine& e)
     : engine (e)
 {
-    createPluginInstance = [this] (const juce::PluginDescription& description, double rate, int blockSize, juce::String& errorMessage)
+    createPluginInstance = [this] (const yup::PluginDescription& description, double rate, int blockSize, yup::String& errorMessage)
     {
-        return std::unique_ptr<juce::AudioPluginInstance> (pluginFormatManager.createPluginInstance (description, rate,
+        return std::unique_ptr<yup::AudioPluginInstance> (pluginFormatManager.createPluginInstance (description, rate,
                                                                                                      blockSize, errorMessage));
     };
 }
@@ -71,7 +71,7 @@ void PluginManager::initialise()
    #endif
 
     initialised = true;
-    juce::addDefaultFormatsToManager (pluginFormatManager);
+    yup::addDefaultFormatsToManager (pluginFormatManager);
 
     if (auto patchFormat = createCmajorPatchPluginFormat (engine))
         pluginFormatManager.addFormat (std::move (patchFormat));
@@ -292,13 +292,13 @@ void PluginManager::initialiseAirWindows()
 }
 #endif
 
-void PluginManager::changeListenerCallback (juce::ChangeBroadcaster*)
+void PluginManager::changeListenerCallback (yup::ChangeBroadcaster*)
 {
-    std::unique_ptr<juce::XmlElement> xml (knownPluginList.createXml());
+    std::unique_ptr<yup::XmlElement> xml (knownPluginList.createXml());
     engine.getPropertyStorage().setXmlProperty (getPluginListPropertyName(), *xml);
 }
 
-Plugin::Ptr PluginManager::createExistingPlugin (Edit& ed, const juce::ValueTree& v)
+Plugin::Ptr PluginManager::createExistingPlugin (Edit& ed, const yup::ValueTree& v)
 {
     if (auto p = createPlugin (ed, v, false))
     {
@@ -309,7 +309,7 @@ Plugin::Ptr PluginManager::createExistingPlugin (Edit& ed, const juce::ValueTree
     return {};
 }
 
-Plugin::Ptr PluginManager::createNewPlugin (Edit& ed, const juce::ValueTree& v)
+Plugin::Ptr PluginManager::createNewPlugin (Edit& ed, const yup::ValueTree& v)
 {
     if (auto p = createPlugin (ed, v, true))
     {
@@ -320,7 +320,7 @@ Plugin::Ptr PluginManager::createNewPlugin (Edit& ed, const juce::ValueTree& v)
     return {};
 }
 
-Plugin::Ptr PluginManager::createNewPlugin (Edit& ed, const juce::String& type, const juce::PluginDescription& desc)
+Plugin::Ptr PluginManager::createNewPlugin (Edit& ed, const yup::String& type, const yup::PluginDescription& desc)
 {
     jassert (initialised); // must call PluginManager::initialise() before this!
     jassert ((type == ExternalPlugin::xmlTypeName) == type.equalsIgnoreCase (ExternalPlugin::xmlTypeName));
@@ -367,16 +367,16 @@ Plugin::Ptr PluginManager::createNewPlugin (Edit& ed, const juce::String& type, 
     return {};
 }
 
-juce::Array<juce::PluginDescription> PluginManager::getARACompatiblePlugDescriptions()
+yup::Array<yup::PluginDescription> PluginManager::getARACompatiblePlugDescriptions()
 {
     jassert (initialised); // must call PluginManager::initialise() before this!
 
-    juce::Array<juce::PluginDescription> descs;
+    yup::Array<yup::PluginDescription> descs;
 
     for (const auto& p : knownPluginList.getTypes())
     {
         // Support both VST3 and AU formats for ARA
-        if (p.pluginFormatName != "VST3" && p.pluginFormatName != "AudioUnit")
+        if (p.name != "VST3" && p.name != "AudioUnit")
             continue;
 
         if (p.hasARAExtension)
@@ -398,14 +398,14 @@ void PluginManager::setDoubleClickToOpenWindows (bool b)
 
 int PluginManager::getNumberOfThreadsForScanning()
 {
-    return juce::jlimit (1, juce::SystemStats::getNumCpus(),
+    return yup::jlimit (1, yup::SystemStats::getNumCpus(),
                          static_cast<int> (engine.getPropertyStorage().getProperty (SettingID::numThreadsForPluginScanning, 1)));
 }
 
 void PluginManager::setNumberOfThreadsForScanning (int numThreads)
 {
     engine.getPropertyStorage().setProperty (SettingID::numThreadsForPluginScanning,
-                                             juce::jlimit (1, juce::SystemStats::getNumCpus(), numThreads));
+                                             yup::jlimit (1, yup::SystemStats::getNumCpus(), numThreads));
 }
 
 bool PluginManager::usesSeparateProcessForScanning()
@@ -420,7 +420,7 @@ void PluginManager::setUsesSeparateProcessForScanning (bool b)
     engine.getPropertyStorage().setProperty (SettingID::useSeparateProcessForScanning, b);
 }
 
-Plugin::Ptr PluginManager::createPlugin (Edit& ed, const juce::ValueTree& v, bool isNew)
+Plugin::Ptr PluginManager::createPlugin (Edit& ed, const yup::ValueTree& v, bool isNew)
 {
     jassert (initialised); // must call PluginManager::initialise() before this!
 
@@ -461,7 +461,7 @@ void PluginManager::registerBuiltInType (std::unique_ptr<BuiltInType> t)
 }
 
 //==============================================================================
-#if JUCE_MAC
+#if YUP_MAC
 static void killWithoutMercy (int)
 {
     kill (getpid(), SIGKILL);
@@ -479,13 +479,13 @@ static void setupSignalHandling()
 }
 #endif
 
-bool PluginManager::startChildProcessPluginScan (const juce::String& commandLine)
+bool PluginManager::startChildProcessPluginScan (const yup::String& commandLine)
 {
     auto childProcess = std::make_unique<PluginScanHelpers::PluginScanChildProcess>();
 
     if (childProcess->initialiseFromCommandLine (commandLine, PluginScanHelpers::commandLineUID))
     {
-       #if JUCE_MAC
+       #if YUP_MAC
         setupSignalHandling();
        #endif
 
@@ -513,7 +513,7 @@ Plugin::Ptr PluginCache::getPluginFor (EditItemID pluginID) const
     if (! pluginID.isValid())
         return {};
 
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     for (auto p : activePlugins)
         if (EditItemID::fromProperty (p->state, IDs::id) == pluginID)
@@ -522,9 +522,9 @@ Plugin::Ptr PluginCache::getPluginFor (EditItemID pluginID) const
     return {};
 }
 
-Plugin::Ptr PluginCache::getPluginFor (const juce::ValueTree& v) const
+Plugin::Ptr PluginCache::getPluginFor (const yup::ValueTree& v) const
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     for (auto p : activePlugins)
         if (p->state == v)
@@ -533,9 +533,9 @@ Plugin::Ptr PluginCache::getPluginFor (const juce::ValueTree& v) const
     return {};
 }
 
-Plugin::Ptr PluginCache::getPluginFor (juce::AudioProcessor& ap) const
+Plugin::Ptr PluginCache::getPluginFor (yup::AudioProcessor& ap) const
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     for (auto p : activePlugins)
         if (p->getWrappedAudioProcessor() == &ap)
@@ -544,16 +544,16 @@ Plugin::Ptr PluginCache::getPluginFor (juce::AudioProcessor& ap) const
     return {};
 }
 
-Plugin::Ptr PluginCache::getOrCreatePluginFor (const juce::ValueTree& v)
+Plugin::Ptr PluginCache::getOrCreatePluginFor (const yup::ValueTree& v)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     if (auto f = getPluginFor (v))
         return f;
 
     if (auto f = edit.engine.getPluginManager().createExistingPlugin (edit, v))
     {
-        jassert (juce::MessageManager::getInstance()->currentThreadHasLockedMessageManager()
+        jassert (yup::MessageManager::getInstance()->currentThreadHasLockedMessageManager()
                   || dynamic_cast<ExternalPlugin*> (f.get()) == nullptr);
 
         return addPluginToCache (f);
@@ -562,9 +562,9 @@ Plugin::Ptr PluginCache::getOrCreatePluginFor (const juce::ValueTree& v)
     return {};
 }
 
-Plugin::Ptr PluginCache::createNewPlugin (const juce::ValueTree& v)
+Plugin::Ptr PluginCache::createNewPlugin (const yup::ValueTree& v)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     auto p = addPluginToCache (edit.engine.getPluginManager().createNewPlugin (edit, v));
 
     if (p != nullptr && edit.engine.getEngineBehaviour().arePluginsRemappedWhenTempoChanges())
@@ -576,11 +576,11 @@ Plugin::Ptr PluginCache::createNewPlugin (const juce::ValueTree& v)
     return p;
 }
 
-Plugin::Ptr PluginCache::createNewPlugin (const juce::String& type, const juce::PluginDescription& desc)
+Plugin::Ptr PluginCache::createNewPlugin (const yup::String& type, const yup::PluginDescription& desc)
 {
     jassert (type.isNotEmpty());
 
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     auto p = addPluginToCache (edit.engine.getPluginManager().createNewPlugin (edit, type, desc));
 
     if (p != nullptr && edit.engine.getEngineBehaviour().arePluginsRemappedWhenTempoChanges())
@@ -594,7 +594,7 @@ Plugin::Ptr PluginCache::createNewPlugin (const juce::String& type, const juce::
 
 Plugin::Array PluginCache::getPlugins() const
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     return activePlugins;
 }
 
@@ -623,7 +623,7 @@ void PluginCache::timerCallback()
     Plugin::Array toDelete;
 
     {
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
 
         for (int i = activePlugins.size(); --i >= 0;)
         {

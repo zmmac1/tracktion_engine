@@ -66,7 +66,7 @@ public:
 private:
     tracktion::graph::Node* input;
     std::shared_ptr<tracktion::graph::Node> nodePtr;
-    size_t nodeID { (size_t) juce::Random::getSystemRandom().nextInt() };
+    size_t nodeID { (size_t) yup::Random::getSystemRandom().nextInt() };
 };
 
 //==============================================================================
@@ -78,7 +78,7 @@ private:
 class MidiNode final    : public Node
 {
 public:
-    MidiNode (juce::MidiMessageSequence sequenceToPlay)
+    MidiNode (yup::MidiMessageSequence sequenceToPlay)
         : sequence (std::move (sequenceToPlay))
     {
     }
@@ -102,7 +102,7 @@ public:
     {
         const int numSamples = (int) pc.referenceSampleRange.getLength();
         const double blockDuration = numSamples / sampleRate;
-        const auto timeRange = juce::Range<double>::withStartAndLength (lastTime, blockDuration);
+        const auto timeRange = yup::Range<double>::withStartAndLength (lastTime, blockDuration);
 
         for (int index = sequence.getNextIndexAtTime (timeRange.getStart()); index >= 0; ++index)
         {
@@ -125,7 +125,7 @@ public:
     }
 
 private:
-    juce::MidiMessageSequence sequence;
+    yup::MidiMessageSequence sequence;
     double sampleRate = 0.0, lastTime = 0.0;
 };
 
@@ -439,7 +439,7 @@ public:
         }
         else
         {
-            juce::SmoothedValue<float> smoother (lastGain);
+            yup::SmoothedValue<float> smoother (lastGain);
             smoother.setTargetValue (gain);
             smoother.reset ((int) pc.buffers.audio.getNumFrames());
             applyGainPerFrame (pc.buffers.audio, [&] { return smoother.getNextValue(); });
@@ -631,7 +631,7 @@ public:
         return ! input || input->hasProcessed();
     }
 
-    void preProcess (choc::buffer::FrameCount, juce::Range<int64_t>) override
+    void preProcess (choc::buffer::FrameCount, yup::Range<int64_t>) override
     {
         if (canUseSourceBuffers)
             setBufferViewToUse (input.get(), input->getProcessedOutput().audio);

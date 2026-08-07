@@ -13,11 +13,11 @@ namespace tracktion::inline engine {
 class MidiControllerEvent
 {
 public:
-    static juce::ValueTree createControllerEvent (BeatPosition, int controllerType, int controllerValue);
-    static juce::ValueTree createControllerEvent (BeatPosition, int controllerType, int controllerValue, int metadata);
-    static juce::ValueTree createControllerEvent (const MidiControllerEvent&, BeatPosition);
+    static yup::ValueTree createControllerEvent (BeatPosition, int controllerType, int controllerValue);
+    static yup::ValueTree createControllerEvent (BeatPosition, int controllerType, int controllerValue, int metadata);
+    static yup::ValueTree createControllerEvent (const MidiControllerEvent&, BeatPosition);
 
-    MidiControllerEvent (const juce::ValueTree&);
+    MidiControllerEvent (const yup::ValueTree&);
     MidiControllerEvent (MidiControllerEvent&&) = default;
 
     //==============================================================================
@@ -37,7 +37,7 @@ public:
     BeatPosition getEditBeats (const MidiClip&) const;
     TimePosition getEditTime (const MidiClip&) const;
 
-    juce::String getLevelDescription (MidiClip*) const;
+    yup::String getLevelDescription (MidiClip*) const;
 
     //==============================================================================
     /** Controller type, from the list below */
@@ -56,12 +56,12 @@ public:
         UnknownType         = 0x7fffffff
     };
 
-    static juce::String getControllerTypeName (int type) noexcept;
+    static yup::String getControllerTypeName (int type) noexcept;
 
     static int bankIDToCoarse (int id)          { return (id & 0xff00) >> 8; }
     static int bankIDToFine (int id)            { return id & 0xff; }
 
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     //==============================================================================
@@ -75,7 +75,7 @@ private:
     MidiControllerEvent() = delete;
     MidiControllerEvent (const MidiControllerEvent&) = delete;
 
-    JUCE_LEAK_DETECTOR (MidiControllerEvent)
+    YUP_LEAK_DETECTOR (MidiControllerEvent)
 };
 
 } // namespace tracktion::inline engine

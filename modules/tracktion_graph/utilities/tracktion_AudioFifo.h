@@ -156,10 +156,10 @@ public:
     }
 
 private:
-    juce::AbstractFifo fifo;
+    yup::AbstractFifo fifo;
     choc::buffer::ChannelArrayBuffer<float> buffer;
 
-    JUCE_DECLARE_NON_COPYABLE (AudioFifo)
+    YUP_DECLARE_NON_COPYABLE (AudioFifo)
 };
 
 } // namespace tracktion::inline graph

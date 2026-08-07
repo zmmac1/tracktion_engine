@@ -13,7 +13,7 @@ namespace tracktion::inline engine {
 /**
     Represents the destination output device(s) for a track.
 */
-class TrackOutput   : private juce::ValueTree::Listener
+class TrackOutput   : private yup::ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -30,16 +30,16 @@ public:
     //==============================================================================
     /// if compareDefaultDevices is true, then this returns true if the device name
     /// is 'default ..' and the actual device is named, or vice-versa
-    bool outputsToDevice (const juce::String& deviceName, bool compareDefaultDevices) const;
+    bool outputsToDevice (const yup::String& deviceName, bool compareDefaultDevices) const;
 
     /// The ID of the track's target device (if one is set).
-    juce::String getOutputDeviceID() const;
+    yup::String getOutputDeviceID() const;
 
     /// description of where it's going.
-    juce::String getOutputName() const;
+    yup::String getOutputName() const;
 
     /// includes the dest track's name, if relevant
-    juce::String getDescriptiveOutputName() const;
+    yup::String getDescriptiveOutputName() const;
 
     /// if the track's being routed into another one, this returns it
     AudioTrack* getDestinationTrack() const;
@@ -64,7 +64,7 @@ public:
     OutputDevice* getOutputDevice (bool traceThroughDestTracks) const;
 
     //==============================================================================
-    void setOutputToDeviceID (const juce::String& deviceID);
+    void setOutputToDeviceID (const yup::String& deviceID);
     void setOutputToTrack (AudioTrack*);
     void setOutputToDefaultDevice (bool isMidi);
 
@@ -74,10 +74,10 @@ public:
     */
     void setOutputToNone();
 
-    static void getPossibleOutputDeviceNames (const juce::Array<AudioTrack*>& tracks,
-                                              juce::StringArray& s, juce::StringArray& a,
-                                              juce::BigInteger& hasAudio,
-                                              juce::BigInteger& hasMidi);
+    static void getPossibleOutputDeviceNames (const yup::Array<AudioTrack*>& tracks,
+                                              yup::StringArray& s, yup::StringArray& a,
+                                              yup::BigInteger& hasAudio,
+                                              yup::BigInteger& hasMidi);
 
     //==============================================================================
     bool canPlayAudio() const;
@@ -85,22 +85,22 @@ public:
     bool canPlayMidi() const;
 
     /// false if not possible
-    bool injectLiveMidiMessage (const juce::MidiMessage&);
+    bool injectLiveMidiMessage (const yup::MidiMessage&);
 
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     Track& owner;
-    juce::CachedValue<juce::String> outputDevice;
+    juce::CachedValue<yup::String> outputDevice;
     EditItemID destTrackID;
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override {}
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override {}
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override {}
-    void valueTreeParentChanged (juce::ValueTree&) override {}
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override {}
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override {}
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override {}
+    void valueTreeParentChanged (yup::ValueTree&) override {}
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackOutput)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrackOutput)
 };
 
 } // namespace tracktion::inline engine

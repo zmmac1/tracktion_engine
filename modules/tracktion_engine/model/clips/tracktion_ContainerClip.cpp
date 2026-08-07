@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-ContainerClip::ContainerClip (const juce::ValueTree& v, EditItemID clipID, ClipOwner& targetParent)
+ContainerClip::ContainerClip (const yup::ValueTree& v, EditItemID clipID, ClipOwner& targetParent)
     : AudioClipBase (v, clipID, Type::container, targetParent)
 {
 }
@@ -42,7 +42,7 @@ void ContainerClip::cloneFrom (Clip* c)
 }
 
 //==============================================================================
-juce::String ContainerClip::getSelectableDescription()
+yup::String ContainerClip::getSelectableDescription()
 {
     return TRANS("Container Clip") + " - \"" + getName() + "\"";
 }
@@ -93,8 +93,8 @@ void ContainerClip::setLoopDefaults()
 
 void ContainerClip::setLoopRangeBeats (BeatRange newRangeBeats)
 {
-    const auto newStartBeat  = juce::jmax (0_bp, newRangeBeats.getStart());
-    const auto newLengthBeat = juce::jmax (0_bd, newRangeBeats.getLength());
+    const auto newStartBeat  = yup::jmax (0_bp, newRangeBeats.getStart());
+    const auto newLengthBeat = yup::jmax (0_bd, newRangeBeats.getLength());
 
     if (loopStartBeats != newStartBeat || loopLengthBeats != newLengthBeat)
     {
@@ -123,7 +123,7 @@ void ContainerClip::pitchTempoTrackChanged()
 }
 
 //==============================================================================
-juce::ValueTree& ContainerClip::getClipOwnerState()
+yup::ValueTree& ContainerClip::getClipOwnerState()
 {
     return clipListState;
 }

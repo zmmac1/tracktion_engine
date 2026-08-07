@@ -26,7 +26,7 @@ struct MidiChannel
         jassert (channelNumber1to16 > 0 && channelNumber1to16 <= 16);
     }
 
-    explicit MidiChannel (const juce::var& storedChannel) noexcept
+    explicit MidiChannel (const yup::var& storedChannel) noexcept
         : channel ((uint8_t) static_cast<int> (storedChannel))
     {
         if (! isValid())
@@ -49,7 +49,7 @@ struct MidiChannel
     bool operator== (const MidiChannel& other) const noexcept   { return channel == other.channel; }
     bool operator!= (const MidiChannel& other) const noexcept   { return channel != other.channel; }
 
-    operator juce::var() const                                  { return juce::var (getChannelNumber()); }
+    operator yup::var() const                                  { return yup::var (getChannelNumber()); }
 
 private:
     uint8_t channel = 0;

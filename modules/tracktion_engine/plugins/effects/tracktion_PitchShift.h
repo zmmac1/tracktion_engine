@@ -13,28 +13,28 @@ namespace tracktion::inline engine {
 class PitchShiftPlugin : public Plugin
 {
 public:
-    PitchShiftPlugin (Edit&, const juce::ValueTree&);
+    PitchShiftPlugin (Edit&, const yup::ValueTree&);
     PitchShiftPlugin (PluginCreationInfo);
     ~PitchShiftPlugin() override;
 
     static const char* getPluginName()          { return NEEDS_TRANS("Pitch Shifter"); }
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
     //==============================================================================
     static const char* xmlTypeName;
 
-    juce::String getName() const override       { return TRANS("Pitch Shifter"); }
-    juce::String getPluginType() override       { return xmlTypeName; }
-    juce::String getShortName (int) override    { return TRANS("Pitch"); }
+    yup::String getName() const override       { return TRANS("Pitch Shifter"); }
+    yup::String getPluginType() override       { return xmlTypeName; }
+    yup::String getShortName (int) override    { return TRANS("Pitch"); }
 
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     double getLatencySeconds() override;
-    int getNumOutputChannelsGivenInputs (int numInputChannels) override  { return juce::jmin (numInputChannels, 2); }
+    int getNumOutputChannelsGivenInputs (int numInputChannels) override  { return yup::jmin (numInputChannels, 2); }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
     void applyToBuffer (const PluginRenderContext&) override;
-    juce::String getSelectableDescription() override;
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    yup::String getSelectableDescription() override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     juce::CachedValue<float> semitonesValue;
     juce::CachedValue<int> mode;
@@ -47,7 +47,7 @@ private:
     struct Pimpl;
     std::unique_ptr<Pimpl> pimpl;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PitchShiftPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PitchShiftPlugin)
 };
 
 } // namespace tracktion::inline engine

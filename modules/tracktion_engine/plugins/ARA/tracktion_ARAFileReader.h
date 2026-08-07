@@ -24,15 +24,15 @@ struct ARAClipPlayer;
     This class handles the ARA (Audio Random Access) integration, allowing
     plugins like Melodyne to provide advanced audio analysis and manipulation.
 */
-class ARAFileReader   : public juce::ReferenceCountedObject,
-                        public juce::ChangeBroadcaster
+class ARAFileReader   : public yup::ReferenceCountedObject,
+                        public yup::ChangeBroadcaster
 {
 public:
     ARAFileReader (Edit&, AudioClipBase&);
     ARAFileReader (Edit&, AudioClipBase&, ARAFileReader& oneToClone);
     ~ARAFileReader();
 
-    using Ptr = juce::ReferenceCountedObjectPtr<ARAFileReader>;
+    using Ptr = yup::ReferenceCountedObjectPtr<ARAFileReader>;
 
     static void cleanUpOnShutdown();
 
@@ -40,26 +40,26 @@ public:
     /** Parsed info from an ARA audio file chunk embedded in iXML. */
     struct ARAChunkInfo
     {
-        juce::String documentArchiveID;
+        yup::String documentArchiveID;
         bool openAutomatically = false;
-        juce::String persistentID;
-        juce::MemoryBlock archiveData;
-        juce::String suggestedPlugInName;
-        juce::String manufacturerName;
+        yup::String persistentID;
+        yup::MemoryBlock archiveData;
+        yup::String suggestedPlugInName;
+        yup::String manufacturerName;
     };
 
     /** Reads the raw iXML chunk from a WAV or AIFF file. */
-    static juce::String readRawIXMLFromSourceFile (const juce::File&);
+    static yup::String readRawIXMLFromSourceFile (const yup::File&);
 
     /** Parses ARA audio file chunks from a raw iXML string. */
-    static juce::Array<ARAChunkInfo> parseARAAudioFileChunksFromIXML (const juce::String& ixmlString);
+    static yup::Array<ARAChunkInfo> parseARAAudioFileChunksFromIXML (const yup::String& ixmlString);
 
     /** Finds an installed ARA plugin whose factory matches the given archive ID.
         If suggestedPlugInName is given (e.g. from an ARA audio file chunk), only
         plugins with that name are considered - this avoids loading the module of
         every installed ARA plugin just to compare archive IDs. */
-    static juce::PluginDescription findPluginForARAArchiveID (Engine&, const juce::String& archiveID,
-                                                              const juce::String& suggestedPlugInName = {});
+    static yup::PluginDescription findPluginForARAArchiveID (Engine&, const yup::String& archiveID,
+                                                              const yup::String& suggestedPlugInName = {});
 
     //==============================================================================
     bool isValid() const noexcept                       { return player != nullptr; }
@@ -80,7 +80,7 @@ public:
     int getNumPlaybackRegions() const;
 
     bool isAnalysingContent();
-    juce::MidiMessageSequence getAnalysedMIDISequence();
+    yup::MidiMessageSequence getAnalysedMIDISequence();
 
     void sourceClipChanged();
 
@@ -90,26 +90,26 @@ public:
 
     /** Store a partial ARA archive of this clip's plugin edits for copy/paste.
         Returns an empty MemoryBlock if ARA is not active. */
-    juce::MemoryBlock storeARAArchiveForCopy();
+    yup::MemoryBlock storeARAArchiveForCopy();
 
     /** Restore a partial ARA archive into this clip after paste.
         @param data            The archive data (from storeARAArchiveForCopy)
         @param archivedSourceID  The audio source persistent ID from when the archive was created
         @param archivedModID     The audio modification persistent ID from when the archive was created
     */
-    void restoreARAArchiveForPaste (const juce::MemoryBlock& data,
-                                    const juce::String& archivedSourceID,
-                                    const juce::String& archivedModID,
-                                    const juce::String& documentArchiveID = {});
+    void restoreARAArchiveForPaste (const yup::MemoryBlock& data,
+                                    const yup::String& archivedSourceID,
+                                    const yup::String& archivedModID,
+                                    const yup::String& documentArchiveID = {});
 
     /** Returns the persistent ID of the current audio source, or empty if ARA is not active. */
-    juce::String getAudioSourcePersistentID() const;
+    yup::String getAudioSourcePersistentID() const;
 
     /** Returns the persistent ID of the current audio modification, or empty if ARA is not active. */
-    juce::String getAudioModificationPersistentID() const;
+    yup::String getAudioModificationPersistentID() const;
 
     /** Returns the document archive ID from the ARA factory, or empty if ARA is not active. */
-    juce::String getDocumentArchiveID() const;
+    yup::String getDocumentArchiveID() const;
 
     /** Returns extra time before the playback region start reported by the ARA plugin. */
     TimeDuration getHead() const;
@@ -120,14 +120,14 @@ public:
     /** Serialises audio-thread rendering of the plugin against message-thread renderer
         deactivation (ARA playback-region changes require the plugin to not be in
         render-state). The audio thread try-locks this and outputs silence if held. */
-    juce::CriticalSection& getProcessLock() noexcept    { return processLock; }
+    yup::CriticalSection& getProcessLock() noexcept    { return processLock; }
 
 private:
     std::unique_ptr<ARAClipPlayer> player;
-    juce::MidiBuffer midiBuffer;
-    juce::CriticalSection processLock;
+    yup::MidiBuffer midiBuffer;
+    yup::CriticalSection processLock;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAFileReader)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAFileReader)
 };
 
 /** @deprecated Use ARAFileReader instead */
@@ -137,16 +137,16 @@ using MelodyneFileReader = ARAFileReader;
 /** Result of detecting ARA iXML chunks in an audio file. */
 struct ARAIXMLResult
 {
-    juce::PluginDescription pluginDescription;
-    juce::MemoryBlock archiveData;
-    juce::String persistentID;
-    juce::String documentArchiveID;
+    yup::PluginDescription pluginDescription;
+    yup::MemoryBlock archiveData;
+    yup::String persistentID;
+    yup::String documentArchiveID;
     bool isValid() const { return pluginDescription.name.isNotEmpty(); }
 };
 
 /** Scans a source audio file for ARA iXML chunks and returns the first
     matching installed plugin description along with archive data. */
-ARAIXMLResult detectARAFromIXMLChunks (Engine&, const juce::File& sourceFile);
+ARAIXMLResult detectARAFromIXMLChunks (Engine&, const yup::File& sourceFile);
 
 
 //==============================================================================
@@ -167,13 +167,13 @@ private:
 
     std::unique_ptr<Impl> impl;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPluginBinding)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPluginBinding)
 };
 
 //==============================================================================
 struct ARADocumentHolder
 {
-    ARADocumentHolder (Edit&, const juce::ValueTree&);
+    ARADocumentHolder (Edit&, const yup::ValueTree&);
     ~ARADocumentHolder();
 
     void flushStateToValueTree();
@@ -188,7 +188,7 @@ struct ARADocumentHolder
 
         Returns false if the plugin isn't ARA-capable, its instance isn't loaded yet, or
         the binding fails. */
-    bool bindPluginToDocument (ExternalPlugin&, const juce::PluginDescription&);
+    bool bindPluginToDocument (ExternalPlugin&, const yup::PluginDescription&);
 
     /** Notifies every existing ARA document that the edit's tempo/key/chord content
         has changed so the plugins re-read their musical contexts. Called from
@@ -202,10 +202,10 @@ struct ARADocumentHolder
 
 private:
     Edit& edit;
-    juce::ValueTree lastState;
+    yup::ValueTree lastState;
     std::unique_ptr<Pimpl> pimpl;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentHolder)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentHolder)
 };
 
 } // namespace tracktion::inline engine

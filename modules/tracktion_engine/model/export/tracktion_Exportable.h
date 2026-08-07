@@ -34,7 +34,7 @@ public:
         bool operator!= (const ReferencedItem& other) const  { return ! operator== (other); }
     };
 
-    virtual juce::Array<ReferencedItem> getReferencedItems() = 0;
+    virtual yup::Array<ReferencedItem> getReferencedItems() = 0;
 
     virtual void reassignReferencedItem (const ReferencedItem&,
                                          ProjectItemRef newRef,
@@ -42,7 +42,7 @@ public:
 
     //==============================================================================
     /** Returns all the Exportables contained in an Edit. */
-    static juce::Array<Exportable*> addAllExportables (Edit&);
+    static yup::Array<Exportable*> addAllExportables (Edit&);
 };
 
 } // namespace tracktion::inline engine

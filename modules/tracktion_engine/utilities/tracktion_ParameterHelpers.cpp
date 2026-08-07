@@ -12,13 +12,13 @@ namespace tracktion::inline engine
 {
 
 ParameterWithStateValue::ParameterWithStateValue (Plugin& plugin,
-                                                  const juce::String& paramID,
-                                                  const juce::Identifier& propertyName,
-                                                  const juce::String& description,
+                                                  const yup::String& paramID,
+                                                  const yup::Identifier& propertyName,
+                                                  const yup::String& description,
                                                   float defaultValue,
-                                                  juce::NormalisableRange<float> valueRange,
-                                                  std::function<juce::String(float)> valueToStringFunction,
-                                                  std::function<float(const juce::String&)> stringToValueFunction)
+                                                  yup::NormalisableRange<float> valueRange,
+                                                  std::function<yup::String(float)> valueToStringFunction,
+                                                  std::function<float(const yup::String&)> stringToValueFunction)
 {
     parameter = plugin.addParam (paramID, description, valueRange);
     value = std::make_unique<juce::CachedValue<float>> (plugin.state, propertyName, std::addressof (plugin.edit.getUndoManager()), defaultValue);
@@ -48,12 +48,12 @@ void ParameterWithStateValue::reset()
     value.reset();
 }
 
-void ParameterWithStateValue::setParameter (float newValue, juce::NotificationType nt)
+void ParameterWithStateValue::setParameter (float newValue, yup::NotificationType nt)
 {
     parameter->setParameter (newValue, nt);
 }
 
-void ParameterWithStateValue::setFromValueTree (const juce::ValueTree& v)
+void ParameterWithStateValue::setFromValueTree (const yup::ValueTree& v)
 {
     if (value)
     {

@@ -16,23 +16,23 @@ class EnvelopeFollowerModifier  : public Modifier,
 {
 public:
     //==============================================================================
-    EnvelopeFollowerModifier (Edit&, const juce::ValueTree&);
+    EnvelopeFollowerModifier (Edit&, const yup::ValueTree&);
     ~EnvelopeFollowerModifier() override;
 
-    using Ptr    = juce::ReferenceCountedObjectPtr<EnvelopeFollowerModifier>;
-    using Array = juce::ReferenceCountedArray<EnvelopeFollowerModifier>;
+    using Ptr    = yup::ReferenceCountedObjectPtr<EnvelopeFollowerModifier>;
+    using Array = yup::ReferenceCountedArray<EnvelopeFollowerModifier>;
 
     void initialise() override  {}
     float getCurrentValue() override;
 
-    juce::String getName() const override           { return TRANS("Envelope Follower Modifier"); }
+    yup::String getName() const override           { return TRANS("Envelope Follower Modifier"); }
 
     //==============================================================================
     float getEnvelopeValue() const noexcept         { return envelopeValue.load (std::memory_order_acquire); }
 
-    AutomatableParameter::ModifierAssignment* createAssignment (const juce::ValueTree&) override;
+    AutomatableParameter::ModifierAssignment* createAssignment (const yup::ValueTree&) override;
 
-    juce::StringArray getAudioInputNames() override;
+    yup::StringArray getAudioInputNames() override;
     ProcessingPosition getProcessingPosition() override { return ProcessingPosition::postFX; }
 
     void initialise (double sampleRate, int blockSizeSamples) override;
@@ -42,18 +42,18 @@ public:
     //==============================================================================
     struct Assignment : public AutomatableParameter::ModifierAssignment
     {
-        Assignment (const juce::ValueTree&, const EnvelopeFollowerModifier&);
+        Assignment (const yup::ValueTree&, const EnvelopeFollowerModifier&);
 
         bool isForModifierSource (const ModifierSource&) const override;
         EnvelopeFollowerModifier::Ptr getEnvelopeFollowerModifier() const;
 
         const EditItemID envelopeFollowerModifierID;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
     };
 
     //==============================================================================
-    juce::String getSelectableDescription() override    { return getName(); }
+    yup::String getSelectableDescription() override    { return getName(); }
 
     //==============================================================================
     juce::CachedValue<float> gainDb, attack, hold, release, depth, offset, lowPassEnabled, highPassEnabled, lowPassFrequency, highPassFrequency;
@@ -65,12 +65,12 @@ private:
 
     std::atomic<float> envelopeValue;
     std::unique_ptr<EnvelopeFollower> envelopeFollower;
-    juce::IIRFilter lowPassFilter, highPassFilter;
+    yup::IIRFilter lowPassFilter, highPassFilter;
     float currentLowPassFrequency = 0.0f, currentHighPassFrequency = 0.0f;
     LambdaTimer changedTimer;
 
     void prepareToPlay (double sampleRate);
-    void processBlock (const juce::AudioBuffer<float>&);
+    void processBlock (const yup::AudioBuffer<float>&);
     void reset();
 
     void valueTreeChanged() override;

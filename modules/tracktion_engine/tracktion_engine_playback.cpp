@@ -15,11 +15,11 @@
 #include <shared_mutex>
 
 #if TRACKTION_ENABLE_ABLETON_LINK
- #include <juce_core/system/juce_TargetPlatform.h>
+ #include <yup_core/system/juce_TargetPlatform.h>
 
  // Ableton Link has to be included here before ReWire as ReWire seems to mess with some Windows defs
- #if (JUCE_WINDOWS || JUCE_MAC || JUCE_LINUX || JUCE_ANDROID)
-     #if JUCE_MAC
+ #if (JUCE_WINDOWS || YUP_MAC || JUCE_LINUX || JUCE_ANDROID)
+     #if YUP_MAC
       #define LINK_PLATFORM_MACOSX  1
      #endif
 
@@ -82,9 +82,9 @@ extern "C"
     #pragma clang diagnostic ignored "-Wconversion"
    #endif
 
-    #include "ReWire/ReWireSDK/ReWire.c"
-    #include "ReWire/ReWireSDK/ReWireAPI.c"
-    #include "ReWire/ReWireSDK/ReWireDeviceAPI.c"
+// EXCLUDED:     #include "ReWire/ReWireSDK/ReWire.c"
+// EXCLUDED:     #include "ReWire/ReWireSDK/ReWireAPI.c"
+// EXCLUDED:     #include "ReWire/ReWireSDK/ReWireDeviceAPI.c"
 
    #if MAC
     #pragma clang diagnostic pop
@@ -194,7 +194,7 @@ using namespace std::literals;
 #include "playback/graph/tracktion_LiveMidiInjectingNode.h"
 #include "playback/graph/tracktion_LiveMidiOutputNode.h"
 #include "playback/graph/tracktion_LoopingMidiNode.h"
-#include "playback/graph/tracktion_ARANode.h"
+// EXCLUDED: #include "playback/graph/tracktion_ARANode.h"
 #include "playback/graph/tracktion_MidiNode.h"
 #include "playback/graph/tracktion_MidiOutputDeviceInstanceInjectingNode.h"
 #include "playback/graph/tracktion_WaveNode.h"
@@ -230,7 +230,7 @@ using namespace std::literals;
 #include "playback/graph/tracktion_LiveMidiOutputNode.cpp"
 #include "playback/graph/tracktion_LoopingMidiNode.cpp"
 #include "playback/graph/tracktion_LoopingMidiNode.test.cpp"
-#include "playback/graph/tracktion_ARANode.cpp"
+// EXCLUDED: #include "playback/graph/tracktion_ARANode.cpp"
 #include "playback/graph/tracktion_MidiNode.cpp"
 #include "playback/graph/tracktion_MidiOutputDeviceInstanceInjectingNode.cpp"
 #include "playback/graph/tracktion_WaveNode.cpp"
@@ -277,7 +277,7 @@ using namespace std::literals;
 #include "playback/tracktion_MidiNoteDispatcher.cpp"
 #include "playback/tracktion_TransportControl.test.cpp"
 #include "playback/tracktion_TransportControl.cpp"
-#include "playback/tracktion_AbletonLink.cpp"
+// EXCLUDED: #include "playback/tracktion_AbletonLink.cpp"
 
 #include "playback/devices/tracktion_IODevice.cpp"
 #include "playback/devices/tracktion_InputDevice.cpp"
@@ -310,10 +310,10 @@ static inline void sprintf (char* dest, size_t maxLength, const char* format, ..
    #endif
 }
 
-#include "control_surfaces/tracktion_ControlSurface.cpp"
-#include "control_surfaces/tracktion_ExternalControllerManager.cpp"
-#include "control_surfaces/tracktion_ExternalController.cpp"
-#include "control_surfaces/tracktion_CustomControlSurface.cpp"
+// EXCLUDED: #include "control_surfaces/tracktion_ControlSurface.cpp"
+// EXCLUDED: #include "control_surfaces/tracktion_ExternalControllerManager.cpp"
+// EXCLUDED: #include "control_surfaces/tracktion_ExternalController.cpp"
+// EXCLUDED: #include "control_surfaces/tracktion_CustomControlSurface.cpp"
 
 #if TRACKTION_ENABLE_CONTROL_SURFACES
  #if TRACKTION_ENABLE_CONTROL_SURFACE_MACKIEC4
@@ -323,20 +323,20 @@ static inline void sprintf (char* dest, size_t maxLength, const char* format, ..
   } // namespace tracktion::inline engine
  #endif
 
- #include "control_surfaces/types/tracktion_AlphaTrack.cpp"
+// EXCLUDED:  #include "control_surfaces/types/tracktion_AlphaTrack.cpp"
  #if TRACKTION_ENABLE_CONTROL_SURFACE_MACKIEC4
-  #include "control_surfaces/types/tracktion_MackieC4.cpp"
+// EXCLUDED:   #include "control_surfaces/types/tracktion_MackieC4.cpp"
  #endif
- #include "control_surfaces/types/tracktion_MackieMCU.cpp"
- #include "control_surfaces/types/tracktion_MackieXT.cpp"
- #include "control_surfaces/types/tracktion_IconProG2.cpp"
- #include "control_surfaces/types/tracktion_NovationRemoteSl.cpp"
- #include "control_surfaces/types/tracktion_RemoteSLCompact.cpp"
- #include "control_surfaces/types/tracktion_Tranzport.cpp"
+// EXCLUDED:  #include "control_surfaces/types/tracktion_MackieMCU.cpp"
+// EXCLUDED:  #include "control_surfaces/types/tracktion_MackieXT.cpp"
+// EXCLUDED:  #include "control_surfaces/types/tracktion_IconProG2.cpp"
+// EXCLUDED:  #include "control_surfaces/types/tracktion_NovationRemoteSl.cpp"
+// EXCLUDED:  #include "control_surfaces/types/tracktion_RemoteSLCompact.cpp"
+// EXCLUDED:  #include "control_surfaces/types/tracktion_Tranzport.cpp"
 #endif
 
 #if TRACKTION_ENABLE_CONTROL_SURFACES
- #include "control_surfaces/types/tracktion_NovationAutomap.cpp"
+// EXCLUDED:  #include "control_surfaces/types/tracktion_NovationAutomap.cpp"
 #endif
 
 #ifdef __GNUC__

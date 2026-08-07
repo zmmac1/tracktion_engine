@@ -13,7 +13,7 @@ namespace tracktion::inline engine {
 /** Manages a list of items that are currently selected.
     @see Selectable
 */
-class SelectionManager  : public juce::ChangeBroadcaster,
+class SelectionManager  : public yup::ChangeBroadcaster,
                           private SelectableListener
 {
 public:
@@ -63,9 +63,9 @@ public:
     }
 
     template <typename SelectableClass>
-    juce::Array<SelectableClass*> getItemsOfType() const
+    yup::Array<SelectableClass*> getItemsOfType() const
     {
-        juce::Array<SelectableClass*> items;
+        yup::Array<SelectableClass*> items;
 
         for (auto s : selected)
             if (auto item = dynamic_cast<SelectableClass*> (s))
@@ -125,7 +125,7 @@ public:
         SelectionManager& manager;
         SelectableList selected;
 
-        JUCE_DECLARE_NON_COPYABLE (ScopedSelectionState)
+        YUP_DECLARE_NON_COPYABLE (ScopedSelectionState)
     };
 
     //==============================================================================
@@ -156,8 +156,8 @@ public:
 
     // walks up the parent hierarchy of a component, looking for a ComponentWithSelectionManager,
     // and if it finds one, returns its SelectionManager.
-    static SelectionManager* findSelectionManager (const juce::Component*);
-    static SelectionManager* findSelectionManager (const juce::Component&);
+    static SelectionManager* findSelectionManager (const yup::Component*);
+    static SelectionManager* findSelectionManager (const yup::Component&);
 
     //==============================================================================
     static SelectionManager* findSelectionManagerContaining (const Selectable*);
@@ -178,13 +178,13 @@ private:
     //==============================================================================
     SelectableList selected;
     friend class Selectable;
-    juce::CriticalSection lock;
+    yup::CriticalSection lock;
 
     void selectionChanged();
     void clearList();
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (SelectionManager)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SelectionManager)
+    YUP_DECLARE_WEAK_REFERENCEABLE (SelectionManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SelectionManager)
 };
 
 } // namespace tracktion::inline engine

@@ -37,7 +37,7 @@ struct ProcessState
                                         tracks changes from one call to the next. This flag lets you ensure
                                         it is only called once per block.
     */
-    void update (double sampleRate, juce::Range<int64_t> referenceSampleRange, UpdateContinuityFlags);
+    void update (double sampleRate, yup::Range<int64_t> referenceSampleRange, UpdateContinuityFlags);
 
     /** Sets a playback speed ratio.
         Some Nodes might use this to adjust their playback speeds.
@@ -79,7 +79,7 @@ struct ProcessState
     tracktion::graph::PlayHeadState& playHeadState;
     double sampleRate = 44100.0, playbackSpeedRatio = 1.0;
     int numSamples = 0;
-    juce::Range<int64_t> referenceSampleRange, timelineSampleRange;
+    yup::Range<int64_t> referenceSampleRange, timelineSampleRange;
     TimeRange editTimeRange;
     BeatRange editBeatRange;
 
@@ -113,7 +113,7 @@ public:
     double getSampleRate() const                            { return processState->sampleRate; }
 
     /** Returns the timeline sample range of the current process block. */
-    juce::Range<int64_t> getTimelineSampleRange() const     { return processState->timelineSampleRange; }
+    yup::Range<int64_t> getTimelineSampleRange() const     { return processState->timelineSampleRange; }
 
     /** Returns the edit time range of the current process block. */
     TimeRange getEditTimeRange() const                      { return processState->editTimeRange; }
@@ -122,7 +122,7 @@ public:
     BeatRange getEditBeatRange() const                      { return processState->editBeatRange; }
 
     /** Returns the reference sample range (from the DeviceManager) of the current process block. */
-    juce::Range<int64_t> getReferenceSampleRange() const    { return processState->referenceSampleRange; }
+    yup::Range<int64_t> getReferenceSampleRange() const    { return processState->referenceSampleRange; }
 
     /** Returns the key of the current process block. */
     tempo::Key getKey() const;

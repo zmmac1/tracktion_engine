@@ -17,13 +17,13 @@ class PitchSetting   : public TrackItem,
                        private ValueTreeAllEventListener
 {
 public:
-    PitchSetting (Edit&, const juce::ValueTree&);
+    PitchSetting (Edit&, const yup::ValueTree&);
     ~PitchSetting() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<PitchSetting>;
-    using Array = juce::ReferenceCountedArray<PitchSetting>;
+    using Ptr = yup::ReferenceCountedObjectPtr<PitchSetting>;
+    using Array = yup::ReferenceCountedArray<PitchSetting>;
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     BeatPosition getStartBeatNumber() const       { return startBeat; }
     void setStartBeat (BeatPosition);
@@ -36,11 +36,11 @@ public:
 
     void removeFromEdit();
 
-    juce::String getName() const override;
+    yup::String getName() const override;
     Track* getTrack() const override;
     ClipPosition getPosition() const override;
 
-    juce::ValueTree state;
+    yup::ValueTree state;
     juce::CachedValue<BeatPosition> startBeat;
     juce::CachedValue<int> pitch;
     juce::CachedValue<bool> accidentalsSharp;
@@ -49,7 +49,7 @@ public:
 private:
     void valueTreeChanged() override { changed(); }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PitchSetting)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PitchSetting)
 };
 
 inline bool operator< (const PitchSetting& p1, const PitchSetting& p2) noexcept

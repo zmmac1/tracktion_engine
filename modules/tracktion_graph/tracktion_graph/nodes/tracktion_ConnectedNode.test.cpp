@@ -45,7 +45,7 @@ TEST_SUITE ("tracktion_graph")
                 const double sampleRate = ts.sampleRate;
                 const double sinFrequency = sampleRate / 100.0;
                 const double numSamplesPerCycle = sampleRate / sinFrequency;
-                const int numLatencySamples = juce::roundToInt (numSamplesPerCycle / 2.0);
+                const int numLatencySamples = yup::roundToInt (numSamplesPerCycle / 2.0);
 
                 auto sinNode1 = std::make_shared<SinNode> ((float) sinFrequency);
                 auto sinNode2 = std::make_shared<LatencyNode> (makeNode<SinNode> ((float) sinFrequency), numLatencySamples);

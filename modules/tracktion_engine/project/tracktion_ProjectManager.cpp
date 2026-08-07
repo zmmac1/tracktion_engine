@@ -31,12 +31,12 @@ void ProjectManager::initialise()
 
     if (storage.getProperty (SettingID::findExamples, false))
     {
-        storage.setProperty (SettingID::findExamples, juce::var());
+        storage.setProperty (SettingID::findExamples, yup::var());
 
         auto examplesDir = storage.getAppPrefsFolder().getChildFile ("examples");
 
-        auto exampleProjects = examplesDir.findChildFiles (juce::File::findFiles, true,
-                                                           juce::String ("*") + projectFileSuffix);
+        auto exampleProjects = examplesDir.findChildFiles (yup::File::findFiles, true,
+                                                           yup::String ("*") + projectFileSuffix);
 
         for (auto& f : exampleProjects)
             addProjectToList (f, false, getActiveProjectsFolder(),
@@ -47,10 +47,10 @@ void ProjectManager::initialise()
 }
 
 //==============================================================================
-static void ensureAllItemsHaveIDs (const juce::ValueTree& folder)
+static void ensureAllItemsHaveIDs (const yup::ValueTree& folder)
 {
     if (folder[IDs::uid].toString().isEmpty())
-        juce::ValueTree (folder).setProperty (IDs::uid, juce::String::toHexString (juce::Random().nextInt()), nullptr);
+        yup::ValueTree (folder).setProperty (IDs::uid, yup::String::toHexString (yup::Random().nextInt()), nullptr);
 
     for (int i = 0; i < folder.getNumChildren(); ++i)
         ensureAllItemsHaveIDs (folder.getChild(i));
@@ -58,20 +58,20 @@ static void ensureAllItemsHaveIDs (const juce::ValueTree& folder)
 
 void ProjectManager::loadList()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     folders = {};
 
     auto xml = engine.getPropertyStorage().getXmlProperty (SettingID::projectList);
 
     if (xml != nullptr)
-        folders = juce::ValueTree::fromXml (*xml);
+        folders = yup::ValueTree::fromXml (*xml);
 
     if (! folders.hasType (IDs::ROOT))
-        folders = juce::ValueTree (IDs::ROOT);
+        folders = yup::ValueTree (IDs::ROOT);
 
-    if (! getLibraryProjectsFolder().isValid())  folders.addChild (juce::ValueTree (IDs::LIBRARY), -1, nullptr);
-    if (! getActiveProjectsFolder().isValid())   folders.addChild (juce::ValueTree (IDs::ACTIVE), 0, nullptr);
+    if (! getLibraryProjectsFolder().isValid())  folders.addChild (yup::ValueTree (IDs::LIBRARY), -1, nullptr);
+    if (! getActiveProjectsFolder().isValid())   folders.addChild (yup::ValueTree (IDs::ACTIVE), 0, nullptr);
 
     jassert (getActiveProjectsFolder().isValid() && getLibraryProjectsFolder().isValid());
 
@@ -81,7 +81,7 @@ void ProjectManager::loadList()
 
         if (xml != nullptr)
         {
-            auto oldT4 = juce::ValueTree::fromXml (*xml);
+            auto oldT4 = yup::ValueTree::fromXml (*xml);
 
             {
                 auto v = oldT4.getChildWithProperty (IDs::name, "Library Projects");
@@ -110,7 +110,7 @@ void ProjectManager::loadList()
     ensureAllItemsHaveIDs (folders);
 }
 
-static void stripProjectObjects (juce::ValueTree v)
+static void stripProjectObjects (yup::ValueTree v)
 {
     v.removeProperty (IDs::project, nullptr);
 
@@ -120,17 +120,17 @@ static void stripProjectObjects (juce::ValueTree v)
 
 void ProjectManager::saveList()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     auto foldersCopy = folders.createCopy();
     stripProjectObjects (foldersCopy);
 
-    std::unique_ptr<juce::XmlElement> xml (foldersCopy.createXml());
+    std::unique_ptr<yup::XmlElement> xml (foldersCopy.createXml());
     engine.getPropertyStorage().setXmlProperty (SettingID::projectList, *xml);
 }
 
-static void findProjects (ProjectManager& pm, const juce::ValueTree& folder,
-                          juce::ReferenceCountedArray<Project>& list)
+static void findProjects (ProjectManager& pm, const yup::ValueTree& folder,
+                          yup::ReferenceCountedArray<Project>& list)
 {
     if (auto p = pm.getProjectFrom (folder))
         list.add (p);
@@ -139,27 +139,27 @@ static void findProjects (ProjectManager& pm, const juce::ValueTree& folder,
         findProjects (pm, folder.getChild(i), list);
 }
 
-juce::ReferenceCountedArray<Project> ProjectManager::getAllProjects()
+yup::ReferenceCountedArray<Project> ProjectManager::getAllProjects()
 {
-    const juce::ScopedLock sl (lock);
-    juce::ReferenceCountedArray<Project> list;
+    const yup::ScopedLock sl (lock);
+    yup::ReferenceCountedArray<Project> list;
     findProjects (*this, folders, list);
     return list;
 }
 
-juce::ReferenceCountedArray<Project> ProjectManager::getAllProjects (const juce::ValueTree& folder)
+yup::ReferenceCountedArray<Project> ProjectManager::getAllProjects (const yup::ValueTree& folder)
 {
-    const juce::ScopedLock sl (lock);
-    juce::ReferenceCountedArray<Project> list;
+    const yup::ScopedLock sl (lock);
+    yup::ReferenceCountedArray<Project> list;
     findProjects (*this, folder, list);
     return list;
 }
 
-juce::ValueTree ProjectManager::getActiveProjectsFolder()                      { return folders.getChildWithName (IDs::ACTIVE); }
-juce::ValueTree ProjectManager::getLibraryProjectsFolder()                     { return folders.getChildWithName (IDs::LIBRARY); }
+yup::ValueTree ProjectManager::getActiveProjectsFolder()                      { return folders.getChildWithName (IDs::ACTIVE); }
+yup::ValueTree ProjectManager::getLibraryProjectsFolder()                     { return folders.getChildWithName (IDs::LIBRARY); }
 
 //==============================================================================
-Project::Ptr ProjectManager::findProjectWithId (const juce::ValueTree& folder, ProjectID pid)
+Project::Ptr ProjectManager::findProjectWithId (const yup::ValueTree& folder, ProjectID pid)
 {
     if (auto p = getProjectFrom (folder))
         if (p->getProjectID() == pid)
@@ -172,8 +172,8 @@ Project::Ptr ProjectManager::findProjectWithId (const juce::ValueTree& folder, P
     return {};
 }
 
-Project::Ptr ProjectManager::findProjectWithFile (const juce::ValueTree& folder,
-                                                  const juce::File& f)
+Project::Ptr ProjectManager::findProjectWithFile (const yup::ValueTree& folder,
+                                                  const yup::File& f)
 {
     if (auto p = getProjectFrom (folder))
         if (p->getProjectFile() == f)
@@ -186,7 +186,7 @@ Project::Ptr ProjectManager::findProjectWithFile (const juce::ValueTree& folder,
     return {};
 }
 
-Project::Ptr ProjectManager::getProjectFrom (const juce::ValueTree& v,
+Project::Ptr ProjectManager::getProjectFrom (const yup::ValueTree& v,
                                              bool createIfNotFound)
 {
     if (auto p = dynamic_cast<Project*> (v.getProperty (IDs::project).getObject()))
@@ -194,7 +194,7 @@ Project::Ptr ProjectManager::getProjectFrom (const juce::ValueTree& v,
 
     if (createIfNotFound && v.hasType (IDs::PROJECT))
     {
-        const juce::File f (v[IDs::file]);
+        const yup::File f (v[IDs::file]);
 
         if (f.exists())
         {
@@ -209,7 +209,7 @@ Project::Ptr ProjectManager::getProjectFrom (const juce::ValueTree& v,
 
             if (p->isValid())
             {
-                juce::ValueTree (v).setProperty (IDs::project, juce::var (p.get()), nullptr);
+                yup::ValueTree (v).setProperty (IDs::project, yup::var (p.get()), nullptr);
                 return p;
             }
         }
@@ -220,7 +220,7 @@ Project::Ptr ProjectManager::getProjectFrom (const juce::ValueTree& v,
 
 Project::Ptr ProjectManager::getProject (ProjectID pid)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     for (auto p : openProjects)
         if (p->getProjectID() == pid)
@@ -229,9 +229,9 @@ Project::Ptr ProjectManager::getProject (ProjectID pid)
     return findProjectWithId (folders, pid);
 }
 
-Project::Ptr ProjectManager::getProject (const juce::File& f)
+Project::Ptr ProjectManager::getProject (const yup::File& f)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     for (auto p : openProjects)
         if (p->getProjectFile() == f)
@@ -241,14 +241,14 @@ Project::Ptr ProjectManager::getProject (const juce::File& f)
 }
 
 //==============================================================================
-Project::Ptr ProjectManager::addProjectToList (const juce::File& f,
+Project::Ptr ProjectManager::addProjectToList (const yup::File& f,
                                                bool shouldSaveList,
-                                               juce::ValueTree folderToAddTo,
+                                               yup::ValueTree folderToAddTo,
                                                int index)
 {
     if ((f.existsAsFile() && isTracktionProjectFile (f)) || f.isDirectory())
     {
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
 
         if (auto existing = findProjectWithFile (folders, f))
             return existing;
@@ -284,7 +284,7 @@ Project::Ptr ProjectManager::addProjectToList (const juce::File& f,
     return {};
 }
 
-static void removeProject (const juce::ValueTree& folder, const Project::Ptr& toRemove)
+static void removeProject (const yup::ValueTree& folder, const Project::Ptr& toRemove)
 {
     if (toRemove == nullptr)
         return;
@@ -302,9 +302,9 @@ static void removeProject (const juce::ValueTree& folder, const Project::Ptr& to
         removeProject (folder.getChild(i), toRemove);
 }
 
-void ProjectManager::removeProjectFromList (const juce::File& f)
+void ProjectManager::removeProjectFromList (const yup::File& f)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     if (auto p = getProject (f))
     {
@@ -330,14 +330,14 @@ void ProjectManager::removeProjectFromList (const juce::File& f)
 
 void ProjectManager::clearProjects()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     folders.removeAllChildren (nullptr);
     openProjects.clear();
 }
 
-static bool getValueTreeFor (const juce::ValueTree& folder, const Project* proj,
-                             juce::ValueTree& result, bool createIfNotFound = true)
+static bool getValueTreeFor (const yup::ValueTree& folder, const Project* proj,
+                             yup::ValueTree& result, bool createIfNotFound = true)
 {
     if (proj == nullptr)
         return false;
@@ -358,10 +358,10 @@ static bool getValueTreeFor (const juce::ValueTree& folder, const Project* proj,
     return false;
 }
 
-juce::ValueTree ProjectManager::findFolderContaining (const Project& p) const
+yup::ValueTree ProjectManager::findFolderContaining (const Project& p) const
 {
-    const juce::ScopedLock sl (lock);
-    juce::ValueTree result;
+    const yup::ScopedLock sl (lock);
+    yup::ValueTree result;
 
     if (getValueTreeFor (folders, &p, result))
         return result.getParent();
@@ -369,10 +369,10 @@ juce::ValueTree ProjectManager::findFolderContaining (const Project& p) const
     return result;
 }
 
-juce::ValueTree ProjectManager::getFolderItemFor (const Project& p) const
+yup::ValueTree ProjectManager::getFolderItemFor (const Project& p) const
 {
-    const juce::ScopedLock sl (lock);
-    juce::ValueTree result;
+    const yup::ScopedLock sl (lock);
+    yup::ValueTree result;
 
     if (getValueTreeFor (folders, &p, result))
         return result;
@@ -382,8 +382,8 @@ juce::ValueTree ProjectManager::getFolderItemFor (const Project& p) const
 
 int ProjectManager::getFolderIndexFor (const Project& p) const
 {
-    const juce::ScopedLock sl (lock);
-    juce::ValueTree result;
+    const yup::ScopedLock sl (lock);
+    yup::ValueTree result;
 
     if (getValueTreeFor (folders, &p, result))
         return result.getParent().indexOf (result);
@@ -391,10 +391,10 @@ int ProjectManager::getFolderIndexFor (const Project& p) const
     return -1;
 }
 
-void ProjectManager::updateProjectFile (Project& p, const juce::File& f)
+void ProjectManager::updateProjectFile (Project& p, const yup::File& f)
 {
-    const juce::ScopedLock sl (lock);
-    juce::ValueTree result;
+    const yup::ScopedLock sl (lock);
+    yup::ValueTree result;
 
     if (getValueTreeFor (folders, &p, result, false))
         result.setProperty (IDs::file, f.getFullPathName(), nullptr);
@@ -413,7 +413,7 @@ ProjectItem::Ptr ProjectManager::getProjectItem (const ProjectItemRef& ref)
     // Path-based ref without an owner — search all projects
     if (! ref.isProjectItemID())
     {
-        const juce::ScopedLock sl (lock);
+        const yup::ScopedLock sl (lock);
 
         for (auto p : openProjects)
             if (auto item = p->getProjectItemFor (ref))
@@ -423,7 +423,7 @@ ProjectItem::Ptr ProjectManager::getProjectItem (const ProjectItemRef& ref)
     return {};
 }
 
-ProjectItem::Ptr ProjectManager::getProjectItem (juce::File file)
+ProjectItem::Ptr ProjectManager::getProjectItem (yup::File file)
 {
     for (auto p : openProjects)
         if (auto pi = p->getProjectItemForFile (file))
@@ -460,7 +460,7 @@ Project::Ptr ProjectManager::getProject (const Edit& ed)
     return {};
 }
 
-juce::File ProjectManager::findSourceFile (const ProjectItemRef& ref)
+yup::File ProjectManager::findSourceFile (const ProjectItemRef& ref)
 {
     if (auto i = getProjectItem (ref))
         return i->getSourceFile();
@@ -468,40 +468,40 @@ juce::File ProjectManager::findSourceFile (const ProjectItemRef& ref)
     return {};
 }
 
-juce::File ProjectManager::findSourceFile (ProjectItemID id)
+yup::File ProjectManager::findSourceFile (ProjectItemID id)
 {
     return findSourceFile (ProjectItemRef (id));
 }
 
 void ProjectManager::saveAllProjects()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     for (auto p : getAllProjects (folders))
         p->save();
 }
 
-Project::Ptr ProjectManager::createNewProject (const juce::File& projectFile)
+Project::Ptr ProjectManager::createNewProject (const yup::File& projectFile)
 {
     return new Project (engine, *this, projectFile);
 }
 
-Project::Ptr ProjectManager::createNewProject (const juce::File& projectFile,
-                                                juce::ValueTree folderToAddTo,
+Project::Ptr ProjectManager::createNewProject (const yup::File& projectFile,
+                                                yup::ValueTree folderToAddTo,
                                                 ProjectType projectType)
 {
     // The backend is determined by whether projectFile is a directory, so for a
     // folder-based project the caller must create the directory before calling this
     jassert (projectType == ProjectType::folderBased ? projectFile.isDirectory()
                                                      : ! projectFile.isDirectory());
-    juce::ignoreUnused (projectType);
+    yup::ignoreUnused (projectType);
 
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     auto newProj = createNewProject (projectFile);
     newProj->createNewProjectId();
     newProj->setName (projectFile.getFileName().upToLastOccurrenceOf (".", false, false));
-    newProj->setDescription (TRANS("Created") + ": " + juce::Time::getCurrentTime().toString (true, false));
+    newProj->setDescription (TRANS("Created") + ": " + yup::Time::getCurrentTime().toString (true, false));
 
     if (newProj->save())
     {
@@ -532,18 +532,18 @@ Project::Ptr ProjectManager::createNewProject (const juce::File& projectFile,
     return newProj;
 }
 
-Project::Ptr ProjectManager::createNewProjectFromTemplate (const juce::String& name, const juce::File& lastPath,
-                                                           const juce::File& archiveFile, juce::ValueTree folder,
+Project::Ptr ProjectManager::createNewProjectFromTemplate (const yup::String& name, const yup::File& lastPath,
+                                                           const yup::File& archiveFile, yup::ValueTree folder,
                                                            ProjectType projectType)
 {
-    auto extractPath = lastPath.getNonexistentChildFile (juce::File::createLegalFileName (name), {});
+    auto extractPath = lastPath.getNonexistentChildFile (yup::File::createLegalFileName (name), {});
 
     if (! extractPath.createDirectory())
         return {};
 
     Project::Ptr proj;
     bool aborted = false;
-    juce::Array<juce::File> filesCreated;
+    yup::Array<yup::File> filesCreated;
     const bool isLegacy = isLegacyArchive (engine, archiveFile);
 
     if (isLegacy)
@@ -555,7 +555,7 @@ Project::Ptr ProjectManager::createNewProjectFromTemplate (const juce::String& n
     }
     else
     {
-        juce::ZipFile zip (archiveFile);
+        yup::ZipFile zip (archiveFile);
         auto result = zip.uncompressTo (extractPath, true);
 
         if (result.failed())
@@ -565,7 +565,7 @@ Project::Ptr ProjectManager::createNewProjectFromTemplate (const juce::String& n
         }
         else
         {
-            extractPath.findChildFiles (filesCreated, juce::File::findFiles, true);
+            extractPath.findChildFiles (filesCreated, yup::File::findFiles, true);
         }
     }
 
@@ -576,7 +576,7 @@ Project::Ptr ProjectManager::createNewProjectFromTemplate (const juce::String& n
         // and the optional conversion to a folder-based project happen.
         if (! isLegacy && isTracktionProjectFolder (extractPath))
         {
-            const juce::ScopedLock sl (lock);
+            const yup::ScopedLock sl (lock);
             proj = addProjectToList (extractPath, true, folder);
         }
         else
@@ -585,7 +585,7 @@ Project::Ptr ProjectManager::createNewProjectFromTemplate (const juce::String& n
             {
                 if (isTracktionProjectFile (f))
                 {
-                    const juce::ScopedLock sl (lock);
+                    const yup::ScopedLock sl (lock);
 
                     // Always open as file-based first for ID remapping
                     auto p = createNewProject (f);
@@ -635,7 +635,7 @@ Project::Ptr ProjectManager::createNewProjectFromTemplate (const juce::String& n
                 auto mo = proj->getProjectItemAt (i);
 
                 if (mo->isEdit())
-                    mo->setName (name + " " + TRANS("Edit") + " " + juce::String (editNum++),
+                    mo->setName (name + " " + TRANS("Edit") + " " + yup::String (editNum++),
                                  ProjectItem::SetNameMode::forceRenameSynchronous);
             }
 
@@ -643,7 +643,7 @@ Project::Ptr ProjectManager::createNewProjectFromTemplate (const juce::String& n
             proj->refreshFolderStructure();
             saveList();
 
-           #if JUCE_DEBUG
+           #if YUP_DEBUG
             for (int i = 0; i < proj->getNumProjectItems(); ++i)
                 jassert (proj->getProjectItemAt (i));
            #endif
@@ -656,9 +656,9 @@ Project::Ptr ProjectManager::createNewProjectFromTemplate (const juce::String& n
     return proj;
 }
 
-void ProjectManager::createNewProjectInteractively (const juce::String& name,
-                                                     const juce::File& lastPath,
-                                                     juce::ValueTree folderToAddTo,
+void ProjectManager::createNewProjectInteractively (const yup::String& name,
+                                                     const yup::File& lastPath,
+                                                     yup::ValueTree folderToAddTo,
                                                      ProjectType projectType,
                                                      std::function<void (Project::Ptr)> callback)
 {
@@ -671,7 +671,7 @@ void ProjectManager::createNewProjectInteractively (const juce::String& name,
     }
 
     auto& ui = engine.getUIBehaviour();
-    auto fileName = juce::File::createLegalFileName (name);
+    auto fileName = yup::File::createLegalFileName (name);
 
     if (projectType == ProjectType::folderBased)
     {
@@ -731,8 +731,8 @@ void ProjectManager::createNewProjectInteractively (const juce::String& name,
     if (! parentDir.exists())
         parentDir.createDirectory();
 
-    if (parentDir.getNumberOfChildFiles (juce::File::findFiles)
-         + parentDir.getNumberOfChildFiles (juce::File::findDirectories) > 0)
+    if (parentDir.getNumberOfChildFiles (yup::File::findFiles)
+         + parentDir.getNumberOfChildFiles (yup::File::findDirectories) > 0)
     {
         ui.showYesNoCancelAlertBoxAsync (
             TRANS("Create project"),
@@ -759,8 +759,8 @@ void ProjectManager::createNewProjectInteractively (const juce::String& name,
                     auto newDir = parentDir.getChildFile (projectFile.getFileNameWithoutExtension());
 
                     if (newDir.exists()
-                         && newDir.getNumberOfChildFiles (juce::File::findDirectories)
-                              + newDir.getNumberOfChildFiles (juce::File::findFiles) > 0)
+                         && newDir.getNumberOfChildFiles (yup::File::findDirectories)
+                              + newDir.getNumberOfChildFiles (yup::File::findFiles) > 0)
                     {
                         engine.getUIBehaviour().showWarningAlert (TRANS("Create project"),
                                                                   TRANS("The directory already existed and wasn't empty, so the project couldn't be created."));
@@ -817,7 +817,7 @@ void ProjectManager::createNewProjectInteractively (const juce::String& name,
         callback (createNewProject (projectFile, folderToAddTo, projectType));
 }
 
-void ProjectManager::unpackArchiveAndAddToList (const juce::File& archiveFile, const juce::File& destDir, juce::ValueTree folder)
+void ProjectManager::unpackArchiveAndAddToList (const yup::File& archiveFile, const yup::File& destDir, yup::ValueTree folder)
 {
     if (! destDir.createDirectory())
     {
@@ -833,7 +833,7 @@ void ProjectManager::unpackArchiveAndAddToList (const juce::File& archiveFile, c
         return;
     }
 
-    juce::Array<juce::File> newFiles;
+    yup::Array<yup::File> newFiles;
 
     if (isLegacyArchive (engine, archiveFile))
     {
@@ -862,7 +862,7 @@ void ProjectManager::unpackArchiveAndAddToList (const juce::File& archiveFile, c
     }
     else
     {
-        juce::ZipFile zip (archiveFile);
+        yup::ZipFile zip (archiveFile);
 
         if (zip.getNumEntries() == 0 || ! zip.uncompressTo (extractDir, true).wasOk())
         {
@@ -881,7 +881,7 @@ void ProjectManager::unpackArchiveAndAddToList (const juce::File& archiveFile, c
         }
 
         // File-based project: collect .tracktion files from the extraction
-        extractDir.findChildFiles (newFiles, juce::File::findFiles, true);
+        extractDir.findChildFiles (newFiles, yup::File::findFiles, true);
 
         for (int i = newFiles.size(); --i >= 0;)
             if (! isTracktionProjectFile (newFiles.getReference (i)))
@@ -910,9 +910,9 @@ void ProjectManager::unpackArchiveAndAddToList (const juce::File& archiveFile, c
     saveList();
 }
 
-juce::StringArray ProjectManager::getRecentProjects (bool printableFormat)
+yup::StringArray ProjectManager::getRecentProjects (bool printableFormat)
 {
-    juce::StringArray files;
+    yup::StringArray files;
     files.addTokens (engine.getPropertyStorage().getProperty (SettingID::recentProjects).toString(), ";", {});
     files.trim();
     files.removeEmptyStrings();
@@ -922,7 +922,7 @@ juce::StringArray ProjectManager::getRecentProjects (bool printableFormat)
 
     for (int i = files.size(); --i >= 0;)
     {
-        const juce::File f (files.getReference (i));
+        const yup::File f (files.getReference (i));
 
         if (! f.existsAsFile())
         {
@@ -938,17 +938,17 @@ juce::StringArray ProjectManager::getRecentProjects (bool printableFormat)
 
     if (printableFormat)
         for (auto& f : files)
-            f = juce::File (f).getFileNameWithoutExtension();
+            f = yup::File (f).getFileNameWithoutExtension();
 
     return files;
 }
 
-void ProjectManager::addFileToRecentProjectsList (const juce::File& f)
+void ProjectManager::addFileToRecentProjectsList (const yup::File& f)
 {
     auto files = getRecentProjects (false);
 
     for (auto& file : files)
-        if (juce::File (file) == f)
+        if (yup::File (file) == f)
             return;
 
     if (auto p = getProject (f))
@@ -960,7 +960,7 @@ void ProjectManager::addFileToRecentProjectsList (const juce::File& f)
     engine.getPropertyStorage().setProperty (SettingID::recentProjects, files.joinIntoString (";"));
 }
 
-void ProjectManager::createNewProjectFolder (juce::ValueTree parent, const juce::String& name)
+void ProjectManager::createNewProjectFolder (yup::ValueTree parent, const yup::String& name)
 {
     auto v = createValueTree (IDs::FOLDER,
                               IDs::name, name);
@@ -971,7 +971,7 @@ void ProjectManager::createNewProjectFolder (juce::ValueTree parent, const juce:
     engine.getUIBehaviour().updateAllProjectItemLists();
 }
 
-void ProjectManager::deleteProjectFolder (juce::ValueTree folder)
+void ProjectManager::deleteProjectFolder (yup::ValueTree folder)
 {
     folder.getParent().removeChild (folder, nullptr);
 }

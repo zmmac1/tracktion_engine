@@ -39,7 +39,7 @@ namespace audio_analysis_utils
             meter.prepare (sampleRate, numChannels, maxBlockSize);
         }
 
-        void process (const juce::AudioBuffer<float>& buffer, int numSamples) override
+        void process (const yup::AudioBuffer<float>& buffer, int numSamples) override
         {
             const auto numChannelsToUse = std::min (numChannels, buffer.getNumChannels());
 
@@ -93,7 +93,7 @@ namespace audio_analysis_utils
             samplesIntoBlock = 0;
         }
 
-        void addResults (juce::DynamicObject& result) override
+        void addResults (yup::DynamicObject& result) override
         {
             if (samplesIntoBlock >= gatingBlockSamples / 2)
                 finishSilenceBlock();
@@ -108,13 +108,13 @@ namespace audio_analysis_utils
             result.setProperty ("peakDb", rounded (safeDb (peak)));
             result.setProperty ("truePeakDb", rounded (readings.truePeakDb));
             result.setProperty ("rmsDb", rounded (safeDb (rms)));
-            result.setProperty ("clippedSamples", (juce::int64) clippedSamples);
+            result.setProperty ("clippedSamples", (yup::int64) clippedSamples);
             result.setProperty ("silenceRatio", totalBlocks > 0 ? rounded ((double) silentBlocks / (double) totalBlocks, 2) : 0.0);
 
-            result.setProperty ("integratedLufs", readings.integratedValid ? juce::var (rounded (readings.integratedLufs)) : juce::var());
-            result.setProperty ("maxMomentaryLufs", readings.momentaryValid ? juce::var (rounded (readings.maxMomentaryLufs)) : juce::var());
-            result.setProperty ("maxShortTermLufs", readings.shortTermValid ? juce::var (rounded (readings.maxShortTermLufs)) : juce::var());
-            result.setProperty ("loudnessRangeLu", readings.loudnessRangeValid ? juce::var (rounded (readings.loudnessRangeLu)) : juce::var());
+            result.setProperty ("integratedLufs", readings.integratedValid ? yup::var (rounded (readings.integratedLufs)) : yup::var());
+            result.setProperty ("maxMomentaryLufs", readings.momentaryValid ? yup::var (rounded (readings.maxMomentaryLufs)) : yup::var());
+            result.setProperty ("maxShortTermLufs", readings.shortTermValid ? yup::var (rounded (readings.maxShortTermLufs)) : yup::var());
+            result.setProperty ("loudnessRangeLu", readings.loudnessRangeValid ? yup::var (rounded (readings.loudnessRangeLu)) : yup::var());
         }
 
         static constexpr int maxBlockSize = 8192;
@@ -145,11 +145,11 @@ namespace audio_analysis_utils
             fifo.resize ((size_t) fftSize, 0.0f);
             averageSpectrum.assign ((size_t) fftSize / 2, 0.0);
             window.resize ((size_t) fftSize);
-            juce::dsp::WindowingFunction<float>::fillWindowingTables (window.data(), (size_t) fftSize,
-                                                                      juce::dsp::WindowingFunction<float>::hann, false);
+            yup::dsp::WindowingFunction<float>::fillWindowingTables (window.data(), (size_t) fftSize,
+                                                                      yup::dsp::WindowingFunction<float>::hann, false);
         }
 
-        void process (const juce::AudioBuffer<float>& buffer, int numSamples) override
+        void process (const yup::AudioBuffer<float>& buffer, int numSamples) override
         {
             for (int i = 0; i < numSamples; ++i)
             {
@@ -173,7 +173,7 @@ namespace audio_analysis_utils
             for (int i = 0; i < fftSize; ++i)
                 frame[(size_t) i] = fifo[(size_t) i] * window[(size_t) i];
 
-            fft.performFrequencyOnlyForwardTransform (frame.data(), true);
+            fft.performFrequencyOnlyForwardTransform (frame.data());
 
             for (size_t bin = 0; bin < averageSpectrum.size(); ++bin)
                 averageSpectrum[bin] += (double) frame[bin] * (double) frame[bin];
@@ -185,9 +185,9 @@ namespace audio_analysis_utils
             fifoPos = fftSize / 2;
         }
 
-        void addResults (juce::DynamicObject& result) override
+        void addResults (yup::DynamicObject& result) override
         {
-            auto spectrum = new juce::DynamicObject();
+            auto spectrum = new yup::DynamicObject();
 
             if (numFrames == 0)
             {
@@ -201,7 +201,7 @@ namespace audio_analysis_utils
 
                 if (numFrames == 0)
                 {
-                    result.setProperty ("spectrum", juce::var (spectrum));
+                    result.setProperty ("spectrum", yup::var (spectrum));
                     return;
                 }
             }
@@ -215,7 +215,7 @@ namespace audio_analysis_utils
             constexpr auto numBands = (int) std::size (bandCentres);
             const auto thirdOctave = std::pow (2.0, 1.0 / 6.0);   // half a band width each way
 
-            juce::Array<juce::var> bandHz, bandDb;
+            yup::Array<yup::var> bandHz, bandDb;
             std::vector<double> bandEnergies ((size_t) numBands, 0.0);
 
             double totalEnergy = 0.0, weightedFrequency = 0.0;
@@ -274,14 +274,14 @@ namespace audio_analysis_utils
             spectrum->setProperty ("centroidHz", totalEnergy > 0.0 ? (int) std::llround (weightedFrequency / totalEnergy) : 0);
             spectrum->setProperty ("rolloffHz", (int) std::llround (rolloffHz));
 
-            auto balance = new juce::DynamicObject();
+            auto balance = new yup::DynamicObject();
             const auto toPercent = [totalEnergy] (double energy) { return totalEnergy > 0.0 ? (int) std::llround (100.0 * energy / totalEnergy) : 0; };
             balance->setProperty ("lowPct", toPercent (lowEnergy));
             balance->setProperty ("midPct", toPercent (midEnergy));
             balance->setProperty ("highPct", toPercent (highEnergy));
-            spectrum->setProperty ("balance", juce::var (balance));
+            spectrum->setProperty ("balance", yup::var (balance));
 
-            result.setProperty ("spectrum", juce::var (spectrum));
+            result.setProperty ("spectrum", yup::var (spectrum));
         }
 
         static constexpr int fftOrder = 12;
@@ -289,7 +289,7 @@ namespace audio_analysis_utils
 
         double sampleRate = 44100.0;
         int numChannels = 1;
-        juce::dsp::FFT fft { fftOrder };
+        yup::dsp::FFT fft { fftOrder };
         std::vector<float> fifo, window;
         int fifoPos = 0;
         std::vector<double> averageSpectrum;
@@ -300,7 +300,7 @@ namespace audio_analysis_utils
     /** A downsampled peak/RMS envelope exposing the file's dynamics over time. */
     struct EnvelopeAnalyser final : public AudioFileAnalyser
     {
-        explicit EnvelopeAnalyser (int numPointsToUse) : numPoints (juce::jlimit (2, 1000, numPointsToUse)) {}
+        explicit EnvelopeAnalyser (int numPointsToUse) : numPoints (yup::jlimit (2, 1000, numPointsToUse)) {}
 
         void prepare (const AudioFileInfo& info) override
         {
@@ -309,7 +309,7 @@ namespace audio_analysis_utils
             windowSamples = std::max ((SampleCount) 1, info.lengthInSamples / numPoints);
         }
 
-        void process (const juce::AudioBuffer<float>& buffer, int numSamples) override
+        void process (const yup::AudioBuffer<float>& buffer, int numSamples) override
         {
             for (int i = 0; i < numSamples; ++i)
             {
@@ -335,16 +335,16 @@ namespace audio_analysis_utils
             samplesIntoWindow = 0;
         }
 
-        void addResults (juce::DynamicObject& result) override
+        void addResults (yup::DynamicObject& result) override
         {
             if (samplesIntoWindow > 0 && peakDb.size() < numPoints)
                 finishWindow();
 
-            auto envelope = new juce::DynamicObject();
+            auto envelope = new yup::DynamicObject();
             envelope->setProperty ("windowSeconds", rounded ((double) windowSamples / sampleRate, 3));
             envelope->setProperty ("peakDb", peakDb);
             envelope->setProperty ("rmsDb", rmsDb);
-            result.setProperty ("envelope", juce::var (envelope));
+            result.setProperty ("envelope", yup::var (envelope));
         }
 
         const int numPoints;
@@ -353,12 +353,12 @@ namespace audio_analysis_utils
         SampleCount windowSamples = 1, samplesIntoWindow = 0;
         float windowPeak = 0.0f;
         double windowSumOfSquares = 0.0;
-        juce::Array<juce::var> peakDb, rmsDb;
+        yup::Array<yup::var> peakDb, rmsDb;
     };
 }
 
 //==============================================================================
-tl::expected<juce::var, juce::String> analyseAudioFile (Engine& engine, const juce::File& file,
+tl::expected<yup::var, yup::String> analyseAudioFile (Engine& engine, const yup::File& file,
                                                         const std::vector<AudioFileAnalyser*>& analysers)
 {
     using namespace audio_analysis_utils;
@@ -366,7 +366,7 @@ tl::expected<juce::var, juce::String> analyseAudioFile (Engine& engine, const ju
     if (! file.existsAsFile())
         return tl::unexpected (TRANS("File not found: ") + file.getFullPathName());
 
-    std::unique_ptr<juce::AudioFormatReader> reader (AudioFileUtils::createReaderFor (engine, file));
+    std::unique_ptr<yup::AudioFormatReader> reader (AudioFileUtils::createReaderFor (engine, file));
 
     if (reader == nullptr)
         return tl::unexpected (TRANS("Couldn't read the audio file: ") + file.getFullPathName());
@@ -378,7 +378,7 @@ tl::expected<juce::var, juce::String> analyseAudioFile (Engine& engine, const ju
 
     constexpr int blockSize = 65536;
     const auto numChannels = std::max (1, (int) reader->numChannels);
-    juce::AudioBuffer<float> buffer (numChannels, blockSize);
+    yup::AudioBuffer<float> buffer (numChannels, blockSize);
 
     for (SampleCount position = 0; position < (SampleCount) reader->lengthInSamples;)
     {
@@ -394,7 +394,7 @@ tl::expected<juce::var, juce::String> analyseAudioFile (Engine& engine, const ju
         position += numThisTime;
     }
 
-    auto result = new juce::DynamicObject();
+    auto result = new yup::DynamicObject();
     result->setProperty ("sampleRate", info.sampleRate);
     result->setProperty ("channels", info.numChannels);
     result->setProperty ("seconds", rounded (info.getLengthInSeconds(), 3));
@@ -402,10 +402,10 @@ tl::expected<juce::var, juce::String> analyseAudioFile (Engine& engine, const ju
     for (auto analyser : analysers)
         analyser->addResults (*result);
 
-    return juce::var (result);
+    return yup::var (result);
 }
 
-tl::expected<juce::var, juce::String> analyseAudioFile (Engine& engine, const juce::File& file,
+tl::expected<yup::var, yup::String> analyseAudioFile (Engine& engine, const yup::File& file,
                                                         const AudioAnalysisOptions& options)
 {
     using namespace audio_analysis_utils;

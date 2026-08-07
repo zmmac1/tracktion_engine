@@ -73,22 +73,22 @@ private:
     AudioFile audioFile;
     LiveClipLevel clipLevel;
     std::shared_ptr<AudioClipPlayhead> playhead;
-    juce::Range<int64_t> editPositionInSamples;
+    yup::Range<int64_t> editPositionInSamples;
     double audioFileSampleRate = 0;
     const ChannelConfiguration sourceChannels, destChannels;
     AudioFileCache::Reader::Ptr reader;
 
     struct PerChannelState;
-    std::shared_ptr<juce::OwnedArray<PerChannelState>> channelState;
+    std::shared_ptr<yup::OwnedArray<PerChannelState>> channelState;
 
     int64_t editPositionToFileSample (int64_t) const noexcept;
     int64_t editTimeToFileSample (TimePosition) const noexcept;
     bool updateFileSampleRate();
     void replaceChannelStateIfPossible (NodeGraph*, int numChannelsToUse);
     void replaceChannelStateIfPossible (WaveNode&, int numChannelsToUse);
-    void processSection (ProcessContext&, juce::Range<int64_t> timelineRange);
+    void processSection (ProcessContext&, yup::Range<int64_t> timelineRange);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveNode)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveNode)
 };
 
 //==============================================================================
@@ -260,7 +260,7 @@ private:
     void processSection (ProcessContext&);
     tempo::Key getKeyToSyncTo (TimePosition) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveNodeRealTime)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveNodeRealTime)
 };
 
 } // namespace tracktion::inline engine

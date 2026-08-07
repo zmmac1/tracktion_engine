@@ -26,7 +26,7 @@ struct PluginComponent
         getActiveComps().removeFirstMatchingValue (this);
     }
 
-    virtual void updateColour() = 0;
+    virtual void updateColor() = 0;
 
     Plugin& plugin;
 
@@ -39,9 +39,9 @@ struct PluginComponent
         return {};
     }
 
-    static juce::Array<PluginComponent*> getComponentsFor (const Plugin& p) noexcept
+    static yup::Array<PluginComponent*> getComponentsFor (const Plugin& p) noexcept
     {
-        juce::Array<PluginComponent*> comps;
+        yup::Array<PluginComponent*> comps;
 
         for (auto fc : getActiveComps())
             if (&fc->plugin == &p)
@@ -51,13 +51,13 @@ struct PluginComponent
     }
 
 private:
-    static juce::Array<PluginComponent*>& getActiveComps()
+    static yup::Array<PluginComponent*>& getActiveComps()
     {
-        static juce::Array<PluginComponent*> comps;
+        static yup::Array<PluginComponent*> comps;
         return comps;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginComponent)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginComponent)
 };
 
 } // namespace tracktion::inline engine

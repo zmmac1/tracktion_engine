@@ -24,7 +24,7 @@ public:
     void update (Edit* edit)
     {
         framesPerSecond = 24;
-        midiTCType = juce::MidiMessage::fps24;
+        midiTCType = yup::MidiMessage::fps24;
         isDropFrame = false;
         offset = 0;
         timeBetweenMessages = 0.1;
@@ -35,9 +35,9 @@ public:
             offset = edit->getTimecodeOffset().inSeconds();
 
             if (framesPerSecond == 25)
-                midiTCType = juce::MidiMessage::fps25;
+                midiTCType = yup::MidiMessage::fps25;
             else if (framesPerSecond == 30)
-                midiTCType = juce::MidiMessage::fps30drop;
+                midiTCType = yup::MidiMessage::fps30drop;
 
             timeBetweenMessages = 1.0 / (framesPerSecond  * 4);
         }
@@ -64,9 +64,9 @@ public:
             scrubbing = isScrubbing;
 
             updateParts (blockStart);
-            buffer.addMidiMessage (juce::MidiMessage::fullFrame (hours, minutes, seconds, frames, midiTCType),
+            buffer.addMidiMessage (yup::MidiMessage::fullFrame (hours, minutes, seconds, frames, midiTCType),
                                    0, {});
-            lastMessageSent = juce::Time::getMillisecondCounter();
+            lastMessageSent = yup::Time::getMillisecondCounter();
         }
         else if (lastTime != blockStart)
         {
@@ -74,12 +74,12 @@ public:
 
             if (scrubbing)
             {
-                auto now = juce::Time::getMillisecondCounter();
+                auto now = yup::Time::getMillisecondCounter();
 
                 if (now > lastMessageSent + 50)
                 {
                     updateParts (blockStart);
-                    buffer.addMidiMessage (juce::MidiMessage::fullFrame (hours, minutes, seconds, frames, midiTCType),
+                    buffer.addMidiMessage (yup::MidiMessage::fullFrame (hours, minutes, seconds, frames, midiTCType),
                                            0, {});
                     lastMessageSent = now;
                 }
@@ -126,7 +126,7 @@ public:
                                 break;
                         }
 
-                        buffer.addMidiMessage (juce::MidiMessage::quarterFrame (sequenceIndex, value),
+                        buffer.addMidiMessage (yup::MidiMessage::quarterFrame (sequenceIndex, value),
                                                t - blockStart, {});
                     }
 
@@ -143,7 +143,7 @@ private:
     uint32_t lastMessageSent = 0;
     int framesPerSecond = 0;
     bool isDropFrame = false;
-    juce::MidiMessage::SmpteTimecodeType midiTCType = juce::MidiMessage::fps24;
+    yup::MidiMessage::SmpteTimecodeType midiTCType = yup::MidiMessage::fps24;
     int hours = 0, minutes = 0, seconds = 0, frames = 0;
 
     void updateParts (double t)
@@ -158,7 +158,7 @@ private:
         seconds = (((int) t) % 60);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiTimecodeGenerator)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiTimecodeGenerator)
 };
 
 //==============================================================================
@@ -172,7 +172,7 @@ public:
 
     void reset (Edit* edit)
     {
-        const juce::ScopedLock sl (positionLock);
+        const yup::ScopedLock sl (positionLock);
         wasPlaying = false;
         position = nullptr;
         needsToSendPosition = true;
@@ -195,12 +195,12 @@ public:
             needsToSendPosition = true;
 
             if (! isPlaying)
-                buffer.addMidiMessage (juce::MidiMessage::midiStop(), 0, {});
+                buffer.addMidiMessage (yup::MidiMessage::midiStop(), 0, {});
         }
 
         if (isPlaying)
         {
-            const juce::ScopedLock sl (positionLock);
+            const yup::ScopedLock sl (positionLock);
 
             position->set (blockStartTime);
             auto blockStartPPQ = position->getPPQTime();
@@ -227,19 +227,19 @@ public:
                 {
                     if ((num % 24) == 0)
                     {
-                        buffer.addMidiMessage (juce::MidiMessage::songPositionPointer (num / 6), 0);
+                        buffer.addMidiMessage (yup::MidiMessage::songPositionPointer (num / 6), 0);
 
                         if (num == 0 || (tc != nullptr && tc->isRecording()))
-                            buffer.addMidiMessage (juce::MidiMessage::midiStart(), 0, {});
+                            buffer.addMidiMessage (yup::MidiMessage::midiStart(), 0, {});
                         else
-                            buffer.addMidiMessage (juce::MidiMessage::midiContinue(), 0, {});
+                            buffer.addMidiMessage (yup::MidiMessage::midiContinue(), 0, {});
 
                         needsToSendPosition = false;
                     }
                 }
 
                 if (! needsToSendPosition)
-                    buffer.addMidiMessage (juce::MidiMessage::midiClock(),
+                    buffer.addMidiMessage (yup::MidiMessage::midiClock(),
                                            (num - startNum) * timePerNum,
                                            {});
 
@@ -251,17 +251,17 @@ public:
 private:
     bool wasPlaying = false;
     bool needsToSendPosition = false;
-    juce::CriticalSection positionLock;
+    yup::CriticalSection positionLock;
     std::unique_ptr<tempo::Sequence::Position> position;
     TimePosition lastBlockStart;
     double lastBlockEndPPQ = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiClockGenerator)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiClockGenerator)
 };
 
 //==============================================================================
-MidiOutputDevice::MidiOutputDevice (Engine& e, juce::MidiDeviceInfo info)
-    : OutputDevice (e, info.name, "midiout_" + juce::String::toHexString (info.identifier.hashCode())),
+MidiOutputDevice::MidiOutputDevice (Engine& e, yup::MidiDeviceInfo info)
+    : OutputDevice (e, info.name, "midiout_" + yup::String::toHexString (info.identifier.hashCode())),
       deviceInfo (std::move (info))
 {
     enabled = true;
@@ -292,7 +292,7 @@ void MidiOutputDevice::setEnabled (bool b)
     }
 }
 
-juce::String MidiOutputDevice::prepareToPlay (Edit* edit, TimePosition)
+yup::String MidiOutputDevice::prepareToPlay (Edit* edit, TimePosition)
 {
     if (outputDevice == nullptr)
         return TRANS("Couldn't open the MIDI port");
@@ -310,7 +310,7 @@ bool MidiOutputDevice::start()
 {
     if (outputDevice != nullptr)
     {
-        audioAdjustmentDelay = juce::roundToInt (2.0 * engine.getDeviceManager().getBlockSizeMs());
+        audioAdjustmentDelay = yup::roundToInt (2.0 * engine.getDeviceManager().getBlockSizeMs());
         playing = true;
         return true;
     }
@@ -341,10 +341,10 @@ bool MidiOutputDevice::getControllerOffMessagesSent (Engine& e)
     return e.getPropertyStorage().getProperty (SettingID::sendControllerOffMessages, true);
 }
 
-juce::String MidiOutputDevice::getNameForMidiNoteNumber (int note, int midiChannel, bool useSharp) const
+yup::String MidiOutputDevice::getNameForMidiNoteNumber (int note, int midiChannel, bool useSharp) const
 {
-    return midiChannel == 10 ? TRANS(juce::MidiMessage::getRhythmInstrumentName (note))
-                             : juce::MidiMessage::getMidiNoteName (note, useSharp, true,
+    return midiChannel == 10 ? TRANS(yup::MidiMessage::getRhythmInstrumentName (note))
+                             : yup::MidiMessage::getMidiNoteName (note, useSharp, true,
                                                                    engine.getEngineBehaviour().getMiddleCOctave());
 }
 
@@ -394,7 +394,7 @@ void MidiOutputDevice::loadProps()
 
 void MidiOutputDevice::saveProps()
 {
-    juce::XmlElement n ("SETTINGS");
+    yup::XmlElement n ("SETTINGS");
 
     n.setAttribute ("enabled", enabled);
     n.setAttribute ("preDelay", preDelayMillisecs);
@@ -405,7 +405,7 @@ void MidiOutputDevice::saveProps()
     engine.getPropertyStorage().setXmlPropertyItem (SettingID::midiout, getName(), n);
 }
 
-juce::String MidiOutputDevice::openDevice()
+yup::String MidiOutputDevice::openDevice()
 {
     if (isEnabled())
     {
@@ -416,8 +416,8 @@ juce::String MidiOutputDevice::openDevice()
 
             if (softDevice)
             {
-               #if JUCE_MAC
-                outputDevice = juce::MidiOutput::createNewDevice (getName());
+               #if YUP_MAC
+                outputDevice = yup::MidiOutput::createNewDevice (getName());
                #else
                 outputDevice.reset();
                 jassertfalse;
@@ -425,7 +425,7 @@ juce::String MidiOutputDevice::openDevice()
             }
             else if (deviceInfo.identifier.isNotEmpty())
             {
-                outputDevice = juce::MidiOutput::openDevice (deviceInfo.identifier);
+                outputDevice = yup::MidiOutput::openDevice (deviceInfo.identifier);
 
                 if (outputDevice == nullptr)
                 {
@@ -461,7 +461,7 @@ void MidiOutputDevice::sendNoteOffMessages()
 
     if (outputDevice != nullptr)
     {
-        const juce::ScopedLock sl (noteOnLock);
+        const yup::ScopedLock sl (noteOnLock);
 
         for (int channel = channelsUsed.getHighestBit() + 1; --channel > 0;)
         {
@@ -469,18 +469,18 @@ void MidiOutputDevice::sendNoteOffMessages()
             {
                 for (int note = midiNotesOn.getHighestBit() + 1; --note >= 0;)
                     if (midiNotesOn [note])
-                        sendMessageNow (juce::MidiMessage::noteOff (channel, note));
+                        sendMessageNow (yup::MidiMessage::noteOff (channel, note));
 
                 if (sustain > 0)
                 {
-                    sendMessageNow (juce::MidiMessage::controllerEvent (channel, 64, 0));
-                    sendMessageNow (juce::MidiMessage::controllerEvent (channel, 64, sustain));
+                    sendMessageNow (yup::MidiMessage::controllerEvent (channel, 64, 0));
+                    sendMessageNow (yup::MidiMessage::controllerEvent (channel, 64, sustain));
                 }
 
-                sendMessageNow (juce::MidiMessage::allNotesOff (channel));
+                sendMessageNow (yup::MidiMessage::allNotesOff (channel));
 
                 if (shouldSendAllControllersOffMessages)
-                    sendMessageNow (juce::MidiMessage::allControllersOff (channel));
+                    sendMessageNow (yup::MidiMessage::allControllersOff (channel));
             }
         }
 
@@ -489,18 +489,18 @@ void MidiOutputDevice::sendNoteOffMessages()
     }
 }
 
-void MidiOutputDevice::sendMessageNow (const juce::MidiMessage& message)
+void MidiOutputDevice::sendMessageNow (const yup::MidiMessage& message)
 {
-    // juce::MidiOutput isn't thread safe, so serialise sends here as this
+    // yup::MidiOutput isn't thread safe, so serialise sends here as this
     // can be called from the MIDI dispatch thread, the message thread
     // (control surface feedback, MMC) and device-detection scans.
-    const juce::SpinLock::ScopedLockType sl (outputDeviceLock);
+    const yup::SpinLock::ScopedLockType sl (outputDeviceLock);
 
     if (outputDevice != nullptr)
         outputDevice->sendMessageNow (message);
 }
 
-void MidiOutputDevice::fireMessage (const juce::MidiMessage& message)
+void MidiOutputDevice::fireMessage (const yup::MidiMessage& message)
 {
     if (! message.isMetaEvent())
     {
@@ -511,7 +511,7 @@ void MidiOutputDevice::fireMessage (const juce::MidiMessage& message)
 
         if (message.isNoteOnOrOff())
         {
-            const juce::ScopedLock sl (noteOnLock);
+            const yup::ScopedLock sl (noteOnLock);
 
             if (message.isNoteOn())
                 midiNotesOn.setBit (message.getNoteNumber());
@@ -560,7 +560,7 @@ void MidiOutputDevice::flipSendingTimecode()
     saveProps();
 }
 
-juce::StringArray MidiOutputDevice::getProgramSets() const
+yup::StringArray MidiOutputDevice::getProgramSets() const
 {
     return getMidiProgramManager().getMidiProgramSetNames();
 }
@@ -570,7 +570,7 @@ int MidiOutputDevice::getCurrentSetIndex() const
     return getMidiProgramManager().getSetIndex (programNameSet);
 }
 
-void MidiOutputDevice::setCurrentProgramSet (const juce::String& newSet)
+void MidiOutputDevice::setCurrentProgramSet (const yup::String& newSet)
 {
     if (programNameSet != newSet)
     {
@@ -580,7 +580,7 @@ void MidiOutputDevice::setCurrentProgramSet (const juce::String& newSet)
     }
 }
 
-juce::String MidiOutputDevice::getProgramName (int programNumber, int bank)
+yup::String MidiOutputDevice::getProgramName (int programNumber, int bank)
 {
     return getMidiProgramManager().getProgramName (getCurrentSetIndex(), bank, programNumber);
 }
@@ -595,7 +595,7 @@ bool MidiOutputDevice::canDeleteProgramSet (int index) const
     return getMidiProgramManager().canDeleteProgramSet (index);
 }
 
-juce::String MidiOutputDevice::getBankName (int bank)
+yup::String MidiOutputDevice::getBankName (int bank)
 {
     return getMidiProgramManager().getBankName (getCurrentSetIndex(), bank);
 }
@@ -627,7 +627,7 @@ MidiOutputDeviceInstance::~MidiOutputDeviceInstance()
 {
 }
 
-juce::String MidiOutputDeviceInstance::prepareToPlay (TimePosition, bool shouldSendMidiTC)
+yup::String MidiOutputDeviceInstance::prepareToPlay (TimePosition, bool shouldSendMidiTC)
 {
     if (getMidiOutput().outputDevice == nullptr)
         return TRANS("Couldn't open the MIDI port");
@@ -645,7 +645,7 @@ bool MidiOutputDeviceInstance::start()
 {
     if (getMidiOutput().outputDevice != nullptr)
     {
-        audioAdjustmentDelay = juce::roundToInt (2.0 * edit.engine.getDeviceManager().getBlockSizeMs());
+        audioAdjustmentDelay = yup::roundToInt (2.0 * edit.engine.getDeviceManager().getBlockSizeMs());
         playing = true;
         return true;
     }

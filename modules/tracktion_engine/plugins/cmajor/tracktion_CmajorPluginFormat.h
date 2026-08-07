@@ -12,11 +12,11 @@
 
 namespace tracktion::inline engine {
     std::string getCmajorVersion();
-    std::unique_ptr<juce::AudioPluginFormat> createCmajorPatchPluginFormat (Engine&);
+    std::unique_ptr<yup::AudioPluginFormat> createCmajorPatchPluginFormat (Engine&);
 
-    bool isCmajorPatchPluginFormat (const juce::PluginDescription&);
-    bool isCmajorPatchPluginFormat (const juce::String& formatName);
-    juce::String getCmajorPatchPluginFormatName();
-    juce::String getCmajorPatchCompileError (Plugin&);
+    bool isCmajorPatchPluginFormat (const yup::PluginDescription&);
+    bool isCmajorPatchPluginFormat (const yup::String& formatName);
+    yup::String getCmajorPatchPluginFormatName();
+    yup::String getCmajorPatchCompileError (Plugin&);
 
 } // namespace tracktion::inline engine

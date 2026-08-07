@@ -25,9 +25,9 @@ namespace tracktion::inline graph {
 namespace
 {
     template<typename SemaphoreType>
-    void runSemaphoreTests (juce::String semaphoreName)
+    void runSemaphoreTests (yup::String semaphoreName)
     {
-        auto basicName = juce::String ("Semaphore basic tests").replace ("Semaphore", semaphoreName).toStdString();
+        auto basicName = yup::String ("Semaphore basic tests").replace ("Semaphore", semaphoreName).toStdString();
         SUBCASE (basicName.c_str())
         {
             {
@@ -51,7 +51,7 @@ namespace
             }
         }
 
-        auto wakeupName = juce::String ("Semaphore wakeup tests").replace ("Semaphore", semaphoreName).toStdString();
+        auto wakeupName = yup::String ("Semaphore wakeup tests").replace ("Semaphore", semaphoreName).toStdString();
         SUBCASE (wakeupName.c_str())
         {
             constexpr int numThreads = 10;
@@ -70,7 +70,7 @@ namespace
                                           event.wait();
 
                                           auto signalDuration = std::chrono::steady_clock::now() - signalTime;
-                                          MESSAGE ((juce::String (std::chrono::duration_cast<std::chrono::microseconds> (signalDuration).count()) + "us").toStdString());
+                                          MESSAGE ((yup::String (std::chrono::duration_cast<std::chrono::microseconds> (signalDuration).count()) + "us").toStdString());
 
                                           ++counter;
                                       });
@@ -120,11 +120,11 @@ namespace tracktion::inline graph {
 
 //==============================================================================
 //==============================================================================
-class NoOpBenchmarks    : public juce::UnitTest
+class NoOpBenchmarks    : public yup::UnitTest
 {
 public:
     NoOpBenchmarks()
-        : juce::UnitTest ("no_op", "tracktion_benchmarks") {}
+        : yup::UnitTest ("no_op", "tracktion_benchmarks") {}
 
     //==============================================================================
     void runTest() override
@@ -145,11 +145,11 @@ static NoOpBenchmarks noOpBenchmarks;
 
 //==============================================================================
 //==============================================================================
-class ChronoNowBenchmarks   : public juce::UnitTest
+class ChronoNowBenchmarks   : public yup::UnitTest
 {
 public:
     ChronoNowBenchmarks()
-        : juce::UnitTest ("steady_clock::now", "tracktion_benchmarks") {}
+        : yup::UnitTest ("steady_clock::now", "tracktion_benchmarks") {}
 
     //==============================================================================
     void runTest() override
@@ -171,21 +171,21 @@ static ChronoNowBenchmarks chronoNowBenchmarks;
 
 //==============================================================================
 //==============================================================================
-class JUCEMsCounterHiRes   : public juce::UnitTest
+class JUCEMsCounterHiRes   : public yup::UnitTest
 {
 public:
     JUCEMsCounterHiRes()
-        : juce::UnitTest ("juce::Time::getMillisecondCounterHiRes()", "tracktion_benchmarks") {}
+        : yup::UnitTest ("yup::Time::getMillisecondCounterHiRes()", "tracktion_benchmarks") {}
 
     //==============================================================================
     void runTest() override
     {
-        Benchmark benchmark (createBenchmarkDescription ("Time", "juce ms timer hi-res", "juce::Time::getMillisecondCounterHiRes()"));
+        Benchmark benchmark (createBenchmarkDescription ("Time", "juce ms timer hi-res", "yup::Time::getMillisecondCounterHiRes()"));
 
         for (int i = 0; i < 100'000; ++i)
         {
             benchmark.start();
-            [[ maybe_unused ]] volatile auto now = juce::Time::getMillisecondCounterHiRes();
+            [[ maybe_unused ]] volatile auto now = yup::Time::getMillisecondCounterHiRes();
             benchmark.stop();
         }
 
@@ -197,11 +197,11 @@ static JUCEMsCounterHiRes juceMsCounterHiRes;
 
 //==============================================================================
 //==============================================================================
-class ThreadSignallingBenchmarks    : public juce::UnitTest
+class ThreadSignallingBenchmarks    : public yup::UnitTest
 {
 public:
     ThreadSignallingBenchmarks()
-        : juce::UnitTest ("Thread signalling", "tracktion_benchmarks") {}
+        : yup::UnitTest ("Thread signalling", "tracktion_benchmarks") {}
 
     //==============================================================================
     void runTest() override
@@ -217,12 +217,12 @@ public:
 
 private:
     template<typename SemaphoreType>
-    void runSemaphoreBenchmarks (juce::String semaphoreName)
+    void runSemaphoreBenchmarks (yup::String semaphoreName)
     {
         constexpr int numThreads = 10;
         Benchmark benchmark (createBenchmarkDescription ("Threads",
-                                                         juce::String ("Semaphore signal").replace ("Semaphore", semaphoreName).toStdString(),
-                                                         juce::String ("Signal numThreads from waiting").replace ("numThreads", juce::String (numThreads)).toStdString()));
+                                                         yup::String ("Semaphore signal").replace ("Semaphore", semaphoreName).toStdString(),
+                                                         yup::String ("Signal numThreads from waiting").replace ("numThreads", yup::String (numThreads)).toStdString()));
 
         using namespace std::literals;
         std::atomic<int> numThreadsRunning { 0 };
@@ -276,12 +276,12 @@ private:
     {
         constexpr int numThreads = 10;
         Benchmark benchmark (createBenchmarkDescription ("Threads",
-                                                         juce::String ("CV signal").toStdString(),
-                                                         juce::String ("Signal numThreads from waiting").replace ("numThreads", juce::String (numThreads)).toStdString()));
+                                                         yup::String ("CV signal").toStdString(),
+                                                         yup::String ("Signal numThreads from waiting").replace ("numThreads", yup::String (numThreads)).toStdString()));
 
         using namespace std::literals;
         std::atomic<int> numThreadsRunning { 0 };
-        juce::WaitableEvent event (true);
+        yup::WaitableEvent event (true);
 
         // Start all the threads
         std::vector<std::thread> threads;
@@ -324,13 +324,13 @@ private:
     }
 
     template<typename SemaphoreType>
-    void runNonWaitingSemaphoreBenchmarks (juce::String semaphoreName)
+    void runNonWaitingSemaphoreBenchmarks (yup::String semaphoreName)
     {
         constexpr int numThreads = 10;
         using namespace std::literals;
         Benchmark benchmark (createBenchmarkDescription ("Threads",
-                                                         juce::String ("Semaphore signal").replace ("Semaphore", semaphoreName).toStdString(),
-                                                         juce::String ("Signal numThreads (may not be waiting)").replace ("numThreads", juce::String (numThreads)).toStdString()));
+                                                         yup::String ("Semaphore signal").replace ("Semaphore", semaphoreName).toStdString(),
+                                                         yup::String ("Signal numThreads (may not be waiting)").replace ("numThreads", yup::String (numThreads)).toStdString()));
 
         std::atomic<int> numThreadsRunning { 0 };
         std::atomic<bool> threadShouldExit { false };
@@ -388,12 +388,12 @@ private:
         constexpr int numThreads = 10;
         using namespace std::literals;
         Benchmark benchmark (createBenchmarkDescription ("Threads",
-                                                         juce::String ("CV signal").toStdString(),
-                                                         juce::String ("Signal numThreads (may not be waiting)").replace ("numThreads", juce::String (numThreads)).toStdString()));
+                                                         yup::String ("CV signal").toStdString(),
+                                                         yup::String ("Signal numThreads (may not be waiting)").replace ("numThreads", yup::String (numThreads)).toStdString()));
 
         std::atomic<int> numThreadsRunning { 0 };
         std::atomic<bool> threadShouldExit { false };
-        juce::WaitableEvent event;
+        yup::WaitableEvent event;
 
         // Start all the threads
         std::vector<std::thread> threads;

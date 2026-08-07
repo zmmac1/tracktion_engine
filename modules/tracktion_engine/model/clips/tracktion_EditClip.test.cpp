@@ -31,7 +31,7 @@ TEST_SUITE("tracktion_engine")
         // - Render the second Edit
         // - Output should be the same as the first Edit
 
-        juce::TemporaryFile tempProjectFile (projectFileSuffix);
+        yup::TemporaryFile tempProjectFile (projectFileSuffix);
         ProjectManager::TempProject tempProject (pm, tempProjectFile.getFile(), true);
         CHECK (tempProject.project);
         auto& proj = *tempProject.project;
@@ -56,7 +56,7 @@ TEST_SUITE("tracktion_engine")
 
         // Sin file must outlive everything!
         auto fileLength = 5_td;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds());
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds());
 
         // Source Edit
         {

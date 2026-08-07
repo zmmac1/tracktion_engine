@@ -10,9 +10,9 @@
 
 namespace tracktion::inline engine {
 
-juce::Array<Exportable*> Exportable::addAllExportables (Edit& edit)
+yup::Array<Exportable*> Exportable::addAllExportables (Edit& edit)
 {
-    juce::Array<Exportable*> list;
+    yup::Array<Exportable*> list;
 
     for (auto t : getAudioTracks (edit))
     {

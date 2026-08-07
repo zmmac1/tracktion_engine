@@ -33,7 +33,7 @@ TEST_CASE ("Benchmark: AutomationIterator")
 
     auto& engine = *tracktion::engine::Engine::getEngines()[0];
     auto edit = Edit::createSingleTrackEdit (engine);
-    auto r = juce::Random::getSystemRandom();
+    auto r = yup::Random::getSystemRandom();
     constexpr auto end = 180_tp;
 
     AutomationCurve straightCurve (*edit, AutomationCurve::TimeBase::time);

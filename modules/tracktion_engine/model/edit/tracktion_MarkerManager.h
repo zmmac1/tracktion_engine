@@ -13,11 +13,11 @@ namespace tracktion::inline engine {
 //==============================================================================
 /**
 */
-class MarkerManager   : public juce::ChangeBroadcaster,
-                        private juce::ValueTree::Listener
+class MarkerManager   : public yup::ChangeBroadcaster,
+                        private yup::ValueTree::Listener
 {
 public:
-    MarkerManager (Edit&, const juce::ValueTree&);
+    MarkerManager (Edit&, const yup::ValueTree&);
     ~MarkerManager() override;
 
     int getNextUniqueID (int start = 1);
@@ -33,20 +33,20 @@ public:
     MarkerClip* getNextMarker (TimePosition);
     MarkerClip* getPrevMarker (TimePosition);
 
-    juce::ReferenceCountedArray<MarkerClip> getMarkers() const;
+    yup::ReferenceCountedArray<MarkerClip> getMarkers() const;
 
 private:
     Edit& edit;
-    juce::ValueTree state;
+    yup::ValueTree state;
 
-    void valueTreeChanged (const juce::ValueTree&);
+    void valueTreeChanged (const yup::ValueTree&);
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override {}
-    void valueTreeParentChanged (juce::ValueTree&) override;
-    void valueTreeRedirected (juce::ValueTree&) override {}
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override {}
+    void valueTreeParentChanged (yup::ValueTree&) override;
+    void valueTreeRedirected (yup::ValueTree&) override {}
 };
 
 } // namespace tracktion::inline engine

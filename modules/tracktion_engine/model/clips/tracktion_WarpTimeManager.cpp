@@ -61,7 +61,7 @@ struct TransientDetectionJob  : public RenderManager::Job
         return file == f && config.sensitivity == c.sensitivity;
     }
 
-    juce::Array<TimePosition> getTimes() const      { return transientTimes; }
+    yup::Array<TimePosition> getTimes() const      { return transientTimes; }
 
 protected:
     bool setUpRender() override        { return reader != nullptr && totalNumSamples > 0; }
@@ -140,11 +140,11 @@ private:
 
     AudioFileUtils::EnvelopeFollower envelopeFollower[3];
     Differentiator<float> differentiator;
-    juce::Array<TimePosition> transientTimes;
+    yup::Array<TimePosition> transientTimes;
 
-    juce::Range<float> fileMinMax;
+    yup::Range<float> fileMinMax;
     float normaliseScale = -1.0f;
-    const float thresh = juce::Decibels::decibelsToGain (-25.0f);
+    const float thresh = yup::Decibels::decibelsToGain (-25.0f);
     int triggerTimer = 0;
     int countDownTimer = 0;
     bool findingNormaliseLevel = true;
@@ -169,13 +169,13 @@ private:
         envelopeFollower[2].setCoefficients (1.0, 0.002f);
     }
 
-    void processNextNormaliseBuffer (const juce::AudioBuffer<float>& buffer)
+    void processNextNormaliseBuffer (const yup::AudioBuffer<float>& buffer)
     {
-        fileMinMax = fileMinMax.getUnionWith (juce::FloatVectorOperations::findMinAndMax (buffer.getReadPointer (0),
+        fileMinMax = fileMinMax.getUnionWith (yup::FloatVectorOperations::findMinAndMax (buffer.getReadPointer (0),
                                                                                           buffer.getNumSamples()));
     }
 
-    void processNextBuffer (const juce::AudioBuffer<float>& buffer)
+    void processNextBuffer (const yup::AudioBuffer<float>& buffer)
     {
         const int numSamples = buffer.getNumSamples();
         AudioScratchBuffer scratch (1, numSamples);
@@ -220,7 +220,7 @@ private:
         return TimePosition::fromSeconds (sampleRate > 0.0 ? static_cast<double> (sample) / sampleRate : 0.0);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransientDetectionJob)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransientDetectionJob)
 };
 
 //==============================================================================
@@ -246,7 +246,7 @@ WarpTimeManager::WarpTimeManager (AudioClipBase& c)
     edit.engine.getWarpTimeFactory().addWarpTimeManager (*this);
 }
 
-WarpTimeManager::WarpTimeManager (Edit& e, const AudioFile& f, juce::ValueTree parentTree)
+WarpTimeManager::WarpTimeManager (Edit& e, const AudioFile& f, yup::ValueTree parentTree)
     : edit (e), sourceFile (f), endMarkerEnabled (false), endMarkersLimited (true)
 {
     state = parentTree.getOrCreateChildWithName (IDs::WARPTIME, &edit.getUndoManager());
@@ -366,7 +366,7 @@ TimePosition WarpTimeManager::moveMarker (int index, TimePosition newWarpTime)
     }
 
     if (endMarkersLimited && (index == 0 || (index == markers->objects.size() - 1)))
-        newWarpTime = juce::jlimit (TimePosition(), toPosition (getSourceLength()), newWarpTime);
+        newWarpTime = yup::jlimit (TimePosition(), toPosition (getSourceLength()), newWarpTime);
 
     m.setProperty (IDs::warpTime, newWarpTime.inSeconds(), getUndoManager());
 
@@ -379,9 +379,9 @@ void WarpTimeManager::setWarpEndMarkerTime (TimePosition endTime)
         state.setProperty (IDs::warpEndMarkerTime, endTime.inSeconds(), &edit.getUndoManager());
 }
 
-juce::Array<TimeRange> WarpTimeManager::getWarpTimeRegions (const TimeRange overallTimeRegion) const
+yup::Array<TimeRange> WarpTimeManager::getWarpTimeRegions (const TimeRange overallTimeRegion) const
 {
-    juce::Array<TimeRange> visibleWarpRegions;
+    yup::Array<TimeRange> visibleWarpRegions;
     auto& markersArray = markers->objects;
 
     if (markersArray.isEmpty())
@@ -578,7 +578,7 @@ void WarpTimeManager::jobFinished (RenderManager::Job& job, bool /*completedOk*/
 WarpTimeManager::Ptr WarpTimeFactory::getWarpTimeManager (const Clip& clip)
 {
     {
-        const juce::ScopedLock sl (warpTimeLock);
+        const yup::ScopedLock sl (warpTimeLock);
 
         for (auto c : warpTimeManagers)
             if (c->clip == &clip)
@@ -594,14 +594,14 @@ WarpTimeManager::Ptr WarpTimeFactory::getWarpTimeManager (const Clip& clip)
 
 void WarpTimeFactory::addWarpTimeManager (WarpTimeManager& wtm)
 {
-    const juce::ScopedLock sl (warpTimeLock);
+    const yup::ScopedLock sl (warpTimeLock);
     jassert (! warpTimeManagers.contains (&wtm));
     warpTimeManagers.addIfNotAlreadyThere (&wtm);
 }
 
 void WarpTimeFactory::removeWarpTimeManager (WarpTimeManager& wtm)
 {
-    const juce::ScopedLock sl (warpTimeLock);
+    const yup::ScopedLock sl (warpTimeLock);
     jassert (warpTimeManagers.contains (&wtm));
     warpTimeManagers.removeAllInstancesOf (&wtm);
 }

@@ -117,11 +117,11 @@ public:
 
 private:
     //==============================================================================
-    juce::HeapBlock<float> buffer;
+    yup::HeapBlock<float> buffer;
     int bufferIndex = 0, maxBufferSize = 0, bufferWritePos = 0;
     int bufferSize = 0, lastBufferSize = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayRegister)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayRegister)
 };
 
 //==============================================================================
@@ -134,7 +134,7 @@ LatencyPlugin::LatencyPlugin (PluginCreationInfo info)
     delayCompensator[0] = std::make_unique<DelayRegister>();
     delayCompensator[1] = std::make_unique<DelayRegister>();
 
-    latencyTimeSeconds.setConstrainer ([] (float in) { return juce::jlimit (0.0f, 5.0f, in); });
+    latencyTimeSeconds.setConstrainer ([] (float in) { return yup::jlimit (0.0f, 5.0f, in); });
     latencyTimeSeconds.referTo (state, IDs::time, getUndoManager(), 0.0f);
     applyLatency.referTo (state, IDs::apply, getUndoManager(), true);
 
@@ -150,7 +150,7 @@ LatencyPlugin::~LatencyPlugin()
     notifyListenersOfDeletion();
 }
 
-juce::ValueTree LatencyPlugin::create()
+yup::ValueTree LatencyPlugin::create()
 {
     return createValueTree (IDs::PLUGIN,
                             IDs::type, xmlTypeName);
@@ -162,13 +162,13 @@ void LatencyPlugin::initialise (const PluginInitialisationInfo&)
 
     const int maxDelaySamples = (int) std::ceil (5.0 * sampleRate);
 
-    for (int i = juce::numElementsInArray (delayCompensator); --i >= 0;)
+    for (int i = yup::numElementsInArray (delayCompensator); --i >= 0;)
         delayCompensator[i]->setMaxSize (maxDelaySamples);
 }
 
 void LatencyPlugin::deinitialise()
 {
-    for (int i = juce::numElementsInArray (delayCompensator); --i >= 0;)
+    for (int i = yup::numElementsInArray (delayCompensator); --i >= 0;)
         delayCompensator[i]->clear();
 }
 
@@ -180,12 +180,12 @@ void LatencyPlugin::applyToBuffer (const PluginRenderContext& rc)
     if (rc.destBuffer == nullptr)
         return;
 
-    const int delayCompensationSamples =  juce::roundToInt (latencyTimeSeconds.get() * (float) sampleRate);
+    const int delayCompensationSamples =  yup::roundToInt (latencyTimeSeconds.get() * (float) sampleRate);
 
     if (delayCompensationSamples != 0)
     {
         const int numChannels = std::min (rc.destBuffer->getNumChannels(),
-                                          juce::numElementsInArray (delayCompensator));
+                                          yup::numElementsInArray (delayCompensator));
         float* const* samples = rc.destBuffer->getArrayOfWritePointers();
 
         for (int i = 0; i < numChannels; ++i)
@@ -196,7 +196,7 @@ void LatencyPlugin::applyToBuffer (const PluginRenderContext& rc)
     }
 }
 
-void LatencyPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void LatencyPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     if (v.hasProperty (IDs::time))
         latencyTimeSeconds = v[IDs::time];
@@ -205,7 +205,7 @@ void LatencyPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
         applyLatency = v[IDs::apply];
 }
 
-void LatencyPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void LatencyPlugin::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v == state && i == IDs::time)
         playbackRestartTimer.startTimer (50);

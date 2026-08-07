@@ -22,24 +22,24 @@ AuxReturnPlugin::~AuxReturnPlugin()
 
 const char* AuxReturnPlugin::xmlTypeName = "auxreturn";
 
-juce::String AuxReturnPlugin::getName() const
+yup::String AuxReturnPlugin::getName() const
 {
     auto nm = edit.getAuxBusName (busNumber);
 
     if (nm.isNotEmpty())
         return "R:" + nm;
 
-    return TRANS("Aux Return") + " #" + juce::String (busNumber + 1);
+    return TRANS("Aux Return") + " #" + yup::String (busNumber + 1);
 }
 
-juce::String AuxReturnPlugin::getShortName (int)
+yup::String AuxReturnPlugin::getShortName (int)
 {
     auto nm = edit.getAuxBusName (busNumber);
 
     if (nm.isNotEmpty())
         return "R:" + nm;
 
-    return "Ret:" + juce::String (busNumber + 1);
+    return "Ret:" + yup::String (busNumber + 1);
 }
 
 void AuxReturnPlugin::initialise (const PluginInitialisationInfo&)
@@ -54,7 +54,7 @@ void AuxReturnPlugin::applyToBuffer (const PluginRenderContext&)
 {
 }
 
-void AuxReturnPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void AuxReturnPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, busNumber);
 

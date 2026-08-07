@@ -17,7 +17,7 @@ namespace
         std::vector<ClipTrack*> clipTracks;
         std::vector<AutomatableEditItem*> automatableItems;
 
-        EditSpaceTargets (Edit& edit, const juce::Array<Track*>& onlyTheseTracks)
+        EditSpaceTargets (Edit& edit, const yup::Array<Track*>& onlyTheseTracks)
         {
             const bool allTracks = onlyTheseTracks.isEmpty();
 
@@ -64,7 +64,7 @@ ProjectItem::Ptr getProjectItemForEdit (const Edit& e)
     return e.engine.getProjectManager().getProjectItem (e);
 }
 
-juce::File getEditFileFromProjectManager (Edit& edit)
+yup::File getEditFileFromProjectManager (Edit& edit)
 {
     if (auto item = getProjectItemForEdit (edit))
         return item->getSourceFile();
@@ -86,7 +86,7 @@ bool referencesProjectItem (Edit& edit, ProjectItemRef itemRef)
     auto& engine = edit.engine;
     const auto targetFile = itemRef.resolve (engine);
 
-    if (targetFile == juce::File())
+    if (targetFile == yup::File())
         return false;
 
     const auto editFolder = getEditFileFromProjectManager (edit).getParentDirectory();
@@ -102,7 +102,7 @@ bool referencesProjectItem (Edit& edit, ProjectItemRef itemRef)
 
 //==============================================================================
 //==============================================================================
-void insertSpaceIntoEdit (Edit& edit, TimeRange timeRange, const juce::Array<Track*>& onlyTheseTracks)
+void insertSpaceIntoEdit (Edit& edit, TimeRange timeRange, const yup::Array<Track*>& onlyTheseTracks)
 {
     const bool allTracks = onlyTheseTracks.isEmpty();
     const bool doTempoTrackFirst = ! edit.getTimecodeFormat().isBarsBeats();
@@ -165,26 +165,26 @@ EditItem* findEditItemForID (Edit& edit, EditItemID itemID)
 }
 
 //==============================================================================
-juce::Array<Track*> getAllTracks (const Edit& edit)
+yup::Array<Track*> getAllTracks (const Edit& edit)
 {
-    juce::Array<Track*> tracks;
+    yup::Array<Track*> tracks;
     edit.visitAllTracks ([&] (Track& t) { tracks.add (&t); return true; }, true);
     return tracks;
 }
 
-juce::Array<Track*> getTopLevelTracks (const Edit& edit)
+yup::Array<Track*> getTopLevelTracks (const Edit& edit)
 {
-    juce::Array<Track*> tracks;
+    yup::Array<Track*> tracks;
     edit.visitAllTracks ([&] (Track& t) { tracks.add (&t); return true; }, false);
     return tracks;
 }
 
-juce::Array<AudioTrack*> getAudioTracks (const Edit& edit)
+yup::Array<AudioTrack*> getAudioTracks (const Edit& edit)
 {
     return getTracksOfType<AudioTrack> (edit, true);
 }
 
-juce::Array<ClipTrack*> getClipTracks (const Edit& edit)
+yup::Array<ClipTrack*> getClipTracks (const Edit& edit)
 {
     return getTracksOfType<ClipTrack> (edit, true);
 }
@@ -206,9 +206,9 @@ AudioTrack* findAudioTrackForID (const Edit& edit, EditItemID id)
     return dynamic_cast<AudioTrack*> (findTrackForID (edit, id));
 }
 
-juce::Array<Track*> findTracksForIDs (const Edit& edit, const juce::Array<EditItemID>& ids)
+yup::Array<Track*> findTracksForIDs (const Edit& edit, const yup::Array<EditItemID>& ids)
 {
-    juce::Array<Track*> tracks;
+    yup::Array<Track*> tracks;
 
     edit.visitAllTracksRecursive ([&] (Track& t)
                                   {
@@ -221,7 +221,7 @@ juce::Array<Track*> findTracksForIDs (const Edit& edit, const juce::Array<EditIt
     return tracks;
 }
 
-Track* findTrackForState (const Edit& edit, const juce::ValueTree& v)
+Track* findTrackForState (const Edit& edit, const yup::ValueTree& v)
 {
     return findTrackForPredicate (edit, [&] (Track& t) { return t.state == v; });
 }
@@ -247,9 +247,9 @@ TrackOutput* getTrackOutput (Track& track)
     return {};
 }
 
-juce::BigInteger toBitSet (const juce::Array<Track*>& tracks)
+yup::BigInteger toBitSet (const yup::Array<Track*>& tracks)
 {
-    juce::BigInteger bitset;
+    yup::BigInteger bitset;
 
     if (auto first = tracks[0])
     {
@@ -263,9 +263,9 @@ juce::BigInteger toBitSet (const juce::Array<Track*>& tracks)
     return bitset;
 }
 
-juce::Array<Track*> toTrackArray (Edit& edit, const juce::BigInteger& tracksToAdd)
+yup::Array<Track*> toTrackArray (Edit& edit, const yup::BigInteger& tracksToAdd)
 {
-    juce::Array<Track*> tracks;
+    yup::Array<Track*> tracks;
 
     auto allTracks = getAllTracks (edit);
 
@@ -275,7 +275,7 @@ juce::Array<Track*> toTrackArray (Edit& edit, const juce::BigInteger& tracksToAd
     return tracks;
 }
 
-juce::Array<Track*> findAllTracksContainingSelectedItems (const SelectableList& items)
+yup::Array<Track*> findAllTracksContainingSelectedItems (const SelectableList& items)
 {
     auto tracks = items.getItemsOfType<Track>();
 
@@ -409,9 +409,9 @@ void deleteRegionOfSelectedClips (SelectionManager& selectionManager, TimeRange 
     for (auto c : edit.engine.getUIBehaviour().getAssociatedClipsToEdit (selectedClips).getItemsOfType<Clip>())
         selectedClips.addIfNotAlreadyThere (c);
 
-    juce::Array<ClipTrack*> tracks;
+    yup::Array<ClipTrack*> tracks;
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     // A clip should always have a track. Crash reports are
     // showing this is sometimes not the case
     for (auto c : selectedClips)
@@ -458,7 +458,7 @@ void deleteRegionOfSelectedClips (SelectionManager& selectionManager, TimeRange 
 
 void deleteRegionOfTracks (Edit& edit, TimeRange rangeToDelete, bool onlySelected, CloseGap closeGap, SelectionManager* selectionManager)
 {
-    juce::Array<Track*> tracks;
+    yup::Array<Track*> tracks;
 
     if (onlySelected)
     {
@@ -490,14 +490,14 @@ void deleteRegionOfTracks (Edit& edit, TimeRange rangeToDelete, bool onlySelecte
         selectionManager->deselectAll();
     }
 
-    EditSpaceTargets targets (edit, onlySelected ? tracks : juce::Array<Track*>{});
+    EditSpaceTargets targets (edit, onlySelected ? tracks : yup::Array<Track*>{});
 
     for (auto ct : targets.clipTracks)
     {
         ct->deleteRegion (rangeToDelete, selectionManager);
 
         // Remove any tiny clips that might be left over
-        juce::Array<Clip*> clipsToRemove;
+        yup::Array<Clip*> clipsToRemove;
 
         for (auto& c : ct->getClips())
             if (c->getPosition().getLength() < TimeDuration::fromSeconds (0.0001))
@@ -543,12 +543,12 @@ void moveSelectedClips (const SelectableList& selectedObjectsIn, Edit& edit, Mov
     auto& ed = firstClip ? firstClip->edit
                          : firstCClip->edit;
 
-    auto moveClipsAndAutomation = [automationLocked] (const juce::Array<Clip*>& clips, TimeDuration delta)
+    auto moveClipsAndAutomation = [automationLocked] (const yup::Array<Clip*>& clips, TimeDuration delta)
     {
         if (delta == TimeDuration())
             return;
 
-        juce::Array<TrackAutomationSection> sections;
+        yup::Array<TrackAutomationSection> sections;
 
         for (auto c : clips)
         {
@@ -575,12 +575,12 @@ void moveSelectedClips (const SelectableList& selectedObjectsIn, Edit& edit, Mov
             moveAutomation (sections, delta, false);
     };
 
-    auto moveCollectionClipAutomation = [automationLocked] (const juce::Array<CollectionClip*>& clips, TimeDuration delta)
+    auto moveCollectionClipAutomation = [automationLocked] (const yup::Array<CollectionClip*>& clips, TimeDuration delta)
     {
         if (delta == TimeDuration())
             return;
 
-        juce::Array<TrackAutomationSection> sections;
+        yup::Array<TrackAutomationSection> sections;
 
         if (automationLocked)
             for (auto c : clips)
@@ -604,7 +604,7 @@ void moveSelectedClips (const SelectableList& selectedObjectsIn, Edit& edit, Mov
     {
         for (auto track : getClipTracks (ed))
         {
-            juce::Array<Clip*> clipsInTrack;
+            yup::Array<Clip*> clipsInTrack;
 
             for (auto s : expandedList)
                 if (auto c = dynamic_cast<Clip*> (s))
@@ -668,9 +668,9 @@ SelectableList getClipSelectionWithCollectionClipContents (const SelectableList&
     return result;
 }
 
-juce::Array<ClipEffect*> getAllClipEffects (Edit& edit)
+yup::Array<ClipEffect*> getAllClipEffects (Edit& edit)
 {
-    juce::Array<ClipEffect*> res;
+    yup::Array<ClipEffect*> res;
 
     for (auto audioTrack : getAudioTracks (edit))
         for (auto clip : audioTrack->getClips())
@@ -761,7 +761,7 @@ Clip* findClipForID (const Edit& edit, EditItemID clipID)
     return result;
 }
 
-Clip* findClipForState (const Edit& edit, const juce::ValueTree& v)
+Clip* findClipForState (const Edit& edit, const yup::ValueTree& v)
 {
     Clip* result = nullptr;
 
@@ -847,7 +847,7 @@ TimeRange getTimeRangeForSelectedItems (const SelectableList& selected)
 }
 
 //==============================================================================
-MidiNote* findNoteForState (const Edit& edit, const juce::ValueTree& v)
+MidiNote* findNoteForState (const Edit& edit, const yup::ValueTree& v)
 {
     MidiNote* result = nullptr;
 
@@ -868,11 +868,11 @@ MidiNote* findNoteForState (const Edit& edit, const juce::ValueTree& v)
     return result;
 }
 
-juce::Result mergeMidiClips (juce::Array<MidiClip*> clips, SelectionManager* sm)
+yup::Result mergeMidiClips (yup::Array<MidiClip*> clips, SelectionManager* sm)
 {
     for (auto c : clips)
         if (c->getClipTrack() == nullptr || c->getClipTrack()->isFrozen (Track::anyFreeze))
-            return juce::Result::fail (TRANS("Unable to merge clips on frozen tracks"));
+            return yup::Result::fail (TRANS("Unable to merge clips on frozen tracks"));
 
     TrackItem::sortByTime (clips);
 
@@ -892,9 +892,9 @@ juce::Result mergeMidiClips (juce::Array<MidiClip*> clips, SelectionManager* sm)
 
                 for (auto c : clips)
                 {
-                    startBeat = juce::jmin (startBeat, c->getStartBeat());
-                    startTime = juce::jmin (startTime, c->getPosition().getStart());
-                    endTime   = juce::jmax (endTime,   c->getPosition().getEnd());
+                    startBeat = yup::jmin (startBeat, c->getStartBeat());
+                    startTime = yup::jmin (startTime, c->getPosition().getStart());
+                    endTime   = yup::jmax (endTime,   c->getPosition().getEnd());
                 }
 
                 MidiList destinationList;
@@ -920,20 +920,20 @@ juce::Result mergeMidiClips (juce::Array<MidiClip*> clips, SelectionManager* sm)
                     clips.getUnchecked (i)->removeFromParent();
             }
 
-            return juce::Result::ok();
+            return yup::Result::ok();
         }
     }
 
-    return juce::Result::fail (TRANS("No clips to merge"));
+    return yup::Result::fail (TRANS("No clips to merge"));
 }
 
-juce::OwnedArray<MidiList> readFileToMidiList (juce::File midiFile, bool importAsNoteExpression)
+yup::OwnedArray<MidiList> readFileToMidiList (yup::File midiFile, bool importAsNoteExpression)
 {
     CRASH_TRACER
-    juce::OwnedArray<MidiList> lists;
-    juce::Array<BeatPosition> tempoChangeBeatNumbers;
-    juce::Array<double> bpms;
-    juce::Array<int> numerators, denominators;
+    yup::OwnedArray<MidiList> lists;
+    yup::Array<BeatPosition> tempoChangeBeatNumbers;
+    yup::Array<double> bpms;
+    yup::Array<int> numerators, denominators;
     BeatDuration len;
 
     if (MidiList::readSeparateTracksFromFile (midiFile, lists,
@@ -947,7 +947,7 @@ juce::OwnedArray<MidiList> readFileToMidiList (juce::File midiFile, bool importA
     return {};
 }
 
-MidiClip::Ptr createClipFromFile (juce::File midiFile, ClipOwner& owner, bool importAsNoteExpression)
+MidiClip::Ptr createClipFromFile (yup::File midiFile, ClipOwner& owner, bool importAsNoteExpression)
 {
     auto lists = readFileToMidiList (std::move (midiFile), importAsNoteExpression);
 
@@ -1017,7 +1017,7 @@ Plugin::Array getAllPlugins (const Edit& edit, bool includeMasterVolume)
     return list;
 }
 
-Plugin::Ptr findPluginForState (const Edit& edit, const juce::ValueTree& v)
+Plugin::Ptr findPluginForState (const Edit& edit, const yup::ValueTree& v)
 {
     for (auto p : getAllPlugins (edit, true))
         if (p->state == v)
@@ -1049,9 +1049,9 @@ bool areAnyPluginsMissing (const Edit& edit)
     return false;
 }
 
-juce::Array<RackInstance*> getRackInstancesInEditForType (const RackType& rt)
+yup::Array<RackInstance*> getRackInstancesInEditForType (const RackType& rt)
 {
-    juce::Array<RackInstance*> instances;
+    yup::Array<RackInstance*> instances;
 
     for (auto p : getAllPlugins (rt.edit, false))
         if (auto ri = dynamic_cast<RackInstance*> (p))
@@ -1172,9 +1172,9 @@ void deleteAutomation (const SelectableList& selectedClips)
 }
 
 //==============================================================================
-juce::Array<AutomatableParameter::ModifierSource*> getAllModifierSources (const Edit& edit)
+yup::Array<AutomatableParameter::ModifierSource*> getAllModifierSources (const Edit& edit)
 {
-    juce::Array<AutomatableParameter::ModifierSource*> sources;
+    yup::Array<AutomatableParameter::ModifierSource*> sources;
 
     sources.addArray (getAllModifiers (edit));
 
@@ -1189,9 +1189,9 @@ juce::Array<AutomatableParameter::ModifierSource*> getAllModifierSources (const 
     return sources;
 }
 
-juce::ReferenceCountedArray<Modifier> getAllModifiers (const Edit& edit)
+yup::ReferenceCountedArray<Modifier> getAllModifiers (const Edit& edit)
 {
-    juce::ReferenceCountedArray<Modifier> modifiers;
+    yup::ReferenceCountedArray<Modifier> modifiers;
 
     for (auto r : edit.getRackList().getTypes())
         modifiers.addArray (r->getModifierList().getModifiers());
@@ -1253,10 +1253,10 @@ Track* getTrackShowingParameter (AutomatableParameter& param)
 }
 
 //==============================================================================
-juce::Array<MacroParameterList*> getAllMacroParameterLists (const Edit& edit)
+yup::Array<MacroParameterList*> getAllMacroParameterLists (const Edit& edit)
 {
     CRASH_TRACER
-    juce::Array<MacroParameterList*> destArray;
+    yup::Array<MacroParameterList*> destArray;
 
     for (auto ae : getAllAutomatableEditItems (edit))
         if (auto m = dynamic_cast<MacroParameterList*> (ae))
@@ -1265,9 +1265,9 @@ juce::Array<MacroParameterList*> getAllMacroParameterLists (const Edit& edit)
     return destArray;
 }
 
-juce::Array<MacroParameterElement*> getAllMacroParameterElements (const Edit& edit)
+yup::Array<MacroParameterElement*> getAllMacroParameterElements (const Edit& edit)
 {
-    juce::Array<MacroParameterElement*> elements;
+    yup::Array<MacroParameterElement*> elements;
 
     elements.add (&edit.getGlobalMacros());
     elements.addArray (edit.getRackList().getTypes());
@@ -1307,7 +1307,7 @@ InputDeviceInstance::RecordingParameters getDefaultRecordingParameters (const Ed
     return params;
 }
 
-juce::Result prepareAndPunchRecord (InputDeviceInstance& instance, EditItemID targetID)
+yup::Result prepareAndPunchRecord (InputDeviceInstance& instance, EditItemID targetID)
 {
     CRASH_TRACER
     TRACKTION_ASSERT_MESSAGE_THREAD
@@ -1323,13 +1323,13 @@ juce::Result prepareAndPunchRecord (InputDeviceInstance& instance, EditItemID ta
     }
 
     if (! dest)
-        return juce::Result::fail (TRANS("Input not assigned to this destination"));
+        return yup::Result::fail (TRANS("Input not assigned to this destination"));
 
     if (! instance.edit.getTransport().isRecording())
-        return juce::Result::fail (TRANS("Transport must be recording to punch record"));
+        return yup::Result::fail (TRANS("Transport must be recording to punch record"));
 
     if (! dest->recordEnabled)
-        return juce::Result::fail (TRANS("Input must be armed to punch record"));
+        return yup::Result::fail (TRANS("Input must be armed to punch record"));
 
     // Punch in at the current play time don't punch out until recording is stopped
     InputDeviceInstance::RecordingParameters params;
@@ -1338,12 +1338,12 @@ juce::Result prepareAndPunchRecord (InputDeviceInstance& instance, EditItemID ta
     if (auto [recContexts, errors] = extract (instance.prepareToRecord (params)); errors.isEmpty())
         instance.startRecording (std::move (recContexts));
     else
-        return juce::Result::fail (errors[0]);
+        return yup::Result::fail (errors[0]);
 
-    return juce::Result::ok();
+    return yup::Result::ok();
 }
 
-tl::expected<Clip::Array, juce::String> punchOutRecording (InputDeviceInstance& instance)
+tl::expected<Clip::Array, yup::String> punchOutRecording (InputDeviceInstance& instance)
 {
     auto& transport = instance.edit.getTransport();
     jassert (transport.isPlaying()); // If this isn't playing the getUnloopedPosition call below will be incorrect

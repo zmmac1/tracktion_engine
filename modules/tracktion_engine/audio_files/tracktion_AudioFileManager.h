@@ -15,7 +15,7 @@ class TracktionThumbnailCache;
 //==============================================================================
 /**
 */
-class AudioFileManager   : private juce::AsyncUpdater
+class AudioFileManager   : private yup::AsyncUpdater
 {
 public:
     AudioFileManager (Engine&);
@@ -46,7 +46,7 @@ public:
     /// AudioFormatReaderWithTimeout for it. Returns nullptr otherwise.
     std::unique_ptr<AudioFormatReaderWithTimeout> createMemoryReader (const AudioFile&) const;
 
-    juce::AudioThumbnailCache& getAudioThumbnailCache()     { return *thumbnailCache; }
+    yup::AudioThumbnailCache& getAudioThumbnailCache()     { return *thumbnailCache; }
 
     Engine& engine;
     AudioProxyGenerator proxyGenerator;
@@ -55,13 +55,13 @@ public:
 private:
     struct KnownFile;
     std::unordered_map<HashCode, std::unique_ptr<KnownFile>> knownFiles;
-    juce::CriticalSection knownFilesLock;
+    yup::CriticalSection knownFilesLock;
 
     KnownFile& findOrCreateKnown (const AudioFile&);
     void removeFile (HashCode);
     void clearFiles();
 
-    juce::Array<AudioFile> filesToCheck;
+    yup::Array<AudioFile> filesToCheck;
 
     void handleAsyncUpdate();
     bool checkFileTime (KnownFile&);
@@ -70,13 +70,13 @@ private:
 
     friend class TracktionThumbnailCache;
     friend class SmartThumbnail;
-    std::unique_ptr<juce::AudioThumbnailCache> thumbnailCache;
+    std::unique_ptr<yup::AudioThumbnailCache> thumbnailCache;
     std::set<size_t> thumbnailTypeHashes;
-    std::unordered_map<const juce::AudioThumbnailBase*, SmartThumbnail*> thumbnailMap;
-    juce::Array<SmartThumbnail*> activeThumbnails;
-    juce::CriticalSection activeThumbnailLock;
+    std::unordered_map<const yup::AudioThumbnailBase*, SmartThumbnail*> thumbnailMap;
+    yup::Array<SmartThumbnail*> activeThumbnails;
+    yup::CriticalSection activeThumbnailLock;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFileManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioFileManager)
 };
 
 } // namespace tracktion::inline engine

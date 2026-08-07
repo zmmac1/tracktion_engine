@@ -15,7 +15,7 @@
 struct ArchivingState
 {
     const ARAFactory* factory = nullptr;
-    juce::String documentArchiveIDOverride;
+    yup::String documentArchiveIDOverride;
 };
 
 struct ArchivingFunctions
@@ -24,7 +24,7 @@ struct ArchivingFunctions
     static ARASize ARA_CALL getArchiveSize (ARAArchivingControllerHostRef,
                                             ARAArchiveReaderHostRef ref)
     {
-        if (auto m = (juce::MemoryBlock*) ref)
+        if (auto m = (yup::MemoryBlock*) ref)
             return (ARASize) m->getSize();
 
         return 0;
@@ -37,11 +37,11 @@ struct ArchivingFunctions
     {
         CRASH_TRACER
 
-        if (auto m = (juce::MemoryBlock*) ref)
+        if (auto m = (yup::MemoryBlock*) ref)
         {
             if ((pos + length) <= m->getSize())
             {
-                std::memcpy (buffer, juce::addBytesToPointer (m->getData(), pos), length);
+                std::memcpy (buffer, yup::addBytesToPointer (m->getData(), pos), length);
                 return kARATrue;
             }
         }
@@ -55,7 +55,7 @@ struct ArchivingFunctions
                                                  const ARAByte buffer[])
     {
         CRASH_TRACER
-        if (auto m = (juce::MemoryOutputStream*) ref)
+        if (auto m = (yup::MemoryOutputStream*) ref)
         {
             // Plugins may write sparsely - the skipped range must be zero-filled
             // (MemoryOutputStream can't seek past the end of the data written so far)
@@ -76,13 +76,13 @@ struct ArchivingFunctions
 
     static void ARA_CALL notifyDocumentArchivingProgress (ARAArchivingControllerHostRef, float p)
     {
-        juce::ignoreUnused (p);
+        yup::ignoreUnused (p);
         //TRACKTION_LOG_ARA ("Archiving progress: " << p);
     }
 
     static void ARA_CALL notifyDocumentUnarchivingProgress (ARAArchivingControllerHostRef, float p)
     {
-        juce::ignoreUnused (p);
+        yup::ignoreUnused (p);
         //TRACKTION_LOG_ARA ("Unarchiving progress: " << p);
     }
 
@@ -115,7 +115,7 @@ struct EditProxyFunctions
             auto editPtr = &tc->edit;
             auto& engine = tc->edit.engine;
 
-            juce::MessageManager::callAsync ([&engine, editPtr, fn = std::move (fn)]
+            yup::MessageManager::callAsync ([&engine, editPtr, fn = std::move (fn)]
             {
                 for (auto e : engine.getActiveEdits().getEdits())
                     if (e == editPtr)
@@ -179,7 +179,7 @@ struct ModelUpdateFunctions
         auto editPtr = &edit;
         auto& engine = edit.engine;
 
-        juce::MessageManager::callAsync ([&engine, editPtr]
+        yup::MessageManager::callAsync ([&engine, editPtr]
         {
             for (auto e : engine.getActiveEdits().getEdits())
                 if (e == editPtr)
@@ -230,26 +230,26 @@ struct MusicalContextFunctions
 {
     /** Converts ASCII accidentals to the Unicode flat/sharp symbols that ARA
         content name strings must use (see ARAInterface.h: 0x266d and 0x266f). */
-    static juce::String convertAccidentalsToUnicode (const juce::String& name)
+    static yup::String convertAccidentalsToUnicode (const yup::String& name)
     {
         if (! (name.containsChar ('#') || name.containsChar ('b')))
             return name;
 
-        auto isNoteLetter = [] (juce::juce_wchar c)  { return c >= 'A' && c <= 'G'; };
+        auto isNoteLetter = [] (yup::juce_wchar c)  { return c >= 'A' && c <= 'G'; };
 
-        juce::String result;
+        yup::String result;
 
         for (int i = 0; i < name.length(); ++i)
         {
             auto c = name[i];
 
             if (c == '#')
-                result += juce::String::charToString (0x266f); // sharp symbol
+                result += yup::String::charToString (0x266f); // sharp symbol
             else if (c == 'b' && i > 0 && (isNoteLetter (name[i - 1])
-                                            || juce::CharacterFunctions::isDigit (name[i + 1])))
-                result += juce::String::charToString (0x266d); // flat symbol
+                                            || yup::CharacterFunctions::isDigit (name[i + 1])))
+                result += yup::String::charToString (0x266d); // flat symbol
             else
-                result += juce::String::charToString (c);
+                result += yup::String::charToString (c);
         }
 
         return result;
@@ -260,7 +260,7 @@ struct MusicalContextFunctions
         static const ARA::ARACircleOfFifthsIndex sharpNoteIndices[] = { 0, 7, 2, 9, 4, -1, 6, 1, 8, 3, 10, 5 };
         static const ARA::ARACircleOfFifthsIndex flatNoteIndices[] = { 0, -5, 2, -3, 4, -1, -6, 1, -4, 3, -2, 5 };
 
-        if (juce::isPositiveAndBelow (note, 128))
+        if (yup::isPositiveAndBelow (note, 128))
         {
             return (useSharps ? sharpNoteIndices[note % 12]
                               : flatNoteIndices[note % 12]);

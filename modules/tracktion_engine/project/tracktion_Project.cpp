@@ -11,7 +11,7 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-Project::Project (Engine& e, ProjectManager& pm, const juce::File& fileOrFolder)
+Project::Project (Engine& e, ProjectManager& pm, const yup::File& fileOrFolder)
    : engine (e), projectManager (pm)
 {
     if (fileOrFolder.isDirectory())
@@ -21,7 +21,7 @@ Project::Project (Engine& e, ProjectManager& pm, const juce::File& fileOrFolder)
 
     for (auto* p : pm.openProjects)
     {
-        juce::ignoreUnused (p);
+        yup::ignoreUnused (p);
         jassert (p->getProjectFile() != fileOrFolder);
     }
 
@@ -74,13 +74,13 @@ bool Project::isValid() const                                               { re
 bool Project::isReadOnly() const                                            { return impl->isReadOnly(); }
 bool Project::isTemporary() const                                           { return impl->isTemporary(); }
 ProjectID Project::getProjectID() const                                     { return impl->getProjectID(); }
-juce::String Project::getName() const                                       { return impl->getName(); }
-juce::String Project::getDescription() const                                   { return getProjectProperty ("description"); }
-const juce::File& Project::getProjectFile() const noexcept                  { return impl->getProjectFile(); }
-juce::File Project::getDefaultDirectory() const                             { return impl->getDefaultDirectory(); }
-juce::File Project::getDirectoryForMedia (ProjectItem::Category c) const    { return impl->getDirectoryForMedia (c); }
+yup::String Project::getName() const                                       { return impl->getName(); }
+yup::String Project::getDescription() const                                   { return getProjectProperty ("description"); }
+const yup::File& Project::getProjectFile() const noexcept                  { return impl->getProjectFile(); }
+yup::File Project::getDefaultDirectory() const                             { return impl->getDefaultDirectory(); }
+yup::File Project::getDirectoryForMedia (ProjectItem::Category c) const    { return impl->getDirectoryForMedia (c); }
 
-juce::String Project::getSourcePathForFile (const juce::File& file) const
+yup::String Project::getSourcePathForFile (const yup::File& file) const
 {
     auto projectDir = getDefaultDirectory();
 
@@ -90,19 +90,19 @@ juce::String Project::getSourcePathForFile (const juce::File& file) const
     return file.getFullPathName();
 }
 
-void Project::setName (const juce::String& n)                               { impl->setName (n); }
-void Project::setDescription (const juce::String& d)                           { setProjectProperty ("description", juce::String (d).substring (0, 8192)); }
+void Project::setName (const yup::String& n)                               { impl->setName (n); }
+void Project::setDescription (const yup::String& d)                           { setProjectProperty ("description", yup::String (d).substring (0, 8192)); }
 void Project::createNewProjectId()                                          { impl->createNewProjectId(); }
 
-juce::String Project::getProjectProperty (const juce::String& n) const         { return impl->getProjectProperty (n); }
-void Project::setProjectProperty (const juce::String& n, const juce::String& v) { impl->setProjectProperty (n, v); }
+yup::String Project::getProjectProperty (const yup::String& n) const         { return impl->getProjectProperty (n); }
+void Project::setProjectProperty (const yup::String& n, const yup::String& v) { impl->setProjectProperty (n, v); }
 
 void Project::refreshProjectPropertiesFromFile()                            { impl->refreshProjectPropertiesFromFile(); }
 bool Project::isLibraryProject() const                                      { return impl->isLibraryProject(); }
 
-juce::Array<ProjectItemRef> Project::findOrphanItemRefs()
+yup::Array<ProjectItemRef> Project::findOrphanItemRefs()
 {
-    juce::Array<ProjectItemRef> refs;
+    yup::Array<ProjectItemRef> refs;
 
     for (auto& item : findOrphanItems())
         refs.add (item->getProjectItemRef());
@@ -110,9 +110,9 @@ juce::Array<ProjectItemRef> Project::findOrphanItemRefs()
     return refs;
 }
 
-juce::Array<ProjectItem::Ptr> Project::findOrphanItems()
+yup::Array<ProjectItem::Ptr> Project::findOrphanItems()
 {
-    juce::Array<ProjectItem::Ptr> edits, notEdits;
+    yup::Array<ProjectItem::Ptr> edits, notEdits;
 
     for (auto& item : getAllProjectItems())
     {
@@ -138,18 +138,18 @@ juce::Array<ProjectItem::Ptr> Project::findOrphanItems()
 int Project::getNumProjectItems()                                           { return impl->getNumProjectItems(); }
 ProjectItemRef Project::getProjectItemRef (int i)                           { return impl->getProjectItemRef (i); }
 
-juce::Array<ProjectItemRef> Project::getAllProjectItemRefs() const             { return impl->getAllProjectItemRefs(); }
+yup::Array<ProjectItemRef> Project::getAllProjectItemRefs() const             { return impl->getAllProjectItemRefs(); }
 
 ProjectItem::Ptr Project::getProjectItemAt (int i)                          { return impl->getProjectItemAt (i); }
-juce::Array<ProjectItem::Ptr> Project::getAllProjectItems()                    { return impl->getAllProjectItems(); }
+yup::Array<ProjectItem::Ptr> Project::getAllProjectItems()                    { return impl->getAllProjectItems(); }
 int Project::getIndexOf (const ProjectItemRef& ref) const                   { return impl->getIndexOf (ref); }
 
 ProjectItem::Ptr Project::getProjectItemFor (const ProjectItemRef& ref)     { return impl->getProjectItemFor (ref); }
-ProjectItem::Ptr Project::getProjectItemForFile (const juce::File& f)       { return impl->getProjectItemForFile (f); }
+ProjectItem::Ptr Project::getProjectItemForFile (const yup::File& f)       { return impl->getProjectItemForFile (f); }
 
 //==============================================================================
-ProjectItem::Ptr Project::createNewItem (const juce::File& f, const juce::String& type,
-                                         const juce::String& name, const juce::String& desc,
+ProjectItem::Ptr Project::createNewItem (const yup::File& f, const yup::String& type,
+                                         const yup::String& name, const yup::String& desc,
                                          const ProjectItem::Category cat, bool atTop)
 {
     return impl->createNewItem (f, type, name, desc, cat, atTop);
@@ -161,17 +161,17 @@ ProjectItem::Ptr Project::createNewEdit()                                   { re
 void Project::redirectIDsFromProject (ProjectID oldId, ProjectID newId)     { impl->redirectIDsFromProject (oldId, newId); }
 
 //==============================================================================
-void Project::mergeArchiveContents (const juce::File& f)                    { impl->mergeArchiveContents (f); }
-void Project::mergeOtherProjectIntoThis (const juce::File& f)               { impl->mergeOtherProjectIntoThis (f); }
+void Project::mergeArchiveContents (const yup::File& f)                    { impl->mergeArchiveContents (f); }
+void Project::mergeOtherProjectIntoThis (const yup::File& f)               { impl->mergeOtherProjectIntoThis (f); }
 void Project::refreshFolderStructure()                                      { impl->refreshFolderStructure(); }
 void Project::createDefaultFolders()                                        { impl->createDefaultFolders(); }
 
 //==============================================================================
-juce::String Project::getSelectableDescription()                            { return impl->getSelectableDescription(); }
+yup::String Project::getSelectableDescription()                            { return impl->getSelectableDescription(); }
 
 void Project::lockFile()                                                    { impl->lockFile(); }
 void Project::unlockFile()                                                  { impl->unlockFile(); }
-void Project::sourceFileMoved (const juce::File& o, const juce::File& n)    { impl->sourceFileMoved (o, n); }
+void Project::sourceFileMoved (const yup::File& o, const yup::File& n)    { impl->sourceFileMoved (o, n); }
 void Project::reload (ReloadMode mode)                                      { impl->reload (mode); }
 void Project::setNewProjectId (ProjectID newID)                             { impl->setNewProjectId (newID); }
 
@@ -187,12 +187,12 @@ Project::Ptr convertToFolderBasedProject (Project& project)
 
     // Write project metadata to project_info.json
     {
-        auto info = std::make_unique<juce::DynamicObject>();
+        auto info = std::make_unique<yup::DynamicObject>();
         info->setProperty ("name", project.getName());
         info->setProperty ("description", project.getDescription());
         info->setProperty ("projectId", project.getProjectID().toInt());
 
-        auto jsonString = juce::JSON::toString (juce::var (info.release()));
+        auto jsonString = yup::JSON::toString (yup::var (info.release()));
         projectDir.getChildFile ("project_info.json").replaceWithText (jsonString);
     }
 

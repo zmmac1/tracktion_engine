@@ -12,7 +12,7 @@ namespace tracktion::inline engine {
 
 struct ActiveNoteList
 {
-    juce::uint16 activeChannels[128] = {};
+    yup::uint16 activeChannels[128] = {};
 
     void reset() noexcept
     {
@@ -39,7 +39,7 @@ struct ActiveNoteList
 
     bool areAnyNotesActive() const noexcept
     {
-        juce::uint16 result = 0;
+        yup::uint16 result = 0;
 
         for (auto a : activeChannels)
             result |= a;
@@ -58,7 +58,7 @@ struct ActiveNoteList
 
     static bool isValidIndex (int channel, int note) noexcept
     {
-        return juce::isPositiveAndBelow (note, 128) && channel > 0 && channel <= 16;
+        return yup::isPositiveAndBelow (note, 128) && channel > 0 && channel <= 16;
     }
 };
 

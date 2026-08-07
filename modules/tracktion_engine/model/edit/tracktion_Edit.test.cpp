@@ -232,7 +232,7 @@ TEST_SUITE ("tracktion_engine")
         auto& engine = *tracktion::engine::Engine::getEngines()[0];
 
         auto editToMatch = Edit::createSingleTrackEdit (engine);
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat>
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat>
                         (44100.0, 10.0, 2, 220.0f);
         bool couldMatchTempo = false;
 
@@ -253,11 +253,11 @@ namespace tracktion::inline engine {
 
 //==============================================================================
 //==============================================================================
-class EditItemIDBenchmarks  : public juce::UnitTest
+class EditItemIDBenchmarks  : public yup::UnitTest
 {
 public:
     EditItemIDBenchmarks()
-        : juce::UnitTest ("EditItemID", "tracktion_benchmarks")
+        : yup::UnitTest ("EditItemID", "tracktion_benchmarks")
     {}
 
     void runTest() override
@@ -286,7 +286,7 @@ public:
                 auto clipState = c->state.createCopy();
                 EditItemID::remapIDs (clipState, nullptr, c->edit);
 
-               #if JUCE_DEBUG
+               #if YUP_DEBUG
                 auto newClipID = EditItemID::fromID (clipState);
                 jassert (newClipID != EditItemID::fromID (c->state));
                 jassert (findClipForID (c->edit, newClipID) == nullptr);
@@ -297,7 +297,7 @@ public:
 
                 t1->state.appendChild (clipState, c->getUndoManager());
 
-               #if JUCE_DEBUG
+               #if YUP_DEBUG
                 jassert (t1->findClipForID (newClipID) != nullptr);
                #endif
             }
@@ -315,7 +315,7 @@ public:
                 auto trackState = t1->state.createCopy();
                 EditItemID::remapIDs (trackState, nullptr, *edit);
 
-               #if JUCE_DEBUG
+               #if YUP_DEBUG
                 auto newTrackID = EditItemID::fromID (trackState);
                 jassert (newTrackID != EditItemID::fromID (t1->state));
                 jassert (findTrackForID (*edit, newTrackID) == nullptr);
@@ -327,7 +327,7 @@ public:
                 edit->insertTrack (trackState, {}, preceeding, nullptr);
                 preceeding = trackState;
 
-               #if JUCE_DEBUG
+               #if YUP_DEBUG
                 jassert (findTrackForID (*edit, newTrackID) != nullptr);
                #endif
             }
@@ -353,7 +353,7 @@ public:
             EditInsertPoint insertPoint (*edit);
             content.pasteIntoEdit (*edit, insertPoint, nullptr);
 
-           #if JUCE_DEBUG
+           #if YUP_DEBUG
             const int numClips = std::accumulate (allAudioTracks.begin(), allAudioTracks.end(), 0,
                                                   [] (int total, auto t) { return total + t->getNumTrackItems(); });
             jassert (numClips == 10'000);

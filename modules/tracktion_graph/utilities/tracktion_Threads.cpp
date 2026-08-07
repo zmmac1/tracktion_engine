@@ -54,7 +54,7 @@ namespace tracktion::inline graph {
     }
 #endif
 
-#if JUCE_MAC
+#if YUP_MAC
     template<typename Type>
     std::optional<Type> firstOptionalWithValue (const std::initializer_list<std::optional<Type>>& optionals)
     {
@@ -65,7 +65,7 @@ namespace tracktion::inline graph {
         return {};
     }
 
-    bool tryToUpgradeCurrentThreadToRealtime (const juce::Thread::RealtimeOptions& options)
+    bool tryToUpgradeCurrentThreadToRealtime (const yup::Thread::RealtimeOptions& options)
     {
         const auto periodMs = options.getPeriodMs().value_or (0.0);
 
@@ -83,9 +83,9 @@ namespace tracktion::inline graph {
         jassert (maxProcessingTimeMs >= processingTimeMs);
 
         thread_time_constraint_policy_data_t policy;
-        policy.period = (uint32_t) juce::Time::secondsToHighResolutionTicks (periodMs / 1'000.0);
-        policy.computation = (uint32_t) juce::Time::secondsToHighResolutionTicks (processingTimeMs / 1'000.0);
-        policy.constraint = (uint32_t) juce::Time::secondsToHighResolutionTicks (maxProcessingTimeMs / 1'000.0);
+        policy.period = (uint32_t) yup::Time::secondsToHighResolutionTicks (periodMs / 1'000.0);
+        policy.computation = (uint32_t) yup::Time::secondsToHighResolutionTicks (processingTimeMs / 1'000.0);
+        policy.constraint = (uint32_t) yup::Time::secondsToHighResolutionTicks (maxProcessingTimeMs / 1'000.0);
         policy.preemptible = true;
 
         const auto result = thread_policy_set (pthread_mach_thread_np (pthread_self()),
@@ -107,7 +107,7 @@ namespace tracktion::inline graph {
         return false;
     }
 #else
-    bool tryToUpgradeCurrentThreadToRealtime (const juce::Thread::RealtimeOptions&)
+    bool tryToUpgradeCurrentThreadToRealtime (const yup::Thread::RealtimeOptions&)
     {
         return false;
     }

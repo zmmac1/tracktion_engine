@@ -65,7 +65,7 @@ private:
 */
 class Clip   : public TrackItem,
                public Exportable,
-               protected juce::ValueTree::Listener
+               protected yup::ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -73,7 +73,7 @@ public:
         Clip's have to have a parent ClipOwner and unique EditItemID @see Edit::createNewItemID
         You would usually create a clip using ClipOwner::insertNewClip
     */
-    Clip (const juce::ValueTree&, ClipOwner&, EditItemID, Type);
+    Clip (const yup::ValueTree&, ClipOwner&, EditItemID, Type);
 
     /** Destructor. */
     ~Clip() override;
@@ -81,19 +81,19 @@ public:
     /** Initialises the Clip. Called once automatically after construction. */
     virtual void initialise();
 
-    using Ptr = juce::ReferenceCountedObjectPtr<Clip>;
-    using Array = juce::ReferenceCountedArray<Clip>;
+    using Ptr = yup::ReferenceCountedObjectPtr<Clip>;
+    using Array = yup::ReferenceCountedArray<Clip>;
 
     //==============================================================================
     /** Checks whether a ValueTree is some kind of clip state */
-    static bool isClipState (const juce::ValueTree&);
+    static bool isClipState (const yup::ValueTree&);
     /** Checks whether a ValueTree type is some kind of clip state */
-    static bool isClipState (const juce::Identifier&);
+    static bool isClipState (const yup::Identifier&);
 
     /** Creates a clip for a given ValueTree representation.
         This may return a previously-existing clip with the same ID.
     */
-    static Ptr createClipForState (const juce::ValueTree&, ClipOwner& targetParent);
+    static Ptr createClipForState (const yup::ValueTree&, ClipOwner& targetParent);
 
     /** Can be overridden to ensure any state (e.g. clip plugins) is flushed to the ValueTree ready for saving. */
     virtual void flushStateToValueTree();
@@ -111,9 +111,9 @@ public:
 
     //==============================================================================
     /** Returns the name of the clip. */
-    virtual juce::String getName() const override       { return clipName; }
+    virtual yup::String getName() const override       { return clipName; }
     /** Sets a new name for a clip. */
-    void setName (const juce::String& newName);
+    void setName (const yup::String& newName);
 
     /** Returns true if this is a MidiClip. */
     [[ nodiscard ]] virtual bool isMidi() const = 0;
@@ -131,11 +131,11 @@ public:
     /** Returns the current source file, this is different to the SourceFileReference
         as it could be a temporary comp file, clipFX, reverse render etc.
     */
-    juce::File getCurrentSourceFile() const             { return currentSourceFile; }
+    yup::File getCurrentSourceFile() const             { return currentSourceFile; }
 
     //==============================================================================
     /** Returns an array of any ReferencedItem[s] e.g. audio files. */
-    juce::Array<ReferencedItem> getReferencedItems() override;
+    yup::Array<ReferencedItem> getReferencedItems() override;
 
     /** Should be implemented to change the underlying source to a new ProjectItemRef. */
     void reassignReferencedItem (const ReferencedItem&, ProjectItemRef newRef, double newStartTime) override;
@@ -205,7 +205,7 @@ public:
     virtual TimeDuration getTail() const                  { return {}; }
 
     /** Returns times for snapping to, relative to the Edit. Base class adds start and end time. */
-    virtual juce::Array<TimePosition> getInterestingTimes();
+    virtual yup::Array<TimePosition> getInterestingTimes();
 
     /** Returns the first marked time in the source file which can be used for
         syncronising newly added clips.
@@ -328,9 +328,9 @@ public:
     /** Returns true if this clip is linked with any others. */
     bool isLinked() const                           { return linkID.get().isNotEmpty(); }
     /** Sets the link ID to link this clip with others. */
-    void setLinkGroupID (juce::String newLinkID)    { linkID = newLinkID; }
+    void setLinkGroupID (yup::String newLinkID)    { linkID = newLinkID; }
     /** Returns the link ID of this clip. */
-    juce::String getLinkGroupID() const             { return linkID; }
+    yup::String getLinkGroupID() const             { return linkID; }
 
     //==============================================================================
     /** Returns the parent ClipOwner this clip is on. */
@@ -344,9 +344,9 @@ public:
 
     //==============================================================================
     /** Returns the colour property of this clip. */
-    virtual juce::Colour getColour() const;
+    virtual yup::Color getColor() const;
     /** Sets the colour property of this clip. */
-    void setColour (juce::Colour);
+    void setColor (yup::Color);
 
     //==============================================================================
     /** Removes the given plugin from the clip if the clip supports plugins. */
@@ -367,7 +367,7 @@ public:
 
     //==============================================================================
     /** Returns the default colour for this clip. */
-    virtual juce::Colour getDefaultColour() const = 0;
+    virtual yup::Color getDefaultColor() const = 0;
 
     //==============================================================================
     /** Clears any takes this clip has. */
@@ -375,7 +375,7 @@ public:
     /** Returns true if this clip has any takes. */
     virtual bool hasAnyTakes() const                        { return false; }
     /** Returns the descriptions of any takes. */
-    virtual juce::StringArray getTakeDescriptions() const   { return {}; }
+    virtual yup::StringArray getTakeDescriptions() const   { return {}; }
     /** Sets a given take index to be the current take. */
     virtual void setCurrentTake (int /*takeIndex*/)         {}
     /** Returns the current take index. */
@@ -427,7 +427,7 @@ public:
         /** Called when a recorded MidiMessage has been generated and sent.
             to the playback graph. This applies to Step and Midi clips.
          */
-        virtual void midiMessageGenerated (Clip&, const juce::MidiMessage&) = 0;
+        virtual void midiMessageGenerated (Clip&, const yup::MidiMessage&) = 0;
     };
 
     /** Adds a Listener. */
@@ -437,7 +437,7 @@ public:
     void removeListener (Listener*);
 
     /** Returns the listener list so Nodes can manually call them. */
-    juce::ListenerList<Listener>& getListeners()            { return listeners; }
+    yup::ListenerList<Listener>& getListeners()            { return listeners; }
 
     //==============================================================================
     /** @internal */
@@ -446,8 +446,8 @@ public:
     /** Returns the UndoManager. @see Edit::getUndoManager. */
     juce::UndoManager* getUndoManager() const;
 
-    juce::ValueTree state;                      /**< The ValueTree of the Clip state. */
-    juce::CachedValue<juce::Colour> colour;     /**< The colour property. */
+    yup::ValueTree state;                      /**< The ValueTree of the Clip state. */
+    juce::CachedValue<yup::Color> colour;     /**< The colour property. */
     juce::CachedValue<bool> disabled;           /**< Whether the Clip is disabled or not.
                                                      Changed to disabled clips won't rebuild the
                                                      audio graph and they won't get added to
@@ -468,41 +468,41 @@ protected:
 
     bool isInitialised = false;
     bool cloneInProgress = false;
-    juce::CachedValue<juce::String> clipName;
+    juce::CachedValue<yup::String> clipName;
     ClipOwner* parent = nullptr;
     juce::CachedValue<TimePosition> clipStart;
     juce::CachedValue<TimeDuration> length, offset;
     juce::CachedValue<double> speedRatio;
     SourceFileReference sourceFileReference;
     juce::CachedValue<EditItemID> groupID;
-    juce::CachedValue<juce::String> linkID;
-    juce::File currentSourceFile;
+    juce::CachedValue<yup::String> linkID;
+    yup::File currentSourceFile;
     juce::CachedValue<SyncType> syncType;
     juce::CachedValue<bool> showingTakes;
     std::unique_ptr<PatternGenerator> patternGenerator;
     std::unique_ptr<AutomationCurveList> automationCurveList;
     AsyncCaller updateLinkedClipsCaller;
 
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 
     /** Sets a new source file for this clip. */
-    void setCurrentSourceFile (const juce::File&);
+    void setCurrentSourceFile (const yup::File&);
 
     /** Returns the mark points relative to the start of the clip, rescaled to the current speed. */
-    virtual juce::Array<TimePosition> getRescaledMarkPoints() const;
+    virtual yup::Array<TimePosition> getRescaledMarkPoints() const;
 
     /** @internal */
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
     /** @internal */
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
     /** @internal */
-    void valueTreeParentChanged (juce::ValueTree&) override;
+    void valueTreeParentChanged (yup::ValueTree&) override;
 
 private:
     void updateParent();
     std::pair<std::function<CurvePosition()>, std::function<ClipPositionInfo()>> getAutomationCurveListDelegates();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Clip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Clip)
 };
 
 
@@ -516,13 +516,13 @@ namespace ClipConstants
 
 namespace details
 {
-    Clip::FollowActionDurationType followActionDurationTypeFromString (juce::String);
-    juce::String toString (Clip::FollowActionDurationType);
+    Clip::FollowActionDurationType followActionDurationTypeFromString (yup::String);
+    yup::String toString (Clip::FollowActionDurationType);
 }
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template<>
     struct VariantConverter<tracktion::engine::Clip::SyncType>

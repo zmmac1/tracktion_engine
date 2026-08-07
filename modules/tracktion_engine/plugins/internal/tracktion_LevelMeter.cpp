@@ -22,9 +22,9 @@ LevelMeterPlugin::~LevelMeterPlugin()
     notifyListenersOfDeletion();
 }
 
-juce::ValueTree LevelMeterPlugin::create()
+yup::ValueTree LevelMeterPlugin::create()
 {
-    juce::ValueTree v (IDs::PLUGIN);
+    yup::ValueTree v (IDs::PLUGIN);
     v.setProperty (IDs::type, xmlTypeName, nullptr);
     return v;
 }
@@ -96,7 +96,7 @@ void LevelMeterPlugin::timerCallback()
     }
 }
 
-void LevelMeterPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void LevelMeterPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, showMidiActivity);
 

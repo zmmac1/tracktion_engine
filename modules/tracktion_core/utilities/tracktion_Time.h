@@ -12,7 +12,7 @@
 
 #include <chrono>
 #include <cstdlib>
-#include <juce_core/juce_core.h>
+#include <yup_core/yup_core.h>
 
 namespace tracktion::inline core {
 
@@ -725,12 +725,12 @@ inline constexpr BeatDuration toDuration (BeatPosition t)
 
 inline BeatPosition roundToNearestBeat (BeatPosition t)
 {
-    return BeatPosition::fromBeats (juce::roundToInt (t.inBeats()));
+    return BeatPosition::fromBeats (yup::roundToInt (t.inBeats()));
 }
 
 inline BeatDuration roundToNearestBeat (BeatDuration t)
 {
-    return BeatDuration::fromBeats (juce::roundToInt (t.inBeats()));
+    return BeatDuration::fromBeats (yup::roundToInt (t.inBeats()));
 }
 
 inline BeatDuration abs (BeatDuration t)
@@ -840,10 +840,10 @@ inline constexpr bool operator<=    (const BeatDuration& t1, const BeatDuration&
 inline constexpr bool operator>     (const BeatDuration& t1, const BeatDuration& t2)    { return t1.inBeats() > t2.inBeats(); }
 inline constexpr bool operator>=    (const BeatDuration& t1, const BeatDuration& t2)    { return t1.inBeats() >= t2.inBeats(); }
 
-inline juce::String& operator<< (juce::String& s, TimeDuration d)  { return s << juce::String (d.inSeconds()); }
-inline juce::String& operator<< (juce::String& s, TimePosition p)  { return s << juce::String (p.inSeconds()); }
-inline juce::String& operator<< (juce::String& s, BeatDuration d)  { return s << juce::String (d.inBeats()); }
-inline juce::String& operator<< (juce::String& s, BeatPosition p)  { return s << juce::String (p.inBeats()); }
+inline yup::String& operator<< (yup::String& s, TimeDuration d)  { return s << yup::String (d.inSeconds()); }
+inline yup::String& operator<< (yup::String& s, TimePosition p)  { return s << yup::String (p.inSeconds()); }
+inline yup::String& operator<< (yup::String& s, BeatDuration d)  { return s << yup::String (d.inBeats()); }
+inline yup::String& operator<< (yup::String& s, BeatPosition p)  { return s << yup::String (p.inBeats()); }
 
 inline std::ostream& operator<< (std::ostream& os, const TimeDuration& v) { os << v.inSeconds(); return os; }
 inline std::ostream& operator<< (std::ostream& os, const TimePosition& v) { os << v.inSeconds(); return os; }

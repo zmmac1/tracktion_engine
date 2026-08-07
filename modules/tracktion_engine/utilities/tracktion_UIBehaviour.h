@@ -22,7 +22,7 @@ public:
     //==============================================================================
     virtual Edit* getCurrentlyFocusedEdit()                                         { return {}; }
     virtual Edit* getLastFocusedEdit()                                              { return {}; }
-    virtual juce::Array<Edit*> getAllOpenEdits()                                    { return {}; }
+    virtual yup::Array<Edit*> getAllOpenEdits()                                    { return {}; }
     virtual bool isEditVisibleOnScreen (const Edit&)                                { return true; }
     virtual bool closeAllEditsBelongingToProject (Project&)                         { return false; }
     virtual void editNamesMayHaveChanged()                                          {}
@@ -35,10 +35,10 @@ public:
     virtual void selectProjectInFocusedWindow (Project::Ptr)                        {}
     virtual void updateAllProjectItemLists()                                        {}
 
-    virtual juce::ApplicationCommandManager* getApplicationCommandManager()         { return {}; }
-    virtual void getAllCommands (juce::Array<juce::CommandID>&)                     {}
-    virtual void getCommandInfo (juce::CommandID, juce::ApplicationCommandInfo&)    {}
-    virtual bool perform (const juce::ApplicationCommandTarget::InvocationInfo&)    { return false; }
+    virtual yup::ApplicationCommandManager* getApplicationCommandManager()         { return {}; }
+    virtual void getAllCommands (yup::Array<yup::CommandID>&)                     {}
+    virtual void getCommandInfo (yup::CommandID, yup::ApplicationCommandInfo&)    {}
+    virtual bool perform (const yup::ApplicationCommandTarget::InvocationInfo&)    { return false; }
 
     //==============================================================================
     /** Should show the new plugin window and creates the Plugin the user selects.
@@ -57,7 +57,7 @@ public:
         The type of state should be checked and used accordingly e.g. Plugin::WindowState
         or RackType::WindowsState
     */
-    virtual std::unique_ptr<juce::Component> createPluginWindow (PluginWindowState&){ return {}; }
+    virtual std::unique_ptr<yup::Component> createPluginWindow (PluginWindowState&){ return {}; }
 
     /** Should trigger an asynchronous refresh of any editor components showing for this plugin.
         The default implementation just causes a new instance of the whole window to be created.
@@ -68,34 +68,34 @@ public:
     virtual void newTrackCreated (Track&) {}
 
     /** Must create an AudioThumnail for displaying, usually in a SmartThumbnail. */
-    virtual std::unique_ptr<juce::AudioThumbnailBase> createAudioThumbnail (int sourceSamplesPerThumbnailSample,
-                                                                            juce::AudioFormatManager& formatManagerToUse,
-                                                                            juce::AudioThumbnailCache& cacheToUse)
+    virtual std::unique_ptr<yup::AudioThumbnailBase> createAudioThumbnail (int sourceSamplesPerThumbnailSample,
+                                                                            yup::AudioFormatManager& formatManagerToUse,
+                                                                            yup::AudioThumbnailCache& cacheToUse)
     {
-        return std::make_unique<juce::AudioThumbnail> (sourceSamplesPerThumbnailSample,
+        return std::make_unique<yup::AudioThumbnail> (sourceSamplesPerThumbnailSample,
                                                        formatManagerToUse, cacheToUse);
     }
 
     //==============================================================================
     /** Should display a dismissable alert window. N.B. this should be non-blocking. */
-    virtual void showWarningAlert (const juce::String& title, const juce::String& message);
+    virtual void showWarningAlert (const yup::String& title, const yup::String& message);
 
     /** Async ok/cancel alert. Calls the callback with true for OK, false for cancel. */
-    virtual void showOkCancelAlertBoxAsync (const juce::String& title, const juce::String& message,
-                                             const juce::String& ok, const juce::String& cancel,
+    virtual void showOkCancelAlertBoxAsync (const yup::String& title, const yup::String& message,
+                                             const yup::String& ok, const yup::String& cancel,
                                              std::function<void (bool)> callback);
 
     /** Async yes/no/cancel alert. Calls the callback with 1=yes, 2=no, 0=cancel. */
-    virtual void showYesNoCancelAlertBoxAsync (const juce::String& title, const juce::String& message,
-                                                const juce::String& yes, const juce::String& no,
-                                                const juce::String& cancel,
+    virtual void showYesNoCancelAlertBoxAsync (const yup::String& title, const yup::String& message,
+                                                const yup::String& yes, const yup::String& no,
+                                                const yup::String& cancel,
                                                 std::function<void (int)> callback);
 
     /** Should display a temporary information message, usually in the same place. */
-    virtual void showInfoMessage (const juce::String& message);
+    virtual void showInfoMessage (const yup::String& message);
 
     /** Should display a temporary warning message. */
-    virtual void showWarningMessage (const juce::String& message);
+    virtual void showWarningMessage (const yup::String& message);
 
     /** Should show the current quantisation level for a short period of time. */
     virtual void showQuantisationLevel() {}
@@ -136,10 +136,10 @@ public:
     virtual void scrollTracksLeft()                                                 {}
     virtual void scrollTracksRight()                                                {}
 
-    virtual void nudgeSelectedClips (TimecodeSnapType, const juce::String& commandDesc,
-                                     SelectionManager&, const juce::Array<Clip*>&, bool automationLocked);
-    virtual void nudgeSelected (TimecodeSnapType, const juce::String& commandDesc, bool automationLocked);
-    virtual void nudgeSelected (const juce::String& commandDesc);
+    virtual void nudgeSelectedClips (TimecodeSnapType, const yup::String& commandDesc,
+                                     SelectionManager&, const yup::Array<Clip*>&, bool automationLocked);
+    virtual void nudgeSelected (TimecodeSnapType, const yup::String& commandDesc, bool automationLocked);
+    virtual void nudgeSelected (const yup::String& commandDesc);
 
     virtual void stopPreviewPlayback()                                              {}
     virtual void resetOverloads()                                                   {}
@@ -164,7 +164,7 @@ public:
 
     /** Can return a range of tracks which used be used for edit operations such as coping or deleting.
     */
-    virtual juce::Array<Track*> getEditingTracks (Edit&)                            { return {}; }
+    virtual yup::Array<Track*> getEditingTracks (Edit&)                            { return {}; }
 
     //==============================================================================
     /** If your UI has the concept of edit groups, you should return an expanded list of

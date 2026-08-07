@@ -13,8 +13,8 @@ namespace tracktion::inline engine {
 class EqualiserPlugin::EQAutomatableParameter : public AutomatableParameter
 {
 public:
-    EQAutomatableParameter (EqualiserPlugin& p, const juce::String& xmlTag, const juce::String& name,
-                            Plugin& owner, juce::Range<float> valueRangeToUse, int paramNumberToUse,
+    EQAutomatableParameter (EqualiserPlugin& p, const yup::String& xmlTag, const yup::String& name,
+                            Plugin& owner, yup::Range<float> valueRangeToUse, int paramNumberToUse,
                             bool isGain_, bool isFreq_, bool isQ_)
         : AutomatableParameter (xmlTag, name, owner, valueRangeToUse),
           equaliser (p), paramNumber (paramNumberToUse),
@@ -27,18 +27,18 @@ public:
         notifyListenersOfDeletion();
     }
 
-    juce::String valueToString (float value) override
+    yup::String valueToString (float value) override
     {
         if (isFreq)
-            return juce::String (juce::roundToInt (value)) + " Hz";
+            return yup::String (yup::roundToInt (value)) + " Hz";
 
         if (isGain)
-            return juce::Decibels::toString (value);
+            return yup::Decibels::toString (value);
 
-        return juce::String (value, 3);
+        return yup::String (value, 3);
     }
 
-    float stringToValue (const juce::String& str) override
+    float stringToValue (const yup::String& str) override
     {
         if (isFreq)
             return str.retainCharacters ("0123456789").getFloatValue();
@@ -141,33 +141,33 @@ EqualiserPlugin::~EqualiserPlugin()
     hiQ->detachFromCurrentValue();
 }
 
-juce::String EqualiserPlugin::getTooltip()
+yup::String EqualiserPlugin::getTooltip()
 {
     return getName() + "$equaliserplugin";
 }
 
 void EqualiserPlugin::resetToDefault()
 {
-    loGain->setParameter (0.0f, juce::dontSendNotification);
-    loFreq->setParameter (80.0f, juce::dontSendNotification);
-    loQ   ->setParameter (0.5f, juce::dontSendNotification);
+    loGain->setParameter (0.0f, yup::dontSendNotification);
+    loFreq->setParameter (80.0f, yup::dontSendNotification);
+    loQ   ->setParameter (0.5f, yup::dontSendNotification);
 
-    hiGain->setParameter (0.0f, juce::dontSendNotification);
-    hiFreq->setParameter (17000.0f, juce::dontSendNotification);
-    hiQ   ->setParameter (0.5f, juce::dontSendNotification);
+    hiGain->setParameter (0.0f, yup::dontSendNotification);
+    hiFreq->setParameter (17000.0f, yup::dontSendNotification);
+    hiQ   ->setParameter (0.5f, yup::dontSendNotification);
 
-    midGain1->setParameter (0.0f, juce::dontSendNotification);
-    midFreq1->setParameter (3000.0f, juce::dontSendNotification);
-    midQ1   ->setParameter (0.5f, juce::dontSendNotification);
+    midGain1->setParameter (0.0f, yup::dontSendNotification);
+    midFreq1->setParameter (3000.0f, yup::dontSendNotification);
+    midQ1   ->setParameter (0.5f, yup::dontSendNotification);
 
-    midGain2->setParameter (0.0f, juce::dontSendNotification);
-    midFreq2->setParameter (5000.0f, juce::dontSendNotification);
-    midQ2   ->setParameter (0.5f, juce::dontSendNotification);
+    midGain2->setParameter (0.0f, yup::dontSendNotification);
+    midFreq2->setParameter (5000.0f, yup::dontSendNotification);
+    midQ2   ->setParameter (0.5f, yup::dontSendNotification);
 
     curveNeedsUpdating = true;
 }
 
-void EqualiserPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void EqualiserPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, loFreqValue, loGainValue, loQValue, hiFreqValue, hiGainValue,
                                   hiQValue, midFreqValue1, midGainValue1, midQValue1, midFreqValue2,
@@ -177,7 +177,7 @@ void EqualiserPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
         p->updateFromAttachedValue();
 }
 
-void EqualiserPlugin::valueTreePropertyChanged (juce::ValueTree& parent, const juce::Identifier& prop)
+void EqualiserPlugin::valueTreePropertyChanged (yup::ValueTree& parent, const yup::Identifier& prop)
 {
     curveNeedsUpdating = true;
     Plugin::valueTreePropertyChanged (parent, prop);
@@ -190,13 +190,13 @@ static float convertEQLevelToGain (double db)
 
 void EqualiserPlugin::updateIIRFilters()
 {
-    const juce::ScopedLock sl (filterLock);
+    const yup::ScopedLock sl (filterLock);
 
     if (needToUpdateFilters[0])
     {
         needToUpdateFilters[0] = false;
 
-        auto c = juce::IIRCoefficients::makeLowShelf (lastSampleRate, loFreq->getCurrentValue(), loQ->getCurrentValue(),
+        auto c = yup::IIRCoefficients::makeLowShelf (lastSampleRate, loFreq->getCurrentValue(), loQ->getCurrentValue(),
                                                       convertEQLevelToGain (loGain->getCurrentValue()));
 
         for (int i = EQ_CHANS; --i >= 0;)
@@ -207,7 +207,7 @@ void EqualiserPlugin::updateIIRFilters()
     {
         needToUpdateFilters[1] = false;
 
-        auto c = juce::IIRCoefficients::makePeakFilter (lastSampleRate, midFreq1->getCurrentValue(), midQ1->getCurrentValue(),
+        auto c = yup::IIRCoefficients::makePeakFilter (lastSampleRate, midFreq1->getCurrentValue(), midQ1->getCurrentValue(),
                                                         convertEQLevelToGain (midGain1->getCurrentValue()));
 
         for (int i = EQ_CHANS; --i >= 0;)
@@ -218,7 +218,7 @@ void EqualiserPlugin::updateIIRFilters()
     {
         needToUpdateFilters[2] = false;
 
-        auto c = juce::IIRCoefficients::makePeakFilter (lastSampleRate, midFreq2->getCurrentValue(), midQ2->getCurrentValue(),
+        auto c = yup::IIRCoefficients::makePeakFilter (lastSampleRate, midFreq2->getCurrentValue(), midQ2->getCurrentValue(),
                                                         convertEQLevelToGain (midGain2->getCurrentValue()));
 
         for (int i = EQ_CHANS; --i >= 0;)
@@ -229,7 +229,7 @@ void EqualiserPlugin::updateIIRFilters()
     {
         needToUpdateFilters[3] = false;
 
-        auto c = juce::IIRCoefficients::makeHighShelf (lastSampleRate, hiFreq->getCurrentValue(), hiQ->getCurrentValue(),
+        auto c = yup::IIRCoefficients::makeHighShelf (lastSampleRate, hiFreq->getCurrentValue(), hiQ->getCurrentValue(),
                                                        convertEQLevelToGain (hiGain->getCurrentValue()));
 
         for (int i = EQ_CHANS; --i >= 0;)
@@ -268,7 +268,7 @@ void EqualiserPlugin::applyToBuffer (const PluginRenderContext& fc)
     {
         SCOPED_REALTIME_CHECK
 
-        const juce::ScopedLock sl (filterLock);
+        const yup::ScopedLock sl (filterLock);
 
         updateIIRFilters();
 
@@ -310,17 +310,17 @@ float EqualiserPlugin::getDBGainAtFrequency (float f)
         float samps[sampSize * 2 + 8] = {};
         samps[0] = 1.0f;
 
-        if (loGain->getCurrentValue() != 0)     juce::IIRFilter (low[0]) .processSamples (samps, sampSize);
-        if (midGain1->getCurrentValue() != 0)   juce::IIRFilter (mid1[0]).processSamples (samps, sampSize);
-        if (midGain2->getCurrentValue() != 0)   juce::IIRFilter (mid2[0]).processSamples (samps, sampSize);
-        if (hiGain->getCurrentValue() != 0)     juce::IIRFilter (high[0]).processSamples (samps, sampSize);
+        if (loGain->getCurrentValue() != 0)     yup::IIRFilter (low[0]) .processSamples (samps, sampSize);
+        if (midGain1->getCurrentValue() != 0)   yup::IIRFilter (mid1[0]).processSamples (samps, sampSize);
+        if (midGain2->getCurrentValue() != 0)   yup::IIRFilter (mid2[0]).processSamples (samps, sampSize);
+        if (hiGain->getCurrentValue() != 0)     yup::IIRFilter (high[0]).processSamples (samps, sampSize);
 
         fft.performRealOnlyForwardTransform (samps);
 
         for (int i = 0; i < sampSize / 2;)
         {
             curve.addPoint (float (i) / float (sampSize / 2),
-                            gainToDb (juce::jlimit (0.01f, 10.0f, samps[i * 2])));
+                            gainToDb (yup::jlimit (0.01f, 10.0f, samps[i * 2])));
 
             if (i < sampSize / 8)
                 ++i;

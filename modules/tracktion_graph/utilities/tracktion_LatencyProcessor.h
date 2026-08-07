@@ -110,7 +110,7 @@ struct LatencyProcessor
         // Ensure there are no negative time messages
         for (auto& m : midi)
         {
-           juce::ignoreUnused (m);
+           yup::ignoreUnused (m);
            jassert (m.getTimeStamp() >= 0.0);
         }
     }
@@ -136,7 +136,7 @@ struct LatencyProcessor
         // Ensure there are no negative time messages
         for (auto& m : midi)
         {
-           juce::ignoreUnused (m);
+           yup::ignoreUnused (m);
            jassert (m.getTimeStamp() >= 0.0);
         }
     }

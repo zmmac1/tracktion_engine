@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-StepClip::Channel::Channel (StepClip& c, const juce::ValueTree& v)
+StepClip::Channel::Channel (StepClip& c, const yup::ValueTree& v)
     : clip (c), state (v)
 {
     auto* um = &clip.edit.getUndoManager();
@@ -56,13 +56,13 @@ int StepClip::Channel::getIndex() const
     return state.getParent().indexOf (state);
 }
 
-juce::String StepClip::Channel::getDisplayName() const
+yup::String StepClip::Channel::getDisplayName() const
 {
-    return name.get().isEmpty() ? juce::String (getIndex() + 1) : name;
+    return name.get().isEmpty() ? yup::String (getIndex() + 1) : name;
 }
 
 //==============================================================================
-juce::String StepClip::Channel::getSelectableDescription()
+yup::String StepClip::Channel::getSelectableDescription()
 {
     jassertfalse;
     return {};

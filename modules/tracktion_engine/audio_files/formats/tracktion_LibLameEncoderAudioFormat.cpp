@@ -40,7 +40,7 @@ namespace liblame
     /** True if the string has anything that ISO-8859-1 can't represent. ID3v2.3 text
         frames are latin-1 unless they're explicitly flagged as UTF-16.
     */
-    static bool needsUnicode (const juce::String& s)
+    static bool needsUnicode (const yup::String& s)
     {
         for (auto c = s.getCharPointer(); ! c.isEmpty();)
             if (c.getAndAdvance() > 255)
@@ -52,7 +52,7 @@ namespace liblame
     /** Encodes to latin-1 for LAME's normal id3 setters, dropping anything that
         doesn't fit. Callers should prefer the UTF-16 entry points where possible.
     */
-    static std::string toLatin1 (const juce::String& s)
+    static std::string toLatin1 (const yup::String& s)
     {
         std::string result;
 
@@ -64,7 +64,7 @@ namespace liblame
     }
 
     /** LAME's UTF-16 id3 entry points want a byte-order-marked, null terminated string. */
-    static std::vector<unsigned short> toUTF16WithBOM (const juce::String& s)
+    static std::vector<unsigned short> toUTF16WithBOM (const yup::String& s)
     {
         std::vector<unsigned short> result { 0xfeff };
 
@@ -96,7 +96,7 @@ namespace liblame
         char buffer[1024] = {};
         std::vsnprintf (buffer, sizeof (buffer) - 1, format, args);
 
-        if (juce::String message (buffer); message.trim().isNotEmpty())
+        if (yup::String message (buffer); message.trim().isNotEmpty())
             TRACKTION_LOG ("LAME: " + message.trimEnd());
     }
 }
@@ -113,7 +113,7 @@ struct LibLameEncoderAudioFormat::LameLibrary
 {
     using lame_t = liblame::lame_t;
 
-    explicit LameLibrary (const juce::String& libraryName)
+    explicit LameLibrary (const yup::String& libraryName)
     {
         if (! library.open (libraryName))
         {
@@ -196,7 +196,7 @@ struct LibLameEncoderAudioFormat::LameLibrary
         LAME's normal setters, which also lets it write an ID3v1 tag; anything else
         needs the UTF-16 entry points, as the plain setters are latin-1 only.
     */
-    void applyMetadata (lame_t gfp, const juce::StringPairArray& metadata) const
+    void applyMetadata (lame_t gfp, const yup::StringPairArray& metadata) const
     {
         if (id3tag_init == nullptr || id3tag_add_v2 == nullptr)
             return;
@@ -204,7 +204,7 @@ struct LibLameEncoderAudioFormat::LameLibrary
         id3tag_init (gfp);
         id3tag_add_v2 (gfp);
 
-        auto setTextFrame = [this, gfp] (const char* frameID, const juce::String& value, auto&& latin1Setter)
+        auto setTextFrame = [this, gfp] (const char* frameID, const yup::String& value, auto&& latin1Setter)
         {
             if (value.isEmpty())
                 return;
@@ -227,7 +227,7 @@ struct LibLameEncoderAudioFormat::LameLibrary
         applyComment (gfp, metadata.getValue ("id3comment", {}));
     }
 
-    void applyComment (lame_t gfp, const juce::String& value) const
+    void applyComment (lame_t gfp, const yup::String& value) const
     {
         if (value.isEmpty())
             return;
@@ -246,7 +246,7 @@ struct LibLameEncoderAudioFormat::LameLibrary
     }
 
     //==============================================================================
-    juce::DynamicLibrary library;
+    yup::DynamicLibrary library;
     bool isLoaded = false;
 
     lame_t (*lame_init)() = nullptr;
@@ -288,22 +288,22 @@ struct LibLameEncoderAudioFormat::LameLibrary
     int (*id3tag_set_textinfo_utf16) (lame_t, const char*, const unsigned short*) = nullptr;
     int (*id3tag_set_comment_utf16) (lame_t, const char*, const unsigned short*, const unsigned short*) = nullptr;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LameLibrary)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LameLibrary)
 };
 
 //==============================================================================
 //==============================================================================
-class LibLameEncoderAudioFormat::Writer  : public juce::AudioFormatWriter
+class LibLameEncoderAudioFormat::Writer  : public yup::AudioFormatWriter
 {
 public:
     /** The flags must already have been through a successful lame_init_params - see
         LibLameEncoderAudioFormat::createWriterFor. Ownership of them passes to this.
     */
-    Writer (std::unique_ptr<juce::OutputStream>& destStream,
-            const juce::String& formatName,
+    Writer (std::unique_ptr<yup::OutputStream>& destStream,
+            const yup::String& formatName,
             std::shared_ptr<LameLibrary> libraryToUse,
             liblame::lame_t flagsToUse,
-            const juce::AudioFormatWriterOptions& options)
+            const yup::WriteOptions& options)
         : AudioFormatWriter (destStream.release(), formatName,
                              options.getSampleRate(),
                              (unsigned int) options.getNumChannels(),
@@ -340,9 +340,9 @@ public:
 
             // JUCE always hands over 32-bit ints here, whatever the nominal bit depth
             if (auto src = samplesToWrite != nullptr ? samplesToWrite[i] : nullptr)
-                juce::FloatVectorOperations::convertFixedToFloat (dest, src, intToFloatScale, numSamples);
+                yup::FloatVectorOperations::convertFixedToFloat (dest, src, intToFloatScale, numSamples);
             else
-                juce::FloatVectorOperations::clear (dest, numSamples);
+                yup::FloatVectorOperations::clear (dest, numSamples);
         }
 
         auto left  = scratch.getReadPointer (0);
@@ -378,7 +378,7 @@ private:
     {
         if (numBytes < 0)
         {
-            TRACKTION_LOG ("LAME: encoder returned error " + juce::String (numBytes));
+            TRACKTION_LOG ("LAME: encoder returned error " + yup::String (numBytes));
             return false;
         }
 
@@ -403,7 +403,7 @@ private:
 
     //==============================================================================
     /** Reads a tag out of LAME, which reports the size it needs when given a null buffer. */
-    juce::MemoryBlock readTag (size_t (*getTag) (liblame::lame_t, unsigned char*, size_t)) const
+    yup::MemoryBlock readTag (size_t (*getTag) (liblame::lame_t, unsigned char*, size_t)) const
     {
         if (getTag == nullptr)
             return {};
@@ -413,7 +413,7 @@ private:
         if (numBytes == 0)
             return {};
 
-        juce::MemoryBlock tag (numBytes);
+        yup::MemoryBlock tag (numBytes);
 
         if (getTag (gfp, static_cast<unsigned char*> (tag.getData()), numBytes) != numBytes)
             return {};
@@ -461,16 +461,16 @@ private:
 
     const std::shared_ptr<LameLibrary> lame;
     liblame::lame_t gfp = nullptr;
-    juce::int64 lameTagPosition = 0;
-    juce::AudioBuffer<float> scratch;
-    juce::MemoryBlock mp3Buffer;
+    yup::int64 lameTagPosition = 0;
+    yup::AudioBuffer<float> scratch;
+    yup::MemoryBlock mp3Buffer;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Writer)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Writer)
 };
 
 //==============================================================================
 //==============================================================================
-LibLameEncoderAudioFormat::LibLameEncoderAudioFormat (const juce::String& lameSharedLibraryToUse)
+LibLameEncoderAudioFormat::LibLameEncoderAudioFormat (const yup::String& lameSharedLibraryToUse)
     : AudioFormat ("MP3 file", ".mp3"),
       lame (std::make_shared<LameLibrary> (lameSharedLibraryToUse))
 {
@@ -480,11 +480,11 @@ LibLameEncoderAudioFormat::~LibLameEncoderAudioFormat()
 {
 }
 
-juce::String LibLameEncoderAudioFormat::getDefaultLibraryName()
+yup::String LibLameEncoderAudioFormat::getDefaultLibraryName()
 {
    #if JUCE_WINDOWS
     return "libmp3lame.dll";
-   #elif JUCE_MAC || JUCE_IOS
+   #elif YUP_MAC || JUCE_IOS
     return "libmp3lame.dylib";
    #else
     // The bare .so is only there with the -dev package installed, so use the soname
@@ -497,20 +497,20 @@ bool LibLameEncoderAudioFormat::isLibraryLoaded() const
     return lame->isLoaded;
 }
 
-juce::String LibLameEncoderAudioFormat::getLibraryVersion() const
+yup::String LibLameEncoderAudioFormat::getLibraryVersion() const
 {
     if (! isLibraryLoaded() || lame->get_lame_version == nullptr)
         return {};
 
-    return juce::String (lame->get_lame_version());
+    return yup::String (lame->get_lame_version());
 }
 
-bool LibLameEncoderAudioFormat::canHandleFile (const juce::File&)
+bool LibLameEncoderAudioFormat::canHandleFile (const yup::File&)
 {
     return false;
 }
 
-juce::Array<int> LibLameEncoderAudioFormat::getPossibleSampleRates()
+yup::Array<int> LibLameEncoderAudioFormat::getPossibleSampleRates()
 {
     // Deliberately the same set as LAMEEncoderAudioFormat and FFmpegEncoderAudioFormat
     // so this is a drop-in replacement for them. MP3 itself also allows the MPEG-2 and
@@ -519,7 +519,7 @@ juce::Array<int> LibLameEncoderAudioFormat::getPossibleSampleRates()
     return { 32000, 44100, 48000 };
 }
 
-juce::Array<int> LibLameEncoderAudioFormat::getPossibleBitDepths()
+yup::Array<int> LibLameEncoderAudioFormat::getPossibleBitDepths()
 {
     return { 16 };
 }
@@ -528,29 +528,29 @@ bool LibLameEncoderAudioFormat::canDoStereo()      { return true; }
 bool LibLameEncoderAudioFormat::canDoMono()        { return true; }
 bool LibLameEncoderAudioFormat::isCompressed()     { return true; }
 
-juce::StringArray LibLameEncoderAudioFormat::getQualityOptions()
+yup::StringArray LibLameEncoderAudioFormat::getQualityOptions()
 {
     static const char* vbrOptions[] = { "VBR quality 0 (best)", "VBR quality 1", "VBR quality 2", "VBR quality 3",
                                         "VBR quality 4 (normal)", "VBR quality 5", "VBR quality 6", "VBR quality 7",
                                         "VBR quality 8", "VBR quality 9 (smallest)", nullptr };
 
-    juce::StringArray opts (vbrOptions);
+    yup::StringArray opts (vbrOptions);
 
     const int cbrRates[] = { 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320 };
 
     for (int i = 0; i < std::ssize (cbrRates); ++i)
-        opts.add (juce::String (cbrRates[i]) + " Kb/s CBR");
+        opts.add (yup::String (cbrRates[i]) + " Kb/s CBR");
 
     return opts;
 }
 
-juce::AudioFormatReader* LibLameEncoderAudioFormat::createReaderFor (juce::InputStream*, const bool)
+yup::AudioFormatReader* LibLameEncoderAudioFormat::createReaderFor (yup::InputStream*, const bool)
 {
     return nullptr;
 }
 
-std::unique_ptr<juce::AudioFormatWriter> LibLameEncoderAudioFormat::createWriterFor (std::unique_ptr<juce::OutputStream>& streamToWriteTo,
-                                                                                     const juce::AudioFormatWriterOptions& options)
+std::unique_ptr<yup::AudioFormatWriter> LibLameEncoderAudioFormat::createWriterFor (std::unique_ptr<yup::OutputStream>& streamToWriteTo,
+                                                                                     const yup::WriteOptions& options)
 {
     if (streamToWriteTo == nullptr || ! isLibraryLoaded())
         return {};
@@ -560,7 +560,7 @@ std::unique_ptr<juce::AudioFormatWriter> LibLameEncoderAudioFormat::createWriter
     if (numChans < 1 || numChans > 2)   // MP3 is mono or stereo only
         return {};
 
-    auto sampleRate = juce::roundToInt (options.getSampleRate());
+    auto sampleRate = yup::roundToInt (options.getSampleRate());
 
     if (sampleRate <= 0)
         return {};
@@ -579,7 +579,7 @@ std::unique_ptr<juce::AudioFormatWriter> LibLameEncoderAudioFormat::createWriter
     lame->lame_set_quality (gfp, 2);
 
     int vbr = 4, cbr = 0;
-    const juce::String qual (getQualityOptions()[options.getQualityOptionIndex()]);
+    const yup::String qual (getQualityOptions()[options.getQualityOptionIndex()]);
 
     if (qual.contains ("VBR"))
         vbr = qual.retainCharacters ("0123456789").getIntValue();
@@ -605,7 +605,7 @@ std::unique_ptr<juce::AudioFormatWriter> LibLameEncoderAudioFormat::createWriter
     if (lame->lame_set_bWriteVbrTag != nullptr)
         lame->lame_set_bWriteVbrTag (gfp, lame->lame_get_lametag_frame != nullptr ? 1 : 0);
 
-    juce::StringPairArray metadata;
+    yup::StringPairArray metadata;
     metadata.addUnorderedMap (options.getMetadataValues());
 
     if (! metadata.getAllKeys().isEmpty())

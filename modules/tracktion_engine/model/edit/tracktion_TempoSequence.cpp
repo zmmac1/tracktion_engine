@@ -12,9 +12,9 @@ namespace tracktion::inline engine {
 
 template<typename ObjectType>
 struct TempoAndTimeSigListBase  : public ValueTreeObjectList<ObjectType>,
-                                  public juce::AsyncUpdater
+                                  public yup::AsyncUpdater
 {
-    TempoAndTimeSigListBase (TempoSequence& ts, const juce::ValueTree& parentTree)
+    TempoAndTimeSigListBase (TempoSequence& ts, const yup::ValueTree& parentTree)
         : ValueTreeObjectList<ObjectType> (parentTree), sequence (ts)
     {
     }
@@ -22,7 +22,7 @@ struct TempoAndTimeSigListBase  : public ValueTreeObjectList<ObjectType>,
     void newObjectAdded (ObjectType*) override                                          { sendChange(); }
     void objectRemoved (ObjectType*) override                                           { sendChange(); }
     void objectOrderChanged() override                                                  { sendChange(); }
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override  { sendChange(); }
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override  { sendChange(); }
 
     void sendChange()
     {
@@ -41,7 +41,7 @@ struct TempoAndTimeSigListBase  : public ValueTreeObjectList<ObjectType>,
 //==============================================================================
 struct TempoSequence::TempoSettingList  : public TempoAndTimeSigListBase<TempoSetting>
 {
-    TempoSettingList (TempoSequence& ts, const juce::ValueTree& parentTree)
+    TempoSettingList (TempoSequence& ts, const yup::ValueTree& parentTree)
         : TempoAndTimeSigListBase<TempoSetting> (ts, parentTree)
     {
         rebuildObjects();
@@ -52,12 +52,12 @@ struct TempoSequence::TempoSettingList  : public TempoAndTimeSigListBase<TempoSe
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return v.hasType (IDs::TEMPO);
     }
 
-    TempoSetting* createNewObject (const juce::ValueTree& v) override
+    TempoSetting* createNewObject (const yup::ValueTree& v) override
     {
         auto t = new TempoSetting (sequence, v);
         t->incReferenceCount();
@@ -74,7 +74,7 @@ struct TempoSequence::TempoSettingList  : public TempoAndTimeSigListBase<TempoSe
 //==============================================================================
 struct TempoSequence::TimeSigList  : public TempoAndTimeSigListBase<TimeSigSetting>
 {
-    TimeSigList (TempoSequence& ts, const juce::ValueTree& parentTree)
+    TimeSigList (TempoSequence& ts, const yup::ValueTree& parentTree)
         : TempoAndTimeSigListBase<TimeSigSetting> (ts, parentTree)
     {
         rebuildObjects();
@@ -85,12 +85,12 @@ struct TempoSequence::TimeSigList  : public TempoAndTimeSigListBase<TimeSigSetti
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return v.hasType (IDs::TIMESIG);
     }
 
-    TimeSigSetting* createNewObject (const juce::ValueTree& v) override
+    TimeSigSetting* createNewObject (const yup::ValueTree& v) override
     {
         auto t = new TimeSigSetting (sequence, v);
         t->incReferenceCount();
@@ -122,7 +122,7 @@ juce::UndoManager* TempoSequence::getUndoManager() const noexcept
 }
 
 //==============================================================================
-void TempoSequence::setState (const juce::ValueTree& v, bool remapEdit)
+void TempoSequence::setState (const yup::ValueTree& v, bool remapEdit)
 {
     EditTimecodeRemapperSnapshot snap;
 
@@ -161,7 +161,7 @@ void TempoSequence::setState (const juce::ValueTree& v, bool remapEdit)
 
 void TempoSequence::createEmptyState()
 {
-    setState (juce::ValueTree (IDs::TEMPOSEQUENCE), false);
+    setState (yup::ValueTree (IDs::TEMPOSEQUENCE), false);
 }
 
 void TempoSequence::copyFrom (const TempoSequence& other)
@@ -175,11 +175,11 @@ void TempoSequence::freeResources()
     timeSigs.reset();
 }
 
-const juce::Array<TimeSigSetting*>& TempoSequence::getTimeSigs() const   { return timeSigs->objects; }
+const yup::Array<TimeSigSetting*>& TempoSequence::getTimeSigs() const   { return timeSigs->objects; }
 int TempoSequence::getNumTimeSigs() const                                { return timeSigs->objects.size(); }
 TimeSigSetting* TempoSequence::getTimeSig (int index) const              { return timeSigs->objects[index]; }
 
-const juce::Array<TempoSetting*>& TempoSequence::getTempos() const  { return tempos->objects; }
+const yup::Array<TempoSetting*>& TempoSequence::getTempos() const  { return tempos->objects; }
 int TempoSequence::getNumTempos() const                             { return tempos->objects.size(); }
 TempoSetting* TempoSequence::getTempo (int index) const             { return tempos->objects[index]; }
 
@@ -326,7 +326,7 @@ void TempoSequence::moveTempoStart (int index, BeatDuration deltaBeats, bool sna
             const auto prevBeat = prev != nullptr ? prev->startBeatNumber : BeatPosition();
             const auto nextBeat = next != nullptr ? next->startBeatNumber : BeatPosition::fromBeats (0x7ffffff);
 
-            const auto newStart = juce::jlimit (prevBeat, nextBeat, t->startBeatNumber.get() + deltaBeats);
+            const auto newStart = yup::jlimit (prevBeat, nextBeat, t->startBeatNumber.get() + deltaBeats);
             t->set (snapToBeat ? tracktion::roundToNearestBeat (newStart) : newStart,
                     t->bpm, t->curve, false);
         }
@@ -350,7 +350,7 @@ void TempoSequence::moveTimeSigStart (int index, BeatDuration deltaBeats, bool s
 
             t->startBeatNumber.forceUpdateOfCachedValue();
             const auto newBeat = t->startBeatNumber.get() + deltaBeats;
-            t->startBeatNumber = juce::jlimit (prevBeat + BeatDuration::fromBeats (1), nextBeat - BeatDuration::fromBeats (1),
+            t->startBeatNumber = yup::jlimit (prevBeat + BeatDuration::fromBeats (1), nextBeat - BeatDuration::fromBeats (1),
                                                snapToBeat ? tracktion::roundToNearestBeat (newBeat) : newBeat);
         }
     }
@@ -589,7 +589,7 @@ void TempoSequence::updateTempoData()
 
     {
         //TODO: This lock should be removed when all playback classes are using the new tempo::Sequence class
-        juce::ScopedLock sl (edit.engine.getDeviceManager().deviceManager.getAudioCallbackLock());
+        yup::ScopedLock sl (edit.engine.getDeviceManager().deviceManager.getAudioCallbackLock());
         internalSequence = std::move (newSeq);
     }
 }
@@ -611,7 +611,7 @@ void TempoSequence::handleAsyncUpdate()
     changed();
 }
 
-juce::String TempoSequence::getSelectableDescription()
+yup::String TempoSequence::getSelectableDescription()
 {
     return TRANS("Tempo Curve");
 }
@@ -747,7 +747,7 @@ void EditTimecodeRemapperSnapshot::savePreChangeState (Edit& ed)
             if (numPoints == 0)
                 continue;
 
-            juce::Array<BeatPosition> beats;
+            yup::Array<BeatPosition> beats;
             beats.ensureStorageAllocated (numPoints);
 
             for (int p = 0; p < numPoints; ++p)

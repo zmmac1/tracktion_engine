@@ -52,7 +52,7 @@ void LoudnessMeter::setKWeightingCoefficients (Biquad& shelf, Biquad& highpass, 
         const double gainDb = 3.999843853973347;
         const double q = 0.7071752369554196;
 
-        const double k = std::tan (juce::MathConstants<double>::pi * f0 / sampleRate);
+        const double k = std::tan (yup::MathConstants<double>::pi * f0 / sampleRate);
         const double vh = std::pow (10.0, gainDb / 20.0);
         const double vb = std::pow (vh, 0.4996667741545416);
         const double a0 = 1.0 + k / q + k * k;
@@ -68,7 +68,7 @@ void LoudnessMeter::setKWeightingCoefficients (Biquad& shelf, Biquad& highpass, 
         const double f0 = 38.13547087602444;
         const double q = 0.5003270373238773;
 
-        const double k = std::tan (juce::MathConstants<double>::pi * f0 / sampleRate);
+        const double k = std::tan (yup::MathConstants<double>::pi * f0 / sampleRate);
         const double a0 = 1.0 + k / q + k * k;
 
         highpass.b0 = 1.0;
@@ -92,9 +92,9 @@ void LoudnessMeter::prepare (double newSampleRate, int newNumChannels, int newMa
     for (auto& state : channels)
         setKWeightingCoefficients (state.shelf, state.highpass, sampleRate);
 
-    oversampler = std::make_unique<juce::dsp::Oversampling<float>> (
+    oversampler = std::make_unique<yup::dsp::Oversampling<float>> (
                       (size_t) numChannels, 2,
-                      juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple);
+                      yup::dsp::Oversampling<float>::filterHalfBandFIREquiripple);
     oversampler->initProcessing ((size_t) maxBlockSize);
 
     resetRequested.store (false, std::memory_order_relaxed);
@@ -148,7 +148,7 @@ void LoudnessMeter::processChunk (const float* const* channelData, int numChanne
     }
 
     // True peak from the 4x oversampled signal
-    juce::dsp::AudioBlock<const float> block (channelData, (size_t) numChannelsToUse,
+    yup::dsp::AudioBlock<const float> block (channelData, (size_t) numChannelsToUse,
                                               (size_t) startSample, (size_t) numSamples);
     auto upsampled = oversampler->processSamplesUp (block);
 
@@ -241,7 +241,7 @@ void LoudnessMeter::addToHistogram (double power, double loudness) noexcept
     if (loudness <= histogramFloorLufs)
         return;
 
-    const auto bin = juce::jlimit (0, numHistogramBins - 1,
+    const auto bin = yup::jlimit (0, numHistogramBins - 1,
                                    (int) ((loudness - histogramFloorLufs) / histogramBinWidthLu));
 
     binPowerSums[(size_t) bin] += power;
@@ -263,7 +263,7 @@ void LoudnessMeter::updateIntegrated() noexcept
 
     // The relative gate sits 10 LU below the mean of the absolutely-gated blocks
     const auto relativeGateLufs = powerToLoudness (histogramPowerSum / (double) histogramCount) - 10.0;
-    const auto firstBin = juce::jlimit (0, numHistogramBins,
+    const auto firstBin = yup::jlimit (0, numHistogramBins,
                                         (int) std::ceil ((relativeGateLufs - histogramFloorLufs) / histogramBinWidthLu));
 
     double sum = 0.0;
@@ -290,7 +290,7 @@ void LoudnessMeter::addToShortTermHistogram (double power, double loudness) noex
     if (loudness <= histogramFloorLufs)
         return;
 
-    const auto bin = juce::jlimit (0, numHistogramBins - 1,
+    const auto bin = yup::jlimit (0, numHistogramBins - 1,
                                    (int) ((loudness - histogramFloorLufs) / histogramBinWidthLu));
 
     ++shortTermBinCounts[(size_t) bin];
@@ -312,7 +312,7 @@ void LoudnessMeter::updateLoudnessRange() noexcept
     // measurement, but a relative gate 20 LU down, then the spread between the
     // 10th and 95th percentiles of what's left
     const auto relativeGateLufs = powerToLoudness (shortTermPowerSum / (double) shortTermCount) - 20.0;
-    const auto firstBin = juce::jlimit (0, numHistogramBins,
+    const auto firstBin = yup::jlimit (0, numHistogramBins,
                                         (int) std::ceil ((relativeGateLufs - histogramFloorLufs) / histogramBinWidthLu));
 
     int64_t total = 0;

@@ -20,44 +20,44 @@ public:
     ~AudioFileFormatManager();
 
     //==============================================================================
-    const juce::Array<juce::AudioFormat*>& getWriteFormats() const     { return writeFormats; }
+    const yup::Array<yup::AudioFormat*>& getWriteFormats() const     { return writeFormats; }
 
-    void addLameFormat (std::unique_ptr<juce::AudioFormat> lameForArray,
-                        std::unique_ptr<juce::AudioFormat> lameForAccess);
+    void addLameFormat (std::unique_ptr<yup::AudioFormat> lameForArray,
+                        std::unique_ptr<yup::AudioFormat> lameForAccess);
 
-    void addFormat (std::function<juce::AudioFormat*()> formatCreator, bool isWritable, bool isMemoryMappable);
+    void addFormat (std::function<yup::AudioFormat*()> formatCreator, bool isWritable, bool isMemoryMappable);
 
     //==============================================================================
-    juce::AudioFormat* getFormatFromFileName (const juce::File&) const;
-    juce::AudioFormat* getNamedFormat (const juce::String& formatName) const;
+    yup::AudioFormat* getFormatFromFileName (const yup::File&) const;
+    yup::AudioFormat* getNamedFormat (const yup::String& formatName) const;
 
-    bool canOpen (const juce::File&) const;
-    juce::String getValidFileExtensions() const;
+    bool canOpen (const yup::File&) const;
+    yup::String getValidFileExtensions() const;
 
-    juce::AudioFormat* getDefaultFormat() const     { return wavFormat.get(); }
-    juce::AudioFormat* getWavFormat() const         { return wavFormat.get(); }
-    juce::AudioFormat* getAiffFormat() const        { return aiffFormat.get(); }
-    juce::AudioFormat* getFrozenFileFormat() const  { return floatFormat.get(); }
-    juce::AudioFormat* getOggFormat() const         { return oggFormat.get(); }
-    juce::AudioFormat* getFlacFormat() const        { return flacFormat.get(); }
-    juce::AudioFormat* getNativeAudioFormat() const { return nativeAudioFormat.get(); }
-    juce::AudioFormat* getLameFormat() const        { return lameFormat.get(); }
+    yup::AudioFormat* getDefaultFormat() const     { return wavFormat.get(); }
+    yup::AudioFormat* getWavFormat() const         { return wavFormat.get(); }
+    yup::AudioFormat* getAiffFormat() const        { return aiffFormat.get(); }
+    yup::AudioFormat* getFrozenFileFormat() const  { return floatFormat.get(); }
+    yup::AudioFormat* getOggFormat() const         { return oggFormat.get(); }
+    yup::AudioFormat* getFlacFormat() const        { return flacFormat.get(); }
+    yup::AudioFormat* getNativeAudioFormat() const { return nativeAudioFormat.get(); }
+    yup::AudioFormat* getLameFormat() const        { return lameFormat.get(); }
 
    #if TRACKTION_ENABLE_REX
-    juce::AudioFormat* getRexFormat() const         { return rexFormat.get(); }
+    yup::AudioFormat* getRexFormat() const         { return rexFormat.get(); }
    #endif
 
-    juce::AudioFormatManager readFormatManager, writeFormatManager, memoryMappedFormatManager;
+    yup::AudioFormatManager readFormatManager, writeFormatManager, memoryMappedFormatManager;
 
 private:
-    juce::Array<juce::AudioFormat*> allFormats, readFormats, writeFormats;
-    juce::OwnedArray<juce::AudioFormat> additionalFormats;
+    yup::Array<yup::AudioFormat*> allFormats, readFormats, writeFormats;
+    yup::OwnedArray<yup::AudioFormat> additionalFormats;
 
-    std::unique_ptr<juce::AudioFormat> wavFormat, aiffFormat, floatFormat, nativeAudioFormat,
+    std::unique_ptr<yup::AudioFormat> wavFormat, aiffFormat, floatFormat, nativeAudioFormat,
                                        mp3ReadFormat, oggFormat, flacFormat, lameFormat;
 
    #if TRACKTION_ENABLE_REX
-    std::unique_ptr<juce::AudioFormat> rexFormat;
+    std::unique_ptr<yup::AudioFormat> rexFormat;
    #endif
 };
 

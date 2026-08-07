@@ -133,7 +133,7 @@ public:
     void prepareToPlay (const PlaybackInitialisationInfo&) override;
 
     bool isReadyToProcess() override;
-    void prefetchBlock (juce::Range<int64_t> /*referenceSampleRange*/) override;
+    void prefetchBlock (yup::Range<int64_t> /*referenceSampleRange*/) override;
     void process (ProcessContext&) override;
 
 private:

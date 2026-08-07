@@ -16,17 +16,17 @@ class StepModifier  : public Modifier,
 {
 public:
     //==============================================================================
-    StepModifier (Edit&, const juce::ValueTree&);
+    StepModifier (Edit&, const yup::ValueTree&);
     ~StepModifier() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<StepModifier>;
-    using Array = juce::ReferenceCountedArray<StepModifier>;
+    using Ptr = yup::ReferenceCountedObjectPtr<StepModifier>;
+    using Array = yup::ReferenceCountedArray<StepModifier>;
 
     using Modifier::initialise;
     void initialise() override;
     float getCurrentValue() override;
 
-    juce::String getName() const override            { return TRANS("Step Modifier"); }
+    yup::String getName() const override            { return TRANS("Step Modifier"); }
 
     //==============================================================================
     enum { maxNumSteps = 64 };
@@ -35,7 +35,7 @@ public:
 
     int getCurrentStep() const noexcept;
 
-    AutomatableParameter::ModifierAssignment* createAssignment (const juce::ValueTree&) override;
+    AutomatableParameter::ModifierAssignment* createAssignment (const yup::ValueTree&) override;
 
     ProcessingPosition getProcessingPosition() override { return ProcessingPosition::preFX; }
     void applyToBuffer (const PluginRenderContext&) override;
@@ -43,18 +43,18 @@ public:
     //==============================================================================
     struct Assignment : public AutomatableParameter::ModifierAssignment
     {
-        Assignment (const juce::ValueTree&, const StepModifier&);
+        Assignment (const yup::ValueTree&, const StepModifier&);
 
         bool isForModifierSource (const ModifierSource&) const override;
-        juce::ReferenceCountedObjectPtr<StepModifier> getStepModifier() const;
+        yup::ReferenceCountedObjectPtr<StepModifier> getStepModifier() const;
 
         const EditItemID stepModifierID;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
     };
 
     //==============================================================================
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     //==============================================================================
     juce::CachedValue<float> syncType, numSteps, rate, rateType, depth;
@@ -73,7 +73,7 @@ private:
     void restoreStepsFromProperty();
 
     void valueTreeChanged() override;
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 };
 
 } // namespace tracktion::inline engine

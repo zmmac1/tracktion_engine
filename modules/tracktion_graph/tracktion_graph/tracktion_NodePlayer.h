@@ -50,7 +50,7 @@ public:
         std::unique_ptr<NodeGraph> oldGraph;
 
         {
-            const juce::SpinLock::ScopedLockType sl (inputAndNodesLock);
+            const yup::SpinLock::ScopedLockType sl (inputAndNodesLock);
             oldGraph = std::move (nodeGraph);
             nodeGraph = std::move (newGraph);
         }
@@ -127,7 +127,7 @@ protected:
     double sampleRate = 0.0;
     int blockSize = 0;
 
-    juce::SpinLock inputAndNodesLock;
+    yup::SpinLock inputAndNodesLock;
 
     int processWithPlayHeadState (PlayHeadState& phs, NodeGraph& graphToProcess,
                                   const Node::ProcessContext& pc)
@@ -142,7 +142,7 @@ protected:
             const auto firstProportion = (double) splitTimelineRange.timelineRange1.getLength() / (double) pc.referenceSampleRange.getLength();
 
             const auto firstReferenceRange  = pc.referenceSampleRange.withEnd (pc.referenceSampleRange.getStart() + (int64_t) std::llround ((double) pc.referenceSampleRange.getLength() * firstProportion));
-            const auto secondReferenceRange = juce::Range<int64_t> (firstReferenceRange.getEnd(), pc.referenceSampleRange.getEnd());
+            const auto secondReferenceRange = yup::Range<int64_t> (firstReferenceRange.getEnd(), pc.referenceSampleRange.getEnd());
             jassert (firstReferenceRange.getLength() + secondReferenceRange.getLength() == pc.referenceSampleRange.getLength());
 
             const auto firstNumSamples  = (choc::buffer::FrameCount) std::llround (pc.numSamples * firstProportion);

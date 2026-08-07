@@ -74,19 +74,19 @@ struct CombiningNode::TimedNode
         return nodesToProcess.front()->isReadyToProcess();
     }
 
-    void prefetchBlock (juce::Range<int64_t> referenceSampleRange)
+    void prefetchBlock (yup::Range<int64_t> referenceSampleRange)
     {
         for (auto n : nodesToProcess)
             n->prepareForNextBlock (referenceSampleRange);
 
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         hasPrefetched = true;
        #endif
     }
 
     void process (ProcessContext& pc)
     {
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         jassert (hasPrefetched);
        #endif
 
@@ -105,7 +105,7 @@ struct CombiningNode::TimedNode
 
         pc.buffers.midi.mergeFrom (nodeOutput.midi);
 
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         hasPrefetched = false;
        #endif
     }
@@ -125,11 +125,11 @@ struct CombiningNode::TimedNode
 private:
     const std::unique_ptr<Node> node;
     std::vector<Node*> nodesToProcess;
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     bool hasPrefetched = false;
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE (TimedNode)
+    YUP_DECLARE_NON_COPYABLE (TimedNode)
 };
 
 //==============================================================================
@@ -189,7 +189,7 @@ void CombiningNode::addInput (std::unique_ptr<Node> input, BeatRange beatRange)
     const auto end   = std::max (0, combining_node_utils::timeToGroupIndex (timeRange.getEnd()));
 
     while (groups.size() <= end)
-        groups.add (new juce::Array<TimedNode*>());
+        groups.add (new yup::Array<TimedNode*>());
 
     for (i = start; i <= end; ++i)
     {
@@ -270,7 +270,7 @@ bool CombiningNode::isReadyToProcess()
     return isReadyToProcessBlock.load (std::memory_order_acquire);
 }
 
-void CombiningNode::prefetchBlock (juce::Range<int64_t> referenceSampleRange)
+void CombiningNode::prefetchBlock (yup::Range<int64_t> referenceSampleRange)
 {
     SCOPED_REALTIME_CHECK
 
@@ -337,7 +337,7 @@ size_t CombiningNode::getAllocatedBytes() const
     return size;
 }
 
-void CombiningNode::prefetchGroup (juce::Range<int64_t> referenceSampleRange, TimeRange editTime, BeatRange editBeats)
+void CombiningNode::prefetchGroup (yup::Range<int64_t> referenceSampleRange, TimeRange editTime, BeatRange editBeats)
 {
     if (auto g = groups[combining_node_utils::timeToGroupIndex (editTime.getStart())])
     {
@@ -377,7 +377,7 @@ void CombiningNode::queueNoteOffsForClipsNoLongerPresent (const CombiningNode& o
                     oldLoopingMidiNode->getActiveNoteList()->iterate ([this, mpeSourceID = oldLoopingMidiNode->getMPESourceID()]
                                                                       (int chan, int note)
                                                                       {
-                                                                          noteOffEventsToSend.addMidiMessage (juce::MidiMessage::noteOff (chan, note), mpeSourceID);
+                                                                          noteOffEventsToSend.addMidiMessage (yup::MidiMessage::noteOff (chan, note), mpeSourceID);
                                                                       });
                 }
             }

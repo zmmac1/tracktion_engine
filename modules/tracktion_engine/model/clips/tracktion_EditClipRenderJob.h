@@ -44,7 +44,7 @@ public:
         operation. Don't hang onto this however as it is owned by the job and you should
         create your own thumbnail from the file once the job has finished.
     */
-    juce::AudioThumbnail& getAudioThumbnail()               { return thumbnailToUpdate; }
+    yup::AudioThumbnail& getAudioThumbnail()               { return thumbnailToUpdate; }
 
     /** Returns true if this job is rendering MIDI.
         This can be used to determine if the AudioThumbnail should be used to generate
@@ -55,29 +55,29 @@ public:
     /** Returns the result of this render. Only valid once the job has completed. */
     Renderer::RenderResult& getResult()                     { return result; }
 
-    juce::String getLastError() const;
+    yup::String getLastError() const;
 
 protected:
     //==============================================================================
     bool setUpRender() override;
     bool renderNextBlock() override;
     bool completeRender() override;
-    void setLastError (const juce::String&);
+    void setLastError (const yup::String&);
 
 private:
     //==============================================================================
     struct RenderPass
     {
-        RenderPass (EditRenderJob&, Renderer::Parameters&, const juce::String& description);
+        RenderPass (EditRenderJob&, Renderer::Parameters&, const yup::String& description);
         ~RenderPass();
 
         bool initialise();
 
         EditRenderJob& owner;
         Renderer::Parameters r;
-        const juce::String desc;
+        const yup::String desc;
         ProjectItem::Category originalCategory;
-        juce::TemporaryFile tempFile;
+        yup::TemporaryFile tempFile;
         std::unique_ptr<Renderer::RenderTask> task;
     };
 
@@ -85,19 +85,19 @@ private:
     const ProjectItemRef itemRef;
 
     Renderer::Parameters params;
-    juce::OptionalScopedPointer<Edit> editDeleter;
+    yup::OptionalScopedPointer<Edit> editDeleter;
     std::unique_ptr<Edit::ScopedRenderStatus> renderStatus;
-    juce::OwnedArray<RenderPass> renderPasses;
+    yup::OwnedArray<RenderPass> renderPasses;
     bool silenceOnBackup, reverse;
     Renderer::RenderResult result;
 
-    juce::String lastError;
-    juce::CriticalSection errorLock;
+    yup::String lastError;
+    yup::CriticalSection errorLock;
 
-    juce::AudioThumbnail thumbnailToUpdate;
+    yup::AudioThumbnail thumbnailToUpdate;
 
     void renderSeparateTracks();
-    bool generateSilence (const juce::File& fileToWriteTo);
+    bool generateSilence (const yup::File& fileToWriteTo);
 
     //==============================================================================
     EditRenderJob (Engine&, const Renderer::Parameters&, bool deleteEdit, bool silenceOnBackup, bool reverse);
@@ -106,7 +106,7 @@ private:
                    bool silenceOnBackup, bool reverse);
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditRenderJob)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditRenderJob)
 };
 
 } // namespace tracktion::inline engine

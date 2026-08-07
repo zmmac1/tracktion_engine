@@ -33,24 +33,24 @@ public:
 
     //==============================================================================
     /** Loads an impulse from binary audio file data i.e. not a block of raw floats.
-        @see juce::Convolution::loadImpulseResponse
+        @see yup::Convolution::loadImpulseResponse
     */
     bool loadImpulseResponse (const void* sourceData, size_t sourceDataSize);
 
     /** Loads an impulse from a file.
-        @see juce::Convolution::loadImpulseResponse
+        @see yup::Convolution::loadImpulseResponse
     */
-    bool loadImpulseResponse (const juce::File& fileImpulseResponse);
+    bool loadImpulseResponse (const yup::File& fileImpulseResponse);
 
     /** Loads an impulse from an AudioBuffer<float>.
-        @see juce::Convolution::loadImpulseResponse
+        @see yup::Convolution::loadImpulseResponse
     */
-    bool loadImpulseResponse (juce::AudioBuffer<float>&& bufferImpulseResponse,
+    bool loadImpulseResponse (yup::AudioBuffer<float>&& bufferImpulseResponse,
                               double sampleRateToStore,
                               int bitDepthToStore);
 
     //==============================================================================
-    juce::CachedValue<juce::String> name;           /**< A name property. This isn't used by the IR itselt but useful in UI contexts. */
+    juce::CachedValue<yup::String> name;           /**< A name property. This isn't used by the IR itselt but useful in UI contexts. */
     juce::CachedValue<bool> normalise;              /**< Normalise the IR file when loading from the state. True by default. */
     juce::CachedValue<bool> trimSilence;            /**< Trim silence from the IR file when loading from the state. False by default. */
 
@@ -62,13 +62,13 @@ public:
 
     //==============================================================================
     /** @internal */
-    juce::String getName() const override;
+    yup::String getName() const override;
     /** @internal */
-    juce::String getShortName (int /*suggestedLength*/) override;
+    yup::String getShortName (int /*suggestedLength*/) override;
     /** @internal */
-    juce::String getPluginType() override;
+    yup::String getPluginType() override;
     /** @internal */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     /** @internal */
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
@@ -83,7 +83,7 @@ public:
     /** @internal */
     void applyToBuffer (const PluginRenderContext&) override;
     /** @internal */
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
 private:
     //==============================================================================
@@ -99,11 +99,11 @@ private:
     juce::CachedValue<float> highPassCutoffValue, lowPassCutoffValue;
     juce::CachedValue<float> qValue;
 
-    juce::dsp::ProcessorChain<juce::dsp::Convolution,
-                              juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>,
-                              juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float>>,
-                              juce::dsp::Gain<float>> processorChain;
-    juce::SmoothedValue<float> highFreqSmoother, lowFreqSmoother, gainSmoother, wetGainSmoother, dryGainSmoother, qSmoother;
+    yup::dsp::ProcessorChain<yup::dsp::Convolution,
+                              yup::dsp::ProcessorDuplicator<yup::dsp::IIR::Filter<float>, yup::dsp::IIR::Coefficients<float>>,
+                              yup::dsp::ProcessorDuplicator<yup::dsp::IIR::Filter<float>, yup::dsp::IIR::Coefficients<float>>,
+                              yup::dsp::Gain<float>> processorChain;
+    yup::SmoothedValue<float> highFreqSmoother, lowFreqSmoother, gainSmoother, wetGainSmoother, dryGainSmoother, qSmoother;
 
     struct WetDryGain { float wet, dry; };
     static WetDryGain getWetDryLevels (float mix)
@@ -116,9 +116,9 @@ private:
     }
     void loadImpulseResponseFromState();
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImpulseResponsePlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImpulseResponsePlugin)
 };
 
 } // namespace tracktion::inline engine

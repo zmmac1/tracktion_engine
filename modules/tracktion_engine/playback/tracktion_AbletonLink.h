@@ -70,7 +70,7 @@ public:
 
     /** Once set, tempos chnages from link are transparently divided or multiplied
         by 2 to stay within this range (if possible). */
-    void setTempoConstraint (juce::Range<double> minMaxTempo);
+    void setTempoConstraint (yup::Range<double> minMaxTempo);
 
     /** Returns how far though the current bar the Link clock is. */
     double getBarPhase() const;

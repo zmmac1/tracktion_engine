@@ -12,7 +12,7 @@ namespace tracktion::inline engine {
 
 struct StepClip::ChannelList  : public ValueTreeObjectList<StepClip::Channel>
 {
-    ChannelList (StepClip& c, const juce::ValueTree& v)
+    ChannelList (StepClip& c, const yup::ValueTree& v)
         : ValueTreeObjectList<Channel> (v), clip (c)
     {
         rebuildObjects();
@@ -23,12 +23,12 @@ struct StepClip::ChannelList  : public ValueTreeObjectList<StepClip::Channel>
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return v.hasType (IDs::CHANNEL);
     }
 
-    Channel* createNewObject (const juce::ValueTree& v) override
+    Channel* createNewObject (const yup::ValueTree& v) override
     {
         return new Channel (clip, v);
     }
@@ -44,11 +44,11 @@ struct StepClip::ChannelList  : public ValueTreeObjectList<StepClip::Channel>
 
     StepClip& clip;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelList)
 };
 
 //==============================================================================
-StepClip::StepClip (const juce::ValueTree& v, EditItemID id, ClipOwner& targetParent)
+StepClip::StepClip (const yup::ValueTree& v, EditItemID id, ClipOwner& targetParent)
     : Clip (v, targetParent, id, Type::step)
 {
     auto um = getUndoManager();
@@ -89,7 +89,7 @@ StepClip::StepClip (const juce::ValueTree& v, EditItemID id, ClipOwner& targetPa
             if (Channel* c = getChannels()[i])
             {
                 c->noteNumber   = getDefaultNoteNumber (i);
-                c->name         = juce::MidiMessage::getRhythmInstrumentName (c->noteNumber);
+                c->name         = yup::MidiMessage::getRhythmInstrumentName (c->noteNumber);
             }
         }
     }
@@ -136,7 +136,7 @@ const StepClip::PatternInstance::Ptr StepClip::getPatternInstance (int i, bool r
 
 void StepClip::updatePatternList()
 {
-    auto newSequence = juce::StringArray::fromTokens (state[IDs::sequence].toString(), ",", {});
+    auto newSequence = yup::StringArray::fromTokens (state[IDs::sequence].toString(), ",", {});
 
     PatternArray newArray (patternInstanceList);
     newArray.removeRange (newSequence.size(), newArray.size());
@@ -157,7 +157,7 @@ void StepClip::updatePatternList()
     sendChangeMessage();
 }
 
-void StepClip::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void StepClip::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     Clip::valueTreePropertyChanged (v, i);
 
@@ -180,7 +180,7 @@ void StepClip::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identif
     }
 }
 
-void StepClip::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
+void StepClip::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c)
 {
     Clip::valueTreeChildAdded (p, c);
 
@@ -188,7 +188,7 @@ void StepClip::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
         changed();
 }
 
-void StepClip::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int oldIndex)
+void StepClip::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int oldIndex)
 {
     Clip::valueTreeChildRemoved (p, c, oldIndex);
 
@@ -196,7 +196,7 @@ void StepClip::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, in
         changed();
 }
 
-void StepClip::valueTreeChildOrderChanged (juce::ValueTree& p, int o, int n)
+void StepClip::valueTreeChildOrderChanged (yup::ValueTree& p, int o, int n)
 {
     Clip::valueTreeChildOrderChanged (p, o, n);
 
@@ -209,15 +209,15 @@ bool StepClip::canBeAddedTo (ClipOwner& co)
     return canContainMIDI (co);
 }
 
-juce::String StepClip::getSelectableDescription()
+yup::String StepClip::getSelectableDescription()
 {
     return TRANS("Step Clip") + " - \"" + getName() + "\"";
 }
 
 //==============================================================================
-juce::Array<BeatPosition> StepClip::getBeatTimesOfPatternStarts() const
+yup::Array<BeatPosition> StepClip::getBeatTimesOfPatternStarts() const
 {
-    juce::Array<BeatPosition> starts;
+    yup::Array<BeatPosition> starts;
 
     auto& tempoSequence = edit.tempoSequence;
     auto pos = getPosition();
@@ -305,7 +305,7 @@ int StepClip::getBeatsPerBar()
     return edit.tempoSequence.getTimeSigAt (getPosition().getStart()).numerator;
 }
 
-void StepClip::generateMidiSequenceForChannels (juce::MidiMessageSequence& result,
+void StepClip::generateMidiSequenceForChannels (yup::MidiMessageSequence& result,
                                                 bool convertToSeconds, const Pattern& pattern,
                                                 BeatPosition startBeat, BeatPosition clipStartBeat,
                                                 BeatPosition clipEndBeat, const TempoSequence& tempoSequence)
@@ -320,7 +320,7 @@ void StepClip::generateMidiSequenceForChannels (juce::MidiMessageSequence& resul
     auto numNotes = pattern.getNumNotes();
     auto noteLength = pattern.getNoteLength();
 
-    juce::OwnedArray<Pattern::CachedPattern> caches;
+    yup::OwnedArray<Pattern::CachedPattern> caches;
     caches.ensureStorageAllocated (numChannels);
 
     for (int f = 0; f < numChannels; ++f)
@@ -349,7 +349,7 @@ void StepClip::generateMidiSequenceForChannels (juce::MidiMessageSequence& resul
                 {
                     auto prob = cache->getProbability (i);
 
-                    if (juce::Random::getSystemRandom().nextFloat() >= prob)
+                    if (yup::Random::getSystemRandom().nextFloat() >= prob)
                         continue;
 
                     auto gate = cache->getGate (i);
@@ -395,8 +395,8 @@ void StepClip::generateMidiSequenceForChannels (juce::MidiMessageSequence& resul
                         const float vel = static_cast<float> (cache->getVelocity (i)) / 127.0f;
                         jassert (c.channel.get().isValid());
                         auto chan = c.channel.get().getChannelNumber();
-                        result.addEvent (juce::MidiMessage::noteOn  (chan, c.noteNumber, vel * channelVelScale), eventStart);
-                        result.addEvent (juce::MidiMessage::noteOff (chan, c.noteNumber, (uint8_t) juce::jlimit (0, 127, c.noteValue.get())), eventEnd);
+                        result.addEvent (yup::MidiMessage::noteOn  (chan, c.noteNumber, vel * channelVelScale), eventStart);
+                        result.addEvent (yup::MidiMessage::noteOff (chan, c.noteNumber, (uint8_t) yup::jlimit (0, 127, c.noteValue.get())), eventEnd);
                     }
                 }
             }
@@ -406,7 +406,7 @@ void StepClip::generateMidiSequenceForChannels (juce::MidiMessageSequence& resul
     }
 }
 
-void StepClip::generateMidiSequence (juce::MidiMessageSequence& result,
+void StepClip::generateMidiSequence (yup::MidiMessageSequence& result,
                                      bool convertToSeconds,
                                      PatternInstance* instance)
 {
@@ -448,7 +448,7 @@ void StepClip::generateMidiSequence (juce::MidiMessageSequence& result,
     result.updateMatchedPairs();
 }
 
-juce::MidiMessageSequence StepClip::generateMidiSequence (MidiList::TimeBase timeBase, PatternInstance* instance)
+yup::MidiMessageSequence StepClip::generateMidiSequence (MidiList::TimeBase timeBase, PatternInstance* instance)
 {
     if (instance != nullptr && ! patternInstanceList.contains (instance))
     {
@@ -456,7 +456,7 @@ juce::MidiMessageSequence StepClip::generateMidiSequence (MidiList::TimeBase tim
         return {};
     }
 
-    juce::MidiMessageSequence result;
+    yup::MidiMessageSequence result;
     auto& tempoSequence = edit.tempoSequence;
     const auto pos = getPosition();
     const auto clipBeatRange = tempoSequence.toBeats (pos.time);
@@ -492,9 +492,9 @@ juce::MidiMessageSequence StepClip::generateMidiSequence (MidiList::TimeBase tim
 }
 
 //==============================================================================
-juce::Colour StepClip::getDefaultColour() const
+yup::Color StepClip::getDefaultColor() const
 {
-    return juce::Colours::red.withHue (3.0f / 9.0f);
+    return yup::Colors::red.withHue (3.0f / 9.0f);
 }
 
 LiveClipLevel StepClip::getLiveClipLevel()
@@ -512,10 +512,10 @@ struct SelectedChannelIndex
     const bool wasSelected;
 
     SelectedChannelIndex() = delete;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SelectedChannelIndex)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SelectedChannelIndex)
 };
 
-const juce::Array<StepClip::Channel*>& StepClip::getChannels() const noexcept
+const yup::Array<StepClip::Channel*>& StepClip::getChannels() const noexcept
 {
     return channelList->objects;
 }
@@ -575,10 +575,10 @@ StepClip::PatternArray StepClip::getPatternSequence() const
 
 void StepClip::setPatternSequence (const StepClip::PatternArray& newSequence)
 {
-    juce::StringArray s;
+    yup::StringArray s;
 
     for (auto* p : newSequence)
-        s.add (juce::String (p->patternIndex));
+        s.add (yup::String (p->patternIndex));
 
     state.setProperty (IDs::sequence, s.joinIntoString (","), getUndoManager());
 }
@@ -587,13 +587,13 @@ void StepClip::setPatternSequence (const StepClip::PatternArray& newSequence)
 void StepClip::insertVariation (int patternIndex, int insertIndex)
 {
     PatternArray s (patternInstanceList);
-    s.insert (insertIndex, new PatternInstance (*this, juce::jlimit (0, getPatterns().size() - 1, patternIndex)));
+    s.insert (insertIndex, new PatternInstance (*this, yup::jlimit (0, getPatterns().size() - 1, patternIndex)));
     setPatternSequence (s);
 }
 
 void StepClip::removeVariation (int variationIndex)
 {
-    jassert (juce::isPositiveAndBelow (variationIndex, patternInstanceList.size()));
+    jassert (yup::isPositiveAndBelow (variationIndex, patternInstanceList.size()));
 
     PatternArray s (patternInstanceList);
     s.remove (variationIndex);
@@ -602,7 +602,7 @@ void StepClip::removeVariation (int variationIndex)
 
 void StepClip::removeAllVariations()
 {
-    state.setProperty (IDs::sequence, juce::String(), getUndoManager());
+    state.setProperty (IDs::sequence, yup::String(), getUndoManager());
 }
 
 void StepClip::createDefaultPatternIfEmpty()
@@ -619,18 +619,18 @@ void StepClip::createDefaultPatternIfEmpty()
 
 void StepClip::setPatternForVariation (int variationIndex, int newPatternIndex)
 {
-    jassert (juce::isPositiveAndBelow (variationIndex, patternInstanceList.size()));
-    jassert (juce::isPositiveAndBelow (newPatternIndex, getPatterns().size()));
+    jassert (yup::isPositiveAndBelow (variationIndex, patternInstanceList.size()));
+    jassert (yup::isPositiveAndBelow (newPatternIndex, getPatterns().size()));
 
     PatternArray s (patternInstanceList);
-    s.set (variationIndex, new PatternInstance (*this, juce::jlimit (0, getPatterns().size() - 1, newPatternIndex)));
+    s.set (variationIndex, new PatternInstance (*this, yup::jlimit (0, getPatterns().size() - 1, newPatternIndex)));
     setPatternSequence (s);
 }
 
 //==============================================================================
-juce::Array<StepClip::Pattern> StepClip::getPatterns()
+yup::Array<StepClip::Pattern> StepClip::getPatterns()
 {
-    juce::Array<Pattern> p;
+    yup::Array<Pattern> p;
     auto patterns = state.getChildWithName (IDs::PATTERNS);
 
     for (int i = 0; i < patterns.getNumChildren(); ++i)
@@ -672,8 +672,8 @@ int StepClip::insertNewPattern (int index)
 void StepClip::removeUnusedPatterns()
 {
     auto patterns = state.getChildWithName (IDs::PATTERNS);
-    juce::Array<int> usedPatterns;
-    juce::Array<juce::ValueTree> sequence;
+    yup::Array<int> usedPatterns;
+    yup::Array<yup::ValueTree> sequence;
 
     for (auto* p : patternInstanceList)
     {
@@ -688,14 +688,14 @@ void StepClip::removeUnusedPatterns()
         if (! usedPatterns.contains (i))
             patterns.removeChild (i, um);
 
-    juce::StringArray newSequence;
+    yup::StringArray newSequence;
 
     for (int i = 0; i < sequence.size(); ++i)
     {
         const int index = patterns.indexOf (sequence.getUnchecked (i));
 
         if (index != -1)
-            newSequence.add (juce::String (index));
+            newSequence.add (yup::String (index));
     }
 
     state.setProperty (IDs::sequence, newSequence.joinIntoString (","), um);
@@ -711,11 +711,11 @@ void StepClip::setCell (int patternIndex, int channelIndex,
                         int noteIndex, bool value)
 {
     if (getCell (patternIndex, channelIndex, noteIndex) != value
-          && juce::isPositiveAndBelow (channelIndex, getChannels().size()))
+          && yup::isPositiveAndBelow (channelIndex, getChannels().size()))
     {
         Pattern p (getPattern (patternIndex));
 
-        if (juce::isPositiveAndBelow (noteIndex, p.getNumNotes()))
+        if (yup::isPositiveAndBelow (noteIndex, p.getNumNotes()))
             p.setNote (channelIndex, noteIndex, value);
     }
 }

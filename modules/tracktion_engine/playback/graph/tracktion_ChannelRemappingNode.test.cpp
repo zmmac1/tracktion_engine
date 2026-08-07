@@ -148,9 +148,9 @@ TEST_CASE ("ChannelRemappingNode")
     // Explicit mapping tests
     for (auto setup : getTestSetups())
     {
-        MESSAGE (juce::String ("Test setup: sample rate SR, block size BS")
-                    .replace ("SR", juce::String (setup.sampleRate))
-                    .replace ("BS", juce::String (setup.blockSize)).toStdString());
+        MESSAGE (yup::String ("Test setup: sample rate SR, block size BS")
+                    .replace ("SR", yup::String (setup.sampleRate))
+                    .replace ("BS", yup::String (setup.blockSize)).toStdString());
 
         auto ts = setup;
 

@@ -9,7 +9,7 @@
 */
 
 #include <thread>
-#if JUCE_INTEL
+#if YUP_INTEL
  #include <emmintrin.h>
 #endif
 
@@ -22,7 +22,7 @@ LockFreeMultiThreadedNodePlayer::LockFreeMultiThreadedNodePlayer()
     threadPool = getPoolCreatorFunction (ThreadPoolStrategy::realTime) (*this);
 }
 
-LockFreeMultiThreadedNodePlayer::LockFreeMultiThreadedNodePlayer (ThreadPoolCreator poolCreator, juce::AudioWorkgroup audioWorkgroup_)
+LockFreeMultiThreadedNodePlayer::LockFreeMultiThreadedNodePlayer (ThreadPoolCreator poolCreator, yup::AudioWorkgroup audioWorkgroup_)
     : audioWorkgroup (std::move (audioWorkgroup_))
 {
     threadPool = poolCreator (*this);
@@ -284,7 +284,7 @@ void LockFreeMultiThreadedNodePlayer::buildNodesOutputLists (PreparedNode& prepa
 
     for (auto n : preparedNode.graph->orderedNodes)
     {
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         for (auto& pn : preparedNode.playbackNodes)
             jassert (&pn->node != n);
        #endif
@@ -331,7 +331,7 @@ void LockFreeMultiThreadedNodePlayer::resetProcessQueue (PreparedNode& preparedN
         playbackNode->numInputsToBeProcessed.store (playbackNode->numInputs, std::memory_order_release);
 
         // Check only ready nodes will be queued
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         if (playbackNode->node.isReadyToProcess())
             jassert (playbackNode->numInputsToBeProcessed == 0);
 
@@ -340,7 +340,7 @@ void LockFreeMultiThreadedNodePlayer::resetProcessQueue (PreparedNode& preparedN
        #endif
     }
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     for (auto& playbackNode : preparedNode.playbackNodes)
     {
         playbackNode->hasBeenDequeued = false;
@@ -451,7 +451,7 @@ void LockFreeMultiThreadedNodePlayer::processNode (PreparedNode& preparedNode, N
     // to reduce context switches and overhead
     for (;;)
     {
-        #if JUCE_DEBUG
+        #if YUP_DEBUG
          jassert (! static_cast<PlaybackNode*> (nodeToProcess->internal)->hasBeenDequeued);
          static_cast<PlaybackNode*> (nodeToProcess->internal)->hasBeenDequeued = true;
         #endif

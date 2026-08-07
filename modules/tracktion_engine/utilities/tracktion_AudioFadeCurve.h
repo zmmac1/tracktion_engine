@@ -22,14 +22,14 @@ struct AudioFadeCurve
     /** A convex sine-shaped curve. */
     struct Convex
     {
-        inline static double preadjust (double alpha) noexcept  { return alpha * (0.5 * juce::MathConstants<double>::pi); }
+        inline static double preadjust (double alpha) noexcept  { return alpha * (0.5 * yup::MathConstants<double>::pi); }
         inline static float get (float alpha) noexcept          { return std::sin (alpha); }
     };
 
     /** A concave sine-shaped curve. */
     struct Concave
     {
-        inline static double preadjust (double alpha) noexcept  { return alpha * (0.5 * juce::MathConstants<double>::pi); }
+        inline static double preadjust (double alpha) noexcept  { return alpha * (0.5 * yup::MathConstants<double>::pi); }
         inline static float get (float alpha) noexcept          { return 1.0f - std::cos (alpha); }
     };
 
@@ -37,8 +37,8 @@ struct AudioFadeCurve
     struct SCurve
     {
         inline static double preadjust (double alpha) noexcept  { return alpha; }
-        inline static float get (float alpha) noexcept          { return (1.0f - alpha) * (1.0f - std::cos (alpha * (0.5f * juce::MathConstants<float>::pi)))
-                                                                            + alpha * std::sin (alpha * (0.5f * juce::MathConstants<float>::pi)); }
+        inline static float get (float alpha) noexcept          { return (1.0f - alpha) * (1.0f - std::cos (alpha * (0.5f * yup::MathConstants<float>::pi)))
+                                                                            + alpha * std::sin (alpha * (0.5f * yup::MathConstants<float>::pi)); }
     };
 
     /** A enumeration of the curve classes available. */
@@ -132,20 +132,20 @@ struct AudioFadeCurve
         float gain1, gain2;
     };
 
-    static void applyCrossfadeSection (juce::AudioBuffer<float>&, int channel,
+    static void applyCrossfadeSection (yup::AudioBuffer<float>&, int channel,
                                        int startSample, int numSamples,
                                        Type type,
                                        float startAlpha,
                                        float endAlpha);
 
-    static void applyCrossfadeSection (juce::AudioBuffer<float>&,
+    static void applyCrossfadeSection (yup::AudioBuffer<float>&,
                                        int startSample, int numSamples,
                                        Type type,
                                        float startAlpha,
                                        float endAlpha);
 
-    static void addWithCrossfade (juce::AudioBuffer<float>& dest,
-                                  const juce::AudioBuffer<float>& src,
+    static void addWithCrossfade (yup::AudioBuffer<float>& dest,
+                                  const yup::AudioBuffer<float>& src,
                                   int destChannel, int destStartIndex,
                                   int sourceChannel, int sourceStartIndex,
                                   int numSamples,
@@ -153,14 +153,14 @@ struct AudioFadeCurve
                                   float startAlpha,
                                   float endAlpha);
 
-    static void drawFadeCurve (juce::Graphics&, const AudioFadeCurve::Type,
-                               float x1, float x2, float top, float bottom, juce::Rectangle<int> clip);
+    static void drawFadeCurve (yup::Graphics&, const AudioFadeCurve::Type,
+                               float x1, float x2, float top, float bottom, yup::Rectangle<int> clip);
 };
 
 } // namespace tracktion::inline engine
 
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::AudioFadeCurve::Type>

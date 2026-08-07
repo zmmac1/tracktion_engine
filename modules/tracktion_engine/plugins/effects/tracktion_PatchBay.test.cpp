@@ -76,7 +76,7 @@ TEST_SUITE ("tracktion_engine")
         auto track = getAudioTracks (*edit)[0];
 
         auto fileLength = 2_td;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds(), 1, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds(), 1, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, fileLength } },
                         DeleteExistingClips::no);
@@ -102,7 +102,7 @@ TEST_SUITE ("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine);
         auto track = getAudioTracks (*edit)[0];
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0, 1, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0, 1, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, 1_td } },
                         DeleteExistingClips::no);
@@ -110,7 +110,7 @@ TEST_SUITE ("tracktion_engine")
         auto pb = insertPatchBay (*track);
         REQUIRE (pb != nullptr);
 
-        juce::StringArray ins, outs;
+        yup::StringArray ins, outs;
         pb->getChannelNames (&ins, &outs);
 
         // Input is mono (from clip)
@@ -126,7 +126,7 @@ TEST_SUITE ("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine);
         auto track = getAudioTracks (*edit)[0];
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0, 2, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0, 2, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, 1_td } },
                         DeleteExistingClips::no);
@@ -134,7 +134,7 @@ TEST_SUITE ("tracktion_engine")
         auto pb = insertPatchBay (*track);
         REQUIRE (pb != nullptr);
 
-        juce::StringArray ins, outs;
+        yup::StringArray ins, outs;
         pb->getChannelNames (&ins, &outs);
 
         CHECK (ins.size() == 2);
@@ -147,7 +147,7 @@ TEST_SUITE ("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine);
         auto track = getAudioTracks (*edit)[0];
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0, 2, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0, 2, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, 1_td } },
                         DeleteExistingClips::no);
@@ -169,7 +169,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (rackInstance != nullptr);
         rackInstance->setNumInputChannels (4);
 
-        juce::StringArray ins, outs;
+        yup::StringArray ins, outs;
         pb->getChannelNames (&ins, &outs);
 
         // Upstream is stereo
@@ -185,7 +185,7 @@ TEST_SUITE ("tracktion_engine")
         auto edit = test_utilities::createTestEdit (engine);
         auto track = getAudioTracks (*edit)[0];
 
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, 1.0, 2, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, 1.0, 2, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, 1_td } },
                         DeleteExistingClips::no);
@@ -207,7 +207,7 @@ TEST_SUITE ("tracktion_engine")
         REQUIRE (pb != nullptr);
 
         {
-            juce::StringArray ins, outs;
+            yup::StringArray ins, outs;
             pb->getChannelNames (&ins, &outs);
             CHECK (ins.size() == 2);   // upstream is stereo clip
             CHECK (outs.size() == 4);  // downstream rack expects 4
@@ -236,7 +236,7 @@ TEST_SUITE ("tracktion_engine")
         pb->removeSelectableListener (&changeListener);
 
         {
-            juce::StringArray ins, outs;
+            yup::StringArray ins, outs;
             pb->getChannelNames (&ins, &outs);
             CHECK (ins.size() == 4);   // now after 4-output rack, input is 4
         }
@@ -249,7 +249,7 @@ TEST_SUITE ("tracktion_engine")
         auto track = getAudioTracks (*edit)[0];
 
         auto fileLength = 2_td;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds(), 2, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds(), 2, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, fileLength } },
                         DeleteExistingClips::no);

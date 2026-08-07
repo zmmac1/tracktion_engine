@@ -12,8 +12,8 @@ class MusicalContextWrapper;
 class RegionSequenceWrapper;
 class AudioSourceWrapper;
 
-ARA_MAP_HOST_REF(juce::MemoryOutputStream, ARAArchiveWriterHostRef)
-ARA_MAP_HOST_REF(juce::MemoryBlock, ARAArchiveReaderHostRef)
+ARA_MAP_HOST_REF(yup::MemoryOutputStream, ARAArchiveWriterHostRef)
+ARA_MAP_HOST_REF(yup::MemoryBlock, ARAArchiveReaderHostRef)
 ARA_MAP_HOST_REF(Edit, ARAContentAccessControllerHostRef, ARAModelUpdateControllerHostRef, ARAMusicalContextHostRef, ARARegionSequenceHostRef, ARAAudioModificationHostRef, ARAPlaybackRegionHostRef)
 ARA_MAP_HOST_REF(TransportControl, ARAPlaybackControllerHostRef)
 ARA_MAP_HOST_REF(AudioSourceWrapper, ARAAudioSourceHostRef)
@@ -25,14 +25,14 @@ ARA_MAP_HOST_REF(AudioSourceWrapper, ARAAudioSourceHostRef)
 */
 struct PersistentIDMapping
 {
-    juce::String archiveID;
-    juce::String currentID;
+    yup::String archiveID;
+    yup::String currentID;
 };
 
 struct PersistentIDMappingGroup
 {
     PersistentIDMapping sourceMapping;
-    juce::Array<PersistentIDMapping> modificationMappings;
+    yup::Array<PersistentIDMapping> modificationMappings;
 };
 
 class ARADocument
@@ -115,16 +115,16 @@ public:
         ARADocument& doc;
         const bool skipContextCheck;
 
-        JUCE_DECLARE_NON_COPYABLE (ScopedEdit)
+        YUP_DECLARE_NON_COPYABLE (ScopedEdit)
     };
 
-    void flushStateToValueTree (juce::ValueTree& v)
+    void flushStateToValueTree (yup::ValueTree& v)
     {
         CRASH_TRACER
         TRACKTION_ASSERT_MESSAGE_THREAD
 
-        juce::MemoryBlock data;
-        juce::MemoryOutputStream out (data, false);
+        yup::MemoryBlock data;
+        yup::MemoryOutputStream out (data, false);
 
         if (dci->storeObjectsToArchive (dcRef, toHostRef (&out), nullptr))
         {
@@ -139,7 +139,7 @@ public:
                 // archive was saved with, not the factory's current one
                 if (wrapper != nullptr && wrapper->factory != nullptr)
                     v.setProperty (IDs::araDocumentArchiveID,
-                                   juce::String::fromUTF8 (wrapper->factory->documentArchiveID), nullptr);
+                                   yup::String::fromUTF8 (wrapper->factory->documentArchiveID), nullptr);
             }
         }
     }
@@ -147,7 +147,7 @@ public:
     /** @note Must not be editing or already restoring the document while restoring
               from a state.
     */
-    void beginRestoringState (const juce::ValueTree& state)
+    void beginRestoringState (const yup::ValueTree& state)
     {
         CRASH_TRACER
         TRACKTION_ASSERT_MESSAGE_THREAD
@@ -163,18 +163,18 @@ public:
              && wrapper != nullptr && wrapper->factory != nullptr)
         {
             const auto& f = *wrapper->factory;
-            bool compatible = (juce::String::fromUTF8 (f.documentArchiveID) == savedArchiveID);
+            bool compatible = (yup::String::fromUTF8 (f.documentArchiveID) == savedArchiveID);
 
             for (ARASize i = 0; ! compatible && i < f.compatibleDocumentArchiveIDsCount; ++i)
                 if (f.compatibleDocumentArchiveIDs != nullptr
-                     && juce::String::fromUTF8 (f.compatibleDocumentArchiveIDs[i]) == savedArchiveID)
+                     && yup::String::fromUTF8 (f.compatibleDocumentArchiveIDs[i]) == savedArchiveID)
                     compatible = true;
 
             if (! compatible)
             {
                 TRACKTION_LOG_ERROR ("ARA: not restoring document archive with incompatible ID '"
                                      + savedArchiveID + "' (plug-in archive ID '"
-                                     + juce::String::fromUTF8 (f.documentArchiveID) + "')");
+                                     + yup::String::fromUTF8 (f.documentArchiveID) + "')");
                 data = {};
             }
         }
@@ -183,7 +183,7 @@ public:
         {
             beginEditing (true);
 
-            lastArchiveState = std::make_unique<juce::MemoryBlock>();
+            lastArchiveState = std::make_unique<yup::MemoryBlock>();
             lastArchiveState->fromBase64Encoding (data);
             lastArchiveDocumentArchiveID = savedArchiveID;
         }
@@ -194,7 +194,7 @@ public:
         }
     }
 
-    void endRestoringState (juce::Array<PersistentIDMappingGroup> groups = {})
+    void endRestoringState (yup::Array<PersistentIDMappingGroup> groups = {})
     {
         CRASH_TRACER
         TRACKTION_ASSERT_MESSAGE_THREAD
@@ -214,7 +214,7 @@ public:
                 // Check if any groups share the same sourceMapping.currentID (collision)
                 bool hasCollisions = false;
                 {
-                    juce::StringArray seenCurrentIDs;
+                    yup::StringArray seenCurrentIDs;
 
                     for (auto& g : groups)
                     {
@@ -231,7 +231,7 @@ public:
                 if (! hasCollisions)
                 {
                     // Fast path: no collisions, flatten all groups into one call
-                    juce::Array<PersistentIDMapping> allSources, allMods;
+                    yup::Array<PersistentIDMapping> allSources, allMods;
 
                     for (auto& g : groups)
                     {
@@ -261,12 +261,12 @@ public:
                     // where the source ID already matches and won't collide
                     // with old-scheme groups (old-scheme sources aren't in the
                     // new archive, so those calls are no-ops).
-                    juce::StringArray restoredSourceIDs;
+                    yup::StringArray restoredSourceIDs;
                     bool isFirstCall = true;
 
                     for (auto& g : groups)
                     {
-                        juce::Array<PersistentIDMapping> sourceForThisCall;
+                        yup::Array<PersistentIDMapping> sourceForThisCall;
                         bool isIdentity = (g.sourceMapping.archiveID == g.sourceMapping.currentID);
 
                         if (isIdentity || ! restoredSourceIDs.contains (g.sourceMapping.currentID))
@@ -293,11 +293,11 @@ public:
     }
 
 private:
-    void restoreWithFilter (const juce::Array<PersistentIDMapping>& sourceMappings,
-                            const juce::Array<PersistentIDMapping>& modificationMappings,
+    void restoreWithFilter (const yup::Array<PersistentIDMapping>& sourceMappings,
+                            const yup::Array<PersistentIDMapping>& modificationMappings,
                             ARABool documentData)
     {
-        juce::Array<ARAPersistentID> srcArchiveIDs, srcCurrentIDs, modArchiveIDs, modCurrentIDs;
+        yup::Array<ARAPersistentID> srcArchiveIDs, srcCurrentIDs, modArchiveIDs, modCurrentIDs;
 
         for (auto& m : sourceMappings)
         {
@@ -335,13 +335,13 @@ public:
     /** Store a partial ARA archive containing just the given audio source and modification.
         Used by clipboard copy to capture ARA plugin edits (e.g. Melodyne note corrections).
     */
-    juce::MemoryBlock storeObjectsForCopy (ARAAudioSourceRef source, ARAAudioModificationRef modification)
+    yup::MemoryBlock storeObjectsForCopy (ARAAudioSourceRef source, ARAAudioModificationRef modification)
     {
         CRASH_TRACER
         TRACKTION_ASSERT_MESSAGE_THREAD
 
-        juce::MemoryBlock data;
-        juce::MemoryOutputStream out (data, false);
+        yup::MemoryBlock data;
+        yup::MemoryOutputStream out (data, false);
 
         // Flush pending plugin state changes before archiving
         dci->notifyModelUpdates (dcRef);
@@ -363,10 +363,10 @@ public:
     /** Restore a partial ARA archive, mapping archived persistent IDs to current ones.
         Used by clipboard paste to restore ARA plugin edits into a newly pasted clip.
     */
-    void restoreObjectsForPaste (const juce::MemoryBlock& data,
-                                 const juce::String& archivedSourceID, const juce::String& currentSourceID,
-                                 const juce::String& archivedModID, const juce::String& currentModID,
-                                 const juce::String& documentArchiveID = {})
+    void restoreObjectsForPaste (const yup::MemoryBlock& data,
+                                 const yup::String& archivedSourceID, const yup::String& currentSourceID,
+                                 const yup::String& archivedModID, const yup::String& currentModID,
+                                 const yup::String& documentArchiveID = {})
     {
         CRASH_TRACER
         TRACKTION_ASSERT_MESSAGE_THREAD
@@ -392,23 +392,23 @@ public:
         if (documentArchiveID.isNotEmpty() && wrapper != nullptr && wrapper->factory != nullptr)
         {
             const auto& f = *wrapper->factory;
-            bool compatible = (juce::String::fromUTF8 (f.documentArchiveID) == documentArchiveID);
+            bool compatible = (yup::String::fromUTF8 (f.documentArchiveID) == documentArchiveID);
 
             for (ARASize i = 0; ! compatible && i < f.compatibleDocumentArchiveIDsCount; ++i)
                 if (f.compatibleDocumentArchiveIDs != nullptr
-                     && juce::String::fromUTF8 (f.compatibleDocumentArchiveIDs[i]) == documentArchiveID)
+                     && yup::String::fromUTF8 (f.compatibleDocumentArchiveIDs[i]) == documentArchiveID)
                     compatible = true;
 
             if (! compatible)
             {
                 TRACKTION_LOG_ERROR ("ARA restoreObjectsForPaste: refusing archive with incompatible "
                                      "documentArchiveID '" + documentArchiveID + "' (plug-in archive ID '"
-                                     + juce::String::fromUTF8 (f.documentArchiveID) + "')");
+                                     + yup::String::fromUTF8 (f.documentArchiveID) + "')");
                 return;
             }
         }
 
-        juce::MemoryBlock dataCopy (data);
+        yup::MemoryBlock dataCopy (data);
 
         // Flush so the plugin acknowledges the newly created modification before restoring into it
         dci->notifyModelUpdates (dcRef);
@@ -449,7 +449,7 @@ public:
         archivingState->documentArchiveIDOverride = documentArchiveID;
         auto restoreResult = dci->restoreObjectsFromArchive (dcRef, toHostRef (&dataCopy), &filter);
         T_ARA_DBG ("ARA restoreObjectsFromArchive returned: " << (restoreResult ? "TRUE" : "FALSE"));
-        juce::ignoreUnused (restoreResult);
+        yup::ignoreUnused (restoreResult);
         archivingState->documentArchiveIDOverride = {};
         endEditing (true);
     }
@@ -486,7 +486,7 @@ public:
         return audioSources[key];
     }
 
-    void releaseAudioSource (const juce::String& key)
+    void releaseAudioSource (const yup::String& key)
     {
         jassert (audioSourceRefCount.count (key) > 0);
 
@@ -503,10 +503,10 @@ public:
     std::unique_ptr<MusicalContextWrapper> musicalContext;
     std::map<EditItemID, std::unique_ptr<RegionSequenceWrapper>> regionSequences;
     std::map<EditItemID, int> regionSequencePlaybackRegionCount;
-    std::map<juce::String, std::shared_ptr<AudioSourceWrapper>> audioSources;
-    std::map<juce::String, int> audioSourceRefCount;
-    std::unique_ptr<juce::MemoryBlock> lastArchiveState;
-    juce::String lastArchiveDocumentArchiveID;
+    std::map<yup::String, std::shared_ptr<AudioSourceWrapper>> audioSources;
+    std::map<yup::String, int> audioSourceRefCount;
+    std::unique_ptr<yup::MemoryBlock> lastArchiveState;
+    yup::String lastArchiveDocumentArchiveID;
 
     //==============================================================================
     /** RAII registration of an editor view bound to this document - a clip
@@ -536,7 +536,7 @@ public:
     private:
         ARADocument& doc;
 
-        JUCE_DECLARE_NON_COPYABLE (ScopedEditorView)
+        YUP_DECLARE_NON_COPYABLE (ScopedEditorView)
     };
 
     /** Calls the given function for every registered editor view. */
@@ -569,15 +569,15 @@ private:
     std::unique_ptr<ArchivingState> archivingState;
     std::vector<const ScopedEditorView*> editorViews;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocument)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocument)
 };
 
 //==============================================================================
 struct ARADocumentCreatorCallback : private MessageThreadCallback
 {
-    ARADocumentCreatorCallback (Edit& e, const juce::PluginDescription& d) : edit (e), desc (d) {}
+    ARADocumentCreatorCallback (Edit& e, const yup::PluginDescription& d) : edit (e), desc (d) {}
 
-    static ARADocument* perform (Edit& edit, const juce::PluginDescription& desc)
+    static ARADocument* perform (Edit& edit, const yup::PluginDescription& desc)
     {
         CRASH_TRACER
         ARADocumentCreatorCallback adcc (edit, desc);
@@ -587,7 +587,7 @@ struct ARADocumentCreatorCallback : private MessageThreadCallback
     }
 
     Edit& edit;
-    juce::PluginDescription desc;
+    yup::PluginDescription desc;
     std::unique_ptr<ARADocument> result;
 
     void performAction() override
@@ -599,18 +599,18 @@ struct ARADocumentCreatorCallback : private MessageThreadCallback
     }
 
     ARADocumentCreatorCallback() = delete;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentCreatorCallback)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARADocumentCreatorCallback)
 };
 
-static ARADocument* createDocument (Edit& edit, const juce::PluginDescription& desc)
+static ARADocument* createDocument (Edit& edit, const yup::PluginDescription& desc)
 {
-    if (juce::MessageManager::getInstance()->isThisTheMessageThread())
+    if (yup::MessageManager::getInstance()->isThisTheMessageThread())
         return createDocumentInternal (edit, desc);
 
     return ARADocumentCreatorCallback::perform (edit, desc);
 }
 
-static ARADocument* createDocumentInternal (Edit& edit, const juce::PluginDescription& desc)
+static ARADocument* createDocumentInternal (Edit& edit, const yup::PluginDescription& desc)
 {
     CRASH_TRACER
     TRACKTION_ASSERT_MESSAGE_THREAD
@@ -892,7 +892,7 @@ private:
         strictly ordered and can assert or abort on duplicates, which zero-length
         progression items or rounding after tempo changes can otherwise produce. */
     template <typename ContentType, typename GetPosition>
-    static void removeNonIncreasingPositions (juce::Array<ContentType>& items, GetPosition&& getPosition)
+    static void removeNonIncreasingPositions (yup::Array<ContentType>& items, GetPosition&& getPosition)
     {
         for (int i = 1; i < items.size();)
         {
@@ -912,22 +912,22 @@ private:
 
         const void* getDataForEvent (int index) const override
         {
-            if (juce::isPositiveAndBelow (index, getNumEvents()))
+            if (yup::isPositiveAndBelow (index, getNumEvents()))
                 return &items.getReference (index);
 
             return {};
         }
 
-        juce::Array<ContentType> items;
+        yup::Array<ContentType> items;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeEventReaderHelper)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeEventReaderHelper)
     };
 
     struct MidiNoteReader  : public TimeEventReaderHelper<ARAContentNote>
     {
         MidiNoteReader (Edit&, const ARAContentTimeRange*) {}
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiNoteReader)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiNoteReader)
     };
 
     struct TimeSigReader  : public TimeEventReaderHelper<ARAContentBarSignature>
@@ -962,7 +962,7 @@ private:
             removeNonIncreasingPositions (items, [] (const ARAContentBarSignature& i) { return i.position; });
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSigReader)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TimeSigReader)
     };
 
     struct TempoReader  : public TimeEventReaderHelper<ARAContentTempoEntry>
@@ -1014,14 +1014,14 @@ private:
             removeNonIncreasingPositions (items, [] (const ARAContentTempoEntry& i) { return i.quarterPosition; });
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoReader)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoReader)
     };
 
     // make sure updates are coming when the chord track changes
     struct ChordReader : public TimeEventReaderHelper<ARAContentChord>
     {
         // store chord names in a set to maintain valid UTF8 buffer pointers
-        std::set<juce::String> chordNames;
+        std::set<yup::String> chordNames;
 
         ChordReader (Edit& ed, const ARAContentTimeRange* range)
         {
@@ -1046,7 +1046,7 @@ private:
             auto ptnGen = chordTrack->getClips().getFirst()->getPatternGenerator();
             jassert (ptnGen);
 
-            juce::OwnedArray<PatternGenerator::ProgressionItem> progression;
+            yup::OwnedArray<PatternGenerator::ProgressionItem> progression;
             ptnGen->getFlattenedChordProgression (progression, true);
 
             BeatPosition itemStartBeat;
@@ -1092,7 +1092,7 @@ private:
                 auto chordIntervals = MusicalContextFunctions::getChordARAIntervalUsage (chord);
                 memcpy (item.intervals, chordIntervals.data(), sizeof (item.intervals));
 
-                auto symbol = juce::MidiMessage::getMidiNoteName (rootNote, sharp, false, 0) + chord.getSymbol();
+                auto symbol = yup::MidiMessage::getMidiNoteName (rootNote, sharp, false, 0) + chord.getSymbol();
                 item.name = chordNames.insert (MusicalContextFunctions::convertAccidentalsToUnicode (symbol)).first->toRawUTF8();
 
                 item.position = position;
@@ -1111,13 +1111,13 @@ private:
             }
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChordReader)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChordReader)
     };
 
     struct KeySignatureReader : public TimeEventReaderHelper<ARAContentKeySignature>
     {
         // store scale names in a set to maintain valid UTF8 buffer pointers
-        std::set<juce::String> scaleNames;
+        std::set<yup::String> scaleNames;
 
         KeySignatureReader (Edit& ed, const ARAContentTimeRange* range)
         {
@@ -1151,7 +1151,7 @@ private:
                 for (auto s : scale.getSteps())
                     item.intervals[s] = ARA::kARAKeySignatureIntervalUsed;
 
-                auto scaleName = juce::MidiMessage::getMidiNoteName (pitchSetting->getPitch(),
+                auto scaleName = yup::MidiMessage::getMidiNoteName (pitchSetting->getPitch(),
                                                                      pitchSetting->accidentalsSharp, false, 0)
                                     + " " + scale.getName();
 
@@ -1164,13 +1164,13 @@ private:
             removeNonIncreasingPositions (items, [] (const ARAContentKeySignature& i) { return i.position; });
         }
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeySignatureReader)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KeySignatureReader)
     };
 
     void updateMusicalContextProperties() {}
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MusicalContextWrapper)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MusicalContextWrapper)
 };
 
 //==============================================================================
@@ -1219,7 +1219,7 @@ public:
             }
             else
             {
-                juce::FloatVectorOperations::copy ((float*) buffers[i], buffer.getReadPointer (i), numSamples);
+                yup::FloatVectorOperations::copy ((float*) buffers[i], buffer.getReadPointer (i), numSamples);
             }
         }
 
@@ -1231,10 +1231,10 @@ public:
 
 private:
     AudioFileCache::Reader::Ptr reader;
-    juce::AudioBuffer<float> buffer;
+    yup::AudioBuffer<float> buffer;
     const bool use64BitSamples;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NodeReader)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NodeReader)
 };
 
 //==============================================================================
@@ -1357,7 +1357,7 @@ public:
         };
     }
 
-    const juce::String& getPersistentID() const { return sourceID; }
+    const yup::String& getPersistentID() const { return sourceID; }
 
     //==============================================================================
     ARADocument& doc;
@@ -1373,11 +1373,11 @@ private:
         name = audioFile.getFile().getFileName();
     }
 
-    const juce::String sourceID;
-    juce::String name;
+    const yup::String sourceID;
+    yup::String name;
     int accessRefCount = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourceWrapper)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioSourceWrapper)
 };
 
 //==============================================================================
@@ -1386,7 +1386,7 @@ class AudioModificationWrapper
 public:
     AudioModificationWrapper (ARADocument& d,
                               AudioSourceWrapper& source,
-                              const juce::String& itemID,
+                              const yup::String& itemID,
                               AudioModificationWrapper* instanceToClone)
       : doc (d),
         audioSource (source),
@@ -1419,7 +1419,7 @@ public:
         };
     }
 
-    const juce::String& getPersistentID() const { return persistentID; }
+    const yup::String& getPersistentID() const { return persistentID; }
 
     ARADocument& doc;
     AudioSourceWrapper& audioSource;
@@ -1428,9 +1428,9 @@ public:
 private:
     void updateAudioModificationProperties() {}
 
-    const juce::String persistentID;
+    const yup::String persistentID;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioModificationWrapper)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioModificationWrapper)
 };
 
 class RegionSequenceWrapper  : private SelectableListener
@@ -1496,12 +1496,12 @@ private:
         if (track == nullptr || regionSequenceRef == nullptr)
             return;
 
-        auto trackColour = track->getColour();
-        const ARAColor newColour { trackColour.getFloatRed(), trackColour.getFloatGreen(), trackColour.getFloatBlue() };
+        auto trackColor = track->getColor();
+        const ARAColor newColor { trackColor.getFloatRed(), trackColor.getFloatGreen(), trackColor.getFloatBlue() };
 
         if (name == track->getName()
              && orderIndex == track->getIndexInEditTrackList()
-             && colour.r == newColour.r && colour.g == newColour.g && colour.b == newColour.b)
+             && colour.r == newColor.r && colour.g == newColor.g && colour.b == newColor.b)
             return;
 
         if (doc.canEdit (false))
@@ -1522,16 +1522,16 @@ private:
     {
         name = track->getName();
         orderIndex = track->getIndexInEditTrackList();
-        auto trackColour = track->getColour();
-        colour = { trackColour.getFloatRed(), trackColour.getFloatGreen(), trackColour.getFloatBlue() };
+        auto trackColor = track->getColor();
+        colour = { trackColor.getFloatRed(), trackColor.getFloatGreen(), trackColor.getFloatBlue() };
     }
 
     SafeScopedListener trackListener;
     int orderIndex;
-    juce::String name;
+    yup::String name;
     ARAColor colour;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceWrapper)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceWrapper)
 };
 
 //==============================================================================
@@ -1689,18 +1689,18 @@ private:
     void updatePlaybackRegionProperties()
     {
         name = clip.getName();
-        auto clipColour = clip.getColour();
-        colour = { clipColour.getFloatRed(), clipColour.getFloatGreen(), clipColour.getFloatBlue() };
+        auto clipColor = clip.getColor();
+        colour = { clipColor.getFloatRed(), clipColor.getFloatGreen(), clipColor.getFloatBlue() };
     }
 
-    juce::String name;
+    yup::String name;
     ARAColor colour;
     const ARAPlaybackTransformationFlags supportedFlags;
     ARAAudioModificationRef audioModificationRef = nullptr;
     const bool isLoopIteration = false;
     const int loopIteration = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaybackRegionWrapper)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaybackRegionWrapper)
 };
 
 //==============================================================================
@@ -1711,7 +1711,7 @@ public:
                              AudioClipBase& audioClip,
                              const ARAFactory& f,
                              const ARAPlugInExtensionInstance& pluginExtensionInstance,
-                             const juce::String& itemID,
+                             const yup::String& itemID,
                              PlaybackRegionAndSource* instanceToClone)
         : clip (audioClip),
           araDoc (doc),
@@ -1850,7 +1850,7 @@ public:
     std::vector<std::unique_ptr<PlaybackRegionWrapper>> playbackRegions;
     std::shared_ptr<AudioSourceWrapper> audioSource;
     std::unique_ptr<AudioModificationWrapper> audioModification;
-    juce::String audioSourceKey;
+    yup::String audioSourceKey;
 
 private:
     AudioClipBase& clip;
@@ -1893,6 +1893,6 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaybackRegionAndSource)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaybackRegionAndSource)
 };
 

@@ -39,6 +39,8 @@ void progressive_backoff_wait(Predicate&& pred)
     impl::progressive_backoff_wait_armv8<2, 750>(std::forward<Predicate>(pred));
     // approx. 2x10 ns (= 20 ns) and 750x1333 ns (~ 1 ms), respectively, on an
     // Apple Silicon Mac or an armv8 based phone.
+  #elif defined(__EMSCRIPTEN__) || defined(__wasm__) || defined(__wasm)
+    while (! pred()) {}
   #else
     #error "Platform not supported!"
   #endif

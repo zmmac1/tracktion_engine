@@ -19,13 +19,13 @@ public:
     void initialiseDevice (bool connect) override;
     void shutDownDevice() override;
 
-    void acceptMidiMessage (int, const juce::MidiMessage&) override;
+    void acceptMidiMessage (int, const yup::MidiMessage&) override;
     void moveFader (int channelNum, float newSliderPos) override;
     void movePanPot (int channelNum, float newPan) override;
     void updateSoloAndMute (int channelNum, Track::MuteAndSoloLightState, bool isBright) override;
     void soloCountChanged (bool) override;
     void recordStateChanged (bool isRecording) override;
-    void faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames) override;
+    void faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames) override;
     void trackRecordEnabled (int channel, bool isEnabled) override;
     void timecodeChanged (int barsOrHours, int beatsOrMinutes, int ticksOrSeconds, int millisecs, bool isBarsBeats, bool isFrames) override;
     void snapOnOffChanged (bool isSnapOn) override;
@@ -41,10 +41,10 @@ private:
     int currentTrack = -1;
     bool shift = false;
     float faderPos = 0, pan = 0;
-    juce::String trackName;
+    yup::String trackName;
     bool snap = false, panMode = false, init = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TranzportControlSurface)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TranzportControlSurface)
 };
 
 } // namespace tracktion::inline engine

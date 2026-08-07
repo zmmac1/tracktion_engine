@@ -56,27 +56,27 @@ enum class FollowAction
 
 //==============================================================================
 /** Converts a string to a FollowAction if possible. */
-std::optional<FollowAction> followActionFromString (juce::String);
+std::optional<FollowAction> followActionFromString (yup::String);
 
 /** Converts a FollowAction to a string if possible. */
-juce::String toString (FollowAction);
+yup::String toString (FollowAction);
 
 /** Creates a follow action for a Clip. */
 std::function<void (MonotonicBeat)> createFollowAction (Clip&);
 
 //==============================================================================
 //==============================================================================
-class FollowActions : public juce::ChangeBroadcaster
+class FollowActions : public yup::ChangeBroadcaster
 {
 public:
     struct Action
     {
-        juce::ValueTree state;
+        yup::ValueTree state;
         juce::CachedValue<FollowAction> action;
         juce::CachedValue<double> weight;
     };
 
-    FollowActions (juce::ValueTree, juce::UndoManager*);
+    FollowActions (yup::ValueTree, juce::UndoManager*);
     ~FollowActions() override;
 
     Action& addAction();
@@ -86,7 +86,7 @@ public:
     std::span<Action*> getActions() const;
 
 private:
-    juce::ValueTree state;
+    yup::ValueTree state;
     juce::UndoManager* undoManager = nullptr;
     class List;
     std::unique_ptr<List> list;
@@ -97,7 +97,7 @@ private:
 
 //==============================================================================
 //==============================================================================
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::FollowAction>

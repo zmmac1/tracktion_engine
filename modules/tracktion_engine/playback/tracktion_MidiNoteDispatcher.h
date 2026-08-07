@@ -10,14 +10,14 @@
 
 namespace tracktion::inline engine {
 
-class MidiNoteDispatcher   : private juce::HighResolutionTimer
+class MidiNoteDispatcher   : private yup::HighResolutionTimer
 {
 public:
     MidiNoteDispatcher();
     ~MidiNoteDispatcher() override;
 
     //==============================================================================
-    void setMidiDeviceList (const juce::OwnedArray<MidiOutputDeviceInstance>&);
+    void setMidiDeviceList (const yup::OwnedArray<MidiOutputDeviceInstance>&);
 
     void dispatchPendingMessagesForDevices (TimePosition editTime);
 
@@ -38,7 +38,7 @@ private:
     };
 
     //==============================================================================
-    juce::OwnedArray<DeviceState> devices;
+    yup::OwnedArray<DeviceState> devices;
     mutable RealTimeSpinLock timeLock;
     std::shared_mutex deviceMutex;
     TimePosition masterTime;
@@ -47,7 +47,7 @@ private:
     TimePosition getCurrentTime() const;
     void dispatchPendingMessages (DeviceState&, TimePosition editTime);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiNoteDispatcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiNoteDispatcher)
 };
 
 } // namespace tracktion::inline engine

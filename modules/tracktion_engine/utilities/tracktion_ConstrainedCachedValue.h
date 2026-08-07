@@ -15,7 +15,7 @@ namespace tracktion::inline engine {
     A CachedValue that can take a std::function to constrain its value.
 */
 template <typename Type>
-class ConstrainedCachedValue    : private juce::ValueTree::Listener
+class ConstrainedCachedValue    : private yup::ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -35,7 +35,7 @@ public:
         @param propertyID    The identifier of the property
         @param undoManager   The UndoManager to use when writing to the property
     */
-    ConstrainedCachedValue (juce::ValueTree& tree, const juce::Identifier& propertyID,
+    ConstrainedCachedValue (yup::ValueTree& tree, const yup::Identifier& propertyID,
                             juce::UndoManager* undoManager);
 
     /** Constructor.
@@ -48,7 +48,7 @@ public:
         @param undoManager   The UndoManager to use when writing to the property
         @param defaultToUse  The fallback default value to use.
     */
-    ConstrainedCachedValue (juce::ValueTree& tree, const juce::Identifier& propertyID,
+    ConstrainedCachedValue (yup::ValueTree& tree, const yup::Identifier& propertyID,
                             juce::UndoManager* undoManager, const Type& defaultToUse);
 
     /** Sets a std::function to use to constain the value.
@@ -91,7 +91,7 @@ public:
 
     //==============================================================================
     /** Returns the current property as a Value object. */
-    juce::Value getPropertyAsValue();
+    yup::Value getPropertyAsValue();
 
     /** Returns true if the current property does not exist and the CachedValue is using
         the fallback default value instead.
@@ -123,12 +123,12 @@ public:
 
     //==============================================================================
     /** Makes the CachedValue refer to the specified property inside the given ValueTree. */
-    void referTo (juce::ValueTree& tree, const juce::Identifier& property, juce::UndoManager*);
+    void referTo (yup::ValueTree& tree, const yup::Identifier& property, juce::UndoManager*);
 
     /** Makes the CachedValue refer to the specified property inside the given ValueTree,
         and specifies a fallback value to use if the property does not exist.
     */
-    void referTo (juce::ValueTree& tree, const juce::Identifier& property, juce::UndoManager*, const Type& defaultVal);
+    void referTo (yup::ValueTree& tree, const yup::Identifier& property, juce::UndoManager*, const Type& defaultVal);
 
     /** Force an update in case the referenced property has been changed from elsewhere.
 
@@ -140,31 +140,31 @@ public:
 
     //==============================================================================
     /** Returns a reference to the ValueTree containing the referenced property. */
-    juce::ValueTree& getValueTree() noexcept                { return targetTree; }
+    yup::ValueTree& getValueTree() noexcept                { return targetTree; }
 
     /** Returns the property ID of the referenced property. */
-    const juce::Identifier& getPropertyID() const noexcept  { return targetProperty; }
+    const yup::Identifier& getPropertyID() const noexcept  { return targetProperty; }
 
 private:
     //==============================================================================
-    juce::ValueTree targetTree;
-    juce::Identifier targetProperty;
+    yup::ValueTree targetTree;
+    yup::Identifier targetProperty;
     juce::UndoManager* undoManager;
     Type defaultValue = Type();
     Type cachedValue = Type();
     std::function<Type (Type)> constrainer;
 
     //==============================================================================
-    void referToWithDefault (juce::ValueTree&, const juce::Identifier&, juce::UndoManager*, const Type&);
+    void referToWithDefault (yup::ValueTree&, const yup::Identifier&, juce::UndoManager*, const Type&);
     Type getTypedValue() const;
 
-    void valueTreePropertyChanged (juce::ValueTree& changedTree, const juce::Identifier& changedProperty) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override {}
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override {}
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override {}
-    void valueTreeParentChanged (juce::ValueTree&) override {}
+    void valueTreePropertyChanged (yup::ValueTree& changedTree, const yup::Identifier& changedProperty) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override {}
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override {}
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override {}
+    void valueTreeParentChanged (yup::ValueTree&) override {}
 
-    JUCE_DECLARE_NON_COPYABLE (ConstrainedCachedValue)
+    YUP_DECLARE_NON_COPYABLE (ConstrainedCachedValue)
 };
 
 
@@ -173,7 +173,7 @@ template <typename Type>
 inline ConstrainedCachedValue<Type>::ConstrainedCachedValue()  : undoManager (nullptr) {}
 
 template <typename Type>
-inline ConstrainedCachedValue<Type>::ConstrainedCachedValue (juce::ValueTree& v, const juce::Identifier& i, juce::UndoManager* um)
+inline ConstrainedCachedValue<Type>::ConstrainedCachedValue (yup::ValueTree& v, const yup::Identifier& i, juce::UndoManager* um)
     : targetTree (v), targetProperty (i), undoManager (um),
       defaultValue(), cachedValue (getTypedValue())
 {
@@ -181,7 +181,7 @@ inline ConstrainedCachedValue<Type>::ConstrainedCachedValue (juce::ValueTree& v,
 }
 
 template <typename Type>
-inline ConstrainedCachedValue<Type>::ConstrainedCachedValue (juce::ValueTree& v, const juce::Identifier& i, juce::UndoManager* um, const Type& defaultToUse)
+inline ConstrainedCachedValue<Type>::ConstrainedCachedValue (yup::ValueTree& v, const yup::Identifier& i, juce::UndoManager* um, const Type& defaultToUse)
     : targetTree (v), targetProperty (i), undoManager (um),
       defaultValue (defaultToUse), cachedValue (getTypedValue())
 {
@@ -202,7 +202,7 @@ inline void ConstrainedCachedValue<Type>::setConstrainer (std::function<Type (Ty
 }
 
 template <typename Type>
-inline juce::Value ConstrainedCachedValue<Type>::getPropertyAsValue()
+inline yup::Value ConstrainedCachedValue<Type>::getPropertyAsValue()
 {
     return targetTree.getPropertyAsValue (targetProperty, undoManager);
 }
@@ -229,7 +229,7 @@ inline void ConstrainedCachedValue<Type>::setValue (const Type& newValue, juce::
     if (cachedValue != constrainedValue || isUsingDefault())
     {
         cachedValue = constrainedValue;
-        targetTree.setProperty (targetProperty, juce::VariantConverter<Type>::toVar (constrainedValue), undoManagerToUse);
+        targetTree.setProperty (targetProperty, yup::VariantConverter<Type>::toVar (constrainedValue), undoManagerToUse);
     }
 }
 
@@ -247,13 +247,13 @@ inline void ConstrainedCachedValue<Type>::resetToDefault (juce::UndoManager* und
 }
 
 template <typename Type>
-inline void ConstrainedCachedValue<Type>::referTo (juce::ValueTree& v, const juce::Identifier& i, juce::UndoManager* um)
+inline void ConstrainedCachedValue<Type>::referTo (yup::ValueTree& v, const yup::Identifier& i, juce::UndoManager* um)
 {
     referToWithDefault (v, i, um, Type());
 }
 
 template <typename Type>
-inline void ConstrainedCachedValue<Type>::referTo (juce::ValueTree& v, const juce::Identifier& i, juce::UndoManager* um, const Type& defaultVal)
+inline void ConstrainedCachedValue<Type>::referTo (yup::ValueTree& v, const yup::Identifier& i, juce::UndoManager* um, const Type& defaultVal)
 {
     referToWithDefault (v, i, um, defaultVal);
 }
@@ -265,7 +265,7 @@ inline void ConstrainedCachedValue<Type>::forceUpdateOfCachedValue()
 }
 
 template <typename Type>
-inline void ConstrainedCachedValue<Type>::referToWithDefault (juce::ValueTree& v, const juce::Identifier& i, juce::UndoManager* um, const Type& defaultVal)
+inline void ConstrainedCachedValue<Type>::referToWithDefault (yup::ValueTree& v, const yup::Identifier& i, juce::UndoManager* um, const Type& defaultVal)
 {
     jassert (constrainer);
     targetTree.removeListener (this);
@@ -282,14 +282,14 @@ inline Type ConstrainedCachedValue<Type>::getTypedValue() const
 {
     jassert (constrainer);
 
-    if (const juce::var* property = targetTree.getPropertyPointer (targetProperty))
-        return constrainer (juce::VariantConverter<Type>::fromVar (*property));
+    if (const yup::var* property = targetTree.getPropertyPointer (targetProperty))
+        return constrainer (yup::VariantConverter<Type>::fromVar (*property));
 
     return defaultValue;
 }
 
 template <typename Type>
-inline void ConstrainedCachedValue<Type>::valueTreePropertyChanged (juce::ValueTree& changedTree, const juce::Identifier& changedProperty)
+inline void ConstrainedCachedValue<Type>::valueTreePropertyChanged (yup::ValueTree& changedTree, const yup::Identifier& changedProperty)
 {
     if (changedProperty == targetProperty && targetTree == changedTree)
         forceUpdateOfCachedValue();

@@ -10,26 +10,26 @@
 
 namespace tracktion::inline engine {
 
-class AutomatableParameter   : public juce::ReferenceCountedObject,
+class AutomatableParameter   : public yup::ReferenceCountedObject,
                                public Selectable,
-                               private juce::ValueTree::Listener
+                               private yup::ValueTree::Listener
 {
 public:
-    AutomatableParameter (const juce::String& paramID,
-                          const juce::String& name,
+    AutomatableParameter (const yup::String& paramID,
+                          const yup::String& name,
                           AutomatableEditItem&,
-                          juce::NormalisableRange<float> valueRange);
+                          yup::NormalisableRange<float> valueRange);
 
     ~AutomatableParameter() override;
 
-    using Ptr   = juce::ReferenceCountedObjectPtr<AutomatableParameter>;
-    using Array = juce::ReferenceCountedArray<AutomatableParameter>;
+    using Ptr   = yup::ReferenceCountedObjectPtr<AutomatableParameter>;
+    using Array = yup::ReferenceCountedArray<AutomatableParameter>;
 
-    const juce::String paramID;
-    const juce::NormalisableRange<float> valueRange;
+    const yup::String paramID;
+    const yup::NormalisableRange<float> valueRange;
     AutomatableEditItem& automatableEditElement;
 
-    juce::Range<float> getValueRange() const               { return valueRange.getRange(); }
+    yup::Range<float> getValueRange() const               { return valueRange.getRange(); }
     Plugin* getPlugin() const                              { return plugin; }
 
     Engine& getEngine() const noexcept;
@@ -45,15 +45,15 @@ public:
     void detachFromCurrentValue();
 
     //==============================================================================
-    virtual juce::String getParameterName() const               { return paramName; }
-    virtual juce::String getParameterShortName (int) const      { return paramName; }
-    virtual juce::String getLabel()                             { return {}; }
+    virtual yup::String getParameterName() const               { return paramName; }
+    virtual yup::String getParameterShortName (int) const      { return paramName; }
+    virtual yup::String getLabel()                             { return {}; }
 
     // returns a string "pluginname / paramname"
-    virtual juce::String getPluginAndParamName() const;
+    virtual yup::String getPluginAndParamName() const;
 
     // returns "track / pluginname / paramname"
-    virtual juce::String getFullName() const;
+    virtual yup::String getFullName() const;
 
     /** Returns the thing that you'd select if you wanted to show this param */
     Selectable* getOwnerSelectable() const;
@@ -65,18 +65,18 @@ public:
     float getCurrentValue() const noexcept                      { return currentValue; }
     float getCurrentNormalisedValue() const noexcept            { return valueRange.convertTo0to1 (currentValue); }
 
-    virtual juce::String valueToString (float value)            { return valueToStringFunction (value); }
-    virtual float stringToValue (const juce::String& s)         { return stringToValueFunction (s); }
+    virtual yup::String valueToString (float value)            { return valueToStringFunction (value); }
+    virtual float stringToValue (const yup::String& s)         { return stringToValueFunction (s); }
 
-    virtual juce::String getCurrentValueAsString()              { return valueToString (getCurrentValue()); }
-    juce::String getCurrentValueAsStringWithLabel();
+    virtual yup::String getCurrentValueAsString()              { return valueToString (getCurrentValue()); }
+    yup::String getCurrentValueAsStringWithLabel();
 
-    std::function<juce::String(float)> valueToStringFunction;
-    std::function<float(const juce::String&)> stringToValueFunction;
+    std::function<yup::String(float)> valueToStringFunction;
+    std::function<float(const yup::String&)> stringToValueFunction;
 
     // should be called to change a parameter when a user is actively moving it
-    void setParameter (float value, juce::NotificationType);
-    void setNormalisedParameter (float value, juce::NotificationType);
+    void setParameter (float value, yup::NotificationType);
+    void setNormalisedParameter (float value, yup::NotificationType);
     void updateToFollowCurve (TimePosition);
 
     /** Call to indicate this parameter is about to be changed. */
@@ -95,22 +95,22 @@ public:
         virtual ~ModifierSource();
 
     private:
-        juce::WeakReference<ModifierSource>::Master masterReference;
-        friend class juce::WeakReference<ModifierSource>;
+        yup::WeakReference<ModifierSource>::Master masterReference;
+        friend class yup::WeakReference<ModifierSource>;
     };
 
     /** Connects a modifier source to an AutomatableParameter. */
-    struct ModifierAssignment : public juce::ReferenceCountedObject
+    struct ModifierAssignment : public yup::ReferenceCountedObject
     {
-        using Ptr = juce::ReferenceCountedObjectPtr<ModifierAssignment>;
+        using Ptr = yup::ReferenceCountedObjectPtr<ModifierAssignment>;
 
-        ModifierAssignment (Edit&, const juce::ValueTree&);
+        ModifierAssignment (Edit&, const yup::ValueTree&);
 
         /** Must return true if this assigment is for the given source. */
         virtual bool isForModifierSource (const ModifierSource&) const = 0;
 
         Edit& edit;
-        juce::ValueTree state;
+        yup::ValueTree state;
         juce::CachedValue<float> value, offset, curve;
         juce::CachedValue<float> inputStart, inputEnd;
     };
@@ -136,10 +136,10 @@ public:
     bool hasActiveModifierAssignments() const;
 
     /** Returns all the current ModifierAssignments. */
-    juce::ReferenceCountedArray<ModifierAssignment> getAssignments() const;
+    yup::ReferenceCountedArray<ModifierAssignment> getAssignments() const;
 
     /** Returns all the current ModifierSources currently in use by assignments. */
-    juce::Array<ModifierSource*> getModifiers() const;
+    yup::Array<ModifierSource*> getModifiers() const;
 
     //==============================================================================
     /** This is the value that has been set explicity, either by calling setParameter
@@ -178,9 +178,9 @@ public:
     virtual std::optional<float> getDefaultValue() const;
 
     virtual bool hasLabels()  const                                 { return false; }
-    virtual juce::String getLabelForValue (float) const             { return {}; }
+    virtual yup::String getLabelForValue (float) const             { return {}; }
     virtual float snapToState (float val) const                     { return val; }
-    virtual juce::StringArray getAllLabels() const                  { return {}; }
+    virtual yup::StringArray getAllLabels() const                  { return {}; }
 
     //==============================================================================
     /** true if the parameter been moved while in an automation record mode. */
@@ -195,10 +195,10 @@ public:
     void curveHasChanged();
 
     //==============================================================================
-    juce::String getSelectableDescription() override    { return TRANS("Automation Parameter"); }
+    yup::String getSelectableDescription() override    { return TRANS("Automation Parameter"); }
 
-    const juce::String paramName;
-    juce::ValueTree parentState;
+    const yup::String paramName;
+    yup::ValueTree parentState;
 
     //==============================================================================
     struct Listener
@@ -246,7 +246,7 @@ protected:
     struct AttachedIntValue;
     struct AttachedBoolValue;
     std::unique_ptr<AttachedValue> attachedValue;
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 
     SafeSelectable<Edit> editRef;
     Plugin* plugin = nullptr;
@@ -260,7 +260,7 @@ protected:
     AsyncCaller parameterChangedCaller { [this] { listeners.call (&Listener::currentValueChanged, *this); } };
     int gestureCount = 0;
 
-    juce::ValueTree modifiersState;
+    yup::ValueTree modifiersState;
     struct AutomationSourceList;
     mutable std::unique_ptr<AutomationSourceList> automationSourceList;
 
@@ -268,16 +268,16 @@ protected:
 
     void setParameterValue (float value, bool isFollowingCurve);
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override;
-    void valueTreeParentChanged (juce::ValueTree&) override;
-    void valueTreeRedirected (juce::ValueTree&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override;
+    void valueTreeParentChanged (yup::ValueTree&) override;
+    void valueTreeRedirected (yup::ValueTree&) override;
 
     virtual void parameterChanged (float, bool /*byAutomation*/) {}
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomatableParameter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomatableParameter)
 };
 
 
@@ -287,9 +287,9 @@ AutomationMode getAutomationMode (const AutomatableParameter&);
 
 /** Returns all the Assignments of a specific type. */
 template<typename AssignmentType>
-juce::ReferenceCountedArray<AssignmentType> getAssignmentsOfType (const AutomatableParameter& ap)
+yup::ReferenceCountedArray<AssignmentType> getAssignmentsOfType (const AutomatableParameter& ap)
 {
-    juce::ReferenceCountedArray<AssignmentType> assignments;
+    yup::ReferenceCountedArray<AssignmentType> assignments;
 
     for (auto ass : ap.getAssignments())
         if (auto type = dynamic_cast<AssignmentType*> (ass))
@@ -300,9 +300,9 @@ juce::ReferenceCountedArray<AssignmentType> getAssignmentsOfType (const Automata
 
 /** Returns all the modifers in use of a specific type. */
 template<typename ModifierType>
-juce::Array<ModifierType*> getModifiersOfType (const AutomatableParameter& ap)
+yup::Array<ModifierType*> getModifiersOfType (const AutomatableParameter& ap)
 {
-    juce::Array<ModifierType*> mods;
+    yup::Array<ModifierType*> mods;
 
     for (auto mod : ap.getModifiers())
         if (auto type = dynamic_cast<ModifierType*> (mod))
@@ -313,10 +313,10 @@ juce::Array<ModifierType*> getModifiersOfType (const AutomatableParameter& ap)
 
 /** Iterates an Edit looking for all parameters that assigned to a given parameter. */
 template<typename AssignmentType, typename ModifierSourceType, typename EditType>
-juce::ReferenceCountedArray<AssignmentType> getAssignmentsForSource (EditType& edit, const ModifierSourceType& source)
+yup::ReferenceCountedArray<AssignmentType> getAssignmentsForSource (EditType& edit, const ModifierSourceType& source)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
-    juce::ReferenceCountedArray<AssignmentType> assignments;
+    yup::ReferenceCountedArray<AssignmentType> assignments;
 
     edit.visitAllAutomatableParams (true, [&] (AutomatableParameter& param)
     {
@@ -333,7 +333,7 @@ juce::ReferenceCountedArray<AssignmentType> getAssignmentsForSource (EditType& e
 AutomatableParameter::ModifierSource* getSourceForAssignment (const AutomatableParameter::ModifierAssignment&);
 
 /** Iterates an Edit looking for all parameters that are being modified by the given ModifierSource. */
-juce::ReferenceCountedArray<AutomatableParameter> getAllParametersBeingModifiedBy (Edit&, AutomatableParameter::ModifierSource&);
+yup::ReferenceCountedArray<AutomatableParameter> getAllParametersBeingModifiedBy (Edit&, AutomatableParameter::ModifierSource&);
 
 /** Iterates an Edit looking for the parameter that this ModifierAssignment has been made from. */
 AutomatableParameter* getParameter (AutomatableParameter::ModifierAssignment&);
@@ -342,7 +342,7 @@ AutomatableParameter* getParameter (AutomatableParameter::ModifierAssignment&);
 /** Returns an int version of an AutomatableParameter. */
 inline int getIntParamValue (const AutomatableParameter& ap)
 {
-    return juce::roundToInt (ap.getCurrentValue());
+    return yup::roundToInt (ap.getCurrentValue());
 }
 
 /** Returns a bool version of an AutomatableParameter. */
@@ -363,7 +363,7 @@ inline Type getTypedParamValue (const AutomatableParameter& ap)
     Components can implement this to let things know which automatable parameter
     they control.
 */
-class AutomationDragDropTarget   : public juce::DragAndDropTarget
+class AutomationDragDropTarget   : public yup::DragAndDropTarget
 {
 public:
     AutomationDragDropTarget();
@@ -435,12 +435,12 @@ private:
     };
 
     const tempo::Sequence& tempoSequence;
-    juce::Array<AutoPoint> points;
+    yup::Array<AutoPoint> points;
     int currentIndex = -1;
     float currentValue = 0.0f;
     const AutomationCurve::TimeBase timeBase;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomationIterator)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomationIterator)
 };
 
 } // namespace tracktion::inline engine

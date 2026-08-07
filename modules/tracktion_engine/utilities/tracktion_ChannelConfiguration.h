@@ -21,7 +21,7 @@ struct ChannelIndex
     ChannelIndex();
 
     /// Creates a ChannelIndex for a given index and a channel type.
-    ChannelIndex (int indexInDevice, juce::AudioChannelSet::ChannelType);
+    ChannelIndex (int indexInDevice, yup::AudioChannelSet::ChannelType);
 
     /// Creates a discrete (mono) channel at the given index.
     static ChannelIndex createMono (int indexInDevice);
@@ -30,16 +30,16 @@ struct ChannelIndex
     bool operator!= (const ChannelIndex&) const;
 
     int indexInDevice = -1;
-    juce::AudioChannelSet::ChannelType channel = juce::AudioChannelSet::unknown;
+    yup::AudioChannelSet::ChannelType channel = yup::AudioChannelSet::unknown;
 };
 
 /// Returns the ChannelType for an abbreviated name.
 /// @see AudioChannelSet::getAbbreviatedChannelTypeName.
-juce::AudioChannelSet::ChannelType channelTypeFromAbbreviatedName (const juce::String&);
+yup::AudioChannelSet::ChannelType channelTypeFromAbbreviatedName (const yup::String&);
 
 /// Creates an AudioChannelSet from a list of abbreviated channel names.
 /// E.g. "L R"
-juce::AudioChannelSet channelSetFromSpeakerArrangementString (const juce::String&);
+yup::AudioChannelSet channelSetFromSpeakerArrangementString (const yup::String&);
 
 
 //==============================================================================
@@ -104,7 +104,7 @@ public:
     static ChannelConfiguration canonical (int numChannels, int firstDeviceChannelIndex = 0);
 
     /// Creates a configuration from an AudioChannelSet and starting device index.
-    static ChannelConfiguration fromChannelSet (const juce::AudioChannelSet&, int firstDeviceChannelIndex = 0);
+    static ChannelConfiguration fromChannelSet (const yup::AudioChannelSet&, int firstDeviceChannelIndex = 0);
 
     //==============================================================================
     // Accessors
@@ -161,7 +161,7 @@ public:
     ChannelConfiguration intersection (const ChannelConfiguration& other) const;
 
     /// Creates a JUCE AudioChannelSet from this configuration.
-    juce::AudioChannelSet toChannelSet() const;
+    yup::AudioChannelSet toChannelSet() const;
 
     //==============================================================================
     // Modification
@@ -203,10 +203,10 @@ public:
     ChannelConfiguration reversed() const;
 
     /// Creates a human-readable description of the channels.
-    juce::String getDescription() const;
+    yup::String getDescription() const;
 
     /// Returns the preset name that matches this configuration, or "From Edit" if no match.
-    juce::String getMatchingPresetName() const;
+    yup::String getMatchingPresetName() const;
 
 private:
     //==============================================================================
@@ -219,7 +219,7 @@ private:
 /// A named channel configuration preset for UI selection.
 struct ChannelConfigurationPreset
 {
-    juce::String name;
+    yup::String name;
     ChannelConfiguration config;  ///< Empty config means "auto-detect from source"
 };
 

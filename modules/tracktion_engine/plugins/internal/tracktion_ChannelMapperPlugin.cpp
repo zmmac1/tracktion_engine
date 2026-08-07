@@ -10,14 +10,14 @@
 
 namespace tracktion::inline engine {
 
-static const juce::Identifier channelMapPropID ("channelMap");
-static const juce::Identifier numInputsPropID ("numInputChannels");
-static const juce::Identifier numOutputsPropID ("numOutputChannels");
+static const yup::Identifier channelMapPropID ("channelMap");
+static const yup::Identifier numInputsPropID ("numInputChannels");
+static const yup::Identifier numOutputsPropID ("numOutputChannels");
 
 //==============================================================================
 const char* ChannelMapperPlugin::xmlTypeName ("channelMapper");
 
-juce::ValueTree ChannelMapperPlugin::create()
+yup::ValueTree ChannelMapperPlugin::create()
 {
     return createValueTree (IDs::PLUGIN,
                             IDs::type, xmlTypeName);
@@ -67,7 +67,7 @@ void ChannelMapperPlugin::applyToBuffer (const PluginRenderContext& rc)
         return;
 
     // Work with a temporary copy to handle overlapping source/dest
-    juce::AudioBuffer<float> temp (numDestChannels, numSamples);
+    yup::AudioBuffer<float> temp (numDestChannels, numSamples);
     temp.clear();
 
     for (const auto& e : currentMap.entries)
@@ -81,7 +81,7 @@ void ChannelMapperPlugin::applyToBuffer (const PluginRenderContext& rc)
         dest.copyFrom (ch, startSample, temp, ch, 0, numSamples);
 }
 
-void ChannelMapperPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void ChannelMapperPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, channelMapState, numInputChannels, numOutputChannels);
     updateMapFromState();
@@ -98,7 +98,7 @@ void ChannelMapperPlugin::setChannelMap (const ChannelMap& newMap)
     currentMap = newMap;
 
     // Serialize: "src1:dst1,src2:dst2,..."
-    juce::String s;
+    yup::String s;
 
     for (size_t i = 0; i < newMap.entries.size(); ++i)
     {
@@ -113,12 +113,12 @@ void ChannelMapperPlugin::setChannelMap (const ChannelMap& newMap)
 
 void ChannelMapperPlugin::setNumInputChannels (int n)
 {
-    numInputChannels = juce::jlimit (1, 8, n);
+    numInputChannels = yup::jlimit (1, 8, n);
 }
 
 void ChannelMapperPlugin::setNumOutputChannels (int n)
 {
-    numOutputChannels = juce::jlimit (1, 8, n);
+    numOutputChannels = yup::jlimit (1, 8, n);
 }
 
 void ChannelMapperPlugin::updateMapFromState()
@@ -129,13 +129,13 @@ void ChannelMapperPlugin::updateMapFromState()
     if (s.isEmpty())
     {
         // Default to identity mapping
-        currentMap = ChannelMap::identity (juce::jmin (numInputChannels.get(), numOutputChannels.get()));
+        currentMap = ChannelMap::identity (yup::jmin (numInputChannels.get(), numOutputChannels.get()));
         return;
     }
 
-    for (auto& token : juce::StringArray::fromTokens (s, ",", ""))
+    for (auto& token : yup::StringArray::fromTokens (s, ",", ""))
     {
-        auto parts = juce::StringArray::fromTokens (token.trim(), ":", "");
+        auto parts = yup::StringArray::fromTokens (token.trim(), ":", "");
 
         if (parts.size() == 2)
         {

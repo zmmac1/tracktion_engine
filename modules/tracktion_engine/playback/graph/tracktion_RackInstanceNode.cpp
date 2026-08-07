@@ -85,13 +85,13 @@ bool RackInstanceNode::isReadyToProcess()
     return input->hasProcessed();
 }
 
-void RackInstanceNode::preProcess (choc::buffer::FrameCount, juce::Range<int64_t>)
+void RackInstanceNode::preProcess (choc::buffer::FrameCount, yup::Range<int64_t>)
 {
     if (canUseSourceBuffers)
         setBufferViewToUse (input.get(), input->getProcessedOutput().audio);
 }
 
-void RackInstanceNode::prefetchBlock (juce::Range<int64_t>)
+void RackInstanceNode::prefetchBlock (yup::Range<int64_t>)
 {
     // This updates automation for the RackInstance gains etc.
     plugin->prepareForNextBlock (getEditTimeRange().getStart() + automationAdjustmentTime);
@@ -135,7 +135,7 @@ void RackInstanceNode::process (ProcessContext& pc)
         }
         else
         {
-            juce::SmoothedValue<float> smoother (lastGain[channel]);
+            yup::SmoothedValue<float> smoother (lastGain[channel]);
             smoother.setTargetValue (gain);
             smoother.reset ((int) dest.getNumFrames());
             applyGainPerFrame (dest, [&] { return smoother.getNextValue(); });

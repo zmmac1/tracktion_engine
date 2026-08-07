@@ -65,7 +65,7 @@ private:
 
 
 //==============================================================================
-Clip::Clip (const juce::ValueTree& v, ClipOwner& targetParent, EditItemID id, Type t)
+Clip::Clip (const yup::ValueTree& v, ClipOwner& targetParent, EditItemID id, Type t)
     : TrackItem (targetParent.getClipOwnerEdit(), id, t),
       state (v), parent (&targetParent),
       sourceFileReference (edit, state, IDs::source)
@@ -115,7 +115,7 @@ void Clip::initialise()
 {
     jassert (parent != nullptr);
 
-    const juce::ScopedValueSetter<bool> initialiser (isInitialised, false, true);
+    const yup::ScopedValueSetter<bool> initialiser (isInitialised, false, true);
 
     if (sourceFileReference.isUsingProjectReference())
         sourceMediaChanged();
@@ -139,12 +139,12 @@ juce::UndoManager* Clip::getUndoManager() const
 }
 
 //==============================================================================
-bool Clip::isClipState (const juce::ValueTree& v)
+bool Clip::isClipState (const yup::ValueTree& v)
 {
     return isClipState (v.getType());
 }
 
-bool Clip::isClipState (const juce::Identifier& i)
+bool Clip::isClipState (const yup::Identifier& i)
 {
     return i == IDs::AUDIOCLIP || i == IDs::MIDICLIP || i == IDs::MARKERCLIP
         || i == IDs::STEPCLIP || i == IDs::CHORDCLIP || i == IDs::ARRANGERCLIP
@@ -152,7 +152,7 @@ bool Clip::isClipState (const juce::Identifier& i)
 }
 
 //==============================================================================
-static Clip::Ptr createNewEditClip (const juce::ValueTree& v, EditItemID newClipID, ClipOwner& targetParent)
+static Clip::Ptr createNewEditClip (const yup::ValueTree& v, EditItemID newClipID, ClipOwner& targetParent)
 {
     auto& edit = targetParent.getClipOwnerEdit();
     auto project = edit.getProjectItemRef().getProject();
@@ -161,7 +161,7 @@ static Clip::Ptr createNewEditClip (const juce::ValueTree& v, EditItemID newClip
     auto sourceFile = ProjectItemRef (sourceString).resolve (edit.engine, project ? project->getDefaultDirectory()
                                                                                   : edit.editFileRetriever().getParentDirectory());
     auto sourceItem = edit.engine.getProjectManager().getProjectItem (sourceFile);
-    juce::String warning;
+    yup::String warning;
 
     if (sourceItem != nullptr && sourceItem->getLength() > 0.0)
     {
@@ -188,7 +188,7 @@ static Clip::Ptr createNewEditClip (const juce::ValueTree& v, EditItemID newClip
     return {};
 }
 
-static Clip::Ptr createNewClipObject (const juce::ValueTree& v, EditItemID newClipID, ClipOwner& targetParent)
+static Clip::Ptr createNewClipObject (const yup::ValueTree& v, EditItemID newClipID, ClipOwner& targetParent)
 {
     auto type = v.getType();
 
@@ -212,7 +212,7 @@ static Clip::Ptr createNewClipObject (const juce::ValueTree& v, EditItemID newCl
     return {};
 }
 
-Clip::Ptr Clip::createClipForState (const juce::ValueTree& v, ClipOwner& targetParent)
+Clip::Ptr Clip::createClipForState (const yup::ValueTree& v, ClipOwner& targetParent)
 {
     jassert (Clip::isClipState (v));
     jassert (TrackList::isTrack (v.getParent())
@@ -248,7 +248,7 @@ void Clip::flushStateToValueTree()
 }
 
 //==============================================================================
-void Clip::setName (const juce::String& newName)
+void Clip::setName (const yup::String& newName)
 {
     if (clipName != newName)
     {
@@ -269,7 +269,7 @@ void Clip::setName (const juce::String& newName)
                         if (i == 0)
                             source->setName (newName, ProjectItem::SetNameMode::doDefault);
                         else
-                            source->setName (newName + " #" + juce::String (i + 1), ProjectItem::SetNameMode::doDefault);
+                            source->setName (newName + " #" + yup::String (i + 1), ProjectItem::SetNameMode::doDefault);
                     }
                 }
             }
@@ -366,10 +366,10 @@ void Clip::sourceMediaChanged()
 void Clip::setPosition (ClipPosition newPosition)
 {
     const auto maxEnd = Edit::getMaximumEditEnd();
-    const auto start = juce::jlimit (0_tp, maxEnd, newPosition.time.getStart());
+    const auto start = yup::jlimit (0_tp, maxEnd, newPosition.time.getStart());
     newPosition.time = { start,
-                         juce::jlimit (start, maxEnd, newPosition.time.getEnd()) };
-    newPosition.offset = juce::jmax (0_td, newPosition.offset);
+                         yup::jlimit (start, maxEnd, newPosition.time.getEnd()) };
+    newPosition.offset = yup::jmax (0_td, newPosition.offset);
 
     clipStart = newPosition.time.getStart();
     length = newPosition.time.getLength();
@@ -379,7 +379,7 @@ void Clip::setPosition (ClipPosition newPosition)
 void Clip::setStart (TimePosition newStart, bool preserveSync, bool keepLength)
 {
     auto pos = getPosition();
-    auto delta = juce::jlimit (0_tp, Edit::getMaximumEditEnd(), newStart) - pos.time.getStart();
+    auto delta = yup::jlimit (0_tp, Edit::getMaximumEditEnd(), newStart) - pos.time.getStart();
 
     if (keepLength)
         pos.time = pos.time + delta;
@@ -387,7 +387,7 @@ void Clip::setStart (TimePosition newStart, bool preserveSync, bool keepLength)
         pos.time = pos.time.withStart (pos.time.getStart() + delta);
 
     if (preserveSync)
-        pos.offset = juce::jmax (0_td, pos.offset + delta);
+        pos.offset = yup::jmax (0_td, pos.offset + delta);
 
     setPosition (pos);
 }
@@ -400,7 +400,7 @@ void Clip::setLength (TimeDuration newLength, bool preserveSync)
 void Clip::setEnd (TimePosition newEnd, bool preserveSync)
 {
     auto pos = getPosition();
-    auto delta = juce::jlimit (pos.time.getStart(), Edit::getMaximumEditEnd(), newEnd) - pos.time.getEnd();
+    auto delta = yup::jlimit (pos.time.getStart(), Edit::getMaximumEditEnd(), newEnd) - pos.time.getEnd();
 
     if (! preserveSync)
         pos.offset = pos.offset - delta;
@@ -412,13 +412,13 @@ void Clip::setEnd (TimePosition newEnd, bool preserveSync)
 void Clip::setOffset (TimeDuration newOffset)
 {
     auto pos = getPosition();
-    pos.offset = juce::jmax (0_td, newOffset);
+    pos.offset = yup::jmax (0_td, newOffset);
     setPosition (pos);
 }
 
-juce::Array<TimePosition> Clip::getInterestingTimes()
+yup::Array<TimePosition> Clip::getInterestingTimes()
 {
-    juce::Array<TimePosition> times;
+    yup::Array<TimePosition> times;
 
     auto pos = getPosition();
     times.add (pos.time.getStart());
@@ -431,9 +431,9 @@ juce::Array<TimePosition> Clip::getInterestingTimes()
     return times;
 }
 
-juce::Array<TimePosition> Clip::getRescaledMarkPoints() const
+yup::Array<TimePosition> Clip::getRescaledMarkPoints() const
 {
-    juce::Array<TimePosition> times;
+    yup::Array<TimePosition> times;
     const auto offsetSecs = getPosition().offset.inSeconds();
 
     if (auto sourceItem = sourceFileReference.getSourceProjectItem())
@@ -452,7 +452,7 @@ TimePosition Clip::getSpottingPoint() const
 
     auto pos = getPosition();
 
-    return juce::jlimit (0_tp, toPosition (pos.time.getLength()),
+    return yup::jlimit (0_tp, toPosition (pos.time.getLength()),
                          marks.getFirst() - pos.offset);
 }
 
@@ -510,7 +510,7 @@ bool Clip::moveTo (ClipOwner& newParent)
 //==============================================================================
 void Clip::setSpeedRatio (double r)
 {
-    r = juce::jlimit (ClipConstants::speedRatioMin, ClipConstants::speedRatioMax, r);
+    r = yup::jlimit (ClipConstants::speedRatioMin, ClipConstants::speedRatioMax, r);
 
     if (speedRatio != r)
         speedRatio = r;
@@ -551,7 +551,7 @@ CollectionClip* Clip::getGroupClip() const
 }
 
 //==============================================================================
-void Clip::setCurrentSourceFile (const juce::File& f)
+void Clip::setCurrentSourceFile (const yup::File& f)
 {
     if (currentSourceFile != f)
     {
@@ -561,7 +561,7 @@ void Clip::setCurrentSourceFile (const juce::File& f)
 }
 
 //==============================================================================
-void Clip::valueTreePropertyChanged (juce::ValueTree& tree, const juce::Identifier& id)
+void Clip::valueTreePropertyChanged (yup::ValueTree& tree, const yup::Identifier& id)
 {
     if (tree == state)
     {
@@ -593,7 +593,7 @@ void Clip::valueTreePropertyChanged (juce::ValueTree& tree, const juce::Identifi
         {
             clipName.forceUpdateOfCachedValue();
 
-            juce::MessageManager::callAsync ([weakRef = makeSafeRef (*this)]
+            yup::MessageManager::callAsync ([weakRef = makeSafeRef (*this)]
             {
                 if (weakRef != nullptr)
                     SelectionManager::refreshAllPropertyPanels();
@@ -631,14 +631,14 @@ void Clip::valueTreePropertyChanged (juce::ValueTree& tree, const juce::Identifi
     }
 }
 
-void Clip::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int)
+void Clip::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int)
 {
     if (p == state)
         if (c.hasType (IDs::AUTOMATIONCURVES))
             automationCurveList.reset();
 }
 
-void Clip::valueTreeParentChanged (juce::ValueTree& v)
+void Clip::valueTreeParentChanged (yup::ValueTree& v)
 {
     if (v == state)
         updateParent();
@@ -714,13 +714,13 @@ void Clip::updateLinkedClips()
 
         if (c != this && typeid (*c) == typeid (*this))
         {
-            const juce::ScopedValueSetter<bool> setter (c->cloneInProgress, true);
+            const yup::ScopedValueSetter<bool> setter (c->cloneInProgress, true);
             c->cloneFrom (this);
         }
     }
 }
 
-juce::Array<Exportable::ReferencedItem> Clip::getReferencedItems()
+yup::Array<Exportable::ReferencedItem> Clip::getReferencedItems()
 {
     return edit.engine.getEngineBehaviour().getReferencedItems (*this);
 }
@@ -758,15 +758,15 @@ void Clip::setGroup (EditItemID newGroupID)
         state.removeProperty (IDs::groupID, getUndoManager());
 }
 
-juce::Colour Clip::getColour() const
+yup::Color Clip::getColor() const
 {
     if (colour.isUsingDefault())
-        return getDefaultColour();
+        return getDefaultColor();
 
     return colour.get();
 }
 
-void Clip::setColour (juce::Colour c)
+void Clip::setColor (yup::Color c)
 {
     if (c.isTransparent())
         colour.resetToDefault();
@@ -817,12 +817,12 @@ void Clip::removeListener (Listener* l)
 //==============================================================================
 namespace details
 {
-    Clip::FollowActionDurationType followActionDurationTypeFromString (juce::String s)
+    Clip::FollowActionDurationType followActionDurationTypeFromString (yup::String s)
     {
         return magic_enum::enum_cast<Clip::FollowActionDurationType> (s.toRawUTF8()).value_or (Clip::FollowActionDurationType::beats);
     }
 
-    juce::String toString (Clip::FollowActionDurationType t)
+    yup::String toString (Clip::FollowActionDurationType t)
     {
         return std::string (magic_enum::enum_name (t));
     }

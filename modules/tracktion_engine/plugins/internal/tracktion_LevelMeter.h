@@ -11,36 +11,36 @@
 namespace tracktion::inline engine {
 
 class LevelMeterPlugin  : public Plugin,
-                          private juce::Timer
+                          private yup::Timer
 {
 public:
     LevelMeterPlugin (PluginCreationInfo);
     ~LevelMeterPlugin() override;
 
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
     //==============================================================================
     static const char* getPluginName()              { return NEEDS_TRANS("Level Meter"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return TRANS("Level Meter"); }
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getShortName (int) override            { return "Meter"; }
-    juce::String getTooltip() override                  { return TRANS("Level meter plugin") + "$levelmeterplugin"; }
+    yup::String getName() const override               { return TRANS("Level Meter"); }
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getShortName (int) override            { return "Meter"; }
+    yup::String getTooltip() override                  { return TRANS("Level meter plugin") + "$levelmeterplugin"; }
     bool canBeDisabled() override                       { return false; }
     bool shouldMeasureCpuUsage() const noexcept final   { return false; }
 
     int getNumOutputChannelsGivenInputs (int numInputChannels) override     { return numInputChannels; }
     BusLayout getBusses() const override   { return BusLayout::singlePassThrough(); }
 
-    juce::String getSelectableDescription() override                        { return TRANS("Level Meter Plugin"); }
+    yup::String getSelectableDescription() override                        { return TRANS("Level Meter Plugin"); }
     void initialise (const PluginInitialisationInfo&) override;
     void initialiseWithoutStopping (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
     void timerCallback() override;
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     //==============================================================================
     LevelMeasurer measurer;
@@ -56,7 +56,7 @@ private:
     friend struct LevelMeterPluginTestAccess;
    #endif
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelMeterPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelMeterPlugin)
 };
 
 } // namespace tracktion::inline engine

@@ -13,12 +13,12 @@ namespace tracktion::inline engine {
 
 namespace
 {
-    juce::AudioBuffer<float> loadWavDataIntoMemory (const void* data, size_t size, double targetSampleRate)
+    yup::AudioBuffer<float> loadWavDataIntoMemory (const void* data, size_t size, double targetSampleRate)
     {
-        auto in = new juce::MemoryInputStream (data, size, false);
+        auto in = new yup::MemoryInputStream (data, size, false);
 
-        juce::WavAudioFormat wavFormat;
-        std::unique_ptr<juce::AudioFormatReader> r (wavFormat.createReaderFor (in, true));
+        yup::WavAudioFormat wavFormat;
+        std::unique_ptr<yup::AudioFormatReader> r (wavFormat.createReaderFor (in, true));
 
         if (r == nullptr)
             return {};
@@ -26,16 +26,16 @@ namespace
         auto ratio = r->sampleRate / targetSampleRate;
         auto targetLength = (int) (static_cast<double> (r->lengthInSamples) / ratio);
 
-        juce::AudioBuffer<float> buf ((int) r->numChannels, targetLength);
+        yup::AudioBuffer<float> buf ((int) r->numChannels, targetLength);
 
         {
-            juce::AudioFormatReaderSource readerSource (r.get(), false);
+            yup::AudioFormatReaderSource readerSource (r.get(), false);
 
-            juce::ResamplingAudioSource resamplerSource (&readerSource, false, (int) r->numChannels);
+            yup::ResamplingAudioSource resamplerSource (&readerSource, false, (int) r->numChannels);
             resamplerSource.setResamplingRatio (ratio);
             resamplerSource.prepareToPlay (targetLength, targetSampleRate);
 
-            juce::AudioSourceChannelInfo info;
+            yup::AudioSourceChannelInfo info;
             info.buffer = &buf;
             info.startSample = 0;
             info.numSamples = targetLength;
@@ -45,9 +45,9 @@ namespace
         return buf;
     }
 
-    juce::AudioBuffer<float> loadWavDataIntoMemory (const juce::File& file, double targetSampleRate)
+    yup::AudioBuffer<float> loadWavDataIntoMemory (const yup::File& file, double targetSampleRate)
     {
-        juce::MemoryBlock mb;
+        yup::MemoryBlock mb;
         file.loadFileAsData (mb);
 
         return loadWavDataIntoMemory (mb.getData(), mb.getSize(), targetSampleRate);
@@ -80,7 +80,7 @@ void ClickGenerator::prepareToPlay (double newSampleRate, TimePosition startTime
     {
         if (bigClick.getNumSamples() == 0)
         {
-            juce::File file (Click::getClickWaveFile (edit.engine, true));
+            yup::File file (Click::getClickWaveFile (edit.engine, true));
 
             if (file.existsAsFile())
                 bigClick = loadWavDataIntoMemory (file, sampleRate);
@@ -91,7 +91,7 @@ void ClickGenerator::prepareToPlay (double newSampleRate, TimePosition startTime
 
         if (littleClick.getNumSamples() == 0)
         {
-            juce::File file (Click::getClickWaveFile (edit.engine, false));
+            yup::File file (Click::getClickWaveFile (edit.engine, false));
 
             if (file.existsAsFile())
                 littleClick = loadWavDataIntoMemory (file, sampleRate);
@@ -149,7 +149,7 @@ void ClickGenerator::processBlock (choc::buffer::ChannelArrayView<float>* destBu
                                                                 : littleClickMidiNote;
 
             if (t >= editTime.getStart())
-                bufferForMidiMessages->addMidiMessage (juce::MidiMessage::noteOn (10, note, gain),
+                bufferForMidiMessages->addMidiMessage (yup::MidiMessage::noteOn (10, note, gain),
                                                        (t - editTime.getStart()).inSeconds(),
                                                        {});
 
@@ -220,7 +220,7 @@ bool ClickGenerator::isPlaying()
     return currentSample != nullptr && samplePos >= 0;
 }
 
-void ClickGenerator::trigger (juce::AudioBuffer<float>* s)
+void ClickGenerator::trigger (yup::AudioBuffer<float>* s)
 {
     currentSample = s;
     samplePos = 0;
@@ -327,7 +327,7 @@ namespace Click
         return n;
     }
 
-    juce::String getClickWaveFile (Engine& e, bool big)
+    yup::String getClickWaveFile (Engine& e, bool big)
     {
         return e.getPropertyStorage().getProperty (big ? SettingID::clickTrackSampleBig
                                                        : SettingID::clickTrackSampleSmall);
@@ -338,14 +338,14 @@ namespace Click
         auto& storage = e.getPropertyStorage();
 
         if (big)
-            storage.setProperty (SettingID::clickTrackMidiNoteBig, juce::String (noteNum));
+            storage.setProperty (SettingID::clickTrackMidiNoteBig, yup::String (noteNum));
         else
-            storage.setProperty (SettingID::clickTrackMidiNoteLittle, juce::String (noteNum));
+            storage.setProperty (SettingID::clickTrackMidiNoteLittle, yup::String (noteNum));
 
         TransportControl::restartAllTransports (e, false);
     }
 
-    void setClickWaveFile (Engine& e, bool big, const juce::String& filename)
+    void setClickWaveFile (Engine& e, bool big, const yup::String& filename)
     {
         auto& storage = e.getPropertyStorage();
 

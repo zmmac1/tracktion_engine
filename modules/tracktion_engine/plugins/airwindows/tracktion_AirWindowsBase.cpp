@@ -55,7 +55,7 @@ AirWindowsPlugin::~AirWindowsPlugin()
     wetGain->detachFromCurrentValue();
 }
 
-void AirWindowsPlugin::setConversionRange (int paramIdx, juce::NormalisableRange<float> range)
+void AirWindowsPlugin::setConversionRange (int paramIdx, yup::NormalisableRange<float> range)
 {
     if (auto p = dynamic_cast<AirWindowsAutomatableParameter*> (parameters[paramIdx].get()))
         p->setConversionRange (range);
@@ -69,8 +69,8 @@ void AirWindowsPlugin::resetToDefault()
         if (auto awp = dynamic_cast<AirWindowsAutomatableParameter*> (p))
             awp->resetToDefault();
 
-    dryGain->setParameter (0.0f, juce::sendNotificationSync);
-    wetGain->setParameter (1.0f, juce::sendNotificationSync);
+    dryGain->setParameter (0.0f, yup::sendNotificationSync);
+    wetGain->setParameter (1.0f, yup::sendNotificationSync);
 }
 
 int AirWindowsPlugin::getNumOutputChannelsGivenInputs (int)
@@ -84,7 +84,7 @@ Plugin::BusLayout AirWindowsPlugin::getBusses() const
                                    ChannelConfiguration::canonical (impl->getNumOutputs()));
 }
 
-juce::String AirWindowsPlugin::getSelectableDescription()
+yup::String AirWindowsPlugin::getSelectableDescription()
 {
     return getName() + " " + TRANS("Plugin");
 }
@@ -103,7 +103,7 @@ void AirWindowsPlugin::applyToBuffer (const PluginRenderContext& fc)
     // We need to lock the processing while a preset is being loaded or the parameters
     // will overwrite the plugin state before we can update the parameters from the
     // plugin state
-    juce::ScopedLock sl (lock);
+    yup::ScopedLock sl (lock);
 
     if (fc.destBuffer == nullptr)
         return;
@@ -114,7 +114,7 @@ void AirWindowsPlugin::applyToBuffer (const PluginRenderContext& fc)
         if (auto awp = dynamic_cast<AirWindowsAutomatableParameter*> (p))
             impl->setParameter (awp->index, awp->getCurrentValue());
 
-    juce::AudioBuffer<float> asb (fc.destBuffer->getArrayOfWritePointers(), fc.destBuffer->getNumChannels(),
+    yup::AudioBuffer<float> asb (fc.destBuffer->getArrayOfWritePointers(), fc.destBuffer->getNumChannels(),
                                   fc.bufferStartSample, fc.bufferNumSamples);
 
     auto dry = dryGain->getCurrentValue();
@@ -147,7 +147,7 @@ void AirWindowsPlugin::applyToBuffer (const PluginRenderContext& fc)
     }
 }
 
-void AirWindowsPlugin::processBlock (juce::AudioBuffer<float>& buffer)
+void AirWindowsPlugin::processBlock (yup::AudioBuffer<float>& buffer)
 {
     auto numChans    = buffer.getNumChannels();
     auto samps       = buffer.getNumSamples();
@@ -183,17 +183,17 @@ void AirWindowsPlugin::processBlock (juce::AudioBuffer<float>& buffer)
     }
 }
 
-void AirWindowsPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void AirWindowsPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
-    juce::ScopedLock sl (lock);
+    yup::ScopedLock sl (lock);
 
     if (v.hasProperty (IDs::state))
     {
-        juce::MemoryBlock data;
+        yup::MemoryBlock data;
 
         {
-            juce::MemoryOutputStream os (data, false);
-            juce::Base64::convertFromBase64 (os, v[IDs::state].toString());
+            yup::MemoryOutputStream os (data, false);
+            yup::Base64::convertFromBase64 (os, v[IDs::state].toString());
         }
 
         impl->setChunk (data.getData(), int (data.getSize()), false);
@@ -217,7 +217,7 @@ void AirWindowsPlugin::flushPluginStateToValueTree()
 
     if (data != nullptr)
     {
-        state.setProperty (IDs::state, juce::Base64::toBase64 (data, size_t (size)), um);
+        state.setProperty (IDs::state, yup::Base64::toBase64 (data, size_t (size)), um);
 
         free (data);
     }

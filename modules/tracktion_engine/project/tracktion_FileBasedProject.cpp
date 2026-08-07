@@ -16,19 +16,19 @@ static const char* fileBasedProjectMagicNumberV1 = "TP01";
 //==============================================================================
 ProjectID FileBasedProject::generateNewProjectId (ProjectManager& projectManager)
 {
-    auto newID = ProjectID (juce::Random::getSystemRandom().nextInt (9999999));
+    auto newID = ProjectID (yup::Random::getSystemRandom().nextInt (9999999));
 
     while (projectManager.getProject (newID))
     {
         jassertfalse;
-        newID = ProjectID (juce::Random::getSystemRandom().nextInt (9999999));
+        newID = ProjectID (yup::Random::getSystemRandom().nextInt (9999999));
     }
 
     return newID;
 }
 
 //==============================================================================
-FileBasedProject::FileBasedProject (Project& o, const juce::File& projectFile)
+FileBasedProject::FileBasedProject (Project& o, const yup::File& projectFile)
    : ProjectBase (o), file (projectFile)
 {
     jassert (isTracktionProjectFile (file));
@@ -88,14 +88,14 @@ void FileBasedProject::load()
 
 void FileBasedProject::refreshProjectPropertiesFromFile()
 {
-    const juce::ScopedLock sl (objectLock);
+    const yup::ScopedLock sl (objectLock);
     stream.reset();
 
     if (auto in = getInputStream())
         readProjectHeader (*in, false);
 }
 
-bool FileBasedProject::readProjectHeader (juce::InputStream& in, bool clearObjectInfo)
+bool FileBasedProject::readProjectHeader (yup::InputStream& in, bool clearObjectInfo)
 {
     CRASH_TRACER
 
@@ -125,7 +125,7 @@ bool FileBasedProject::readProjectHeader (juce::InputStream& in, bool clearObjec
             if (size <= 0 || size > 1024 * 1024)
                 return false;
 
-            juce::MemoryBlock mem ((size_t) size);
+            yup::MemoryBlock mem ((size_t) size);
             in.read (mem.getData(), size);
 
             properties.set (propName, mem.toString());
@@ -157,7 +157,7 @@ bool FileBasedProject::loadProjectItem (ObjectInfo& o)
 void FileBasedProject::loadAllProjectItems()
 {
     CRASH_TRACER
-    const juce::ScopedLock sl (objectLock);
+    const yup::ScopedLock sl (objectLock);
 
     for (auto& o : objects)
         if (o.item == nullptr)
@@ -165,11 +165,11 @@ void FileBasedProject::loadAllProjectItems()
                 break;
 }
 
-juce::BufferedInputStream* FileBasedProject::getInputStream()
+yup::BufferedInputStream* FileBasedProject::getInputStream()
 {
     if (stream == nullptr && file.getSize() > 0)
         if (auto in = file.createInputStream())
-            stream = std::make_unique<juce::BufferedInputStream> (in.release(), 16384, true);
+            stream = std::make_unique<yup::BufferedInputStream> (in.release(), 16384, true);
 
     return stream.get();
 }
@@ -183,7 +183,7 @@ bool FileBasedProject::save()
         if (! hasChanged)
             return true;
 
-        const juce::ScopedLock sl (objectLock);
+        const yup::ScopedLock sl (objectLock);
 
         loadAllProjectItems();
 
@@ -202,7 +202,7 @@ bool FileBasedProject::save()
             {
                 hasChanged = false;
 
-                DBG (juce::Time::getCurrentTime().toString (false, true)
+                DBG (yup::Time::getCurrentTime().toString (false, true)
                         + " Saved: " + file.getFullPathName());
             }
             else
@@ -211,7 +211,7 @@ bool FileBasedProject::save()
                 hasChanged = true;
 
                 bool b = tempFile.deleteFile();
-                jassert (b); juce::ignoreUnused (b);
+                jassert (b); yup::ignoreUnused (b);
 
                 DBG ("!!couldn't save " + file.getFullPathName());
             }
@@ -226,7 +226,7 @@ bool FileBasedProject::save()
 }
 
 //==============================================================================
-void FileBasedProject::saveTo (juce::FileOutputStream& out)
+void FileBasedProject::saveTo (yup::FileOutputStream& out)
 {
     if (! isValid())
         return;
@@ -292,32 +292,32 @@ ProjectID FileBasedProject::getProjectID() const
     return projectId;
 }
 
-juce::String FileBasedProject::getProjectProperty (const juce::String& name) const
+yup::String FileBasedProject::getProjectProperty (const yup::String& name) const
 {
-    const juce::ScopedLock sl (propertyLock);
+    const yup::ScopedLock sl (propertyLock);
     return properties [name];
 }
 
-void FileBasedProject::setProjectProperty (const juce::String& name, const juce::String& value)
+void FileBasedProject::setProjectProperty (const yup::String& name, const yup::String& value)
 {
-    const juce::ScopedLock sl (propertyLock);
+    const yup::ScopedLock sl (propertyLock);
     properties.set (name, value);
     changed();
 }
 
-juce::String FileBasedProject::getName() const
+yup::String FileBasedProject::getName() const
 {
     return getProjectProperty ("name");
 }
 
-void FileBasedProject::setName (const juce::String& newName)
+void FileBasedProject::setName (const yup::String& newName)
 {
     if (getName() != newName)
     {
         setProjectProperty ("name", newName.substring (0, 64));
         owner.engine.getUIBehaviour().updateAllProjectItemLists();
 
-        auto dst = file.getParentDirectory().getChildFile (juce::File::createLegalFileName (newName)
+        auto dst = file.getParentDirectory().getChildFile (yup::File::createLegalFileName (newName)
                                                              + file.getFileExtension());
         stream.reset();
 
@@ -392,19 +392,19 @@ int FileBasedProject::getNumProjectItems()
 
 ProjectItemRef FileBasedProject::getProjectItemRef (int i)
 {
-    const juce::ScopedLock sl (objectLock);
+    const yup::ScopedLock sl (objectLock);
 
-    if (juce::isPositiveAndBelow (i, objects.size()))
+    if (yup::isPositiveAndBelow (i, objects.size()))
         return ProjectItemRef (ProjectItemID (objects.getReference(i).itemID, projectId));
 
     return {};
 }
 
-juce::Array<ProjectItemRef> FileBasedProject::getAllProjectItemRefs() const
+yup::Array<ProjectItemRef> FileBasedProject::getAllProjectItemRefs() const
 {
-    juce::Array<ProjectItemRef> dest;
+    yup::Array<ProjectItemRef> dest;
 
-    const juce::ScopedLock sl (objectLock);
+    const yup::ScopedLock sl (objectLock);
 
     for (auto& o : objects)
         dest.add (ProjectItemRef (ProjectItemID (o.itemID, projectId)));
@@ -414,9 +414,9 @@ juce::Array<ProjectItemRef> FileBasedProject::getAllProjectItemRefs() const
 
 ProjectItem::Ptr FileBasedProject::getProjectItemAt (int i)
 {
-    const juce::ScopedLock sl (objectLock);
+    const yup::ScopedLock sl (objectLock);
 
-    if (juce::isPositiveAndBelow (i, objects.size()))
+    if (yup::isPositiveAndBelow (i, objects.size()))
     {
         auto& o = objects.getReference(i);
 
@@ -429,11 +429,11 @@ ProjectItem::Ptr FileBasedProject::getProjectItemAt (int i)
     return {};
 }
 
-juce::Array<ProjectItem::Ptr> FileBasedProject::getAllProjectItems()
+yup::Array<ProjectItem::Ptr> FileBasedProject::getAllProjectItems()
 {
-    juce::Array<ProjectItem::Ptr> dest;
+    yup::Array<ProjectItem::Ptr> dest;
 
-    const juce::ScopedLock sl (objectLock);
+    const yup::ScopedLock sl (objectLock);
 
     for (auto& o : objects)
     {
@@ -450,17 +450,17 @@ ProjectItem::Ptr FileBasedProject::getProjectItemFor (const ProjectItemRef& ref)
 {
     if (ref.isProjectItemID())
     {
-        const juce::ScopedLock sl (objectLock);
+        const yup::ScopedLock sl (objectLock);
         return getProjectItemAt (getIndexOf (ref));
     }
 
     auto resolved = ref.resolve (owner.engine, getDefaultDirectory());
-    return resolved != juce::File() ? getProjectItemForFile (resolved) : nullptr;
+    return resolved != yup::File() ? getProjectItemForFile (resolved) : nullptr;
 }
 
-ProjectItem::Ptr FileBasedProject::getProjectItemForFile (const juce::File& fileToFind)
+ProjectItem::Ptr FileBasedProject::getProjectItemForFile (const yup::File& fileToFind)
 {
-    const juce::ScopedLock sl (objectLock);
+    const yup::ScopedLock sl (objectLock);
 
     for (auto& o : objects)
     {
@@ -479,7 +479,7 @@ int FileBasedProject::getIndexOf (const ProjectItemRef& ref) const
 {
     auto mo = ref.getProjectItemID();
 
-    const juce::ScopedLock sl (objectLock);
+    const yup::ScopedLock sl (objectLock);
 
     if (mo && mo->getProjectID() == getProjectID())
     {
@@ -497,20 +497,20 @@ void FileBasedProject::moveProjectItem (int indexToMoveFrom, int indexToMoveTo)
 {
     if (indexToMoveTo != indexToMoveFrom)
     {
-        const juce::ScopedLock sl (objectLock);
+        const yup::ScopedLock sl (objectLock);
 
         if (indexToMoveFrom >= 0 && indexToMoveFrom < objects.size())
         {
-            objects.move (indexToMoveFrom, juce::jlimit (0, objects.size(), indexToMoveTo));
+            objects.move (indexToMoveFrom, yup::jlimit (0, objects.size(), indexToMoveTo));
             changed();
         }
     }
 }
 
-ProjectItem::Ptr FileBasedProject::createNewItem (const juce::File& fileToReference,
-                                                  const juce::String& type,
-                                                  const juce::String& name,
-                                                  const juce::String& description,
+ProjectItem::Ptr FileBasedProject::createNewItem (const yup::File& fileToReference,
+                                                  const yup::String& type,
+                                                  const yup::String& name,
+                                                  const yup::String& description,
                                                   const ProjectItem::Category cat,
                                                   bool atTopOfList)
 {
@@ -529,7 +529,7 @@ ProjectItem::Ptr FileBasedProject::createNewItem (const juce::File& fileToRefere
         o.fileOffset = 0;
 
         {
-            const juce::ScopedLock sl (objectLock);
+            const yup::ScopedLock sl (objectLock);
 
             if (atTopOfList)
                 objects.insert (0, o);
@@ -547,10 +547,10 @@ ProjectItem::Ptr FileBasedProject::createNewItem (const juce::File& fileToRefere
     return {};
 }
 
-ProjectItem::Ptr FileBasedProject::quickAddProjectItem (const juce::String& relPathName,
-                                                        const juce::String& type,
-                                                        const juce::String& name,
-                                                        const juce::String& description,
+ProjectItem::Ptr FileBasedProject::quickAddProjectItem (const yup::String& relPathName,
+                                                        const yup::String& type,
+                                                        const yup::String& name,
+                                                        const yup::String& description,
                                                         const ProjectItem::Category cat,
                                                         ProjectItemID newID)
 {
@@ -561,7 +561,7 @@ ProjectItem::Ptr FileBasedProject::quickAddProjectItem (const juce::String& relP
     o.item->file = relPathName;
 
     {
-        const juce::ScopedLock sl (objectLock);
+        const yup::ScopedLock sl (objectLock);
         objects.add (o);
     }
 
@@ -574,7 +574,7 @@ bool FileBasedProject::removeProjectItem (const ProjectItemRef& ref, bool delete
     if (isValid() && ! isReadOnly())
     {
         {
-            const juce::ScopedLock sl (objectLock);
+            const yup::ScopedLock sl (objectLock);
 
             const int index = getIndexOf (ref);
             jassert (index >= 0);
@@ -603,7 +603,7 @@ bool FileBasedProject::removeProjectItem (const ProjectItemRef& ref, bool delete
     return false;
 }
 
-juce::File FileBasedProject::getDirectoryForMedia (ProjectItem::Category category) const
+yup::File FileBasedProject::getDirectoryForMedia (ProjectItem::Category category) const
 {
     auto dir = getDefaultDirectory();
 
@@ -628,7 +628,7 @@ juce::File FileBasedProject::getDirectoryForMedia (ProjectItem::Category categor
     return dir;
 }
 
-juce::File FileBasedProject::getDefaultDirectory() const
+yup::File FileBasedProject::getDefaultDirectory() const
 {
     return file.getParentDirectory();
 }
@@ -663,7 +663,7 @@ ProjectItem::Ptr FileBasedProject::createNewEdit()
     return {};
 }
 
-void FileBasedProject::mergeArchiveContents (const juce::File& archiveFile)
+void FileBasedProject::mergeArchiveContents (const yup::File& archiveFile)
 {
     legacy::TracktionArchiveFile archive (owner.engine, archiveFile);
 
@@ -674,7 +674,7 @@ void FileBasedProject::mergeArchiveContents (const juce::File& archiveFile)
     }
 
     bool wasAborted;
-    juce::Array<juce::File> newFiles;
+    yup::Array<yup::File> newFiles;
 
     if (archive.extractAllAsTask (getProjectFile().getParentDirectory(), true, newFiles, wasAborted))
     {
@@ -700,7 +700,7 @@ void FileBasedProject::mergeArchiveContents (const juce::File& archiveFile)
     }
 }
 
-void FileBasedProject::mergeOtherProjectIntoThis (const juce::File& f)
+void FileBasedProject::mergeOtherProjectIntoThis (const yup::File& f)
 {
     ProjectManager::TempProject temp (owner.projectManager, f, false);
 
@@ -729,7 +729,7 @@ void FileBasedProject::mergeOtherProjectIntoThis (const juce::File& f)
     }
 }
 
-juce::String FileBasedProject::getSelectableDescription() const
+yup::String FileBasedProject::getSelectableDescription() const
 {
     return isReadOnly() ? TRANS("Read-Only Project")
                         : TRANS("Project");

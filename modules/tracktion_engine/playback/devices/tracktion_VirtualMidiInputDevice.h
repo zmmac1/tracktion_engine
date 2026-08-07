@@ -13,36 +13,36 @@ namespace tracktion::inline engine {
 class VirtualMidiInputDevice  : public MidiInputDevice
 {
 public:
-    VirtualMidiInputDevice (Engine&, juce::String name, DeviceType, juce::String deviceID, bool isAllMIDIIns);
+    VirtualMidiInputDevice (Engine&, yup::String name, DeviceType, yup::String deviceID, bool isAllMIDIIns);
     ~VirtualMidiInputDevice() override;
 
     InputDeviceInstance* createInstance (EditPlaybackContext&) override;
 
     using MidiInputDevice::handleIncomingMidiMessage;
-    void handleIncomingMidiMessage (const juce::MidiMessage&, MPESourceID) override;
+    void handleIncomingMidiMessage (const yup::MidiMessage&, MPESourceID) override;
 
     void setEnabled (bool) override;
     void loadProps() override;
     void saveProps() override;
 
-    juce::StringArray getMIDIInputSourceDevices() const         { return inputDeviceIDs; }
-    void setMIDIInputSourceDevices (const juce::StringArray deviceIDs);
-    void toggleMIDIInputSourceDevice (const juce::String& deviceID);
+    yup::StringArray getMIDIInputSourceDevices() const         { return inputDeviceIDs; }
+    void setMIDIInputSourceDevices (const yup::StringArray deviceIDs);
+    void toggleMIDIInputSourceDevice (const yup::String& deviceID);
 
-    void handleMessageFromPhysicalDevice (PhysicalMidiInputDevice&, const juce::MidiMessage&);
+    void handleMessageFromPhysicalDevice (PhysicalMidiInputDevice&, const yup::MidiMessage&);
 
     DeviceType getDeviceType() const override;
-    juce::String getDeviceTypeDescription() const override;
+    yup::String getDeviceTypeDescription() const override;
 
     const bool useAllInputs = false;
 
 private:
-    juce::String openDevice() override;
+    yup::String openDevice() override;
     void closeDevice() override;
     DeviceType deviceType;
-    juce::StringArray inputDeviceIDs;
+    yup::StringArray inputDeviceIDs;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VirtualMidiInputDevice)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VirtualMidiInputDevice)
 };
 
 } // namespace tracktion::inline engine

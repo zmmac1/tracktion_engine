@@ -12,8 +12,8 @@ namespace tracktion::inline engine {
 
 struct VolAutomatableParameter : public AutomatableParameter
 {
-    VolAutomatableParameter (const juce::String& xmlTag, const juce::String& name,
-                             Plugin& owner, juce::Range<float> r)
+    VolAutomatableParameter (const yup::String& xmlTag, const yup::String& name,
+                             Plugin& owner, yup::Range<float> r)
         : AutomatableParameter (xmlTag, name, owner, r)
     {
     }
@@ -23,12 +23,12 @@ struct VolAutomatableParameter : public AutomatableParameter
         notifyListenersOfDeletion();
     }
 
-    juce::String valueToString (float value) override
+    yup::String valueToString (float value) override
     {
-        return juce::Decibels::toString (volumeFaderPositionToDB (value) + 0.001);
+        return yup::Decibels::toString (volumeFaderPositionToDB (value) + 0.001);
     }
 
-    float stringToValue (const juce::String& str) override
+    float stringToValue (const yup::String& str) override
     {
         return decibelsToVolumeFaderPosition (dbStringToDb (str));
     }
@@ -37,8 +37,8 @@ struct VolAutomatableParameter : public AutomatableParameter
 //==============================================================================
 struct PanAutomatableParameter : public AutomatableParameter
 {
-    PanAutomatableParameter (const juce::String& xmlTag, const juce::String& name,
-                             Plugin& owner, juce::Range<float> r)
+    PanAutomatableParameter (const yup::String& xmlTag, const yup::String& name,
+                             Plugin& owner, yup::Range<float> r)
         : AutomatableParameter (xmlTag, name, owner, r)
     {
     }
@@ -48,12 +48,12 @@ struct PanAutomatableParameter : public AutomatableParameter
         notifyListenersOfDeletion();
     }
 
-    juce::String valueToString (float value) override
+    yup::String valueToString (float value) override
     {
         return getPanString (value);
     }
 
-    float stringToValue (const juce::String& str) override
+    float stringToValue (const yup::String& str) override
     {
         const float v = str.retainCharacters ("0123456789.-").getFloatValue();
         return str.contains (TRANS("Left")) ? -v : v;
@@ -63,8 +63,8 @@ struct PanAutomatableParameter : public AutomatableParameter
 //==============================================================================
 struct MasterVolParameter  : public VolAutomatableParameter
 {
-    MasterVolParameter (const juce::String& xmlTag, const juce::String& name,
-                        Plugin& owner, juce::Range<float> r)
+    MasterVolParameter (const yup::String& xmlTag, const yup::String& name,
+                        Plugin& owner, yup::Range<float> r)
         : VolAutomatableParameter (xmlTag, name, owner, r)
     {
     }
@@ -74,15 +74,15 @@ struct MasterVolParameter  : public VolAutomatableParameter
         notifyListenersOfDeletion();
     }
 
-    juce::String getPluginAndParamName() const override        { return getParameterName(); }
-    juce::String getFullName() const override                  { return getParameterName(); }
+    yup::String getPluginAndParamName() const override        { return getParameterName(); }
+    yup::String getFullName() const override                  { return getParameterName(); }
 };
 
 //==============================================================================
 struct MasterPanParameter  : public PanAutomatableParameter
 {
-    MasterPanParameter (const juce::String& xmlTag, const juce::String& name,
-                        Plugin& owner, juce::Range<float> r)
+    MasterPanParameter (const yup::String& xmlTag, const yup::String& name,
+                        Plugin& owner, yup::Range<float> r)
         : PanAutomatableParameter (xmlTag, name, owner, r)
     {
     }
@@ -92,8 +92,8 @@ struct MasterPanParameter  : public PanAutomatableParameter
         notifyListenersOfDeletion();
     }
 
-    juce::String getPluginAndParamName() const override        { return getParameterName(); }
-    juce::String getFullName() const override                  { return getParameterName(); }
+    yup::String getPluginAndParamName() const override        { return getParameterName(); }
+    yup::String getFullName() const override                  { return getParameterName(); }
 };
 
 //==============================================================================
@@ -125,7 +125,7 @@ VolumeAndPanPlugin::VolumeAndPanPlugin (PluginCreationInfo info, bool isMasterVo
     panParam->attachToCurrentValue (pan);
 }
 
-VolumeAndPanPlugin::VolumeAndPanPlugin (Edit& ed, const juce::ValueTree& v, bool isMaster)
+VolumeAndPanPlugin::VolumeAndPanPlugin (Edit& ed, const yup::ValueTree& v, bool isMaster)
     : VolumeAndPanPlugin (PluginCreationInfo (ed, v, false), isMaster)
 {
 }
@@ -138,9 +138,9 @@ VolumeAndPanPlugin::~VolumeAndPanPlugin()
     panParam->detachFromCurrentValue();
 }
 
-juce::ValueTree VolumeAndPanPlugin::create()
+yup::ValueTree VolumeAndPanPlugin::create()
 {
-    juce::ValueTree v (IDs::PLUGIN);
+    yup::ValueTree v (IDs::PLUGIN);
     v.setProperty (IDs::type, xmlTypeName, nullptr);
     return v;
 }
@@ -167,7 +167,7 @@ void VolumeAndPanPlugin::initialiseWithoutStopping (const PluginInitialisationIn
 
 void VolumeAndPanPlugin::deinitialise()
 {
-    juce::ReferenceCountedObjectPtr<AudioTrack> deleter;
+    yup::ReferenceCountedObjectPtr<AudioTrack> deleter;
 
     {
         const std::scoped_lock sl (vcaTrackLock);
@@ -274,7 +274,7 @@ void VolumeAndPanPlugin::applyToBuffer (const PluginRenderContext& fc)
 
 void VolumeAndPanPlugin::refreshVCATrack()
 {
-    juce::ReferenceCountedObjectPtr<AudioTrack> newVcaTrack (ignoreVca ? nullptr : dynamic_cast<AudioTrack*> (getOwnerTrack()));
+    yup::ReferenceCountedObjectPtr<AudioTrack> newVcaTrack (ignoreVca ? nullptr : dynamic_cast<AudioTrack*> (getOwnerTrack()));
 
     {
         const std::scoped_lock sl (vcaTrackLock);
@@ -294,7 +294,7 @@ void VolumeAndPanPlugin::setVolumeDb (float vol)
 
 void VolumeAndPanPlugin::setSliderPos (float newV)
 {
-    volParam->setParameter (juce::jlimit (0.0f, 1.0f, newV), juce::sendNotification);
+    volParam->setParameter (yup::jlimit (0.0f, 1.0f, newV), yup::sendNotification);
 }
 
 void VolumeAndPanPlugin::setPan (float p)
@@ -302,7 +302,7 @@ void VolumeAndPanPlugin::setPan (float p)
     if (p >= -0.005f && p <= 0.005f)
         p = 0.0f;
 
-    panParam->setParameter (juce::jlimit (-1.0f, 1.0f, p), juce::sendNotification);
+    panParam->setParameter (yup::jlimit (-1.0f, 1.0f, p), yup::sendNotification);
 }
 
 PanLaw VolumeAndPanPlugin::getPanLaw() const noexcept
@@ -339,7 +339,7 @@ void VolumeAndPanPlugin::muteOrUnmute()
     }
 }
 
-void VolumeAndPanPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void VolumeAndPanPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, volume, pan, panLaw, applyToMidi, ignoreVca, polarity);
 

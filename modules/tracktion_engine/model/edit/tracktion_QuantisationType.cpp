@@ -42,7 +42,7 @@ QuantisationType::QuantisationType()  : state (IDs::QUANTISATION)
     initialiseCachedValues (nullptr);
 }
 
-QuantisationType::QuantisationType (const juce::ValueTree& vt, juce::UndoManager* um)  : state (vt)
+QuantisationType::QuantisationType (const yup::ValueTree& vt, juce::UndoManager* um)  : state (vt)
 {
     initialiseCachedValues (um);
 }
@@ -91,13 +91,13 @@ void QuantisationType::initialiseCachedValues (juce::UndoManager* um)
 
 void QuantisationType::updateType()
 {
-    auto typeNameToIndex = [] (const juce::String& newTypeName) -> int
+    auto typeNameToIndex = [] (const yup::String& newTypeName) -> int
     {
         int newType = 0;
         auto targetFraction = stripNoteAnnotation (newTypeName).retainCharacters ("0123456789/");
 
-        for (int i = juce::numElementsInArray (quantisationTypes); --i >= 0;)
-            if (targetFraction == juce::String (quantisationTypes[i].name).retainCharacters ("0123456789/"))
+        for (int i = yup::numElementsInArray (quantisationTypes); --i >= 0;)
+            if (targetFraction == yup::String (quantisationTypes[i].name).retainCharacters ("0123456789/"))
                 return i;
 
         return newType;
@@ -109,20 +109,20 @@ void QuantisationType::updateType()
 
 void QuantisationType::updateFraction()
 {
-    if (typeIndex >= 0 && typeIndex < juce::numElementsInArray (quantisationTypes))
+    if (typeIndex >= 0 && typeIndex < yup::numElementsInArray (quantisationTypes))
         fractionOfBeat = quantisationTypes[typeIndex].beatFraction;
     else
         fractionOfBeat = 0.0;
 }
 
-void QuantisationType::setType (const juce::String& newTypeName)
+void QuantisationType::setType (const yup::String& newTypeName)
 {
     typeName = stripNoteAnnotation (newTypeName);
 }
 
-juce::String QuantisationType::getType (bool translated) const
+yup::String QuantisationType::getType (bool translated) const
 {
-    if (typeIndex >= 0 && typeIndex < juce::numElementsInArray (quantisationTypes))
+    if (typeIndex >= 0 && typeIndex < yup::numElementsInArray (quantisationTypes))
         return translated ? TRANS(quantisationTypes[typeIndex].name)
                           : quantisationTypes[typeIndex].name;
 
@@ -130,11 +130,11 @@ juce::String QuantisationType::getType (bool translated) const
     return {};
 }
 
-juce::String QuantisationType::getType (bool translated, int timeSigDenominator) const
+yup::String QuantisationType::getType (bool translated, int timeSigDenominator) const
 {
     auto baseName = getType (translated);
 
-    if (juce::isPositiveAndBelow (typeIndex, juce::numElementsInArray (quantisationTypes)))
+    if (yup::isPositiveAndBelow (typeIndex, yup::numElementsInArray (quantisationTypes)))
     {
         auto annotation = beatFractionToNoteName (quantisationTypes[typeIndex].beatFraction,
                                                   quantisationTypes[typeIndex].isTriplets,
@@ -147,24 +147,24 @@ juce::String QuantisationType::getType (bool translated, int timeSigDenominator)
     return baseName;
 }
 
-juce::String QuantisationType::getType (bool translated, const Edit& edit) const
+yup::String QuantisationType::getType (bool translated, const Edit& edit) const
 {
     return getType (translated, edit.tempoSequence.getTimeSigAt (TimePosition()).denominator.get());
 }
 
-juce::StringArray QuantisationType::getAvailableQuantiseTypes (bool translated, const Edit& edit)
+yup::StringArray QuantisationType::getAvailableQuantiseTypes (bool translated, const Edit& edit)
 {
     return getAvailableQuantiseTypes (translated, edit.tempoSequence.getTimeSigAt (TimePosition()).denominator.get());
 }
 
-juce::String QuantisationType::stripNoteAnnotation (const juce::String& name)
+yup::String QuantisationType::stripNoteAnnotation (const yup::String& name)
 {
     return name.upToFirstOccurrenceOf (" (", false, false);
 }
 
 int QuantisationType::getTimecodeSnapTypeLevel (bool& isTriplet) const noexcept
 {
-    if (! juce::isPositiveAndBelow (typeIndex, juce::numElementsInArray (quantisationTypes)))
+    if (! yup::isPositiveAndBelow (typeIndex, yup::numElementsInArray (quantisationTypes)))
     {
         jassertfalse;
         isTriplet = false;
@@ -183,7 +183,7 @@ bool QuantisationType::isEnabled() const
 
 void QuantisationType::setProportion (float prop)
 {
-    proportion = juce::jlimit (0.0f, 1.0f, prop);
+    proportion = yup::jlimit (0.0f, 1.0f, prop);
 }
 
 TimePosition QuantisationType::roundToNearest (TimePosition time, const Edit& edit) const
@@ -238,24 +238,24 @@ TimePosition QuantisationType::roundTo (TimePosition time, double adjustment, co
                              : time + toDuration (s.toTime (beats) - toDuration (time)) * proportion.get();
 }
 
-juce::StringArray QuantisationType::getAvailableQuantiseTypes (bool translated)
+yup::StringArray QuantisationType::getAvailableQuantiseTypes (bool translated)
 {
-    juce::StringArray s;
+    yup::StringArray s;
 
-    for (int i = 0; i < juce::numElementsInArray (quantisationTypes); ++i)
+    for (int i = 0; i < yup::numElementsInArray (quantisationTypes); ++i)
         s.add (translated ? TRANS(quantisationTypes[i].name)
                           : quantisationTypes[i].name);
 
     return s;
 }
 
-juce::String QuantisationType::beatFractionToNoteName (double beatFraction, bool isTriplet, int timeSigDenominator)
+yup::String QuantisationType::beatFractionToNoteName (double beatFraction, bool isTriplet, int timeSigDenominator)
 {
     if (beatFraction <= 0.0)
         return {};
 
     auto straightBeat = isTriplet ? beatFraction * 1.5 : beatFraction;
-    auto noteDenom = juce::roundToInt ((double) timeSigDenominator / straightBeat);
+    auto noteDenom = yup::roundToInt ((double) timeSigDenominator / straightBeat);
 
     if (noteDenom <= 0)
         return {};
@@ -267,17 +267,17 @@ juce::String QuantisationType::beatFractionToNoteName (double beatFraction, bool
     if (noteDenom == 1)
         return isTriplet ? TRANS("whole note triplet") : TRANS("whole note");
 
-    return "1/" + juce::String (noteDenom) + (isTriplet ? "T" : "") + " " + TRANS("note");
+    return "1/" + yup::String (noteDenom) + (isTriplet ? "T" : "") + " " + TRANS("note");
 }
 
-juce::StringArray QuantisationType::getAvailableQuantiseTypes (bool translated, int timeSigDenominator)
+yup::StringArray QuantisationType::getAvailableQuantiseTypes (bool translated, int timeSigDenominator)
 {
-    juce::StringArray s;
+    yup::StringArray s;
 
-    for (int i = 0; i < juce::numElementsInArray (quantisationTypes); ++i)
+    for (int i = 0; i < yup::numElementsInArray (quantisationTypes); ++i)
     {
         auto baseName = translated ? TRANS(quantisationTypes[i].name)
-                                   : juce::String (quantisationTypes[i].name);
+                                   : yup::String (quantisationTypes[i].name);
 
         auto annotation = beatFractionToNoteName (quantisationTypes[i].beatFraction,
                                                   quantisationTypes[i].isTriplets,
@@ -292,13 +292,13 @@ juce::StringArray QuantisationType::getAvailableQuantiseTypes (bool translated, 
     return s;
 }
 
-juce::String QuantisationType::getDefaultType (bool translated)
+yup::String QuantisationType::getDefaultType (bool translated)
 {
     return translated ? TRANS(quantisationTypes[0].name)
                       : quantisationTypes[0].name;
 }
 
-void QuantisationType::valueTreePropertyChanged (juce::ValueTree& vt, const juce::Identifier& i)
+void QuantisationType::valueTreePropertyChanged (yup::ValueTree& vt, const yup::Identifier& i)
 {
     if (vt == state)
     {
@@ -314,7 +314,7 @@ void QuantisationType::valueTreePropertyChanged (juce::ValueTree& vt, const juce
     }
 }
 
-void QuantisationType::applyQuantisationToSequence (juce::MidiMessageSequence& ms, Edit& ed, TimePosition start)
+void QuantisationType::applyQuantisationToSequence (yup::MidiMessageSequence& ms, Edit& ed, TimePosition start)
 {
     if (! isEnabled())
         return;

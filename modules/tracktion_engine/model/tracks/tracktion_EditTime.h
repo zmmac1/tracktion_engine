@@ -331,7 +331,7 @@ private:
 /** Returns the raw number of seconds or beats.
     Mostly useful for testing.
 */
-juce::Range<double> toUnderlying (EditTimeRange);
+yup::Range<double> toUnderlying (EditTimeRange);
 
 /** Returns true if the given position is contained within the given range. */
 bool contains (EditTimeRange, EditPosition, const TempoSequence&);
@@ -404,7 +404,7 @@ struct ClipPositionBeats
 //==============================================================================
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template<>
     struct VariantConverter<tracktion::core::TimePosition>
@@ -611,7 +611,7 @@ inline bool EditTimeRange::isBeats() const
 }
 
 //==============================================================================
-inline juce::Range<double> toUnderlying (EditTimeRange r)
+inline yup::Range<double> toUnderlying (EditTimeRange r)
 {
     return { toUnderlying (r.getStart()),
              toUnderlying (r.getEnd()) };

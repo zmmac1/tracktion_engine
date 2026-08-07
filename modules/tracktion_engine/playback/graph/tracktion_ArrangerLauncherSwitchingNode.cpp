@@ -124,7 +124,7 @@ bool ArrangerLauncherSwitchingNode::isReadyToProcess()
     return ! arrangerNode || arrangerNode->hasProcessed();
 }
 
-void ArrangerLauncherSwitchingNode::prefetchBlock (juce::Range<int64_t> referenceSampleRange)
+void ArrangerLauncherSwitchingNode::prefetchBlock (yup::Range<int64_t> referenceSampleRange)
 {
     for (auto& launcherNode : launcherNodes)
         launcherNode->prepareForNextBlock (referenceSampleRange);

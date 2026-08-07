@@ -12,7 +12,7 @@
 
 
 #include <numeric>
-#include <juce_audio_formats/juce_audio_formats.h>
+#include <yup_audio_formats/yup_audio_formats.h>
 #include "../../tracktion_engine/audio_files/formats/tracktion_FloatAudioFileFormat.h"
 
 #if TRACKTION_UNIT_TESTS || TRACKTION_BENCHMARKS
@@ -26,10 +26,10 @@ namespace test_utilities
 {
     //==============================================================================
     /** Creates a random MidiMessageSequence sequence. */
-    static inline juce::MidiMessageSequence createRandomMidiMessageSequence (double durationSeconds, juce::Random r,
-                                                                             juce::Range<double> noteLengthRange = { 0.1, 0.6 })
+    static inline yup::MidiMessageSequence createRandomMidiMessageSequence (double durationSeconds, yup::Random r,
+                                                                             yup::Range<double> noteLengthRange = { 0.1, 0.6 })
     {
-        juce::MidiMessageSequence sequence;
+        yup::MidiMessageSequence sequence;
         int noteNumber = -1;
 
         for (double time = 0.0; time < durationSeconds;
@@ -37,13 +37,13 @@ namespace test_utilities
         {
             if (noteNumber != -1)
             {
-                sequence.addEvent (juce::MidiMessage::noteOff (1, noteNumber), time);
+                sequence.addEvent (yup::MidiMessage::noteOff (1, noteNumber), time);
                 noteNumber = -1;
             }
             else
             {
                 noteNumber = r.nextInt ({ 1, 127 });
-                sequence.addEvent (juce::MidiMessage::noteOn (1, noteNumber, 1.0f), time);
+                sequence.addEvent (yup::MidiMessage::noteOn (1, noteNumber, 1.0f), time);
             }
         }
 
@@ -53,9 +53,9 @@ namespace test_utilities
     }
 
     /** Creates a MidiMessageSequence from a MidiBuffer. */
-    static inline juce::MidiMessageSequence createMidiMessageSequence (const juce::MidiBuffer& buffer, double sampleRate)
+    static inline yup::MidiMessageSequence createMidiMessageSequence (const yup::MidiBuffer& buffer, double sampleRate)
     {
-        juce::MidiMessageSequence sequence;
+        yup::MidiMessageSequence sequence;
 
         for (auto itr : buffer)
         {
@@ -72,7 +72,7 @@ namespace test_utilities
     //==============================================================================
     static inline float getPhaseIncrement (float frequency, double sampleRate)
     {
-        return (float) ((frequency * juce::MathConstants<double>::pi * 2.0) / sampleRate);
+        return (float) ((frequency * yup::MathConstants<double>::pi * 2.0) / sampleRate);
     }
 
     struct SineOscillator
@@ -86,7 +86,7 @@ namespace test_utilities
         float getNext()
         {
             auto v = std::sin (phase);
-            phase = std::fmod (phase + phaseIncrement, juce::MathConstants<float>::pi * 2.0f);
+            phase = std::fmod (phase + phaseIncrement, yup::MathConstants<float>::pi * 2.0f);
             return v;
         }
 
@@ -95,7 +95,7 @@ namespace test_utilities
 
     static inline void fillBufferWithSinData (choc::buffer::ChannelArrayView<float> buffer)
     {
-        auto phaseIncrement = juce::MathConstants<float>::twoPi / float (buffer.getNumFrames());
+        auto phaseIncrement = yup::MathConstants<float>::twoPi / float (buffer.getNumFrames());
         setAllFrames (buffer, [=] (auto frame) { return std::sin (float (frame) * phaseIncrement); });
     }
 
@@ -120,17 +120,17 @@ namespace test_utilities
     }
 
     /** Logs a MidiMessageSequence. */
-    static inline void logMidiMessageSequence (juce::UnitTest& ut, const juce::MidiMessageSequence& seq)
+    static inline void logMidiMessageSequence (yup::UnitTest& ut, const yup::MidiMessageSequence& seq)
     {
         for (int i = 0; i < seq.getNumEvents(); ++i)
-            ut.logMessage (seq.getEventPointer (i)->message.getDescription() + " - " + juce::String (seq.getEventPointer (i)->message.getTimeStamp()));
+            ut.logMessage (seq.getEventPointer (i)->message.getDescription() + " - " + yup::String (seq.getEventPointer (i)->message.getTimeStamp()));
     }
 
     /** Logs a MidiBuffer. */
-    static inline void dgbMidiBuffer (const juce::MidiBuffer& buffer)
+    static inline void dgbMidiBuffer (const yup::MidiBuffer& buffer)
     {
         ignoreUnused (buffer);
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         for (auto itr : buffer)
         {
             const auto& result = itr.getMessage();
@@ -140,7 +140,7 @@ namespace test_utilities
     }
 
     /** Removes any non-note event messages from a sequence. */
-    static inline juce::MidiMessageSequence stripNonNoteOnOffMessages (juce::MidiMessageSequence seq)
+    static inline yup::MidiMessageSequence stripNonNoteOnOffMessages (yup::MidiMessageSequence seq)
     {
         for (int i = seq.getNumEvents(); --i >= 0;)
             if (! seq.getEventPointer (i)->message.isNoteOnOrOff())
@@ -150,7 +150,7 @@ namespace test_utilities
     }
 
     /** Removes any meta-event messages from a sequence. */
-    static inline juce::MidiMessageSequence stripMetaEvents (juce::MidiMessageSequence seq)
+    static inline yup::MidiMessageSequence stripMetaEvents (yup::MidiMessageSequence seq)
     {
         for (int i = seq.getNumEvents(); --i >= 0;)
             if (! seq.getEventPointer (i)->message.isMetaEvent())
@@ -161,14 +161,14 @@ namespace test_utilities
 
     /** Writes an audio buffer to a file. */
     template<typename AudioFormatType>
-    void writeToFile (juce::File file, choc::buffer::ChannelArrayView<float> block, double sampleRate, int qualityOptionIndex)
+    void writeToFile (yup::File file, choc::buffer::ChannelArrayView<float> block, double sampleRate, int qualityOptionIndex)
     {
         AudioFormatType type;
 
-        auto os = std::unique_ptr<juce::OutputStream> (file.createOutputStream());
+        auto os = std::unique_ptr<yup::OutputStream> (file.createOutputStream());
 
-        if (auto writer = std::unique_ptr<juce::AudioFormatWriter> (type.createWriterFor (os,
-                                                                                          juce::AudioFormatWriterOptions()
+        if (auto writer = std::unique_ptr<yup::AudioFormatWriter> (type.createWriterFor (os,
+                                                                                          yup::WriteOptions()
                                                                                             .withSampleRate (sampleRate)
                                                                                             .withNumChannels (static_cast<int> (block.getNumChannels()))
                                                                                             .withBitsPerSample (16)
@@ -180,9 +180,9 @@ namespace test_utilities
 
     /** Writes an audio buffer to a file. */
     template<typename AudioFormatType>
-    std::unique_ptr<juce::TemporaryFile> writeToTemporaryFile (choc::buffer::ChannelArrayView<float> block, double sampleRate, int qualityOptionIndex = 0)
+    std::unique_ptr<yup::TemporaryFile> writeToTemporaryFile (choc::buffer::ChannelArrayView<float> block, double sampleRate, int qualityOptionIndex = 0)
     {
-        auto f = std::make_unique<juce::TemporaryFile> (AudioFormatType().getFileExtensions()[0]);
+        auto f = std::make_unique<yup::TemporaryFile> (AudioFormatType().getFileExtensions()[0]);
         writeToFile<AudioFormatType> (f->getFile(), block, sampleRate, qualityOptionIndex);
 
         return f;
@@ -217,7 +217,7 @@ namespace test_utilities
     }
 
     /** Returns the ammount of internal memory allocated for buffers. */
-    inline juce::String getName (ThreadPoolStrategy type)
+    inline yup::String getName (ThreadPoolStrategy type)
     {
         switch (type)
         {
@@ -250,7 +250,7 @@ namespace test_utilities
         {
             static void logNode (Node& n, int depth)
             {
-                juce::Logger::writeToLog (juce::String::repeatedString (" ", depth * 2) + typeid (n).name());
+                yup::Logger::writeToLog (yup::String::repeatedString (" ", depth * 2) + typeid (n).name());
             }
 
             static void visitInputs (Node& n, int depth)
@@ -274,7 +274,7 @@ namespace test_utilities
 
     //==============================================================================
     template<typename AudioFormatType>
-    std::unique_ptr<juce::TemporaryFile> getSinFile (double sampleRate, double durationInSeconds,
+    std::unique_ptr<yup::TemporaryFile> getSinFile (double sampleRate, double durationInSeconds,
                                                      int numChannels = 1, float frequency = 220.0f,
                                                      int qualityOptionIndex = -1)
     {
@@ -282,13 +282,13 @@ namespace test_utilities
                                         getPhaseIncrement (frequency, sampleRate));
 
         AudioFormatType format;
-        auto f = std::make_unique<juce::TemporaryFile> (format.getFileExtensions()[0]);
+        auto f = std::make_unique<yup::TemporaryFile> (format.getFileExtensions()[0]);
         writeToFile<AudioFormatType> (f->getFile(), buffer, sampleRate, qualityOptionIndex);
         return f;
     }
 
     template<typename AudioFormatType>
-    std::unique_ptr<juce::TemporaryFile> getSquareFile (double sampleRate, double durationInSeconds,
+    std::unique_ptr<yup::TemporaryFile> getSquareFile (double sampleRate, double durationInSeconds,
                                                         int numChannels = 1, float frequency = 220.0f,
                                                         int qualityOptionIndex = -1)
     {
@@ -296,13 +296,13 @@ namespace test_utilities
                                           getPhaseIncrement (frequency, sampleRate));
 
         AudioFormatType format;
-        auto f = std::make_unique<juce::TemporaryFile> (format.getFileExtensions()[0]);
+        auto f = std::make_unique<yup::TemporaryFile> (format.getFileExtensions()[0]);
         writeToFile<AudioFormatType> (f->getFile(), buffer, sampleRate, qualityOptionIndex);
         return f;
     }
 
     template<typename AudioFormatType>
-    std::unique_ptr<juce::TemporaryFile> getTimeEncodedFile (double sampleRate, TimeDuration duration,
+    std::unique_ptr<yup::TemporaryFile> getTimeEncodedFile (double sampleRate, TimeDuration duration,
                                                              TimeDuration stepDuration,
                                                              int numChannels = 1,
                                                              int qualityOptionIndex = -1)
@@ -321,14 +321,14 @@ namespace test_utilities
                                                               });
 
         AudioFormatType format;
-        auto f = std::make_unique<juce::TemporaryFile> (format.getFileExtensions()[0]);
+        auto f = std::make_unique<yup::TemporaryFile> (format.getFileExtensions()[0]);
         writeToFile<AudioFormatType> (f->getFile(), buffer, sampleRate, qualityOptionIndex);
 
         return f;
     }
 
     template<typename AudioFormatType>
-    std::unique_ptr<juce::TemporaryFile> getTransientFile (double sampleRate, TimeDuration duration,
+    std::unique_ptr<yup::TemporaryFile> getTransientFile (double sampleRate, TimeDuration duration,
                                                            TimePosition transientPos, float transientVal,
                                                            int numChannels = 1, int qualityOptionIndex = -1)
     {
@@ -338,7 +338,7 @@ namespace test_utilities
                                                 [=] (auto, auto frame) { return frame == transientSample ? transientVal : 0.0f; });
 
         AudioFormatType format;
-        auto f = std::make_unique<juce::TemporaryFile> (format.getFileExtensions()[0]);
+        auto f = std::make_unique<yup::TemporaryFile> (format.getFileExtensions()[0]);
         writeToFile<AudioFormatType> (f->getFile(), buffer, sampleRate, qualityOptionIndex);
 
         return f;
@@ -347,7 +347,7 @@ namespace test_utilities
 
     //==============================================================================
     /** Compares two MidiMessageSequences and expects them to be equal. */
-    static inline void expectMidiMessageSequence (juce::UnitTest& ut, const juce::MidiMessageSequence& actual, const juce::MidiMessageSequence& expected)
+    static inline void expectMidiMessageSequence (yup::UnitTest& ut, const yup::MidiMessageSequence& actual, const yup::MidiMessageSequence& expected)
     {
         ut.expectEquals (actual.getNumEvents(), expected.getNumEvents(), "Num MIDI events not equal");
 
@@ -363,8 +363,8 @@ namespace test_utilities
 
             if (desc1 != desc2)
             {
-                ut.logMessage (juce::String ("Event at index 123 is:\n\tactual: XXX\n\texpected is: YYY")
-                                .replace ("123", juce::String (i)).replace ("XXX", desc1).replace ("YYY", desc2));
+                ut.logMessage (yup::String ("Event at index 123 is:\n\tactual: XXX\n\texpected is: YYY")
+                                .replace ("123", yup::String (i)).replace ("XXX", desc1).replace ("YYY", desc2));
                 sequencesTheSame = false;
             }
         }
@@ -373,16 +373,16 @@ namespace test_utilities
         {
             auto event2 = expected.getEventPointer (i);
             auto desc2 = event2->message.getDescription();
-            ut.logMessage (juce::String ("Missing event at index 123 is:\n\texpected is: YYY, TTT")
-                            .replace ("123", juce::String (i)).replace ("YYY", desc2).replace ("TTT", juce::String (event2->message.getTimeStamp())));
+            ut.logMessage (yup::String ("Missing event at index 123 is:\n\texpected is: YYY, TTT")
+                            .replace ("123", yup::String (i)).replace ("YYY", desc2).replace ("TTT", yup::String (event2->message.getTimeStamp())));
         }
 
         for (int i = expected.getNumEvents(); i < actual.getNumEvents(); ++i)
         {
             auto event2 = actual.getEventPointer (i);
             auto desc2 = event2->message.getDescription();
-            ut.logMessage (juce::String ("Extra event at index 123 is:\n\tactual is: YYY, TTT")
-                            .replace ("123", juce::String (i)).replace ("YYY", desc2).replace ("TTT", juce::String (event2->message.getTimeStamp())));
+            ut.logMessage (yup::String ("Extra event at index 123 is:\n\tactual is: YYY, TTT")
+                            .replace ("123", yup::String (i)).replace ("YYY", desc2).replace ("TTT", yup::String (event2->message.getTimeStamp())));
         }
 
         ut.expect (sequencesTheSame, "MIDI sequence contents not equal");
@@ -397,30 +397,30 @@ namespace test_utilities
     }
 
     /** Compares a MidiBuffer and a MidiMessageSequence and expects them to be equal. */
-    static inline void expectMidiBuffer (juce::UnitTest& ut, const juce::MidiBuffer& buffer, double sampleRate, const juce::MidiMessageSequence& seq)
+    static inline void expectMidiBuffer (yup::UnitTest& ut, const yup::MidiBuffer& buffer, double sampleRate, const yup::MidiMessageSequence& seq)
     {
         expectMidiMessageSequence (ut, createMidiMessageSequence (buffer, sampleRate), seq);
     }
 
     /** Expects a specific magnitude and RMS from an AudioBuffer's channel. */
-    static inline void expectAudioBuffer (juce::UnitTest& ut, const juce::AudioBuffer<float>& buffer, int channel, float mag, float rms)
+    static inline void expectAudioBuffer (yup::UnitTest& ut, const yup::AudioBuffer<float>& buffer, int channel, float mag, float rms)
     {
         ut.expectWithinAbsoluteError (buffer.getMagnitude (channel, 0, buffer.getNumSamples()), mag, 0.01f);
         ut.expectWithinAbsoluteError (buffer.getRMSLevel (channel, 0, buffer.getNumSamples()), rms, 0.01f);
     }
 
     /** Splits a buffer in to two and expects a specific magnitude and RMS from each half AudioBuffer. */
-    static inline void expectAudioBuffer (juce::UnitTest& ut, juce::AudioBuffer<float>& buffer, int channel, int numSampleToSplitAt,
+    static inline void expectAudioBuffer (yup::UnitTest& ut, yup::AudioBuffer<float>& buffer, int channel, int numSampleToSplitAt,
                                           float mag1, float rms1, float mag2, float rms2)
     {
         {
-            juce::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(), buffer.getNumChannels(),
+            yup::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(), buffer.getNumChannels(),
                                                     0, numSampleToSplitAt);
             expectAudioBuffer (ut, trimmedBuffer, channel, mag1, rms1);
         }
 
         {
-            juce::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(),
+            yup::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(),
                                                     buffer.getNumChannels(),
                                                     numSampleToSplitAt, buffer.getNumSamples() - numSampleToSplitAt);
             expectAudioBuffer (ut, trimmedBuffer, channel, mag2, rms2);
@@ -429,16 +429,16 @@ namespace test_utilities
 
     /** Extracts a section of a buffer and expects a specific magnitude and RMS it. */
     template<typename IntType>
-    static inline void expectAudioBuffer (juce::UnitTest& ut, juce::AudioBuffer<float>& buffer, int channel, juce::Range<IntType> sampleRange,
+    static inline void expectAudioBuffer (yup::UnitTest& ut, yup::AudioBuffer<float>& buffer, int channel, yup::Range<IntType> sampleRange,
                                           float mag, float rms)
     {
-        juce::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(),
+        yup::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(),
                                                 buffer.getNumChannels(),
                                                 (int) sampleRange.getStart(), (int) sampleRange.getLength());
         expectAudioBuffer (ut, trimmedBuffer, channel, mag, rms);
     }
 
-    static inline void expectAudioBuffer (juce::UnitTest& ut, const juce::AudioBuffer<float>& a, const juce::AudioBuffer<float>& b)
+    static inline void expectAudioBuffer (yup::UnitTest& ut, const yup::AudioBuffer<float>& a, const yup::AudioBuffer<float>& b)
     {
         ut.expect (a.getNumChannels() == b.getNumChannels());
         ut.expect (a.getNumSamples() == b.getNumSamples());
@@ -453,7 +453,7 @@ namespace test_utilities
         }
     }
 
-    inline bool buffersAreEqual (const juce::AudioBuffer<float>& a, const juce::AudioBuffer<float>& b, float absSampleTolerance = 0.0f)
+    inline bool buffersAreEqual (const yup::AudioBuffer<float>& a, const yup::AudioBuffer<float>& b, float absSampleTolerance = 0.0f)
     {
         if (a.getNumChannels() != b.getNumChannels())
             return false;
@@ -488,27 +488,27 @@ namespace test_utilities
     }
 
     /** Checks that there are no duplicate nodeIDs in a Node. */
-    static inline void expectUniqueNodeIDs (juce::UnitTest& ut, Node& node, bool ignoreZeroIDs)
+    static inline void expectUniqueNodeIDs (yup::UnitTest& ut, Node& node, bool ignoreZeroIDs)
     {
         auto areUnique = node_player_utils::areNodeIDsUnique (node, ignoreZeroIDs);
         ut.expect (areUnique, "nodeIDs are not unique");
 
         if (! areUnique)
-            visitNodes (node, [&] (Node& n) { ut.logMessage (juce::String (typeid (n).name()) + " - " + juce::String (n.getNodeProperties().nodeID)); }, false);
+            visitNodes (node, [&] (Node& n) { ut.logMessage (yup::String (typeid (n).name()) + " - " + yup::String (n.getNodeProperties().nodeID)); }, false);
     }
 
     //==============================================================================
-    // Doctest-compatible overloads (no juce::UnitTest& parameter)
+    // Doctest-compatible overloads (no yup::UnitTest& parameter)
     //==============================================================================
    #ifdef DOCTEST_LIBRARY_INCLUDED
 
-    static inline void logMidiMessageSequence (const juce::MidiMessageSequence& seq)
+    static inline void logMidiMessageSequence (const yup::MidiMessageSequence& seq)
     {
         for (int i = 0; i < seq.getNumEvents(); ++i)
-            MESSAGE ((seq.getEventPointer (i)->message.getDescription() + " - " + juce::String (seq.getEventPointer (i)->message.getTimeStamp())).toStdString());
+            MESSAGE ((seq.getEventPointer (i)->message.getDescription() + " - " + yup::String (seq.getEventPointer (i)->message.getTimeStamp())).toStdString());
     }
 
-    static inline void expectMidiMessageSequence (const juce::MidiMessageSequence& actual, const juce::MidiMessageSequence& expected)
+    static inline void expectMidiMessageSequence (const yup::MidiMessageSequence& actual, const yup::MidiMessageSequence& expected)
     {
         CHECK_EQ (actual.getNumEvents(), expected.getNumEvents());
 
@@ -524,8 +524,8 @@ namespace test_utilities
 
             if (desc1 != desc2)
             {
-                MESSAGE ((juce::String ("Event at index 123 is:\n\tactual: XXX\n\texpected is: YYY")
-                                .replace ("123", juce::String (i)).replace ("XXX", desc1).replace ("YYY", desc2)).toStdString());
+                MESSAGE ((yup::String ("Event at index 123 is:\n\tactual: XXX\n\texpected is: YYY")
+                                .replace ("123", yup::String (i)).replace ("XXX", desc1).replace ("YYY", desc2)).toStdString());
                 sequencesTheSame = false;
             }
         }
@@ -534,16 +534,16 @@ namespace test_utilities
         {
             auto event2 = expected.getEventPointer (i);
             auto desc2 = event2->message.getDescription();
-            MESSAGE ((juce::String ("Missing event at index 123 is:\n\texpected is: YYY, TTT")
-                            .replace ("123", juce::String (i)).replace ("YYY", desc2).replace ("TTT", juce::String (event2->message.getTimeStamp()))).toStdString());
+            MESSAGE ((yup::String ("Missing event at index 123 is:\n\texpected is: YYY, TTT")
+                            .replace ("123", yup::String (i)).replace ("YYY", desc2).replace ("TTT", yup::String (event2->message.getTimeStamp()))).toStdString());
         }
 
         for (int i = expected.getNumEvents(); i < actual.getNumEvents(); ++i)
         {
             auto event2 = actual.getEventPointer (i);
             auto desc2 = event2->message.getDescription();
-            MESSAGE ((juce::String ("Extra event at index 123 is:\n\tactual is: YYY, TTT")
-                            .replace ("123", juce::String (i)).replace ("YYY", desc2).replace ("TTT", juce::String (event2->message.getTimeStamp()))).toStdString());
+            MESSAGE ((yup::String ("Extra event at index 123 is:\n\tactual is: YYY, TTT")
+                            .replace ("123", yup::String (i)).replace ("YYY", desc2).replace ("TTT", yup::String (event2->message.getTimeStamp()))).toStdString());
         }
 
         CHECK_MESSAGE (sequencesTheSame, "MIDI sequence contents not equal");
@@ -557,28 +557,28 @@ namespace test_utilities
         }
     }
 
-    static inline void expectMidiBuffer (const juce::MidiBuffer& buffer, double sampleRate, const juce::MidiMessageSequence& seq)
+    static inline void expectMidiBuffer (const yup::MidiBuffer& buffer, double sampleRate, const yup::MidiMessageSequence& seq)
     {
         expectMidiMessageSequence (createMidiMessageSequence (buffer, sampleRate), seq);
     }
 
-    static inline void expectAudioBuffer (const juce::AudioBuffer<float>& buffer, int channel, float mag, float rms)
+    static inline void expectAudioBuffer (const yup::AudioBuffer<float>& buffer, int channel, float mag, float rms)
     {
         CHECK (std::abs (buffer.getMagnitude (channel, 0, buffer.getNumSamples()) - mag) <= 0.01f);
         CHECK (std::abs (buffer.getRMSLevel (channel, 0, buffer.getNumSamples()) - rms) <= 0.01f);
     }
 
-    static inline void expectAudioBuffer (juce::AudioBuffer<float>& buffer, int channel, int numSampleToSplitAt,
+    static inline void expectAudioBuffer (yup::AudioBuffer<float>& buffer, int channel, int numSampleToSplitAt,
                                           float mag1, float rms1, float mag2, float rms2)
     {
         {
-            juce::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(), buffer.getNumChannels(),
+            yup::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(), buffer.getNumChannels(),
                                                     0, numSampleToSplitAt);
             expectAudioBuffer (trimmedBuffer, channel, mag1, rms1);
         }
 
         {
-            juce::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(),
+            yup::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(),
                                                     buffer.getNumChannels(),
                                                     numSampleToSplitAt, buffer.getNumSamples() - numSampleToSplitAt);
             expectAudioBuffer (trimmedBuffer, channel, mag2, rms2);
@@ -586,16 +586,16 @@ namespace test_utilities
     }
 
     template<typename IntType>
-    static inline void expectAudioBuffer (juce::AudioBuffer<float>& buffer, int channel, juce::Range<IntType> sampleRange,
+    static inline void expectAudioBuffer (yup::AudioBuffer<float>& buffer, int channel, yup::Range<IntType> sampleRange,
                                           float mag, float rms)
     {
-        juce::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(),
+        yup::AudioBuffer<float> trimmedBuffer (buffer.getArrayOfWritePointers(),
                                                 buffer.getNumChannels(),
                                                 (int) sampleRange.getStart(), (int) sampleRange.getLength());
         expectAudioBuffer (trimmedBuffer, channel, mag, rms);
     }
 
-    static inline void expectAudioBuffer (const juce::AudioBuffer<float>& a, const juce::AudioBuffer<float>& b)
+    static inline void expectAudioBuffer (const yup::AudioBuffer<float>& a, const yup::AudioBuffer<float>& b)
     {
         CHECK (a.getNumChannels() == b.getNumChannels());
         CHECK (a.getNumSamples() == b.getNumSamples());
@@ -617,7 +617,7 @@ namespace test_utilities
         CHECK_MESSAGE (areUnique, "nodeIDs are not unique");
 
         if (! areUnique)
-            visitNodes (node, [&] (Node& n) { MESSAGE ((juce::String (typeid (n).name()) + " - " + juce::String (n.getNodeProperties().nodeID)).toStdString()); }, false);
+            visitNodes (node, [&] (Node& n) { MESSAGE ((yup::String (typeid (n).name()) + " - " + yup::String (n.getNodeProperties().nodeID)).toStdString()); }, false);
     }
 
    #endif // DOCTEST_LIBRARY_INCLUDED
@@ -642,22 +642,22 @@ namespace test_utilities
         double sampleRate = 44100.0;
         int blockSize = 512;
         bool randomiseBlockSizes = false;
-        juce::Random random;
+        yup::Random random;
     };
 
     /** Returns a the descriptions of s TestSetup. */
-    static inline juce::String getDescription (const TestSetup& ts)
+    static inline yup::String getDescription (const TestSetup& ts)
     {
-        return juce::String (ts.sampleRate, 0) + ", " + juce::String (ts.blockSize)
-            + juce::String (ts.randomiseBlockSizes ? ", random" : "");
+        return yup::String (ts.sampleRate, 0) + ", " + yup::String (ts.blockSize)
+            + yup::String (ts.randomiseBlockSizes ? ", random" : "");
     }
 
     /** Returns a set of TestSetups to be used for testing. */
-    static inline std::vector<TestSetup> getTestSetups (juce::UnitTest& ut)
+    static inline std::vector<TestSetup> getTestSetups (yup::UnitTest& ut)
     {
         std::vector<TestSetup> setups;
 
-       #if JUCE_DEBUG || GRAPH_UNIT_TESTS_QUICK_VALIDATE
+       #if YUP_DEBUG || GRAPH_UNIT_TESTS_QUICK_VALIDATE
         for (double sampleRate : { 44100.0, 96000.0 })
             for (int blockSize : { 64, 512 })
        #else
@@ -676,7 +676,7 @@ namespace test_utilities
     {
         std::vector<TestSetup> setups;
 
-       #if JUCE_DEBUG || GRAPH_UNIT_TESTS_QUICK_VALIDATE
+       #if YUP_DEBUG || GRAPH_UNIT_TESTS_QUICK_VALIDATE
         for (double sampleRate : { 44100.0, 96000.0 })
             for (int blockSize : { 64, 512 })
        #else
@@ -685,7 +685,7 @@ namespace test_utilities
        #endif
         for (bool randomiseBlockSizes : { false, true })
             setups.push_back ({ sampleRate, blockSize, randomiseBlockSizes,
-                                juce::Random (static_cast<juce::int64> (doctest::getContextOptions()->rand_seed)) });
+                                yup::Random (static_cast<yup::int64> (doctest::getContextOptions()->rand_seed)) });
 
         return setups;
     }
@@ -694,8 +694,8 @@ namespace test_utilities
     //==============================================================================
     struct TestContext
     {
-        juce::AudioBuffer<float> buffer;
-        juce::MidiBuffer midi;
+        yup::AudioBuffer<float> buffer;
+        yup::MidiBuffer midi;
         int numProcessMisses = 0;
     };
 
@@ -710,14 +710,14 @@ namespace test_utilities
             context = std::make_shared<TestContext>();
 
             buffer.resize  ({ (choc::buffer::ChannelCount) numChannels, (choc::buffer::FrameCount) ts.blockSize });
-            numSamplesToDo = juce::roundToInt (durationInSeconds * ts.sampleRate);
+            numSamplesToDo = yup::roundToInt (durationInSeconds * ts.sampleRate);
 
             if (writeToBuffer && numChannels > 0)
             {
-                if (auto os = std::unique_ptr<juce::OutputStream> (std::make_unique<juce::MemoryOutputStream> (audioOutputBlock, false)))
+                if (auto os = std::unique_ptr<yup::OutputStream> (std::make_unique<yup::MemoryOutputStream> (audioOutputBlock, false)))
                 {
-                    writer = std::unique_ptr<juce::AudioFormatWriter> (FloatAudioFormat().createWriterFor (os,
-                                                                                                           juce::AudioFormatWriterOptions().withSampleRate (ts.sampleRate)
+                    writer = std::unique_ptr<yup::AudioFormatWriter> (FloatAudioFormat().createWriterFor (os,
+                                                                                                           yup::WriteOptions().withSampleRate (ts.sampleRate)
                                                                                                                                            .withBitsPerSample (16)
                                                                                                                                            .withNumChannels (numChannels)));
                 }
@@ -733,9 +733,9 @@ namespace test_utilities
         /** Returns a description of the number of channels and length of rendering. */
         std::string getDescription() const
         {
-            return juce::String ("{numChannels} channels, {durationInSeconds}s")
-                    .replace ("{numChannels}", juce::String (numChannels))
-                    .replace ("{durationInSeconds}", juce::String (durationInSeconds)).toStdString();
+            return yup::String ("{numChannels} channels, {durationInSeconds}s")
+                    .replace ("{numChannels}", yup::String (numChannels))
+                    .replace ("{durationInSeconds}", yup::String (durationInSeconds)).toStdString();
         }
 
         const PerformanceMeasurement& getPerformanceMeasurement()
@@ -793,7 +793,7 @@ namespace test_utilities
                 auto subSectionView = buffer.getStart ((choc::buffer::FrameCount) numThisTime);
                 subSectionView.clear();
 
-                const auto referenceSampleRange = juce::Range<int64_t>::withStartAndLength ((int64_t) numSamplesDone, (int64_t) numThisTime);
+                const auto referenceSampleRange = yup::Range<int64_t>::withStartAndLength ((int64_t) numSamplesDone, (int64_t) numThisTime);
 
                 if (playHead)
                     playHead->setReferenceSampleRange (referenceSampleRange);
@@ -837,11 +837,11 @@ namespace test_utilities
                 writer->flush();
 
                 // Then read it back in to the buffer
-                if (auto is = std::make_unique<juce::MemoryInputStream> (audioOutputBlock, false))
+                if (auto is = std::make_unique<yup::MemoryInputStream> (audioOutputBlock, false))
                 {
-                    if (auto reader = std::unique_ptr<juce::AudioFormatReader> (FloatAudioFormat().createReaderFor (is.release(), true)))
+                    if (auto reader = std::unique_ptr<yup::AudioFormatReader> (FloatAudioFormat().createReaderFor (is.release(), true)))
                     {
-                        juce::AudioBuffer<float> tempBuffer (numChannels, (int) reader->lengthInSamples);
+                        yup::AudioBuffer<float> tempBuffer (numChannels, (int) reader->lengthInSamples);
                         reader->read (&tempBuffer, 0, tempBuffer.getNumSamples(), 0, true, true);
                         context->buffer = std::move (tempBuffer);
                     }
@@ -859,8 +859,8 @@ namespace test_utilities
         tracktion::graph::PlayHead* playHead = nullptr;
 
         std::shared_ptr<TestContext> context;
-        juce::MemoryBlock audioOutputBlock;
-        std::unique_ptr<juce::AudioFormatWriter> writer;
+        yup::MemoryBlock audioOutputBlock;
+        std::unique_ptr<yup::AudioFormatWriter> writer;
 
         choc::buffer::ChannelArrayBuffer<float> buffer;
         tracktion_engine::MidiMessageArray midi;

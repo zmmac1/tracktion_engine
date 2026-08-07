@@ -11,14 +11,14 @@
 namespace tracktion::inline engine {
 
 class ExternalAutomatableParameter   : public AutomatableParameter,
-                                       private juce::AudioProcessorParameter::Listener,
-                                       private juce::AsyncUpdater
+                                       private yup::AudioProcessorParameter::Listener,
+                                       private yup::AsyncUpdater
 {
 public:
-    ExternalAutomatableParameter (const juce::String& parameterID,
-                                  const juce::String& name,
+    ExternalAutomatableParameter (const yup::String& parameterID,
+                                  const yup::String& name,
                                   ExternalPlugin& owner, int parameterIndex_,
-                                  juce::Range<float> valueRangeToUse)
+                                  yup::Range<float> valueRangeToUse)
         : AutomatableParameter (parameterID, name, owner, valueRangeToUse),
           parameterIndex (parameterIndex_)
     {
@@ -84,15 +84,15 @@ public:
         }
     }
 
-    juce::String valueToString (float value) override
+    yup::String valueToString (float value) override
     {
         if (auto p = getParam())
             return p->getText (value, 16);
 
-        return juce::String (value, 2);
+        return yup::String (value, 2);
     }
 
-    float stringToValue (const juce::String& str) override
+    float stringToValue (const yup::String& str) override
     {
         if (auto p = getParam())
             return p->getValueForText (str);
@@ -100,7 +100,7 @@ public:
         return dbStringToDb (str);
     }
 
-    juce::String getCurrentValueAsString() override
+    yup::String getCurrentValueAsString() override
     {
         if (auto p = getParam())
             return p->getCurrentValueAsText();
@@ -108,7 +108,7 @@ public:
         return {};
     }
 
-    juce::String getLabel() override
+    yup::String getLabel() override
     {
         if (auto p = getParam())
             return p->getLabel();
@@ -119,10 +119,10 @@ public:
     void valueChangedByPlugin()
     {
         if (auto p = getParam())
-            setParameter (p->getValue(), juce::sendNotification);
+            setParameter (p->getValue(), yup::sendNotification);
     }
 
-    juce::String getParameterName() const override
+    yup::String getParameterName() const override
     {
         if (displayName.isNotEmpty())
             return displayName;
@@ -134,7 +134,7 @@ public:
                 return name;
         }
 
-        return TRANS("Unnamed") + " " + juce::String (parameterIndex + 1);
+        return TRANS("Unnamed") + " " + yup::String (parameterIndex + 1);
     }
 
     int getParameterIndex() const noexcept
@@ -142,7 +142,7 @@ public:
         return parameterIndex;
     }
 
-    juce::String getParameterShortName (int suggestedLength) const override
+    yup::String getParameterShortName (int suggestedLength) const override
     {
         if (auto p = getParam())
             return p->getName (suggestedLength);
@@ -150,7 +150,7 @@ public:
         return {};
     }
 
-    void setDisplayName (const juce::String& str)
+    void setDisplayName (const yup::String& str)
     {
         displayName = str;
     }
@@ -177,10 +177,10 @@ public:
             if (const VSTXML::Entry* e = valueType->entries[state])
                 return (e->range.high + e->range.low) / 2.0f;
 
-        return juce::jlimit (0.0f, 1.0f, 1.0f / float (getNumberOfStates() - 1) * float (state));
+        return yup::jlimit (0.0f, 1.0f, 1.0f / float (getNumberOfStates() - 1) * float (state));
     }
 
-    juce::String getLabelForValue (float val) const override
+    yup::String getLabelForValue (float val) const override
     {
         if (param != nullptr && param->type == "switch")
             return (val >= 0.0f && val < 0.5f) ? TRANS("Off")
@@ -196,9 +196,9 @@ public:
         return {};
     }
 
-    juce::StringArray getAllLabels() const override
+    yup::StringArray getAllLabels() const override
     {
-        juce::StringArray labels;
+        yup::StringArray labels;
 
         if (param->type == "switch")
         {
@@ -227,7 +227,7 @@ public:
                         return (v->range.high + v->range.low) / 2;
             }
 
-            int state = juce::jlimit (0, getNumberOfStates() - 1,
+            int state = yup::jlimit (0, getNumberOfStates() - 1,
                                       (int) (val * float (getNumberOfStates())));
             return getValueForState (state);
         }
@@ -253,7 +253,7 @@ public:
                         return i;
             }
 
-            return juce::roundToInt (std::floor (val * float (getNumberOfStates())));
+            return yup::roundToInt (std::floor (val * float (getNumberOfStates())));
         }
 
         return 0;
@@ -261,18 +261,18 @@ public:
 
 private:
     const int parameterIndex;
-    juce::String displayName;
+    yup::String displayName;
 
     const VSTXML::Param* param = nullptr;
     const VSTXML::ValueType* valueType = nullptr;
 
-    juce::AudioPluginInstance* getPlugin() const noexcept
+    yup::AudioPluginInstance* getPlugin() const noexcept
     {
         jassert (plugin != nullptr);
         return static_cast<ExternalPlugin&> (*plugin).getAudioPluginInstance();
     }
 
-    juce::AudioProcessorParameter* getParam() const noexcept
+    yup::AudioProcessorParameter* getParam() const noexcept
     {
         if (auto pi = getPlugin())
             return pi->getParameters()[parameterIndex];
@@ -295,7 +295,7 @@ private:
 
     void parameterGestureChanged (int index, bool gestureIsStarting) override
     {
-        if (! juce::MessageManager::existsAndIsCurrentThread())
+        if (! yup::MessageManager::existsAndIsCurrentThread())
             return;
 
         if (parameterIndex == index)
@@ -330,7 +330,7 @@ private:
         valueChangedByPlugin();
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExternalAutomatableParameter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExternalAutomatableParameter)
 };
 
 } // namespace tracktion::inline engine

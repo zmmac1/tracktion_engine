@@ -17,25 +17,25 @@ namespace tracktion::inline engine {
     Internally this opens a File for writng and provides some helper methods to
     append to it and free the file handle when done.
 */
-class AudioFileWriter   : public juce::ReferenceCountedObject
+class AudioFileWriter   : public yup::ReferenceCountedObject
 {
 public:
     AudioFileWriter (const AudioFile& file,
-                     juce::AudioFormat* formatToUse,
+                     yup::AudioFormat* formatToUse,
                      int numChannels,
                      double sampleRate,
                      int bitsPerSample,
-                     const juce::StringPairArray& metadata,
+                     const yup::StringPairArray& metadata,
                      int quality);
 
     AudioFileWriter (const AudioFile& file,
-                     juce::AudioFormat* formatToUse,
+                     yup::AudioFormat* formatToUse,
                      int numChannels,
                      double sampleRate,
                      int bitsPerSample,
-                     const juce::StringPairArray& metadata,
+                     const yup::StringPairArray& metadata,
                      int quality,
-                     const juce::AudioChannelSet& channelLayout);
+                     const yup::AudioChannelSet& channelLayout);
 
     /** Destructor, calls closeForWriting. */
     ~AudioFileWriter();
@@ -52,13 +52,13 @@ public:
 
     //==============================================================================
     /** Appends an AudioBuffer to the file. */
-    bool appendBuffer (juce::AudioBuffer<float>& buffer, int numSamples);
+    bool appendBuffer (yup::AudioBuffer<float>& buffer, int numSamples);
 
     /** Appends an block of samples to the file. */
     bool appendBuffer (const int** buffer, int numSamples);
 
     /** Appends a block of samples to the file from an audio format reader. */
-    bool writeFromAudioReader (juce::AudioFormatReader&, SampleCount startSample, SampleCount numSamples);
+    bool writeFromAudioReader (yup::AudioFormatReader&, SampleCount startSample, SampleCount numSamples);
 
     /** Deletes the writer and releases the file handle. */
     void closeForWriting();
@@ -67,8 +67,8 @@ public:
 
 private:
     int samplesUntilFlush;
-    std::unique_ptr<juce::AudioFormatWriter> writer;
-    juce::CriticalSection writerLock;
+    std::unique_ptr<yup::AudioFormatWriter> writer;
+    yup::CriticalSection writerLock;
 };
 
 } // namespace tracktion::inline engine

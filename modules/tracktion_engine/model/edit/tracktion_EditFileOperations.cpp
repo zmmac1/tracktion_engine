@@ -11,7 +11,7 @@
 namespace tracktion::inline engine
 {
 
-struct ThreadedEditFileWriter   : private juce::Thread
+struct ThreadedEditFileWriter   : private yup::Thread
 {
     ThreadedEditFileWriter()
         : Thread ("TemporyFileWriter") {}
@@ -23,10 +23,10 @@ struct ThreadedEditFileWriter   : private juce::Thread
         jassert (pending.isEmpty());
     }
 
-    void writeTreeToFile (juce::ValueTree&& v, const juce::File& f)
+    void writeTreeToFile (yup::ValueTree&& v, const yup::File& f)
     {
         TRACKTION_ASSERT_MESSAGE_THREAD
-        pending.add (std::pair<juce::ValueTree, juce::File> (v, f));
+        pending.add (std::pair<yup::ValueTree, yup::File> (v, f));
         waiter.signal();
         startThread();
     }
@@ -53,15 +53,15 @@ private:
         }
     }
 
-    void writeToFile (std::pair<juce::ValueTree, juce::File> item)
+    void writeToFile (std::pair<yup::ValueTree, yup::File> item)
     {
         item.second.deleteFile();
-        juce::FileOutputStream os (item.second);
+        yup::FileOutputStream os (item.second);
         item.first.writeToStream (os);
     }
 
-    juce::Array<std::pair<juce::ValueTree, juce::File>, juce::CriticalSection> pending;
-    juce::WaitableEvent waiter;
+    yup::Array<std::pair<yup::ValueTree, yup::File>, yup::CriticalSection> pending;
+    yup::WaitableEvent waiter;
 };
 
 //==============================================================================
@@ -90,7 +90,7 @@ struct SharedEditFileDataCache
         }
 
         Edit& edit;
-        juce::Time timeOfLastSave { juce::Time::getCurrentTime() };
+        yup::Time timeOfLastSave { yup::Time::getCurrentTime() };
         EditSnapshot::Ptr editSnapshot { EditSnapshot::getEditSnapshot (edit.engine, edit.editFileRetriever()) };
     };
 
@@ -140,14 +140,14 @@ struct EditFileOperations::SharedDataPimpl
         cache->cleanUp();
     }
 
-    void writeValueTreeToDisk (juce::ValueTree&& v, const juce::File& f)
+    void writeValueTreeToDisk (yup::ValueTree&& v, const yup::File& f)
     {
         editFileWriter->writeTreeToFile (std::move (v), f);
     }
 
-    juce::SharedResourcePointer<SharedEditFileDataCache> cache;
+    yup::SharedResourcePointer<SharedEditFileDataCache> cache;
     std::shared_ptr<SharedEditFileDataCache::Data> data;
-    juce::SharedResourcePointer<ThreadedEditFileWriter> editFileWriter;
+    yup::SharedResourcePointer<ThreadedEditFileWriter> editFileWriter;
 };
 
 
@@ -164,12 +164,12 @@ EditFileOperations::~EditFileOperations()
 {
 }
 
-juce::File EditFileOperations::getEditFile() const
+yup::File EditFileOperations::getEditFile() const
 {
     return edit.editFileRetriever();
 }
 
-bool EditFileOperations::writeToFile (const juce::File& file, bool writeQuickBinaryVersion)
+bool EditFileOperations::writeToFile (const yup::File& file, bool writeQuickBinaryVersion)
 {
     CRASH_TRACER
     bool ok = false;
@@ -203,12 +203,12 @@ bool EditFileOperations::writeToFile (const juce::File& file, bool writeQuickBin
     }
 
     if (ok)
-        timeOfLastSave = juce::Time::getCurrentTime();
+        timeOfLastSave = yup::Time::getCurrentTime();
 
     return ok;
 }
 
-static void editSaveError (Edit& edit, const juce::File& file, bool warnOfFailure,
+static void editSaveError (Edit& edit, const yup::File& file, bool warnOfFailure,
                            std::function<void (bool)> callback)
 {
     // failed..
@@ -216,7 +216,7 @@ static void editSaveError (Edit& edit, const juce::File& file, bool warnOfFailur
 
     if (warnOfFailure)
     {
-        juce::String s (TRANS("Unable to save edit \"XEDTX\" to file: XFNX")
+        yup::String s (TRANS("Unable to save edit \"XEDTX\" to file: XFNX")
                          .replace ("XEDTX", edit.getName())
                          .replace ("XFNX", file.getFullPathName()));
 
@@ -246,7 +246,7 @@ void EditFileOperations::save (bool warnOfFailure,
     CRASH_TRACER
     auto editFile = getEditFile();
 
-    if (editFile == juce::File())
+    if (editFile == yup::File())
     {
         if (callback)
             callback (false);
@@ -367,20 +367,20 @@ void EditFileOperations::saveAs()
     CRASH_TRACER
     auto newEditName = getNonExistentSiblingWithIncrementedNumberSuffix (getEditFile(), false);
 
-    auto fc = std::make_shared<juce::FileChooser> (TRANS("Save As") + "...",
+    auto fc = std::make_shared<yup::FileChooser> (TRANS("Save As") + "...",
                                                     newEditName,
-                                                    juce::String ("*") + editFileSuffix);
+                                                    yup::String ("*") + editFileSuffix);
 
-    fc->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::warnAboutOverwriting,
-                     [fc, editRef = makeSafeRef (edit)] (const juce::FileChooser&)
+    fc->launchAsync (yup::FileBrowserComponent::saveMode | yup::FileBrowserComponent::warnAboutOverwriting,
+                     [fc, editRef = makeSafeRef (edit)] (const yup::FileChooser&)
                      {
-                         if (fc->getResult() != juce::File())
+                         if (fc->getResult() != yup::File())
                              if (auto ed = editRef.get())
                                  EditFileOperations (*ed).saveAs (fc->getResult().withFileExtension (editFileSuffix));
                      });
 }
 
-void EditFileOperations::saveAs (const juce::File& f, bool forceOverwriteExisting,
+void EditFileOperations::saveAs (const yup::File& f, bool forceOverwriteExisting,
                                   std::function<void (bool)> callback)
 {
     if (f == getEditFile())
@@ -444,7 +444,7 @@ void EditFileOperations::saveAs (const juce::File& f, bool forceOverwriteExistin
                 EditFileOperations ops (*ed);
                 auto tempFile = ops.getTempVersionFile();
 
-                if (tempFile == juce::File())
+                if (tempFile == yup::File())
                 {
                     tempFile = getTempVersionOfEditFile (f);
 
@@ -526,13 +526,13 @@ bool EditFileOperations::saveTempVersion (bool forceSaveEvenIfUnchanged)
     return writeToFile (getTempVersionFile(), ! forceSaveEvenIfUnchanged);
 }
 
-juce::File EditFileOperations::getTempVersionOfEditFile (const juce::File& f)
+yup::File EditFileOperations::getTempVersionOfEditFile (const yup::File& f)
 {
-    return f != juce::File() ? f.getSiblingFile (".tmp_" + f.getFileNameWithoutExtension())
-                             : juce::File();
+    return f != yup::File() ? f.getSiblingFile (".tmp_" + f.getFileNameWithoutExtension())
+                             : yup::File();
 }
 
-juce::File EditFileOperations::getTempVersionFile() const
+yup::File EditFileOperations::getTempVersionFile() const
 {
     return getTempVersionOfEditFile (getEditFile());
 }
@@ -545,11 +545,11 @@ void EditFileOperations::deleteTempVersion()
 //==============================================================================
 void EditFileOperations::updateEditFiles()
 {
-    juce::SharedResourcePointer<SharedEditFileDataCache>()->refresh();
+    yup::SharedResourcePointer<SharedEditFileDataCache>()->refresh();
 }
 
 //==============================================================================
-juce::ValueTree loadEditFromProjectManager (ProjectManager& pm, ProjectItemRef itemID)
+yup::ValueTree loadEditFromProjectManager (ProjectManager& pm, ProjectItemRef itemID)
 {
     if (auto item = pm.getProjectItem (itemID))
         return loadEditFromFile (pm.engine, item->getSourceFile(), itemID);
@@ -599,22 +599,22 @@ std::unique_ptr<Edit> loadEditForExamining (ProjectManager& pm, ProjectItemRef r
     return {};
 }
 
-juce::ValueTree loadEditFromFile (Engine& e, const juce::File& f, ProjectItemRef itemID)
+yup::ValueTree loadEditFromFile (Engine& e, const yup::File& f, ProjectItemRef itemID)
 {
     CRASH_TRACER
-    juce::ValueTree state;
+    yup::ValueTree state;
 
-    if (auto xml = juce::parseXML (f))
+    if (auto xml = yup::parseXML (f))
     {
         updateLegacyEdit (*xml);
-        state = juce::ValueTree::fromXml (*xml);
+        state = yup::ValueTree::fromXml (*xml);
     }
 
     if (! state.isValid())
     {
-        if (juce::FileInputStream is (f); is.openedOk())
+        if (yup::FileInputStream is (f); is.openedOk())
         {
-            if (state = juce::ValueTree::readFromStream (is); state.hasType (IDs::EDIT))
+            if (state = yup::ValueTree::readFromStream (is); state.hasType (IDs::EDIT))
                 state = updateLegacyEdit (state);
             else
                 state = {};
@@ -627,7 +627,7 @@ juce::ValueTree loadEditFromFile (Engine& e, const juce::File& f, ProjectItemRef
         if (f.existsAsFile() && f.getSize() > 0)
             return {};
 
-        state = juce::ValueTree (IDs::EDIT);
+        state = yup::ValueTree (IDs::EDIT);
         state.setProperty (IDs::appVersion, e.getPropertyStorage().getApplicationVersion(), nullptr);
     }
 
@@ -636,12 +636,12 @@ juce::ValueTree loadEditFromFile (Engine& e, const juce::File& f, ProjectItemRef
     return state;
 }
 
-juce::ValueTree createEmptyEdit (Engine& e)
+yup::ValueTree createEmptyEdit (Engine& e)
 {
     return loadEditFromFile (e, {}, ProjectItemID::createNewID (ProjectID{}));
 }
 
-static std::unique_ptr<Edit> createEdit (Engine& engine, const juce::ValueTree& editState,
+static std::unique_ptr<Edit> createEdit (Engine& engine, const yup::ValueTree& editState,
                                          Edit::EditFileRetriever editFileRetriever, Edit::EditRole role,
                                          Edit::LoadContext* loadContext)
 {
@@ -666,20 +666,20 @@ static std::unique_ptr<Edit> createEdit (Engine& engine, const juce::ValueTree& 
                              });
 }
 
-std::unique_ptr<Edit> loadEditFromFile (Engine& engine, const juce::File& editFile, Edit::EditRole role,
+std::unique_ptr<Edit> loadEditFromFile (Engine& engine, const yup::File& editFile, Edit::EditRole role,
                                         Edit::LoadContext* loadContext)
 {
     auto editState = loadEditFromFile (engine, editFile, ProjectItemID{});
     return createEdit (engine, editState, [editFile] { return editFile; }, role, loadContext);
 }
 
-std::unique_ptr<Edit> loadEditFromState (Engine& engine, const juce::ValueTree& editState, Edit::EditRole role,
+std::unique_ptr<Edit> loadEditFromState (Engine& engine, const yup::ValueTree& editState, Edit::EditRole role,
                                          Edit::LoadContext* loadContext)
 {
     return createEdit (engine, editState, {}, role, loadContext);
 }
 
-std::unique_ptr<Edit> createEmptyEdit (Engine& engine, const juce::File& editFile)
+std::unique_ptr<Edit> createEmptyEdit (Engine& engine, const yup::File& editFile)
 {
     auto id = ProjectItemID::createNewID (ProjectID{});
 

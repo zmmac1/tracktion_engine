@@ -135,12 +135,12 @@ bool TrackMutingNode::isReadyToProcess()
     return input->hasProcessed();
 }
 
-void TrackMutingNode::prefetchBlock (juce::Range<int64_t>)
+void TrackMutingNode::prefetchBlock (yup::Range<int64_t>)
 {
     trackMuteState->update();
 }
 
-void TrackMutingNode::preProcess (choc::buffer::FrameCount, juce::Range<int64_t>)
+void TrackMutingNode::preProcess (choc::buffer::FrameCount, yup::Range<int64_t>)
 {
     if (canUseSourceBuffers)
         setBufferViewToUse (input.get(), input->getProcessedOutput().audio);

@@ -15,80 +15,80 @@ namespace tracktion::inline engine {
 */
 struct AudioFileUtils
 {
-    static juce::AudioFormatReader* createReaderFor (Engine&, const juce::File&);
-    static juce::AudioFormatReader* createReaderFindingFormat (Engine&, const juce::File&, juce::AudioFormat*&);
-    static juce::MemoryMappedAudioFormatReader* createMemoryMappedReader (Engine&, const juce::File&, juce::AudioFormat*&);
+    static yup::AudioFormatReader* createReaderFor (Engine&, const yup::File&);
+    static yup::AudioFormatReader* createReaderFindingFormat (Engine&, const yup::File&, yup::AudioFormat*&);
+    static yup::MemoryMappedAudioFormatReader* createMemoryMappedReader (Engine&, const yup::File&, yup::AudioFormat*&);
 
     struct MappedFileAndReader
     {
-        std::unique_ptr<juce::MemoryMappedFile> mappedFile;
-        std::unique_ptr<juce::AudioFormatReader> reader;
+        std::unique_ptr<yup::MemoryMappedFile> mappedFile;
+        std::unique_ptr<yup::AudioFormatReader> reader;
     };
 
-    static std::unique_ptr<MappedFileAndReader> createMappedFileAndReaderFor (Engine&, const juce::File&);
+    static std::unique_ptr<MappedFileAndReader> createMappedFileAndReaderFor (Engine&, const yup::File&);
 
-    static juce::AudioFormatWriter* createWriterFor (Engine&, const juce::File&,
+    static yup::AudioFormatWriter* createWriterFor (Engine&, const yup::File&,
                                                      double sampleRate, unsigned int numChannels, int bitsPerSample,
-                                                     const juce::StringPairArray& metadata, int quality);
+                                                     const yup::StringPairArray& metadata, int quality);
 
-    static juce::AudioFormatWriter* createWriterFor (juce::AudioFormat*, const juce::File&,
+    static yup::AudioFormatWriter* createWriterFor (yup::AudioFormat*, const yup::File&,
                                                      double sampleRate, unsigned int numChannels, int bitsPerSample,
-                                                     const juce::StringPairArray& metadata, int quality);
+                                                     const yup::StringPairArray& metadata, int quality);
 
-    static juce::AudioFormatWriter* createWriterFor (juce::AudioFormat*, const juce::File&,
+    static yup::AudioFormatWriter* createWriterFor (yup::AudioFormat*, const yup::File&,
                                                      double sampleRate, unsigned int numChannels, int bitsPerSample,
-                                                     const juce::StringPairArray& metadata, int quality,
-                                                     const juce::AudioChannelSet& channelLayout);
+                                                     const yup::StringPairArray& metadata, int quality,
+                                                     const yup::AudioChannelSet& channelLayout);
 
-    static SampleRange scanForNonZeroSamples (Engine&, const juce::File&, float maxZeroLevelDb);
+    static SampleRange scanForNonZeroSamples (Engine&, const yup::File&, float maxZeroLevelDb);
 
     static SampleRange copyNonSilentSectionToNewFile (Engine&,
-                                                      const juce::File& sourceFile,
-                                                      const juce::File& destFile,
+                                                      const yup::File& sourceFile,
+                                                      const yup::File& destFile,
                                                       float maxZeroLevelDb);
 
-    static SampleRange trimSilence (Engine&, const juce::File&, float maxZeroLevelDb);
+    static SampleRange trimSilence (Engine&, const yup::File&, float maxZeroLevelDb);
 
     /** Reverses a file updating a progress value and checking the exit status of a given job. */
-    static bool reverse (Engine&, const juce::File& source, const juce::File& destination,
-                         std::atomic<float>& progress, juce::ThreadPoolJob* job = nullptr,
+    static bool reverse (Engine&, const yup::File& source, const yup::File& destination,
+                         std::atomic<float>& progress, yup::ThreadPoolJob* job = nullptr,
                          bool canCreateWavIntermediate = true);
 
     // returns length of file created, or -1
     static SampleCount copySectionToNewFile (Engine& e,
-                                             const juce::File& sourceFile,
-                                             const juce::File& destFile,
+                                             const yup::File& sourceFile,
+                                             const yup::File& destFile,
                                              SampleRange range);
 
     static SampleCount copySectionToNewFile (Engine& e,
-                                             const juce::File& sourceFile,
-                                             const juce::File& destFile,
+                                             const yup::File& sourceFile,
+                                             const yup::File& destFile,
                                              TimeRange range);
 
-    static void addBWAVStartToMetadata (juce::StringPairArray& metadata, SampleCount start);
+    static void addBWAVStartToMetadata (yup::StringPairArray& metadata, SampleCount start);
 
-    static void applyBWAVStartTime (const juce::File&, SampleCount start);
+    static void applyBWAVStartTime (const yup::File&, SampleCount start);
 
-    static SampleCount getFileLengthSamples (Engine& e, const juce::File&);
+    static SampleCount getFileLengthSamples (Engine& e, const yup::File&);
 
     //==============================================================================
     template<class TargetFormat>
-    static bool convertToFormat (Engine& e, const juce::File& sourceFile, juce::OutputStream& destStream,
-                                 int quality, const juce::StringPairArray& metadata,
-                                 juce::int64 blockSize = -1,
+    static bool convertToFormat (Engine& e, const yup::File& sourceFile, yup::OutputStream& destStream,
+                                 int quality, const yup::StringPairArray& metadata,
+                                 yup::int64 blockSize = -1,
                                  std::function<bool()> continuePredicate = {},
                                  std::function<void (float)> updateProgress = {})
     {
-        std::unique_ptr<juce::AudioFormatReader> reader (createReaderFor (e, sourceFile));
+        std::unique_ptr<yup::AudioFormatReader> reader (createReaderFor (e, sourceFile));
         return convertToFormat<TargetFormat> (reader.get(), destStream, quality, metadata, blockSize,
                                               continuePredicate, updateProgress);
     }
 
     template<class TargetFormat>
-    static bool convertToFormat (juce::AudioFormatReader* reader,
-                                 juce::OutputStream& destStream,
-                                 int quality, const juce::StringPairArray& metadata,
-                                 juce::int64 blockSize = -1,
+    static bool convertToFormat (yup::AudioFormatReader* reader,
+                                 yup::OutputStream& destStream,
+                                 int quality, const yup::StringPairArray& metadata,
+                                 yup::int64 blockSize = -1,
                                  std::function<bool()> continuePredicate = {},
                                  std::function<void (float)> updateProgress = {})
     {
@@ -97,19 +97,19 @@ struct AudioFileUtils
             // NB: must write to a temp file because the archiver relies on the destStream's position
             // being left pointing to the end of the data that was written, whereas some formats
             // may leave the position set elsewhere.
-            juce::TemporaryFile tempFile;
+            yup::TemporaryFile tempFile;
 
-            if (auto out = std::unique_ptr<juce::OutputStream> (tempFile.getFile().createOutputStream()))
+            if (auto out = std::unique_ptr<yup::OutputStream> (tempFile.getFile().createOutputStream()))
             {
                 TargetFormat format;
 
-                std::unordered_map<juce::String, juce::String> metadataMap;
+                std::unordered_map<yup::String, yup::String> metadataMap;
 
                 for (const auto& key : metadata.getAllKeys())
                     metadataMap[key] = metadata[key];
 
-                if (auto writer = std::unique_ptr<juce::AudioFormatWriter> (format.createWriterFor (out,
-                                                                                                    juce::AudioFormatWriterOptions().withSampleRate (reader->sampleRate)
+                if (auto writer = std::unique_ptr<yup::AudioFormatWriter> (format.createWriterFor (out,
+                                                                                                    yup::WriteOptions().withSampleRate (reader->sampleRate)
                                                                                                                                     .withNumChannels (static_cast<int> (reader->numChannels))
                                                                                                                                     .withBitsPerSample (static_cast<int> (reader->bitsPerSample))
                                                                                                                                     .withMetadataValues (metadataMap)
@@ -128,17 +128,17 @@ struct AudioFileUtils
                     }
                     else
                     {
-                        juce::int64 numLeft = reader->lengthInSamples;
+                        yup::int64 numLeft = reader->lengthInSamples;
 
                         if (numLeft <= 0)
                             return false;
 
-                        for (juce::int64 startSample = 0;;)
+                        for (yup::int64 startSample = 0;;)
                         {
                             if (continuePredicate && ! continuePredicate())
                                 return false;
 
-                            const juce::int64 numThisTime = std::min (blockSize, numLeft);
+                            const yup::int64 numThisTime = std::min (blockSize, numLeft);
 
                             if (! writer->writeFromAudioReader (*reader, startSample, numThisTime))
                                 return false;
@@ -170,24 +170,24 @@ struct AudioFileUtils
 
     //==============================================================================
     template <typename SourceFormat>
-    inline static bool readFromFormat (Engine& engine, juce::InputStream& source, const juce::File& dest)
+    inline static bool readFromFormat (Engine& engine, yup::InputStream& source, const yup::File& dest)
     {
-        struct ForwardingInputStream  : public juce::InputStream
+        struct ForwardingInputStream  : public yup::InputStream
         {
-            ForwardingInputStream (juce::InputStream& s)  : stream (s) {}
+            ForwardingInputStream (yup::InputStream& s)  : stream (s) {}
 
-            juce::int64 getTotalLength() override        { return stream.getTotalLength(); }
+            yup::int64 getTotalLength() override        { return stream.getTotalLength(); }
             bool isExhausted() override                  { return stream.isExhausted(); }
             int read (void* d, int sz) override          { return stream.read (d, sz); }
-            juce::int64 getPosition() override           { return stream.getPosition(); }
-            bool setPosition (juce::int64 pos) override  { return stream.setPosition (pos); }
+            yup::int64 getPosition() override           { return stream.getPosition(); }
+            bool setPosition (yup::int64 pos) override  { return stream.setPosition (pos); }
 
             InputStream& stream;
         };
 
         SourceFormat sourceFormat;
 
-        if (auto reader = std::unique_ptr<juce::AudioFormatReader> (sourceFormat.createReaderFor (new ForwardingInputStream (source), true)))
+        if (auto reader = std::unique_ptr<yup::AudioFormatReader> (sourceFormat.createReaderFor (new ForwardingInputStream (source), true)))
         {
             auto& manager = engine.getAudioFileFormatManager().writeFormatManager;
 
@@ -244,7 +244,7 @@ struct AudioFileUtils
         float envelope = 0.0f;
         float envAttack = 1.0f, envRelease = 1.0f;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnvelopeFollower)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EnvelopeFollower)
     };
 };
 

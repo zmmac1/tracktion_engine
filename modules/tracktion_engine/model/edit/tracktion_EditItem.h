@@ -23,26 +23,26 @@ struct EditItemID
     bool isValid() const noexcept       { return itemID != 0; }
     bool isInvalid() const noexcept     { return itemID == 0; }
 
-    static EditItemID fromID (const juce::ValueTree&);
-    static EditItemID readOrCreateNewID (Edit&, const juce::ValueTree&);
-    void writeID (juce::ValueTree&, juce::UndoManager*) const;
+    static EditItemID fromID (const yup::ValueTree&);
+    static EditItemID readOrCreateNewID (Edit&, const yup::ValueTree&);
+    void writeID (yup::ValueTree&, juce::UndoManager*) const;
 
-    static EditItemID fromVar (const juce::var&);
-    static EditItemID fromString (const juce::String&);
-    static EditItemID fromProperty (const juce::ValueTree&, const juce::Identifier&);
-    static EditItemID fromXML (const juce::XmlElement&, const char* attributeName);
-    static EditItemID fromXML (const juce::XmlElement&, const juce::Identifier&);
+    static EditItemID fromVar (const yup::var&);
+    static EditItemID fromString (const yup::String&);
+    static EditItemID fromProperty (const yup::ValueTree&, const yup::Identifier&);
+    static EditItemID fromXML (const yup::XmlElement&, const char* attributeName);
+    static EditItemID fromXML (const yup::XmlElement&, const yup::Identifier&);
 
     static EditItemID findFirstIDNotIn (const std::vector<EditItemID>& existingIDsSorted,
                                         uint64_t startFrom = 1001);
 
-    void setProperty (juce::ValueTree&, const juce::Identifier&, juce::UndoManager*) const;
-    void setXML (juce::XmlElement&, const juce::Identifier& attributeName) const;
-    void setXML (juce::XmlElement&, const char* attributeName) const;
+    void setProperty (yup::ValueTree&, const yup::Identifier&, juce::UndoManager*) const;
+    void setXML (yup::XmlElement&, const yup::Identifier& attributeName) const;
+    void setXML (yup::XmlElement&, const char* attributeName) const;
 
-    operator juce::var() const                          { return toVar(); }
-    juce::var toVar() const;
-    juce::String toString() const;
+    operator yup::var() const                          { return toVar(); }
+    yup::var toVar() const;
+    yup::String toString() const;
 
     uint64_t getRawID() const noexcept                  { return itemID; }
     static EditItemID fromRawID (uint64_t);
@@ -51,28 +51,28 @@ struct EditItemID
     bool operator!= (EditItemID other) const noexcept   { return itemID != other.itemID; }
     bool operator<  (EditItemID other) const noexcept   { return itemID <  other.itemID; }
 
-    static juce::Array<EditItemID> parseStringList (const juce::String& list);
-    static juce::String listToString (const juce::Array<EditItemID>& list);
+    static yup::Array<EditItemID> parseStringList (const yup::String& list);
+    static yup::String listToString (const yup::Array<EditItemID>& list);
 
     //==============================================================================
-    static std::vector<EditItemID> findAllIDs (const juce::XmlElement&);
-    static std::vector<EditItemID> findAllIDs (const juce::ValueTree&);
+    static std::vector<EditItemID> findAllIDs (const yup::XmlElement&);
+    static std::vector<EditItemID> findAllIDs (const yup::ValueTree&);
 
     using IDMap = std::map<EditItemID, EditItemID>;
 
-    static void remapIDs (juce::XmlElement&, std::function<EditItemID()> createNewID, IDMap* remappedIDs = nullptr);
-    static void remapIDs (juce::XmlElement&, Edit&, IDMap* remappedIDs = nullptr);
-    static void remapIDs (juce::ValueTree&, juce::UndoManager*, std::function<EditItemID()> createNewID, IDMap* remappedIDs = nullptr);
-    static void remapIDs (juce::ValueTree&, juce::UndoManager*, Edit&, IDMap* remappedIDs = nullptr);
+    static void remapIDs (yup::XmlElement&, std::function<EditItemID()> createNewID, IDMap* remappedIDs = nullptr);
+    static void remapIDs (yup::XmlElement&, Edit&, IDMap* remappedIDs = nullptr);
+    static void remapIDs (yup::ValueTree&, juce::UndoManager*, std::function<EditItemID()> createNewID, IDMap* remappedIDs = nullptr);
+    static void remapIDs (yup::ValueTree&, juce::UndoManager*, Edit&, IDMap* remappedIDs = nullptr);
 
     //==============================================================================
     /** Callback that can be set in order to update any reassigned IDs in ValueTree client code. */
-    static std::function<void (juce::ValueTree&, const juce::Identifier& /*propertyName*/,
-                               const std::map<juce::String, EditItemID>&, juce::UndoManager*)> applyNewIDsToExternalValueTree;
+    static std::function<void (yup::ValueTree&, const yup::Identifier& /*propertyName*/,
+                               const std::map<yup::String, EditItemID>&, juce::UndoManager*)> applyNewIDsToExternalValueTree;
 
     /** Callback that can be set in order to update any reassigned IDs in XML client code. */
-    static std::function<void (juce::XmlElement&, const juce::String& /*propertyName*/,
-                               const std::map<juce::String, EditItemID>&)> applyNewIDsToExternalXML;
+    static std::function<void (yup::XmlElement&, const yup::String& /*propertyName*/,
+                               const std::map<yup::String, EditItemID>&)> applyNewIDsToExternalXML;
 
 private:
     uint64_t itemID = 0;
@@ -86,7 +86,7 @@ class EditItem
 {
 public:
     EditItem (EditItemID, Edit&);
-    EditItem (Edit&, const juce::ValueTree&);
+    EditItem (Edit&, const yup::ValueTree&);
     virtual ~EditItem() = default;
 
     //==============================================================================
@@ -95,10 +95,10 @@ public:
     /** Every EditItem has an ID which is unique within the edit. */
     const EditItemID itemID;
 
-    virtual juce::String getName() const = 0;
+    virtual yup::String getName() const = 0;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditItem)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditItem)
 };
 
 
@@ -144,18 +144,18 @@ struct EditItemCache
 private:
     std::map<EditItemID, EditItemType*> knownEditItems;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditItemCache)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditItemCache)
 };
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::EditItemID>
     {
-        static tracktion::engine::EditItemID fromVar (const juce::var& v)   { return tracktion::engine::EditItemID::fromVar (v); }
-        static juce::var toVar (const tracktion::engine::EditItemID& v)     { return juce::var ((juce::int64) v.getRawID()); }
+        static tracktion::engine::EditItemID fromVar (const yup::var& v)   { return tracktion::engine::EditItemID::fromVar (v); }
+        static yup::var toVar (const tracktion::engine::EditItemID& v)     { return yup::var ((yup::int64) v.getRawID()); }
     };
 }
 

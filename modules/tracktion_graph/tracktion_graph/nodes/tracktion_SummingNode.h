@@ -153,7 +153,7 @@ private:
 
     static void sortByTimestampUnstable (tracktion_engine::MidiMessageArray& messages) noexcept
     {
-        std::sort (messages.begin(), messages.end(), [] (const juce::MidiMessage& a, const juce::MidiMessage& b)
+        std::sort (messages.begin(), messages.end(), [] (const yup::MidiMessage& a, const yup::MidiMessage& b)
         {
             auto t1 = a.getTimeStamp();
             auto t2 = b.getTimeStamp();

@@ -27,22 +27,22 @@ public:
     ProjectItemRef() noexcept = default;
 
     /** Creates a ref from a string that is either a ProjectItemID or a file path. */
-    explicit ProjectItemRef (const juce::String& pathOrID);
+    explicit ProjectItemRef (const yup::String& pathOrID);
 
     /** Creates a ref from a path string with a known owner project. */
-    ProjectItemRef (const juce::String& pathOrID, Project& owner);
+    ProjectItemRef (const yup::String& pathOrID, Project& owner);
 
     /** Creates a ref from an existing ProjectItemID. */
     ProjectItemRef (ProjectItemID);
 
     /** Creates a ref from a relative path string. */
-    static ProjectItemRef fromPath (const juce::String& relativePath);
+    static ProjectItemRef fromPath (const yup::String& relativePath);
 
     /** Creates a ref from a relative path with a known owner project. */
-    static ProjectItemRef fromPath (const juce::String& relativePath, Project& owner);
+    static ProjectItemRef fromPath (const yup::String& relativePath, Project& owner);
 
     /** Creates a ref from an absolute file. */
-    static ProjectItemRef fromAbsolutePath (const juce::File&);
+    static ProjectItemRef fromAbsolutePath (const yup::File&);
 
     //==============================================================================
     bool isValid() const noexcept;
@@ -61,13 +61,13 @@ public:
     /** Returns a string which can be used for filenames.
         This isn't meant for resolution, it will be the ProjectItemID or a hash of path.
     */
-    juce::String toIDForFilename() const noexcept;
+    yup::String toIDForFilename() const noexcept;
 
     /** Returns the raw string value. */
-    juce::String toString() const noexcept;
+    yup::String toString() const noexcept;
 
     /** Returns the owner project, if one was provided at construction. */
-    juce::ReferenceCountedObjectPtr<Project> getProject() const noexcept;
+    yup::ReferenceCountedObjectPtr<Project> getProject() const noexcept;
 
     /** Resolves to a file.
         - If ProjectItemID: looks up via engine's ProjectManager
@@ -75,7 +75,7 @@ public:
           default directory if no folder is provided
         - If absolute path: returns directly
     */
-    juce::File resolve (Engine&, const juce::File& projectFolder = {}) const;
+    yup::File resolve (Engine&, const yup::File& projectFolder = {}) const;
 
     //==============================================================================
     bool operator== (const ProjectItemRef&) const;
@@ -86,7 +86,7 @@ public:
     bool operator!= (ProjectItemID) const;
 
 private:
-    juce::String value;
+    yup::String value;
     SafeSelectable<Project> ownerProject;
 };
 
@@ -95,7 +95,7 @@ inline bool operator!= (ProjectItemID lhs, const ProjectItemRef& rhs) { return r
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::ProjectItemRef>

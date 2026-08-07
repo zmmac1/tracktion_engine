@@ -13,10 +13,10 @@ namespace tracktion::inline engine {
 class BackgroundJobManager;
 
 //==============================================================================
-class ThreadPoolJobWithProgress  : public juce::ThreadPoolJob
+class ThreadPoolJobWithProgress  : public yup::ThreadPoolJob
 {
 public:
-    ThreadPoolJobWithProgress (const juce::String& name)  : ThreadPoolJob (name) {}
+    ThreadPoolJobWithProgress (const yup::String& name)  : ThreadPoolJob (name) {}
     ~ThreadPoolJobWithProgress();
 
     virtual float getCurrentTaskProgress() = 0;
@@ -25,7 +25,7 @@ public:
     void setManager (BackgroundJobManager&);
 
     /** Sets the job's name but also updates the manager so the list will reflect it. */
-    void setName (const juce::String& newName);
+    void setName (const yup::String& newName);
 
     /** Call this in your sub-class destructor to to remvoe it from the manager queue before this
         class's destructor is called which can result in a pure virtual call.
@@ -42,8 +42,8 @@ private:
     This is essentially a wrapper around a ThreadPool which adds a listener interface so
     you can create UI elements to represent the list.
 */
-class BackgroundJobManager  : private juce::AsyncUpdater,
-                              private juce::Timer
+class BackgroundJobManager  : private yup::AsyncUpdater,
+                              private yup::Timer
 {
 public:
     BackgroundJobManager()
@@ -89,7 +89,7 @@ public:
         JobInfo (const JobInfo& o)              : name (o.name), progress (o.progress), jobId (o.jobId), canCancel (o.canCancel) {}
         JobInfo& operator= (const JobInfo& o)   { name = o.name; progress = o.progress; jobId = o.jobId; canCancel = o.canCancel; return *this; }
 
-        juce::String name;
+        yup::String name;
         float progress = 0;
         int jobId = -1;
         bool canCancel = false;
@@ -97,7 +97,7 @@ public:
 
     void signalJobShouldExit (const JobInfo& info)
     {
-        const juce::ScopedLock sl (jobsLock);
+        const yup::ScopedLock sl (jobsLock);
 
         for (int i = jobs.size(); --i >= 0;)
             if (auto pair = jobs.getUnchecked (i))
@@ -107,7 +107,7 @@ public:
 
     JobInfo getJobInfo (int index) const noexcept
     {
-        const juce::ScopedLock sl (jobsLock);
+        const yup::ScopedLock sl (jobsLock);
 
         if (auto j = jobs[index])
             return j->info;
@@ -115,9 +115,9 @@ public:
         return JobInfo();
     }
 
-    int getNumJobs() const noexcept                 { const juce::ScopedLock sl (jobsLock); return jobs.size(); }
+    int getNumJobs() const noexcept                 { const yup::ScopedLock sl (jobsLock); return jobs.size(); }
     float getTotalProgress() const noexcept         { return totalProgress; }
-    juce::ThreadPool& getPool() noexcept            { return pool; }
+    yup::ThreadPool& getPool() noexcept            { return pool; }
 
     //==============================================================================
     class Listener
@@ -138,20 +138,20 @@ private:
 
         ThreadPoolJobWithProgress& job;
         JobInfo info;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JobInfoPair)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JobInfoPair)
     };
 
     friend class ThreadPoolJobWithProgress;
-    juce::OwnedArray<JobInfoPair> jobs;
-    juce::CriticalSection jobsLock;
-    juce::ThreadPool pool;
-    juce::ListenerList<Listener> listeners;
+    yup::OwnedArray<JobInfoPair> jobs;
+    yup::CriticalSection jobsLock;
+    yup::ThreadPool pool;
+    yup::ListenerList<Listener> listeners;
     float totalProgress = 1.0f;
     int nextJobId = 0;
 
     void addJobInternal (ThreadPoolJobWithProgress& job)
     {
-        const juce::ScopedLock sl (jobsLock);
+        const yup::ScopedLock sl (jobsLock);
 
         jobs.add (new JobInfoPair (job, getNextJobId()));
         triggerAsyncUpdate();
@@ -160,7 +160,7 @@ private:
 
     void removeJobInternal (ThreadPoolJobWithProgress& job)
     {
-        const juce::ScopedLock sl (jobsLock);
+        const yup::ScopedLock sl (jobsLock);
 
         for (int i = jobs.size(); --i >= 0;)
             if (&jobs.getUnchecked (i)->job == &job)
@@ -173,7 +173,7 @@ private:
 
     void updateJobs()
     {
-        if (auto app = juce::JUCEApplicationBase::getInstance())
+        if (auto app = yup::JUCEApplicationBase::getInstance())
             if (app->isInitialising())
                 return;
 
@@ -181,7 +181,7 @@ private:
         int numJobs = 0;
 
         {
-            const juce::ScopedLock sl (jobsLock);
+            const yup::ScopedLock sl (jobsLock);
 
             for (int i = jobs.size(); --i >= 0;)
             {
@@ -204,7 +204,7 @@ private:
             totalProgress = newTotal;
 
         jassert (totalProgress == totalProgress
-                  && juce::isPositiveAndNotGreaterThan (totalProgress, 1.0f));
+                  && yup::isPositiveAndNotGreaterThan (totalProgress, 1.0f));
 
         if (totalProgress >= 1.0f)
             stopTimer();
@@ -213,7 +213,7 @@ private:
     void handleAsyncUpdate() override               { listeners.call (&Listener::backgroundJobsChanged); }
     void timerCallback() override                   { updateJobs(); }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BackgroundJobManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BackgroundJobManager)
 };
 
 inline ThreadPoolJobWithProgress::~ThreadPoolJobWithProgress()
@@ -231,7 +231,7 @@ inline void ThreadPoolJobWithProgress::setManager (BackgroundJobManager& m)
     manager->triggerAsyncUpdate();
 }
 
-inline void ThreadPoolJobWithProgress::setName (const juce::String& newName)
+inline void ThreadPoolJobWithProgress::setName (const yup::String& newName)
 {
     setJobName (newName);
 

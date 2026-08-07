@@ -11,19 +11,19 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-juce::String getCmajorPatchPluginFormatName()
+yup::String getCmajorPatchPluginFormatName()
 {
     return "Cmajor";
 }
 
-bool isCmajorPatchPluginFormat (const juce::String& formatName)
+bool isCmajorPatchPluginFormat (const yup::String& formatName)
 {
     return formatName == getCmajorPatchPluginFormatName();
 }
 
-bool isCmajorPatchPluginFormat (const juce::PluginDescription& pd)
+bool isCmajorPatchPluginFormat (const yup::PluginDescription& pd)
 {
-    return isCmajorPatchPluginFormat (pd.pluginFormatName);
+    return isCmajorPatchPluginFormat (pd.name);
 }
 
 //==============================================================================
@@ -53,7 +53,7 @@ cmaj::CacheDatabaseInterface::Ptr createCompilerCache (tracktion::Engine& engine
     return {};
 }
 
-std::unique_ptr<juce::AudioPluginFormat> createCmajorPatchPluginFormat (tracktion::Engine& engine)
+std::unique_ptr<yup::AudioPluginFormat> createCmajorPatchPluginFormat (tracktion::Engine& engine)
 {
     TRACKTION_LOG ("Cmajor plugin format enabled");
 
@@ -90,7 +90,7 @@ std::unique_ptr<juce::AudioPluginFormat> createCmajorPatchPluginFormat (tracktio
                                                              engine.getPropertyStorage().getApplicationVersion().toStdString());
 }
 
-juce::String getCmajorPatchCompileError (Plugin& p)
+yup::String getCmajorPatchCompileError (Plugin& p)
 {
     if (auto ex = dynamic_cast<ExternalPlugin*> (&p))
         if (auto plugin = dynamic_cast<cmaj::plugin::SinglePatchJITPlugin*> (ex->getAudioPluginInstance()))
@@ -104,8 +104,8 @@ juce::String getCmajorPatchCompileError (Plugin& p)
 
 //==============================================================================
 std::string getCmajorVersion() { return {}; }
-juce::String getCmajorPatchCompileError (Plugin&) { return {}; }
-std::unique_ptr<juce::AudioPluginFormat> createCmajorPatchPluginFormat (tracktion::Engine&)  { return {}; }
+yup::String getCmajorPatchCompileError (Plugin&) { return {}; }
+std::unique_ptr<yup::AudioPluginFormat> createCmajorPatchPluginFormat (tracktion::Engine&)  { return {}; }
 
 #endif
 

@@ -13,12 +13,12 @@ namespace tracktion::inline engine {
 DelayPlugin::DelayPlugin (PluginCreationInfo info) : Plugin (info)
 {
     feedbackDb    = addParam ("feedback", TRANS("Feedback"), { getMinDelayFeedbackDb(), 0.0f },
-                              [] (float value)              { return juce::Decibels::toString (value); },
-                              [] (const juce::String& s)    { return dbStringToDb (s); });
+                              [] (float value)              { return yup::Decibels::toString (value); },
+                              [] (const yup::String& s)    { return dbStringToDb (s); });
 
     mixProportion = addParam ("mix proportion", TRANS("Mix proportion"), { 0.0f, 1.0f },
-                              [] (float value)              { return juce::String (juce::roundToInt (value * 100.0f)) + "% wet"; },
-                              [] (const juce::String& s)    { return s.getFloatValue() / 100.0f; });
+                              [] (float value)              { return yup::String (yup::roundToInt (value * 100.0f)) + "% wet"; },
+                              [] (const yup::String& s)    { return s.getFloatValue() / 100.0f; });
 
     auto um = getUndoManager();
 
@@ -98,7 +98,7 @@ void DelayPlugin::applyToBuffer (const PluginRenderContext& fc)
     zeroDenormalisedValuesIfNeeded (*fc.destBuffer);
 }
 
-void DelayPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void DelayPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, feedbackValue, mixValue, lengthMs);
 

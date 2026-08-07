@@ -16,7 +16,7 @@ namespace tracktion::inline engine {
 class OutputDevice   : public IODevice
 {
 public:
-    OutputDevice (Engine&, juce::String name, juce::String deviceID);
+    OutputDevice (Engine&, yup::String name, yup::String deviceID);
     ~OutputDevice() override;
 
     //==============================================================================
@@ -25,7 +25,7 @@ public:
 
 protected:
     //==============================================================================
-    virtual juce::String openDevice() = 0;
+    virtual yup::String openDevice() = 0;
     virtual void closeDevice() = 0;
 };
 
@@ -42,7 +42,7 @@ public:
     Edit& edit;
 
 protected:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputDeviceInstance)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OutputDeviceInstance)
 };
 
 } // namespace tracktion::inline engine

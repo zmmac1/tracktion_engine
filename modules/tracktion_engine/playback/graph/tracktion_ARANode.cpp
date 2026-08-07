@@ -15,7 +15,7 @@ namespace tracktion::inline engine {
 /** This class is a necessary bodge due to ARA needing to be told that we're playing, even if we aren't,
     so it can generate audio while its graph is being modified!
 */
-class ARANode::ARAPlayhead  : public juce::AudioPlayHead
+class ARANode::ARAPlayhead  : public yup::AudioPlayHead
 {
 public:
     ARAPlayhead (ExternalPlugin& p)
@@ -37,7 +37,7 @@ public:
         currentPos.set (time);
     }
 
-    juce::Optional<PositionInfo> getPosition() const override
+    yup::Optional<PositionInfo> getPosition() const override
     {
         PositionInfo result;
 
@@ -51,14 +51,14 @@ public:
         result.setEditOriginTime (transport.getTimeWhenStarted().inSeconds());
 
         if (isLooping)
-            result.setLoopPoints (juce::AudioPlayHead::LoopPoints ({ loopStart.getPPQTime(), loopEnd.getPPQTime() }));
+            result.setLoopPoints (yup::AudioPlayHead::LoopPoints ({ loopStart.getPPQTime(), loopEnd.getPPQTime() }));
 
         result.setTimeInSeconds (time.inSeconds());
         result.setTimeInSamples (toSamples (time, plugin.getAudioPluginInstance()->getSampleRate()));
 
         const auto timeSig = currentPos.getTimeSignature();
         result.setBpm (currentPos.getTempo());
-        result.setTimeSignature (juce::AudioPlayHead::TimeSignature ({ timeSig.numerator, timeSig.denominator }));
+        result.setTimeSignature (yup::AudioPlayHead::TimeSignature ({ timeSig.numerator, timeSig.denominator }));
 
         const auto ppqPositionOfLastBarStart = currentPos.getPPQTimeOfBarStart();
         result.setPpqPositionOfLastBarStart (ppqPositionOfLastBarStart);
@@ -90,7 +90,7 @@ private:
         return AudioPlayHead::fps30; //Just to cope with it.
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlayhead)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlayhead)
 };
 
 //==============================================================================
@@ -133,7 +133,7 @@ tracktion::graph::NodeProperties ARANode::getNodeProperties()
 
     if (auto plugin = araProxy->getPlugin())
         if (auto p = plugin->getAudioPluginInstance())
-            props.numberOfChannels = juce::jmax (props.numberOfChannels, p->getTotalNumInputChannels(), p->getTotalNumOutputChannels());
+            props.numberOfChannels = yup::jmax (props.numberOfChannels, p->getTotalNumInputChannels(), p->getTotalNumOutputChannels());
 
     return props;
 }
@@ -150,7 +150,7 @@ void ARANode::prepareToPlay (const tracktion::graph::PlaybackInitialisationInfo&
     {
         if (auto p = plugin->getAudioPluginInstance())
         {
-            //NB: Reducing the number of calls to juce::AudioProcessor::prepareToPlay() keeps some ARA plugins happy;
+            //NB: Reducing the number of calls to yup::AudioProcessor::prepareToPlay() keeps some ARA plugins happy;
             //    the VST3 version of Melodyne relies heavily on calls to the inconspicuous IComponent::setActive()!
             if (p->getSampleRate() != info.sampleRate
                  || p->getBlockSize() != info.blockSize)
@@ -190,7 +190,7 @@ void ARANode::process (ProcessContext& pc)
             // The message thread deactivates the renderer (releaseResources/prepareToPlay)
             // around ARA playback-region changes - never render concurrently with that.
             // Try-lock so the audio thread outputs silence for the block rather than blocking.
-            const juce::ScopedTryLock stl (araProxy->getProcessLock());
+            const yup::ScopedTryLock stl (araProxy->getProcessLock());
 
             if (! stl.isLocked())
                 return;

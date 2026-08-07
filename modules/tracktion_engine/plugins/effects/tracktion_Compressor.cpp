@@ -15,33 +15,33 @@ CompressorPlugin::CompressorPlugin (PluginCreationInfo info)  : Plugin (info)
     thresholdGain   = { *this, "threshold", IDs::threshold, TRANS("Threshold"),
                         dbToGain (-6.0f), { 0.01f, 1.0f },
                         [] (float value)             { return gainToDbString (value); },
-                        [] (const juce::String& s)   { return dbStringToGain (s); } };
+                        [] (const yup::String& s)   { return dbStringToGain (s); } };
 
     ratio           = { *this, "ratio", IDs::ratio, TRANS("Ratio"),
                         0.5f, { 0.0f, 0.95f },
-                        [] (float value)             { return (value > 0.001f ? juce::String (1.0f / value, 2)
-                                                                              : juce::String ("INF")) + " : 1"; },
-                        [] (const juce::String& s)   { return s.getFloatValue(); } };
+                        [] (float value)             { return (value > 0.001f ? yup::String (1.0f / value, 2)
+                                                                              : yup::String ("INF")) + " : 1"; },
+                        [] (const yup::String& s)   { return s.getFloatValue(); } };
 
     attackMs        = { *this, "attack", IDs::attack, TRANS("Attack"),
                         100.0f, { 0.3f, 200.0f },
-                        [] (float value)             { return juce::String (value, 1) + " ms"; },
-                        [] (const juce::String& s)   { return s.getFloatValue(); } };
+                        [] (float value)             { return yup::String (value, 1) + " ms"; },
+                        [] (const yup::String& s)   { return s.getFloatValue(); } };
 
     releaseMs       = { *this, "release", IDs::release, TRANS("Release"),
                         100.0f, { 10.0f, 300.0f },
-                        [] (float value)             { return juce::String (value, 1) + " ms"; },
-                        [] (const juce::String& s)   { return s.getFloatValue(); } };
+                        [] (float value)             { return yup::String (value, 1) + " ms"; },
+                        [] (const yup::String& s)   { return s.getFloatValue(); } };
 
     outputDb        = { *this, "output gain", IDs::outputDb, TRANS("Output gain"),
                         0.0f, { -10.0f, 24.0f },
-                        [] (float value)             { return juce::Decibels::toString (value); },
-                        [] (const juce::String& s)   { return dbStringToDb (s); } };
+                        [] (float value)             { return yup::Decibels::toString (value); },
+                        [] (const yup::String& s)   { return dbStringToDb (s); } };
 
     sidechainDb     = { *this, "input gain", IDs::inputDb, TRANS("Sidechain gain"),
                         0.0f, { -24.0f, 24.0f },
-                        [] (float value)             { return juce::Decibels::toString (value); },
-                        [] (const juce::String& s)   { return dbStringToDb (s); } };
+                        [] (float value)             { return yup::Decibels::toString (value); },
+                        [] (const yup::String& s)   { return dbStringToDb (s); } };
 
     useSidechainTrigger.referTo (state, IDs::sidechainTrigger, getUndoManager());
 }
@@ -60,8 +60,8 @@ CompressorPlugin::~CompressorPlugin()
 
 const char* CompressorPlugin::xmlTypeName = "compressor";
 
-void CompressorPlugin::getChannelNames (juce::StringArray* ins,
-                                        juce::StringArray* outs)
+void CompressorPlugin::getChannelNames (yup::StringArray* ins,
+                                        yup::StringArray* outs)
 {
     Plugin::getChannelNames (ins, outs);
 
@@ -180,9 +180,9 @@ float CompressorPlugin::getThreshold() const
 
 void CompressorPlugin::setThreshold (float t)
 {
-    thresholdGain.setParameter (juce::jlimit (getMinThreshold(),
+    thresholdGain.setParameter (yup::jlimit (getMinThreshold(),
                                               getMaxThreshold(), t),
-                                juce::sendNotification);
+                                yup::sendNotification);
 }
 
 float CompressorPlugin::getRatio() const
@@ -192,11 +192,11 @@ float CompressorPlugin::getRatio() const
 
 void CompressorPlugin::setRatio (float r)
 {
-    ratio.setParameter (juce::jlimit (0.05f, 1.0f, r),
-                        juce::sendNotification);
+    ratio.setParameter (yup::jlimit (0.05f, 1.0f, r),
+                        yup::sendNotification);
 }
 
-void CompressorPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void CompressorPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     thresholdGain.setFromValueTree (v);
     ratio.setFromValueTree (v);
@@ -208,7 +208,7 @@ void CompressorPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v
     copyPropertiesToCachedValues (v, useSidechainTrigger);
 }
 
-void CompressorPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id)
+void CompressorPlugin::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id)
 {
     if (v == state && id == IDs::sidechainTrigger)
         propertiesChanged();

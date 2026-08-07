@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-ChordClip::ChordClip (const juce::ValueTree& v, EditItemID id, ClipOwner& targetParent)
+ChordClip::ChordClip (const yup::ValueTree& v, EditItemID id, ClipOwner& targetParent)
     : Clip (v, targetParent, id, Type::chord)
 {
     if (clipName.get().isEmpty())
@@ -43,14 +43,14 @@ void ChordClip::initialise()
     speedRatio = 1.0; // not used
 }
 
-juce::String ChordClip::getSelectableDescription()
+yup::String ChordClip::getSelectableDescription()
 {
     return TRANS("Chord Clip");
 }
 
-juce::Colour ChordClip::getDefaultColour() const
+yup::Color ChordClip::getDefaultColor() const
 {
-    return juce::Colours::red.withHue (1.0f / 9.0f);
+    return yup::Colors::red.withHue (1.0f / 9.0f);
 }
 
 //==============================================================================
@@ -59,7 +59,7 @@ bool ChordClip::canBeAddedTo (ClipOwner& co)
     return isChordTrack (co);
 }
 
-void ChordClip::valueTreeChildAdded (juce::ValueTree&, juce::ValueTree& c)
+void ChordClip::valueTreeChildAdded (yup::ValueTree&, yup::ValueTree& c)
 {
     if (c.hasType (IDs::PATTERNGENERATOR))
     {
@@ -73,7 +73,7 @@ void ChordClip::valueTreeChildAdded (juce::ValueTree&, juce::ValueTree& c)
     triggerAsyncUpdate();
 }
 
-void ChordClip::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int)
+void ChordClip::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int)
 {
     if (p == state && c.hasType (IDs::PATTERNGENERATOR))
     {
@@ -83,7 +83,7 @@ void ChordClip::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, i
     triggerAsyncUpdate();
 }
 
-void ChordClip::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void ChordClip::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     changed();
     triggerAsyncUpdate();
@@ -91,7 +91,7 @@ void ChordClip::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identi
     Clip::valueTreePropertyChanged (v, i);
 }
 
-void ChordClip::valueTreeParentChanged (juce::ValueTree& v)
+void ChordClip::valueTreeParentChanged (yup::ValueTree& v)
 {
     if (! v.getParent().isValid())
         edit.sendTempoOrPitchSequenceChangedUpdates();
@@ -102,7 +102,7 @@ void ChordClip::valueTreeParentChanged (juce::ValueTree& v)
 PatternGenerator* ChordClip::getPatternGenerator()
 {
     if (! state.getChildWithName (IDs::PATTERNGENERATOR).isValid())
-        state.addChild (juce::ValueTree (IDs::PATTERNGENERATOR), -1, &edit.getUndoManager());
+        state.addChild (yup::ValueTree (IDs::PATTERNGENERATOR), -1, &edit.getUndoManager());
 
     jassert (patternGenerator != nullptr);
     return patternGenerator.get();
@@ -116,9 +116,9 @@ void ChordClip::pitchTempoTrackChanged()
     changed();
 }
 
-juce::Colour ChordClip::getColour() const
+yup::Color ChordClip::getColor() const
 {
-    return Clip::getColour();
+    return Clip::getColor();
 }
 
 void ChordClip::handleAsyncUpdate()

@@ -30,7 +30,7 @@ struct StringMap
     }
 
     //==============================================================================
-    void set (const juce::String& key, const juce::String& value)
+    void set (const yup::String& key, const yup::String& value)
     {
         if (value.isEmpty())
         {
@@ -52,7 +52,7 @@ struct StringMap
         }
     }
 
-    void remove (const juce::String& key)
+    void remove (const yup::String& key)
     {
         const int index = keys.indexOf (key);
 
@@ -69,7 +69,7 @@ struct StringMap
         values.clear();
     }
 
-    juce::String get (const juce::String& key) const
+    yup::String get (const yup::String& key) const
     {
         return values [keys.indexOf (key)];
     }
@@ -79,12 +79,12 @@ struct StringMap
         return keys.size();
     }
 
-    juce::String getKeyAt (int index) const
+    yup::String getKeyAt (int index) const
     {
         return keys[index];
     }
 
-    juce::String getValueAt (int index) const
+    yup::String getValueAt (int index) const
     {
         return values[index];
     }
@@ -95,24 +95,24 @@ struct StringMap
         values.remove (index);
     }
 
-    bool containsKey (const juce::String& key) const
+    bool containsKey (const yup::String& key) const
     {
         return keys.contains (key);
     }
 
-    bool containsValue (const juce::String& value) const
+    bool containsValue (const yup::String& value) const
     {
         return values.contains (value);
     }
 
-    juce::String getKeyForValue (const juce::String& value) const
+    yup::String getKeyForValue (const yup::String& value) const
     {
         return keys [values.indexOf (value)];
     }
 
-    juce::StringArray getKeysForValue (const juce::String& value) const
+    yup::StringArray getKeysForValue (const yup::String& value) const
     {
-        juce::StringArray s;
+        yup::StringArray s;
 
         for (int i = values.size(); --i >= 0;)
             if (values[i] == value)
@@ -127,9 +127,9 @@ struct StringMap
     }
 
     //==============================================================================
-    juce::String toString() const
+    yup::String toString() const
     {
-        juce::String s;
+        yup::String s;
 
         for (int i = 0; i < keys.size(); ++i)
         {
@@ -144,7 +144,7 @@ struct StringMap
         return s;
     }
 
-    static StringMap recreateFromString (const juce::String& stringVersion)
+    static StringMap recreateFromString (const yup::String& stringVersion)
     {
         StringMap sm;
         auto n = stringVersion.getCharPointer();
@@ -152,7 +152,7 @@ struct StringMap
         for (;;)
         {
             int len = 0;
-            juce::juce_wchar c = 0;
+            yup::juce_wchar c = 0;
 
             for (;;)
             {
@@ -167,7 +167,7 @@ struct StringMap
             if (c == 0)
                 break;
 
-            juce::String key (n, (size_t) len);
+            yup::String key (n, (size_t) len);
             n += len + 1;
             len = 0;
 
@@ -183,7 +183,7 @@ struct StringMap
             if (key.contains (slashEscapeSeq))
                 key = key.replace (slashEscapeSeq, "|");
 
-            juce::String val (n, (size_t) len);
+            yup::String val (n, (size_t) len);
 
             if (val.contains (slashEscapeSeq))
                 val = val.replace (slashEscapeSeq, "|");
@@ -199,16 +199,16 @@ struct StringMap
         return sm;
     }
 
-    juce::StringArray keys, values;
+    yup::StringArray keys, values;
 
-    JUCE_LEAK_DETECTOR (StringMap)
+    YUP_LEAK_DETECTOR (StringMap)
 };
 
 
 //==============================================================================
 ProjectItem::ProjectItem (Engine& e,
-                          const juce::String& name_, const juce::String& type_,
-                          const juce::String& desc_, const juce::String& file_,
+                          const yup::String& name_, const yup::String& type_,
+                          const yup::String& desc_, const yup::String& file_,
                           ProjectItem::Category category_,
                           double length_, ProjectItemRef ref)
    : Selectable(),
@@ -224,9 +224,9 @@ ProjectItem::ProjectItem (Engine& e,
     setCategory (category_);
 }
 
-static juce::String readStringAutoDetectingUTF (juce::InputStream& in)
+static yup::String readStringAutoDetectingUTF (yup::InputStream& in)
 {
-    juce::MemoryOutputStream mo;
+    yup::MemoryOutputStream mo;
 
     while (char byte = in.readByte())
         mo << byte;
@@ -234,14 +234,14 @@ static juce::String readStringAutoDetectingUTF (juce::InputStream& in)
     return mo.toString();
 }
 
-ProjectItem::ProjectItem (Engine& e, const juce::File& src,
-                          const juce::String& type_, const juce::String& name_,
+ProjectItem::ProjectItem (Engine& e, const yup::File& src,
+                          const yup::String& type_, const yup::String& name_,
                           Category category_, Project& owner)
    : engine (e),
      itemRef (ProjectItemRef (src.getFullPathName(), owner)),
      type (type_),
      objectName (name_),
-     description ("|MediaObjectCategory|" + juce::String ((int) category_)),
+     description ("|MediaObjectCategory|" + yup::String ((int) category_)),
      file (src.getFullPathName()),
      sourceFile (src),
      ownerProject (&owner)
@@ -253,7 +253,7 @@ ProjectItem::ProjectItem (Engine& e, const juce::File& src,
     // an infinite scan/reload cycle for folder-based projects.
 }
 
-ProjectItem::ProjectItem (Engine& e, ProjectItemRef ref, juce::InputStream* in)
+ProjectItem::ProjectItem (Engine& e, ProjectItemRef ref, yup::InputStream* in)
    : engine (e), itemRef (ref)
 {
     objectName  = readStringAutoDetectingUTF (*in);
@@ -268,7 +268,7 @@ ProjectItem::~ProjectItem()
     notifyListenersOfDeletion();
 }
 
-void ProjectItem::writeToStream (juce::OutputStream& out) const
+void ProjectItem::writeToStream (yup::OutputStream& out) const
 {
     out.writeString (objectName);
     out.writeString (type);
@@ -285,7 +285,7 @@ void ProjectItem::sendChange()
         pp->changed();
 }
 
-juce::String ProjectItem::getSelectableDescription()
+yup::String ProjectItem::getSelectableDescription()
 {
     if (isEdit())               return TRANS ("Edit");
     if (isWave() || isMidi())   return TRANS ("Audio File");
@@ -300,11 +300,11 @@ void ProjectItem::selectionStatusChanged (bool isNowSelected)
     // project, which makes the project tab rebuild its lists and lose the
     // selection that's being made
     if (isNowSelected && getLength() == 0)
-        verifyLength (juce::dontSendNotification);
+        verifyLength (yup::dontSendNotification);
 }
 
 //==============================================================================
-juce::File ProjectItem::getRelativeFile (const juce::String& name) const
+yup::File ProjectItem::getRelativeFile (const yup::String& name) const
 {
     if (auto pp = getProject())
     {
@@ -331,9 +331,9 @@ juce::File ProjectItem::getRelativeFile (const juce::String& name) const
     return {};
 }
 
-juce::File ProjectItem::getSourceFile()
+yup::File ProjectItem::getSourceFile()
 {
-    if (sourceFile == juce::File())
+    if (sourceFile == yup::File())
     {
         auto f = getRelativeFile (file);
 
@@ -357,15 +357,15 @@ juce::File ProjectItem::getSourceFile()
     return sourceFile;
 }
 
-bool ProjectItem::isForFile (const juce::File& f)
+bool ProjectItem::isForFile (const yup::File& f)
 {
-    if (sourceFile != juce::File())
+    if (sourceFile != yup::File())
         return f == sourceFile;
 
     return file.endsWithIgnoreCase (f.getFileName()) && getSourceFile() == f;
 }
 
-void ProjectItem::setSourceFile (const juce::File& f, FileMode mode)
+void ProjectItem::setSourceFile (const yup::File& f, FileMode mode)
 {
     if (auto pp = getProject())
     {
@@ -392,21 +392,21 @@ void ProjectItem::setSourceFile (const juce::File& f, FileMode mode)
                 jassertfalse;
         }
 
-        sourceFile = juce::File();
+        sourceFile = yup::File();
 
         changed();
         pp->changed();
 
         triggerAsyncUpdate();
 
-        if (oldSourceFile != juce::File() && oldSourceFile != f)
+        if (oldSourceFile != yup::File() && oldSourceFile != f)
             pp->sourceFileMoved (oldSourceFile, f);
     }
 }
 
 bool ProjectItem::isAbsolutePath() const
 {
-    return file.isNotEmpty() && juce::File::isAbsolutePath (getRawFileName());
+    return file.isNotEmpty() && yup::File::isAbsolutePath (getRawFileName());
 }
 
 void ProjectItem::convertToRelativePath()
@@ -435,7 +435,7 @@ void ProjectItem::handleAsyncUpdate()
             edit->sendSourceFileUpdate();
 }
 
-juce::String ProjectItem::getFileName() const
+yup::String ProjectItem::getFileName() const
 {
     if (file.isEmpty())
         return {};
@@ -473,12 +473,12 @@ bool ProjectItem::hasBeenDeleted() const
     return true;
 }
 
-const juce::String& ProjectItem::getName() const
+const yup::String& ProjectItem::getName() const
 {
     return objectName;
 }
 
-void ProjectItem::setName (const juce::String& n, SetNameMode mode)
+void ProjectItem::setName (const yup::String& n, SetNameMode mode)
 {
     if (n.isEmpty())
         return;
@@ -507,7 +507,7 @@ void ProjectItem::setName (const juce::String& n, SetNameMode mode)
             if (shouldRename)
             {
                 // Don't use "withFileExtension" here as it will strip any name text after a period "."
-                const auto legalFileName = juce::File::createLegalFileName (n);
+                const auto legalFileName = yup::File::createLegalFileName (n);
                 newDstFile = src.getParentDirectory().getChildFile (legalFileName + src.getFileExtension());
                 jassert (newDstFile.hasFileExtension (src.getFileExtension()));
                 jassert (newDstFile.getFileNameWithoutExtension() == legalFileName);
@@ -566,21 +566,21 @@ ProjectItem::Category ProjectItem::getCategory() const
 
 void ProjectItem::setCategory (ProjectItem::Category cat)
 {
-    setNamedProperty ("MediaObjectCategory", juce::String ((int) cat));
+    setNamedProperty ("MediaObjectCategory", yup::String ((int) cat));
     sendChange();
 }
 
-const juce::String& ProjectItem::getType() const
+const yup::String& ProjectItem::getType() const
 {
     return type;
 }
 
-juce::String ProjectItem::getDescription() const
+yup::String ProjectItem::getDescription() const
 {
     return description.upToFirstOccurrenceOf ("|", false, false);
 }
 
-void ProjectItem::setDescription (const juce::String& newDesc, juce::NotificationType notify)
+void ProjectItem::setDescription (const yup::String& newDesc, yup::NotificationType notify)
 {
     if (newDesc != getDescription())
     {
@@ -590,7 +590,7 @@ void ProjectItem::setDescription (const juce::String& newDesc, juce::Notificatio
         else
             description = newDesc.removeCharacters ("|");
 
-        if (notify != juce::dontSendNotification)
+        if (notify != yup::dontSendNotification)
             sendChange();
     }
 }
@@ -601,7 +601,7 @@ void ProjectItem::copyAllPropertiesFrom (const ProjectItem& other)
     description = other.description;
 }
 
-juce::String ProjectItem::getNamedProperty (const juce::String& name) const
+yup::String ProjectItem::getNamedProperty (const yup::String& name) const
 {
     if (description.containsChar ('|'))
     {
@@ -613,7 +613,7 @@ juce::String ProjectItem::getNamedProperty (const juce::String& name) const
     return {};
 }
 
-void ProjectItem::setNamedProperty (const juce::String& name, const juce::String& value)
+void ProjectItem::setNamedProperty (const yup::String& name, const yup::String& value)
 {
     if (auto pp = getProject())
     {
@@ -634,14 +634,14 @@ void ProjectItem::setNamedProperty (const juce::String& name, const juce::String
     }
 }
 
-juce::Array<TimePosition> ProjectItem::getMarkedPoints() const
+yup::Array<TimePosition> ProjectItem::getMarkedPoints() const
 {
-    juce::Array<TimePosition> marks;
+    yup::Array<TimePosition> marks;
     auto m = getNamedProperty ("marks");
 
     if (m.isNotEmpty())
     {
-        juce::StringArray toks;
+        yup::StringArray toks;
         toks.addTokens (m, true);
 
         for (auto& t : toks)
@@ -651,13 +651,13 @@ juce::Array<TimePosition> ProjectItem::getMarkedPoints() const
     return marks;
 }
 
-void ProjectItem::setMarkedPoints (const juce::Array<TimePosition>& points)
+void ProjectItem::setMarkedPoints (const yup::Array<TimePosition>& points)
 {
     if (auto pp = getProject())
     {
         if (! pp->isReadOnly())
         {
-            juce::String m;
+            yup::String m;
 
             for (auto& p : points)
                 m << p.inSeconds() << " ";
@@ -686,7 +686,7 @@ void ProjectItem::convertEditFile (std::function<void (bool)> callback)
 
     if (newFile.existsAsFile())
     {
-        juce::String m (TRANS("There appears to already be a converted Edit in the project folder."));
+        yup::String m (TRANS("There appears to already be a converted Edit in the project folder."));
         m << "\n" << TRANS("Do you want to use this, or create a new conversion?");
 
         auto safeThis = makeSafeRef (*this);
@@ -769,7 +769,7 @@ void ProjectItem::setLength (double l)
     }
 }
 
-juce::String ProjectItem::getProjectName() const
+yup::String ProjectItem::getProjectName() const
 {
     if (auto p = getProject())
         return p->getName();
@@ -778,7 +778,7 @@ juce::String ProjectItem::getProjectName() const
 }
 
 //==============================================================================
-void ProjectItem::verifyLength (juce::NotificationType notification)
+void ProjectItem::verifyLength (yup::NotificationType notification)
 {
     double len = 0.0;
 
@@ -788,11 +788,11 @@ void ProjectItem::verifyLength (juce::NotificationType notification)
     }
     else if (isMidi())
     {
-        juce::FileInputStream in (getSourceFile());
+        yup::FileInputStream in (getSourceFile());
 
         if (in.openedOk())
         {
-            juce::MidiFile mf;
+            yup::MidiFile mf;
             mf.readFrom (in);
             mf.convertTimestampTicksToSeconds();
 
@@ -808,7 +808,7 @@ void ProjectItem::verifyLength (juce::NotificationType notification)
 
     if (len > 0.001 && len != getLength())
     {
-        if (notification == juce::dontSendNotification)
+        if (notification == yup::dontSendNotification)
             length = len;
         else
             setLength (len);
@@ -816,8 +816,8 @@ void ProjectItem::verifyLength (juce::NotificationType notification)
 }
 
 //==============================================================================
-bool ProjectItem::copySectionToNewFile (const juce::File& destFile,
-                                        juce::File& actualFileCreated,
+bool ProjectItem::copySectionToNewFile (const yup::File& destFile,
+                                        yup::File& actualFileCreated,
                                         double startTime, double lengthToCopy)
 {
     actualFileCreated = destFile;
@@ -857,7 +857,7 @@ bool ProjectItem::deleteSourceFile()
             if (ok)
                 break;
 
-            juce::Thread::sleep (800);
+            yup::Thread::sleep (800);
         }
 
         afm.checkFileForChangesAsync (af);
@@ -865,7 +865,7 @@ bool ProjectItem::deleteSourceFile()
         if (! ok)
         {
             auto info = f.getFullPathName() + "  "
-                         + juce::File::descriptionOfSizeInBytes (f.getSize());
+                         + yup::File::descriptionOfSizeInBytes (f.getSize());
 
             if (! f.hasWriteAccess())
                 info << "  (read only)";
@@ -914,7 +914,7 @@ ProjectItem::Ptr ProjectItem::createCopy()
              && newName.retainCharacters ("0123456789()").length() > 0)
         {
             while (newName.length() > 1
-                    && juce::String ("0123456789()").containsChar (newName.getLastCharacter()))
+                    && yup::String ("0123456789()").containsChar (newName.getLastCharacter()))
                 newName = newName.dropLastCharacters (1);
         }
 
@@ -938,7 +938,7 @@ ProjectItem::Ptr ProjectItem::createCopy()
             }
 
             if (alreadyThere)
-                newName = nameStem + "(" + juce::String (index++) + ")";
+                newName = nameStem + "(" + yup::String (index++) + ")";
             else
                 break;
         }
@@ -968,7 +968,7 @@ ProjectItem::Ptr ProjectItem::createCopy()
 }
 
 //==============================================================================
-static void tokenise (const juce::String& s, juce::StringArray& toks)
+static void tokenise (const yup::String& s, yup::StringArray& toks)
 {
     auto t = s.getCharPointer();
     auto start = t;
@@ -978,7 +978,7 @@ static void tokenise (const juce::String& s, juce::StringArray& toks)
         if (! (t.isLetterOrDigit()))
         {
             if (t > start + 1)
-                toks.add (juce::String (start, t));
+                toks.add (yup::String (start, t));
 
             start = t;
         }
@@ -987,12 +987,12 @@ static void tokenise (const juce::String& s, juce::StringArray& toks)
     }
 
     if (t.getAddress() > start.getAddress() + 1)
-        toks.add (juce::String (start, t));
+        toks.add (yup::String (start, t));
 }
 
-juce::StringArray ProjectItem::getSearchTokens() const
+yup::StringArray ProjectItem::getSearchTokens() const
 {
-    juce::StringArray toks;
+    yup::StringArray toks;
     tokenise (objectName, toks);
     tokenise (getDescription(), toks);
     return toks;

@@ -11,7 +11,7 @@
 namespace tracktion::inline engine {
 
 //==============================================================================
-FolderBasedProject::FolderBasedProject (Project& o, const juce::File& f)
+FolderBasedProject::FolderBasedProject (Project& o, const yup::File& f)
    : ProjectBase (o), folder (f)
 {
     jassert (folder.isDirectory());
@@ -19,7 +19,7 @@ FolderBasedProject::FolderBasedProject (Project& o, const juce::File& f)
 }
 
 //==============================================================================
-juce::File FolderBasedProject::getInfoFile() const
+yup::File FolderBasedProject::getInfoFile() const
 {
     return folder.getChildFile ("project_info.json");
 }
@@ -31,11 +31,11 @@ void FolderBasedProject::loadPropertiesFromFile()
     if (! infoFile.existsAsFile())
         return;
 
-    auto parsed = juce::JSON::parse (infoFile);
+    auto parsed = yup::JSON::parse (infoFile);
 
     if (auto* obj = parsed.getDynamicObject())
     {
-        const juce::ScopedLock sl (propertyLock);
+        const yup::ScopedLock sl (propertyLock);
         properties.clear();
 
         for (const auto& prop : obj->getProperties())
@@ -46,10 +46,10 @@ void FolderBasedProject::loadPropertiesFromFile()
 bool FolderBasedProject::savePropertiesToFile()
 {
     auto infoFile = getInfoFile();
-    auto info = std::make_unique<juce::DynamicObject>();
+    auto info = std::make_unique<yup::DynamicObject>();
 
     {
-        const juce::ScopedLock sl (propertyLock);
+        const yup::ScopedLock sl (propertyLock);
 
         if (properties.isEmpty())
         {
@@ -63,13 +63,13 @@ bool FolderBasedProject::savePropertiesToFile()
             info->setProperty (properties.getName (i), properties.getValueAt (i));
     }
 
-    return infoFile.replaceWithText (juce::JSON::toString (juce::var (info.release())));
+    return infoFile.replaceWithText (yup::JSON::toString (yup::var (info.release())));
 }
 
 //==============================================================================
 void FolderBasedProject::ensureScanned() const
 {
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
     if (! itemsScanned)
         scanFolder();
@@ -89,14 +89,14 @@ void FolderBasedProject::scanFolder() const
         if (cachedItems.getReference (i)->getSourceFile().isAChildOf (folder))
             cachedItems.remove (i);
 
-    juce::String wildcards = "*.tracktionedit;*.trkedit;"
+    yup::String wildcards = "*.tracktionedit;*.trkedit;"
                              "*.wav;*.aiff;*.aif;*.mp3;*.ogg;*.flac;"
                              "*.mid;*.midi";
 
-    for (auto& ext : juce::StringArray::fromTokens (videoFileExtensions, ";", ""))
+    for (auto& ext : yup::StringArray::fromTokens (videoFileExtensions, ";", ""))
         wildcards += ";*" + ext;
 
-    auto files = folder.findChildFiles (juce::File::findFiles, true, wildcards);
+    auto files = folder.findChildFiles (yup::File::findFiles, true, wildcards);
 
     for (auto& f : files)
     {
@@ -114,7 +114,7 @@ void FolderBasedProject::scanFolder() const
         auto storedDesc = getProjectProperty (getItemDescriptionKey (f));
 
         if (storedDesc.isNotEmpty())
-            item->setDescription (storedDesc, juce::dontSendNotification);
+            item->setDescription (storedDesc, yup::dontSendNotification);
 
         cachedItems.add (item.get());
     }
@@ -122,7 +122,7 @@ void FolderBasedProject::scanFolder() const
     itemsScanned = true;
 }
 
-juce::String FolderBasedProject::getItemDescriptionKey (const juce::File& f) const
+yup::String FolderBasedProject::getItemDescriptionKey (const yup::File& f) const
 {
     auto path = f.isAChildOf (folder) ? f.getRelativePathFrom (folder)
                                       : f.getFullPathName();
@@ -131,14 +131,14 @@ juce::String FolderBasedProject::getItemDescriptionKey (const juce::File& f) con
 
 void FolderBasedProject::syncItemDescriptionsToProperties()
 {
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
     // Only sync once items have been scanned, otherwise cachedItems is empty and
     // we'd wipe descriptions that haven't been loaded into memory yet.
     if (! itemsScanned)
         return;
 
-    const juce::ScopedLock sl2 (propertyLock);
+    const yup::ScopedLock sl2 (propertyLock);
 
     for (auto& item : cachedItems)
     {
@@ -152,7 +152,7 @@ void FolderBasedProject::syncItemDescriptionsToProperties()
     }
 }
 
-juce::String FolderBasedProject::inferType (const juce::File& f)
+yup::String FolderBasedProject::inferType (const yup::File& f)
 {
     if (f.hasFileExtension (".tracktionedit;.trkedit"))
         return ProjectItem::editItemType();
@@ -169,7 +169,7 @@ juce::String FolderBasedProject::inferType (const juce::File& f)
     return {};
 }
 
-ProjectItem::Category FolderBasedProject::inferCategory (const juce::File& f, const juce::File& root)
+ProjectItem::Category FolderBasedProject::inferCategory (const yup::File& f, const yup::File& root)
 {
     auto parent = f.getParentDirectory();
 
@@ -223,22 +223,22 @@ ProjectID FolderBasedProject::getProjectID() const
     return ProjectID (folder.hashCode());
 }
 
-juce::String FolderBasedProject::getName() const
+yup::String FolderBasedProject::getName() const
 {
     return folder.getFileNameWithoutExtension();
 }
 
-const juce::File& FolderBasedProject::getProjectFile() const noexcept
+const yup::File& FolderBasedProject::getProjectFile() const noexcept
 {
     return folder;
 }
 
-juce::File FolderBasedProject::getDefaultDirectory() const
+yup::File FolderBasedProject::getDefaultDirectory() const
 {
     return folder;
 }
 
-juce::File FolderBasedProject::getDirectoryForMedia (ProjectItem::Category category) const
+yup::File FolderBasedProject::getDirectoryForMedia (ProjectItem::Category category) const
 {
     auto dir = folder;
 
@@ -263,11 +263,11 @@ juce::File FolderBasedProject::getDirectoryForMedia (ProjectItem::Category categ
     return dir;
 }
 
-void FolderBasedProject::setName (const juce::String& newName)
+void FolderBasedProject::setName (const yup::String& newName)
 {
     if (getName() != newName)
     {
-        auto dst = folder.getParentDirectory().getChildFile (juce::File::createLegalFileName (newName));
+        auto dst = folder.getParentDirectory().getChildFile (yup::File::createLegalFileName (newName));
 
         if (folder.moveFileTo (dst) || folder.moveFileTo (dst))
             folder = dst;
@@ -287,16 +287,16 @@ void FolderBasedProject::setNewProjectId (ProjectID)
 {
 }
 
-juce::String FolderBasedProject::getProjectProperty (const juce::String& name) const
+yup::String FolderBasedProject::getProjectProperty (const yup::String& name) const
 {
-    const juce::ScopedLock sl (propertyLock);
+    const yup::ScopedLock sl (propertyLock);
     return properties [name];
 }
 
-void FolderBasedProject::setProjectProperty (const juce::String& name, const juce::String& value)
+void FolderBasedProject::setProjectProperty (const yup::String& name, const yup::String& value)
 {
     {
-        const juce::ScopedLock sl (propertyLock);
+        const yup::ScopedLock sl (propertyLock);
         properties.set (name, value);
     }
 
@@ -318,16 +318,16 @@ bool FolderBasedProject::isLibraryProject() const
 int FolderBasedProject::getNumProjectItems()
 {
     ensureScanned();
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
     return cachedItems.size();
 }
 
 ProjectItemRef FolderBasedProject::getProjectItemRef (int index)
 {
     ensureScanned();
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
-    if (juce::isPositiveAndBelow (index, cachedItems.size()))
+    if (yup::isPositiveAndBelow (index, cachedItems.size()))
     {
         auto f = cachedItems[index]->getSourceFile();
 
@@ -340,12 +340,12 @@ ProjectItemRef FolderBasedProject::getProjectItemRef (int index)
     return {};
 }
 
-juce::Array<ProjectItemRef> FolderBasedProject::getAllProjectItemRefs() const
+yup::Array<ProjectItemRef> FolderBasedProject::getAllProjectItemRefs() const
 {
     ensureScanned();
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
-    juce::Array<ProjectItemRef> result;
+    yup::Array<ProjectItemRef> result;
 
     for (auto& item : cachedItems)
     {
@@ -363,20 +363,20 @@ juce::Array<ProjectItemRef> FolderBasedProject::getAllProjectItemRefs() const
 ProjectItem::Ptr FolderBasedProject::getProjectItemAt (int index)
 {
     ensureScanned();
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
-    if (juce::isPositiveAndBelow (index, cachedItems.size()))
+    if (yup::isPositiveAndBelow (index, cachedItems.size()))
         return cachedItems[index];
 
     return {};
 }
 
-juce::Array<ProjectItem::Ptr> FolderBasedProject::getAllProjectItems()
+yup::Array<ProjectItem::Ptr> FolderBasedProject::getAllProjectItems()
 {
     ensureScanned();
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
-    juce::Array<ProjectItem::Ptr> result;
+    yup::Array<ProjectItem::Ptr> result;
     result.addArray (cachedItems);
     return result;
 }
@@ -386,10 +386,10 @@ int FolderBasedProject::getIndexOf (const ProjectItemRef& ref) const
     ensureScanned();
     auto file = ref.resolve (owner.engine, folder);
 
-    if (file == juce::File())
+    if (file == yup::File())
         return -1;
 
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
     for (int i = 0; i < cachedItems.size(); ++i)
         if (cachedItems[i]->isForFile (file))
@@ -401,13 +401,13 @@ int FolderBasedProject::getIndexOf (const ProjectItemRef& ref) const
 ProjectItem::Ptr FolderBasedProject::getProjectItemFor (const ProjectItemRef& ref)
 {
     auto file = ref.resolve (owner.engine, folder);
-    return file != juce::File() ? getProjectItemForFile (file) : nullptr;
+    return file != yup::File() ? getProjectItemForFile (file) : nullptr;
 }
 
-ProjectItem::Ptr FolderBasedProject::getProjectItemForFile (const juce::File& fileToFind)
+ProjectItem::Ptr FolderBasedProject::getProjectItemForFile (const yup::File& fileToFind)
 {
     ensureScanned();
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
     for (auto& item : cachedItems)
         if (item->isForFile (fileToFind))
@@ -417,10 +417,10 @@ ProjectItem::Ptr FolderBasedProject::getProjectItemForFile (const juce::File& fi
 }
 
 //==============================================================================
-ProjectItem::Ptr FolderBasedProject::createNewItem (const juce::File& fileToReference,
-                                                    const juce::String& type,
-                                                    const juce::String& name,
-                                                    const juce::String&,
+ProjectItem::Ptr FolderBasedProject::createNewItem (const yup::File& fileToReference,
+                                                    const yup::String& type,
+                                                    const yup::String& name,
+                                                    const yup::String&,
                                                     ProjectItem::Category cat,
                                                     bool)
 {
@@ -438,7 +438,7 @@ ProjectItem::Ptr FolderBasedProject::createNewItem (const juce::File& fileToRefe
     ProjectItem::Ptr item (new ProjectItem (owner.engine, fileToReference, type, name, cat, owner));
 
     {
-        const juce::ScopedLock sl (itemLock);
+        const yup::ScopedLock sl (itemLock);
         cachedItems.add (item.get());
     }
 
@@ -451,7 +451,7 @@ bool FolderBasedProject::removeProjectItem (const ProjectItemRef& ref, bool dele
     if (isValid() && ! isReadOnly())
     {
         {
-            const juce::ScopedLock sl (itemLock);
+            const yup::ScopedLock sl (itemLock);
 
             const int index = getIndexOf (ref);
             jassert (index >= 0);
@@ -521,12 +521,12 @@ void FolderBasedProject::redirectIDsFromProject (ProjectID, ProjectID)
 }
 
 //==============================================================================
-void FolderBasedProject::mergeArchiveContents (const juce::File&)
+void FolderBasedProject::mergeArchiveContents (const yup::File&)
 {
     // No-op: doesn't apply to folder-based projects
 }
 
-void FolderBasedProject::mergeOtherProjectIntoThis (const juce::File&)
+void FolderBasedProject::mergeOtherProjectIntoThis (const yup::File&)
 {
     // No-op: doesn't apply to folder-based projects
 }
@@ -548,7 +548,7 @@ void FolderBasedProject::createDefaultFolders()
 }
 
 //==============================================================================
-juce::String FolderBasedProject::getSelectableDescription() const
+yup::String FolderBasedProject::getSelectableDescription() const
 {
     return TRANS("Folder Project");
 }
@@ -558,7 +558,7 @@ void FolderBasedProject::changed()
     owner.projectChanged();
 }
 
-void FolderBasedProject::sourceFileMoved (const juce::File& oldFile, const juce::File& newFile)
+void FolderBasedProject::sourceFileMoved (const yup::File& oldFile, const yup::File& newFile)
 {
     auto projectDir = getDefaultDirectory();
     auto oldRef = ProjectItemRef::fromPath (oldFile.getRelativePathFrom (projectDir));
@@ -623,7 +623,7 @@ void FolderBasedProject::sourceFileMoved (const juce::File& oldFile, const juce:
 
 void FolderBasedProject::reload (ReloadMode mode)
 {
-    const juce::ScopedLock sl (itemLock);
+    const yup::ScopedLock sl (itemLock);
 
     // In-folder items are cleared and rebuilt by scanFolder(), which also
     // preserves items for files outside the project folder

@@ -10,13 +10,13 @@
 
 namespace tracktion::inline engine {
 
-static inline HashCode getAudioFileHash (const juce::File& file) noexcept
+static inline HashCode getAudioFileHash (const yup::File& file) noexcept
 {
     return file.getFullPathName().hashCode64();
 }
 
 //==============================================================================
-AudioFile::AudioFile (Engine& e, const juce::File& f) noexcept
+AudioFile::AudioFile (Engine& e, const yup::File& f) noexcept
     : engine (&e), file (f), hash (getAudioFileHash (f))
 {
 }
@@ -39,44 +39,44 @@ AudioFileInfo AudioFile::getInfo() const
 {
     CRASH_TRACER
 
-    if (file == juce::File())
+    if (file == yup::File())
         return AudioFileInfo (*engine);
 
     return engine->getAudioFileManager().getInfo (*this);
 }
 
-juce::String AudioFileInfo::getLongDescription() const
+yup::String AudioFileInfo::getLongDescription() const
 {
-    juce::String desc;
+    yup::String desc;
 
     if (sampleRate > 0.0)
     {
-        desc << juce::String ((sampleRate / 1000.0) + 0.0001, 1) << " kHz, ";
+        desc << yup::String ((sampleRate / 1000.0) + 0.0001, 1) << " kHz, ";
 
         if (bitsPerSample > 0) desc << bitsPerSample << " bit ";
 
         desc << (numChannels == 1 ? TRANS("mono") : TRANS("stereo"))
-             << ", " << juce::RelativeTime (getLengthInSeconds()).getDescription();
+             << ", " << yup::RelativeTime (getLengthInSeconds()).getDescription();
 
-        juce::StringArray items;
+        yup::StringArray items;
 
-        const int numBeats = juce::roundToInt (loopInfo.getNumBeats());
+        const int numBeats = yup::roundToInt (loopInfo.getNumBeats());
         if (numBeats == 1)
             items.add (TRANS("1 beat"));
         else if (numBeats > 1)
-            items.add (TRANS("123 beats").replace ("123", juce::String (numBeats)));
+            items.add (TRANS("123 beats").replace ("123", yup::String (numBeats)));
 
         if (loopInfo.isLoopable())
         {
             double bpm = loopInfo.getNumBeats() / (getLengthInSeconds() / 60.0);
-            items.add (juce::String (bpm, 1) + " bpm");
+            items.add (yup::String (bpm, 1) + " bpm");
         }
 
         if (loopInfo.getNumerator() && loopInfo.getDenominator())
-            items.add (juce::String (loopInfo.getNumerator()) + "/" + juce::String (loopInfo.getDenominator()));
+            items.add (yup::String (loopInfo.getNumerator()) + "/" + yup::String (loopInfo.getDenominator()));
 
         if (loopInfo.getRootNote() != -1)
-            items.add (juce::MidiMessage::getMidiNoteName (loopInfo.getRootNote(), true, true,
+            items.add (yup::MidiMessage::getMidiNoteName (loopInfo.getRootNote(), true, true,
                                                            engine->getEngineBehaviour().getMiddleCOctave()));
 
         if (items.size() > 0)
@@ -93,8 +93,8 @@ int AudioFile::getNumChannels() const                   { return getInfo().numCh
 double AudioFile::getSampleRate() const                 { return getInfo().sampleRate; }
 int AudioFile::getBitsPerSample() const                 { return getInfo().bitsPerSample; }
 bool AudioFile::isFloatingPoint() const                 { return getInfo().isFloatingPoint; }
-juce::StringPairArray AudioFile::getMetadata() const    { return getInfo().metadata; }
-juce::AudioFormat* AudioFile::getFormat() const         { return getInfo().format; }
+yup::StringPairArray AudioFile::getMetadata() const    { return getInfo().metadata; }
+yup::AudioFormat* AudioFile::getFormat() const         { return getInfo().format; }
 
 bool AudioFile::moveToTrash() const
 {
@@ -120,7 +120,7 @@ bool AudioFile::deleteFile() const
     return ok;
 }
 
-bool AudioFile::deleteFiles (Engine& engine, const juce::Array<juce::File>& files)
+bool AudioFile::deleteFiles (Engine& engine, const yup::Array<yup::File>& files)
 {
     bool allOK = true;
 
@@ -143,11 +143,11 @@ bool AudioFile::isRexFile() const               { return file.hasFileExtension (
 const int numSamplesPerFlush = 48000 * 6;
 
 AudioFileWriter::AudioFileWriter (const AudioFile& f,
-                                  juce::AudioFormat* formatToUse,
+                                  yup::AudioFormat* formatToUse,
                                   int numChannels,
                                   double sampleRate,
                                   int bitsPerSample,
-                                  const juce::StringPairArray& metadata,
+                                  const yup::StringPairArray& metadata,
                                   int quality)
     : file (f), samplesUntilFlush (numSamplesPerFlush)
 {
@@ -156,7 +156,7 @@ AudioFileWriter::AudioFileWriter (const AudioFile& f,
 
     if (file.getFile().getParentDirectory().createDirectory())
     {
-        const juce::ScopedLock sl (writerLock);
+        const yup::ScopedLock sl (writerLock);
         writer.reset (AudioFileUtils::createWriterFor (formatToUse, file.getFile(), sampleRate,
                                                        (unsigned int) numChannels, bitsPerSample,
                                                        metadata, quality));
@@ -164,13 +164,13 @@ AudioFileWriter::AudioFileWriter (const AudioFile& f,
 }
 
 AudioFileWriter::AudioFileWriter (const AudioFile& f,
-                                  juce::AudioFormat* formatToUse,
+                                  yup::AudioFormat* formatToUse,
                                   int numChannels,
                                   double sampleRate,
                                   int bitsPerSample,
-                                  const juce::StringPairArray& metadata,
+                                  const yup::StringPairArray& metadata,
                                   int quality,
-                                  const juce::AudioChannelSet& channelLayout)
+                                  const yup::AudioChannelSet& channelLayout)
     : file (f), samplesUntilFlush (numSamplesPerFlush)
 {
     CRASH_TRACER
@@ -178,7 +178,7 @@ AudioFileWriter::AudioFileWriter (const AudioFile& f,
 
     if (file.getFile().getParentDirectory().createDirectory())
     {
-        const juce::ScopedLock sl (writerLock);
+        const yup::ScopedLock sl (writerLock);
         writer.reset (AudioFileUtils::createWriterFor (formatToUse, file.getFile(), sampleRate,
                                                        (unsigned int) numChannels, bitsPerSample,
                                                        metadata, quality, channelLayout));
@@ -190,14 +190,14 @@ AudioFileWriter::~AudioFileWriter()
     closeForWriting();
 }
 
-bool AudioFileWriter::isOpen() const noexcept               { const juce::ScopedLock sl (writerLock); return writer != nullptr; }
-double AudioFileWriter::getSampleRate() const noexcept      { jassert (isOpen()); const juce::ScopedLock sl (writerLock); return writer->getSampleRate(); }
-int AudioFileWriter::getNumChannels() const noexcept        { jassert (isOpen()); const juce::ScopedLock sl (writerLock); return writer->getNumChannels(); }
+bool AudioFileWriter::isOpen() const noexcept               { const yup::ScopedLock sl (writerLock); return writer != nullptr; }
+double AudioFileWriter::getSampleRate() const noexcept      { jassert (isOpen()); const yup::ScopedLock sl (writerLock); return writer->getSampleRate(); }
+int AudioFileWriter::getNumChannels() const noexcept        { jassert (isOpen()); const yup::ScopedLock sl (writerLock); return writer->getNumChannels(); }
 
 void AudioFileWriter::closeForWriting()
 {
     {
-        const juce::ScopedLock sl (writerLock);
+        const yup::ScopedLock sl (writerLock);
         writer.reset();
     }
 
@@ -206,10 +206,10 @@ void AudioFileWriter::closeForWriting()
     audioFileManager.checkFileForChanges (file);
 }
 
-bool AudioFileWriter::appendBuffer (juce::AudioBuffer<float>& buffer, int num)
+bool AudioFileWriter::appendBuffer (yup::AudioBuffer<float>& buffer, int num)
 {
     num = std::min (num, buffer.getNumSamples());
-    const juce::ScopedLock sl (writerLock);
+    const yup::ScopedLock sl (writerLock);
 
     if (writer != nullptr && writer->writeFromAudioSampleBuffer (buffer, 0, num))
     {
@@ -229,15 +229,15 @@ bool AudioFileWriter::appendBuffer (juce::AudioBuffer<float>& buffer, int num)
 
 bool AudioFileWriter::appendBuffer (const int** buffer, int num)
 {
-    const juce::ScopedLock sl (writerLock);
-    return writer != nullptr && writer->write (buffer, num);
+    const yup::ScopedLock sl (writerLock);
+    return writer != nullptr && writer->write (reinterpret_cast<const float* const*> (buffer), num);
 }
 
-bool AudioFileWriter::writeFromAudioReader (juce::AudioFormatReader& reader,
+bool AudioFileWriter::writeFromAudioReader (yup::AudioFormatReader& reader,
                                             SampleCount startSample,
                                             SampleCount numSamples)
 {
-    const juce::ScopedLock sl (writerLock);
+    const yup::ScopedLock sl (writerLock);
     return writer != nullptr && writer->writeFromAudioReader (reader, startSample, numSamples);
 }
 
@@ -253,12 +253,12 @@ AudioProxyGenerator::GeneratorJob::~GeneratorJob()
     callBlockingCatching ([this] { proxy.engine->getAudioFileManager().validateFile (proxy, false); });
 }
 
-juce::ThreadPoolJob::JobStatus AudioProxyGenerator::GeneratorJob::runJob()
+yup::ThreadPoolJob::JobStatus AudioProxyGenerator::GeneratorJob::runJob()
 {
     CRASH_TRACER
 
     auto& afm = proxy.engine->getAudioFileManager();
-    juce::FloatVectorOperations::disableDenormalisedNumberSupport();
+    yup::FloatVectorOperations::disableDenormalisedNumberSupport();
     proxy.deleteFile();
 
     if (render())
@@ -311,7 +311,7 @@ void AudioProxyGenerator::beginJob (GeneratorJob* j)
 
     if (! checkProxyStatus (job->proxy))
     {
-        const juce::ScopedLock sl (jobListLock);
+        const yup::ScopedLock sl (jobListLock);
 
         if (findJob (job->proxy) == nullptr)
         {
@@ -323,13 +323,13 @@ void AudioProxyGenerator::beginJob (GeneratorJob* j)
 
 bool AudioProxyGenerator::isProxyBeingGenerated (const AudioFile& proxyFile) const noexcept
 {
-    const juce::ScopedLock sl (jobListLock);
+    const yup::ScopedLock sl (jobListLock);
     return findJob (proxyFile) != nullptr;
 }
 
 float AudioProxyGenerator::getProportionComplete (const AudioFile& proxyFile) const noexcept
 {
-    const juce::ScopedLock sl (jobListLock);
+    const yup::ScopedLock sl (jobListLock);
 
     if (auto j = findJob (proxyFile))
         return j->progress;
@@ -339,7 +339,7 @@ float AudioProxyGenerator::getProportionComplete (const AudioFile& proxyFile) co
 
 void AudioProxyGenerator::removeFinishedJob (GeneratorJob* j)
 {
-    const juce::ScopedLock sl (jobListLock);
+    const yup::ScopedLock sl (jobListLock);
     activeJobs.removeAllInstancesOf (j);
 }
 
@@ -349,7 +349,7 @@ void AudioProxyGenerator::deleteProxy (const AudioFile& proxyFile)
     GeneratorJob* j = nullptr;
 
     {
-        const juce::ScopedLock sl (jobListLock);
+        const yup::ScopedLock sl (jobListLock);
         j = findJob (proxyFile);
     }
 
@@ -366,7 +366,7 @@ AudioFileInfo::AudioFileInfo (Engine& e)
 {
 }
 
-AudioFileInfo::AudioFileInfo (const AudioFile& file, juce::AudioFormatReader* reader, juce::AudioFormat* f)
+AudioFileInfo::AudioFileInfo (const AudioFile& file, yup::AudioFormatReader* reader, yup::AudioFormat* f)
     : engine (file.engine), hashCode (file.getHash()), format (f),
       fileModificationTime (file.getFile().getLastModificationTime()),
       loopInfo (*file.engine, reader, f, file.getFile())
@@ -379,8 +379,8 @@ AudioFileInfo::AudioFileInfo (const AudioFile& file, juce::AudioFormatReader* re
         numChannels     = (int) reader->numChannels;
         bitsPerSample   = (int) reader->bitsPerSample;
         isFloatingPoint = reader->usesFloatingPointData;
-        needsCachedProxy = dynamic_cast<juce::WavAudioFormat*> (format) == nullptr
-                              && dynamic_cast<juce::AiffAudioFormat*> (format) == nullptr
+        needsCachedProxy = dynamic_cast<yup::WavAudioFormat*> (format) == nullptr
+                              && dynamic_cast<yup::AiffAudioFormat*> (format) == nullptr
                               && dynamic_cast<FloatAudioFormat*> (format) == nullptr;
         channelLayout   = reader->getChannelLayout();
         metadata = reader->metadataValues;
@@ -402,9 +402,9 @@ AudioFileInfo AudioFileInfo::parse (const AudioFile& file)
 {
     if (! file.isNull())
     {
-        juce::AudioFormat* format = nullptr;
+        yup::AudioFormat* format = nullptr;
 
-        if (auto reader = std::unique_ptr<juce::AudioFormatReader> (AudioFileUtils::createReaderFindingFormat (*file.engine, file.getFile(), format)))
+        if (auto reader = std::unique_ptr<yup::AudioFormatReader> (AudioFileUtils::createReaderFindingFormat (*file.engine, file.getFile(), format)))
             return AudioFileInfo (file, reader.get(), format);
     }
 
@@ -412,20 +412,20 @@ AudioFileInfo AudioFileInfo::parse (const AudioFile& file)
 }
 
 //==============================================================================
-class TracktionThumbnailCache  : public juce::AudioThumbnailCache
+class TracktionThumbnailCache  : public yup::AudioThumbnailCache
 {
 public:
     TracktionThumbnailCache (Engine& e)
-       #if JUCE_DEBUG
-        : juce::AudioThumbnailCache (3)
+       #if YUP_DEBUG
+        : yup::AudioThumbnailCache (3)
        #else
-        : juce::AudioThumbnailCache (50)
+        : yup::AudioThumbnailCache (50)
        #endif
         , engine (e)
     {
     }
 
-    void saveNewlyFinishedThumbnail (const juce::AudioThumbnailBase& thumb, juce::int64 hash) override
+    void saveNewlyFinishedThumbnail (const yup::AudioThumbnailBase& thumb, yup::int64 hash)
     {
         CRASH_TRACER
         auto st = getActiveSmartThumbnail (thumb);
@@ -435,7 +435,7 @@ public:
         {
             thumbFile.getParentDirectory().createDirectory();
 
-            juce::FileOutputStream fo (thumbFile);
+            yup::FileOutputStream fo (thumbFile);
 
             if (! fo.openedOk())
                 return;
@@ -444,7 +444,7 @@ public:
         }
     }
 
-    bool loadNewThumb (juce::AudioThumbnailBase& thumb, juce::int64 hash) override
+    bool loadNewThumb (yup::AudioThumbnailBase& thumb, yup::int64 hash)
     {
         CRASH_TRACER
         auto st = getActiveSmartThumbnail (thumb);
@@ -452,20 +452,20 @@ public:
 
         if (st != nullptr
               && st->file.getFile().getLastModificationTime() > thumbFile.getLastModificationTime()
-                                                                  + juce::RelativeTime::seconds (0.1))
+                                                                  + yup::RelativeTime::seconds (0.1))
         {
             thumbFile.deleteFile();
             return false;
         }
 
-        juce::FileInputStream fin (thumbFile);
+        yup::FileInputStream fin (thumbFile);
         return fin.openedOk() && thumb.loadFrom (fin);
     }
 
 private:
     Engine& engine;
 
-    juce::File getThumbFolder (Edit* edit) const
+    yup::File getThumbFolder (Edit* edit) const
     {
         if (edit != nullptr)
             return edit->getTempDirectory (false);
@@ -473,7 +473,7 @@ private:
         return engine.getTemporaryFileManager().getThumbnailsFolder();
     }
 
-    SmartThumbnail* getActiveSmartThumbnail (const juce::AudioThumbnailBase& thumb)
+    SmartThumbnail* getActiveSmartThumbnail (const yup::AudioThumbnailBase& thumb)
     {
         auto& map = engine.getAudioFileManager().thumbnailMap;
 
@@ -483,11 +483,11 @@ private:
         return nullptr;
     }
 
-    juce::File getThumbFile (const SmartThumbnail* st, HashCode hash) const
+    yup::File getThumbFile (const SmartThumbnail* st, HashCode hash) const
     {
         auto thumbFolder = getThumbFolder (st != nullptr ? st->edit : nullptr);
 
-        return thumbFolder.getChildFile ("thumbnail_" + juce::String::toHexString (hash) + ".thumb");
+        return thumbFolder.getChildFile ("thumbnail_" + yup::String::toHexString (hash) + ".thumb");
     }
 };
 
@@ -499,7 +499,7 @@ struct MemoryBufferReader  : public AudioFormatReaderWithTimeout
     {
         sampleRate            = sr;
         numChannels           = static_cast<unsigned int> (buf.getNumChannels());
-        lengthInSamples       = static_cast<juce::int64> (buf.getNumFrames());
+        lengthInSamples       = static_cast<yup::int64> (buf.getNumFrames());
         usesFloatingPointData = true;
         bitsPerSample         = 32;
     }
@@ -508,7 +508,7 @@ struct MemoryBufferReader  : public AudioFormatReaderWithTimeout
 
     bool readSamples (int* const* destSamples, int numDestChannels,
                       int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile,
+                      yup::int64 startSampleInFile,
                       int numSamples) override
     {
         auto destOffset = static_cast<choc::buffer::FrameCount> (startOffsetInDestBuffer);
@@ -550,7 +550,7 @@ struct AudioFileManager::KnownFile
     AudioFileInfo info;
     std::optional<choc::buffer::InterleavedView<const float>> memoryBuffer;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownFile)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (KnownFile)
 };
 
 //==============================================================================
@@ -558,7 +558,7 @@ enum { initialTimerDelay = 10 };
 
 bool SmartThumbnail::enabled = true;
 
-SmartThumbnail::SmartThumbnail (Engine& e, const AudioFile& f, juce::Component& componentToRepaint, Edit* ed)
+SmartThumbnail::SmartThumbnail (Engine& e, const AudioFile& f, yup::Component& componentToRepaint, Edit* ed)
     : SmartThumbnail (e, f, componentToRepaint, ed,
                       e.getUIBehaviour().createAudioThumbnail (256,
                                                                e.getAudioFileFormatManager().readFormatManager,
@@ -566,8 +566,8 @@ SmartThumbnail::SmartThumbnail (Engine& e, const AudioFile& f, juce::Component& 
 {
 }
 
-SmartThumbnail::SmartThumbnail (Engine& e, const AudioFile& f, juce::Component& componentToRepaint, Edit* ed,
-                                std::unique_ptr<juce::AudioThumbnailBase> thumbnailToUse)
+SmartThumbnail::SmartThumbnail (Engine& e, const AudioFile& f, yup::Component& componentToRepaint, Edit* ed,
+                                std::unique_ptr<yup::AudioThumbnailBase> thumbnailToUse)
     : file (f), engine (e), edit (ed),
       thumbnail (std::move (thumbnailToUse)),
       component (componentToRepaint)
@@ -616,7 +616,7 @@ void SmartThumbnail::setNewFile (const AudioFile& newFile)
 }
 
 //==============================================================================
-void SmartThumbnail::drawChannel (juce::Graphics& g, juce::Rectangle<int> r,
+void SmartThumbnail::drawChannel (yup::Graphics& g, yup::Rectangle<int> r,
                                   TimeRange time, int channelNum, float verticalZoomFactor)
 {
     thumbnail->drawChannel (g, r,
@@ -624,7 +624,7 @@ void SmartThumbnail::drawChannel (juce::Graphics& g, juce::Rectangle<int> r,
                             channelNum, verticalZoomFactor);
 }
 
-void SmartThumbnail::drawChannels (juce::Graphics& g, juce::Rectangle<int> r,
+void SmartThumbnail::drawChannels (yup::Graphics& g, yup::Rectangle<int> r,
                                    TimeRange time, float verticalZoomFactor)
 {
     thumbnail->drawChannels (g, r,
@@ -637,7 +637,7 @@ double SmartThumbnail::getProportionComplete() const noexcept
     if (auto sampleRate = file.getSampleRate(); sampleRate > 0)
     {
         const auto totalSamples = toSamples (TimePosition::fromSeconds (getTotalLength()), sampleRate);
-        return juce::jlimit (0.0, 1.0, double (getNumSamplesFinished()) / double (std::max ((SampleCount) 1, totalSamples)));
+        return yup::jlimit (0.0, 1.0, double (getNumSamplesFinished()) / double (std::max ((SampleCount) 1, totalSamples)));
     }
 
     return 0.0;
@@ -648,7 +648,7 @@ void SmartThumbnail::releaseFile()
 {
     clear();
     thumbnailIsInvalid = true;
-    juce::MessageManager::callAsync ([ref = makeWeakRef (*this), this]() mutable
+    yup::MessageManager::callAsync ([ref = makeWeakRef (*this), this]() mutable
                                      {
                                          if (ref != nullptr)
                                              startTimer (400);
@@ -664,7 +664,7 @@ void SmartThumbnail::createThumbnailReader()
         // N.B. if this changes, AudioFileManager::callListeners will also need to be updated
         auto& thumbRef = *thumbnail; // Work around a clang warning
         const auto thumbTypeHashCode = std::hash<std::string>{} (typeid (thumbRef).name());
-        const auto hashCode = static_cast<juce::int64> (hash ((size_t) file.getHash(), thumbTypeHashCode));
+        const auto hashCode = static_cast<yup::int64> (hash ((size_t) file.getHash(), thumbTypeHashCode));
 
         // this breaks thumbnails in 64-bit mode
         //setReader (new CacheAudioFormatReader (file), hashCode);
@@ -703,22 +703,22 @@ void SmartThumbnail::clear()
     thumbnail->clear();
 }
 
-bool SmartThumbnail::setSource (juce::InputSource* source)
+bool SmartThumbnail::setSource (yup::InputSource* source)
 {
     return thumbnail->setSource (source);
 }
 
-void SmartThumbnail::setReader (juce::AudioFormatReader* reader, juce::int64 hashCode)
+void SmartThumbnail::setReader (yup::AudioFormatReader* reader, yup::int64 hashCode)
 {
     thumbnail->setReader (reader, hashCode);
 }
 
-bool SmartThumbnail::loadFrom (juce::InputStream& stream)
+bool SmartThumbnail::loadFrom (yup::InputStream& stream)
 {
     return thumbnail->loadFrom (stream);
 }
 
-void SmartThumbnail::saveTo (juce::OutputStream& stream) const
+void SmartThumbnail::saveTo (yup::OutputStream& stream) const
 {
     thumbnail->saveTo (stream);
 }
@@ -733,8 +733,8 @@ double SmartThumbnail::getTotalLength() const noexcept
     return thumbnail->getTotalLength();
 }
 
-void SmartThumbnail::drawChannel (juce::Graphics& g,
-                                  const juce::Rectangle<int>& r,
+void SmartThumbnail::drawChannel (yup::Graphics& g,
+                                  const yup::Rectangle<int>& r,
                                   double startTimeSeconds,
                                   double endTimeSeconds,
                                   int channelNum,
@@ -747,8 +747,8 @@ void SmartThumbnail::drawChannel (juce::Graphics& g,
                             verticalZoomFactor);
 }
 
-void SmartThumbnail::drawChannels (juce::Graphics& g,
-                                   const juce::Rectangle<int>& r,
+void SmartThumbnail::drawChannels (yup::Graphics& g,
+                                   const yup::Rectangle<int>& r,
                                    double startTimeSeconds,
                                    double endTimeSeconds,
                                    float verticalZoomFactor)
@@ -764,7 +764,7 @@ bool SmartThumbnail::isFullyLoaded() const noexcept
     return thumbnail->isFullyLoaded();
 }
 
-juce::int64 SmartThumbnail::getNumSamplesFinished() const noexcept
+yup::int64 SmartThumbnail::getNumSamplesFinished() const noexcept
 {
     return thumbnail->getNumSamplesFinished();
 }
@@ -781,17 +781,17 @@ void SmartThumbnail::getApproximateMinMax (double startTime, double endTime, int
                                      minValue, maxValue);
 }
 
-juce::int64 SmartThumbnail::getHashCode() const
+yup::int64 SmartThumbnail::getHashCode() const
 {
     return thumbnail->getHashCode();
 }
 
-void SmartThumbnail::reset (int numChannels, double sampleRate, juce::int64 totalSamplesInSource)
+void SmartThumbnail::reset (int numChannels, double sampleRate, yup::int64 totalSamplesInSource)
 {
     thumbnail->reset (numChannels, sampleRate, totalSamplesInSource);
 }
 
-void SmartThumbnail::addBlock (juce::int64 sampleNumberInSource, const juce::AudioBuffer<float>& buffer,
+void SmartThumbnail::addBlock (yup::int64 sampleNumberInSource, const yup::AudioBuffer<float>& buffer,
                                int startOffsetInBuffer, int numSamples)
 {
     thumbnail->addBlock (sampleNumberInSource, buffer,
@@ -872,13 +872,13 @@ AudioFileManager::KnownFile& AudioFileManager::findOrCreateKnown (const AudioFil
 void AudioFileManager::clearFiles()
 {
     CRASH_TRACER
-    const juce::ScopedLock sl (knownFilesLock);
+    const yup::ScopedLock sl (knownFilesLock);
     knownFiles.clear();
 }
 
 void AudioFileManager::removeFile (HashCode hash)
 {
-    const juce::ScopedLock sl (knownFilesLock);
+    const yup::ScopedLock sl (knownFilesLock);
 
     auto f = knownFiles.find (hash);
 
@@ -893,7 +893,7 @@ AudioFile AudioFileManager::getAudioFile (ProjectItemRef sourceID)
 
 AudioFileInfo AudioFileManager::getInfo (const AudioFile& file)
 {
-    const juce::ScopedLock sl (knownFilesLock);
+    const yup::ScopedLock sl (knownFilesLock);
     return findOrCreateKnown (file).info;
 }
 
@@ -901,7 +901,7 @@ void AudioFileManager::registerMemoryBuffer (const std::string& filename,
                                              choc::buffer::InterleavedView<const float> buffer,
                                              double sampleRate)
 {
-    AudioFile af (engine, juce::File (filename));
+    AudioFile af (engine, yup::File (yup::String (filename)));
 
     AudioFileInfo info (engine);
     info.wasParsedOk      = true;
@@ -913,19 +913,19 @@ void AudioFileManager::registerMemoryBuffer (const std::string& filename,
     info.isFloatingPoint  = true;
     info.needsCachedProxy = false;
 
-    const juce::ScopedLock sl (knownFilesLock);
+    const yup::ScopedLock sl (knownFilesLock);
     knownFiles[af.getHash()] = std::make_unique<KnownFile> (af, std::move (info), buffer);
 }
 
 void AudioFileManager::unregisterMemoryBuffer (const std::string& filename)
 {
-    AudioFile af (engine, juce::File (filename));
+    AudioFile af (engine, yup::File (yup::String (filename)));
     removeFile (af.getHash());
 }
 
 std::unique_ptr<AudioFormatReaderWithTimeout> AudioFileManager::createMemoryReader (const AudioFile& file) const
 {
-    const juce::ScopedLock sl (knownFilesLock);
+    const yup::ScopedLock sl (knownFilesLock);
 
     auto it = knownFiles.find (file.getHash());
 
@@ -958,7 +958,7 @@ void AudioFileManager::checkFileForChanges (const AudioFile& file)
     bool changed = false;
 
     {
-        const juce::ScopedLock sl (knownFilesLock);
+        const yup::ScopedLock sl (knownFilesLock);
 
         auto f = knownFiles.find (file.getHash());
 
@@ -977,10 +977,10 @@ void AudioFileManager::checkFilesForChanges()
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
 
-    juce::Array<AudioFile> changedFiles;
+    yup::Array<AudioFile> changedFiles;
 
     {
-        const juce::ScopedLock sl (knownFilesLock);
+        const yup::ScopedLock sl (knownFilesLock);
 
         for (auto& f : knownFiles)
             if (checkFileTime (*f.second))
@@ -998,7 +998,7 @@ void AudioFileManager::releaseAllFiles()
 {
     cache.releaseAllFiles();
 
-    const juce::ScopedLock sl (activeThumbnailLock);
+    const yup::ScopedLock sl (activeThumbnailLock);
 
     for (auto t : activeThumbnails)
         t->releaseFile();
@@ -1008,7 +1008,7 @@ void AudioFileManager::releaseFile (const AudioFile& file)
 {
     cache.releaseFile (file);
 
-    const juce::ScopedLock sl (activeThumbnailLock);
+    const yup::ScopedLock sl (activeThumbnailLock);
 
     for (auto t : activeThumbnails)
         if (t->file == file)
@@ -1023,10 +1023,10 @@ void AudioFileManager::callListeners (const AudioFile& file)
     for (auto h : thumbnailTypeHashes)
     {
         const auto hashCode = hash ((size_t) file.getHash(), h);
-        thumbnailCache->removeThumb (static_cast<juce::int64> (hashCode));
+        thumbnailCache->removeThumb (static_cast<yup::int64> (hashCode));
     }
 
-    const juce::ScopedLock sl (activeThumbnailLock);
+    const yup::ScopedLock sl (activeThumbnailLock);
 
     for (auto t : activeThumbnails)
         if (t->file == file)
@@ -1035,10 +1035,10 @@ void AudioFileManager::callListeners (const AudioFile& file)
 
 void AudioFileManager::callListenersOnMessageThread (const AudioFile& file)
 {
-    if (juce::MessageManager::existsAndIsCurrentThread())
+    if (yup::MessageManager::existsAndIsCurrentThread())
         callListeners (file);
     else
-        juce::MessageManager::callAsync ([file, eng = makeWeakRef (engine)]
+        yup::MessageManager::callAsync ([file, eng = makeWeakRef (engine)]
                                          {
                                              if (eng != nullptr)
                                                  eng->getAudioFileManager().callListeners (file);
@@ -1051,7 +1051,7 @@ void AudioFileManager::forceFileUpdate (const AudioFile& file)
     TRACKTION_ASSERT_MESSAGE_THREAD
 
     // this doesn't check for file time and is used when files are changed rapidly such as when recording
-    const juce::ScopedLock sl (knownFilesLock);
+    const yup::ScopedLock sl (knownFilesLock);
 
     auto f = knownFiles.find (file.getHash());
 
@@ -1076,7 +1076,7 @@ void AudioFileManager::validateFile (const AudioFile& file, bool updateInfo)
 
 void AudioFileManager::checkFileForChangesAsync (const AudioFile& file)
 {
-    const juce::ScopedLock sl (knownFilesLock);
+    const yup::ScopedLock sl (knownFilesLock);
     filesToCheck.addIfNotAlreadyThere (file);
     triggerAsyncUpdate();
 }
@@ -1087,7 +1087,7 @@ void AudioFileManager::handleAsyncUpdate()
     AudioFile fileToCheck (engine);
 
     {
-        const juce::ScopedLock sl (knownFilesLock);
+        const yup::ScopedLock sl (knownFilesLock);
 
         if (filesToCheck.isEmpty())
             return;

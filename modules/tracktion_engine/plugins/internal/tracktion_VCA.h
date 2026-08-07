@@ -20,7 +20,7 @@ public:
     VCAPlugin (PluginCreationInfo);
     ~VCAPlugin() override;
 
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
     //==============================================================================
     float getSliderPos() const;
@@ -34,9 +34,9 @@ public:
     //==============================================================================
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return TRANS("VCA"); }
-    juce::String getSelectableDescription() override    { return getName(); }
-    juce::String getPluginType() override               { return xmlTypeName; }
+    yup::String getName() const override               { return TRANS("VCA"); }
+    yup::String getSelectableDescription() override    { return getName(); }
+    yup::String getPluginType() override               { return xmlTypeName; }
     bool canBeAddedToClip() override                    { return false; }
     bool canBeAddedToRack() override                    { return false; }
     bool canBeAddedToFolderTrack()   override           { return true;  }
@@ -47,7 +47,7 @@ public:
     void deinitialise() override;
     void applyToBuffer (const PluginRenderContext&) override;
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     juce::CachedValue<float> volumeValue;
     AutomatableParameter::Ptr volParam;
@@ -55,7 +55,7 @@ public:
 private:
     float lastVolumeBeforeMute = 0.0f;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VCAPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VCAPlugin)
 };
 
 } // namespace tracktion::inline engine

@@ -41,7 +41,7 @@ namespace tracktion::inline engine
     namespace v2
     {
         class AutomationRecordManager   : public AutomationRecordManagerBase,
-                                          private juce::ChangeListener
+                                          private yup::ChangeListener
         {
         public:
             //==============================================================================
@@ -50,18 +50,18 @@ namespace tracktion::inline engine
             {
                 if (edit.shouldPlay())
                 {
-                    auto getMessageManagerLock = []() -> std::unique_ptr<juce::MessageManagerLock>
+                    auto getMessageManagerLock = []() -> std::unique_ptr<yup::MessageManagerLock>
                     {
-                        if (auto job = juce::ThreadPoolJob::getCurrentThreadPoolJob())
-                            return std::make_unique<juce::MessageManagerLock> (job);
+                        if (auto job = yup::ThreadPoolJob::getCurrentThreadPoolJob())
+                            return std::make_unique<yup::MessageManagerLock> (job);
 
-                        if (auto t = juce::Thread::getCurrentThread())
-                            return std::make_unique<juce::MessageManagerLock> (t);
+                        if (auto t = yup::Thread::getCurrentThread())
+                            return std::make_unique<yup::MessageManagerLock> (t);
 
                         return {};
                     };
 
-                    if (juce::MessageManager::getInstance()->isThisTheMessageThread())
+                    if (yup::MessageManager::getInstance()->isThisTheMessageThread())
                     {
                         edit.getTransport().addChangeListener (this);
                     }
@@ -120,13 +120,13 @@ namespace tracktion::inline engine
             //==============================================================================
             bool isRecordingAutomation() const override
             {
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
                 return recordedParams.size() > 0;
             }
 
             bool isParameterRecording (AutomatableParameter* param) const override
             {
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
 
                 for (auto p : recordedParams)
                     if (&p->parameter == param)
@@ -137,7 +137,7 @@ namespace tracktion::inline engine
 
             void punchInWriteParams (TimePosition pos)
             {
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
 
                 auto punchInWriteParam = [this, pos] (auto& ap)
                 {
@@ -157,7 +157,7 @@ namespace tracktion::inline engine
 
             void punchOut (bool toEnd) override
             {
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
 
                 if (recordedParams.isEmpty())
                     return;
@@ -182,7 +182,7 @@ namespace tracktion::inline engine
             AutomationRecordManager (const AutomationRecordManager&) = delete;
 
             struct AutomationParamData : public AutomatableParameter::Listener,
-                                         public juce::Timer
+                                         public yup::Timer
             {
                 AutomationParamData (AutomationRecordManager& o, AutomatableParameter& p, float value, AutomationTrigger t)
                     : owner (o), parameter (p), originalValue (value), trigger (t)
@@ -211,13 +211,13 @@ namespace tracktion::inline engine
                 AutomationRecordManager& owner;
                 AutomatableParameter& parameter;
                 const AutomationMode mode = getAutomationMode (parameter);
-                juce::Array<Change> changes;
+                yup::Array<Change> changes;
                 float originalValue;
                 AutomationTrigger trigger;
                 std::optional<Change> lastChangeFlushed;
                 std::optional<float> valueAtLoopEnd;
                 const TimeDuration glideTime = tracktion::AutomationRecordManager::getGlideSeconds (parameter.getEngine());
-                juce::SparseSet<TimePosition> timeRangeCovered;
+                yup::SparseSet<TimePosition> timeRangeCovered;
 
             private:
                 const ScopedListener listener { parameter, *this};
@@ -238,8 +238,8 @@ namespace tracktion::inline engine
             };
 
             Edit& edit;
-            juce::CriticalSection lock;
-            juce::OwnedArray<AutomationParamData> recordedParams;
+            yup::CriticalSection lock;
+            yup::OwnedArray<AutomationParamData> recordedParams;
             juce::CachedValue<AtomicWrapper<bool>> readingAutomation, writingAutomation;
             bool wasPlaying = false;
             LambdaTimer flushTimer { [this] { flushAutomation(); } };
@@ -267,14 +267,14 @@ namespace tracktion::inline engine
                 auto entry = std::make_unique<AutomationParamData> (*this, param, originalValue, trigger);
                 entry->changed();
 
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
                 recordedParams.add (entry.release());
             }
 
             void postAutomationChange (AutomatableParameter& param, TimePosition time, float value) override
             {
                 TRACKTION_ASSERT_MESSAGE_THREAD
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
 
                 for (auto p : recordedParams)
                 {
@@ -346,7 +346,7 @@ namespace tracktion::inline engine
 
             void parameterBeingDeleted (AutomatableParameter& param) override
             {
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
 
                 for (int i = recordedParams.size(); --i >= 0;)
                     if (&recordedParams.getUnchecked (i)->parameter == &param)
@@ -358,7 +358,7 @@ namespace tracktion::inline engine
                 // Touch: Punch out
                 // Latch: Do nothing until play stops (continue writing existing value)
                 // Write: Punch out - change to latch mode
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
 
                 for (int i = recordedParams.size(); --i >= 0;)
                 {
@@ -394,7 +394,7 @@ namespace tracktion::inline engine
 
             void flushAutomation()
             {
-                const juce::ScopedLock sl (lock);
+                const yup::ScopedLock sl (lock);
 
                 if (recordedParams.isEmpty())
                     return;
@@ -492,7 +492,7 @@ namespace tracktion::inline engine
                 }
             }
 
-            void changeListenerCallback (juce::ChangeBroadcaster* source) override
+            void changeListenerCallback (yup::ChangeBroadcaster* source) override
             {
                 // called back when transport state changes
                 auto& tc = edit.getTransport();
@@ -515,7 +515,7 @@ namespace tracktion::inline engine
                         {
                             punchOut (false);
 
-                            const juce::ScopedLock sl (lock);
+                            const yup::ScopedLock sl (lock);
                             jassert (recordedParams.isEmpty());
                             recordedParams.clear();
                         }

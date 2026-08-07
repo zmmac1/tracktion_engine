@@ -11,9 +11,9 @@
 namespace tracktion::inline engine {
 
 /** An area of the edit currently control by a control surface */
-struct ColourArea
+struct ColorArea
 {
-    juce::Colour colour;
+    yup::Color colour;
     Track& firstTrack;
     Track& lastTrack;
     int firstScene;
@@ -29,9 +29,9 @@ struct ColourArea
 /** Keeps a list of external controllers and keeps them connected to the
     right MIDI in/out devices
 */
-class ExternalControllerManager  : public juce::ChangeBroadcaster,
-                                   private juce::ChangeListener,
-                                   private juce::Timer
+class ExternalControllerManager  : public yup::ChangeBroadcaster,
+                                   private yup::ChangeListener,
+                                   private yup::Timer
 {
 public:
     //==============================================================================
@@ -80,9 +80,9 @@ public:
     SelectionManager* getSelectionManager() const noexcept;
 
     //==============================================================================
-    const juce::OwnedArray<ExternalController>& getControllers() const noexcept     { return devices; }
+    const yup::OwnedArray<ExternalController>& getControllers() const noexcept     { return devices; }
 
-    juce::StringArray getAllControllerNames();
+    yup::StringArray getAllControllerNames();
 
     // Returns the first available custom controler to use for assignments.
     ExternalController* getActiveCustomController();
@@ -95,7 +95,7 @@ public:
         osc
     };
 
-    bool createCustomController (const juce::String& name, Protocol);
+    bool createCustomController (const yup::String& name, Protocol);
     ExternalController* addController (ControlSurface*);
     void deleteController (ExternalController*);
 
@@ -128,13 +128,13 @@ public:
 
     void changeListenerCallback (ChangeBroadcaster*) override;
 
-    bool shouldTrackBeColoured (int channelNum);
-    juce::Colour getTrackColour (int channelNum);
+    bool shouldTrackBeColored (int channelNum);
+    yup::Color getTrackColor (int channelNum);
 
-    std::vector<ColourArea> getColouredArea (const Edit&);
+    std::vector<ColorArea> getColoredArea (const Edit&);
 
-    bool shouldPluginBeColoured (Plugin*);
-    juce::Colour getPluginColour (Plugin*);
+    bool shouldPluginBeColored (Plugin*);
+    yup::Color getPluginColor (Plugin*);
 
     void updateAllDevices();
     void updateParameters();
@@ -143,15 +143,15 @@ public:
     void updatePunchLights();
     void updateScrollLights();
     void updateUndoLights();
-    void updatePadColours();
+    void updatePadColors();
 
     int getNumChannelTracks() const;
     Track* getChannelTrack (int channel) const;
     int mapTrackNumToChannelNum (int channelNum) const;
 
     //==============================================================================
-    int getXTCount (const juce::String& controller);
-    void setXTCount (const juce::String& controller, int);
+    int getXTCount (const yup::String& controller);
+    void setXTCount (const yup::String& controller, int);
     void refreshXTOrder();
 
     //==============================================================================
@@ -200,7 +200,7 @@ private:
 
     struct EditTreeWatcher;
     std::unique_ptr<EditTreeWatcher> editTreeWatcher;
-    juce::OwnedArray<ExternalController> devices;
+    yup::OwnedArray<ExternalController> devices;
 
     NovationAutomap* automap = nullptr;
 
@@ -225,11 +225,11 @@ private:
 
     ExternalController* addNewController (ControlSurface*);
 
-    juce::Array<ExternalController*> getActiveDevices() const;
+    yup::Array<ExternalController*> getActiveDevices() const;
     void blinkNow();
     void timerCallback() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExternalControllerManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExternalControllerManager)
 };
 
 } // namespace tracktion::inline engine

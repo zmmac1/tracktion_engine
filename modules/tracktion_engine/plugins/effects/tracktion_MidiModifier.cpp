@@ -16,7 +16,7 @@ MidiModifierPlugin::MidiModifierPlugin (PluginCreationInfo info) : Plugin (info)
                           { -getMaximumSemitones(), getMaximumSemitones() },
                           [] (float value)            { return std::abs (value) < 0.01f ? "(" + TRANS("Original pitch") + ")"
                                                                                         : getSemitonesAsString (value); },
-                          [] (const juce::String& s)  { return juce::jlimit (-MidiModifierPlugin::getMaximumSemitones(),
+                          [] (const yup::String& s)  { return yup::jlimit (-MidiModifierPlugin::getMaximumSemitones(),
                                                                              MidiModifierPlugin::getMaximumSemitones(),
                                                                              s.getFloatValue()); });
 
@@ -33,28 +33,28 @@ MidiModifierPlugin::~MidiModifierPlugin()
 
 const char* MidiModifierPlugin::xmlTypeName ("midiModifier");
 
-juce::String MidiModifierPlugin::getName() const                                   { return TRANS("MIDI Modifier"); }
-juce::String MidiModifierPlugin::getPluginType()                                   { return xmlTypeName; }
-juce::String MidiModifierPlugin::getShortName (int)                                { return TRANS("MIDI Modifier"); }
+yup::String MidiModifierPlugin::getName() const                                   { return TRANS("MIDI Modifier"); }
+yup::String MidiModifierPlugin::getPluginType()                                   { return xmlTypeName; }
+yup::String MidiModifierPlugin::getShortName (int)                                { return TRANS("MIDI Modifier"); }
 void MidiModifierPlugin::initialise (const PluginInitialisationInfo&)              {}
 void MidiModifierPlugin::deinitialise()                                            {}
 double MidiModifierPlugin::getLatencySeconds()                                     { return 0.0; }
 int MidiModifierPlugin::getNumOutputChannelsGivenInputs (int)                      { return 0; }
-void MidiModifierPlugin::getChannelNames (juce::StringArray*, juce::StringArray*)  {}
+void MidiModifierPlugin::getChannelNames (yup::StringArray*, yup::StringArray*)  {}
 bool MidiModifierPlugin::canBeAddedToClip()                                        { return false; }
 
 void MidiModifierPlugin::applyToBuffer (const PluginRenderContext& fc)
 {
     if (fc.bufferForMidiMessages != nullptr)
-        fc.bufferForMidiMessages->addToNoteNumbers (juce::roundToInt (semitones->getCurrentValue()));
+        fc.bufferForMidiMessages->addToNoteNumbers (yup::roundToInt (semitones->getCurrentValue()));
 }
 
-juce::String MidiModifierPlugin::getSelectableDescription()
+yup::String MidiModifierPlugin::getSelectableDescription()
 {
     return TRANS("MIDI Modifier Plugin");
 }
 
-void MidiModifierPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void MidiModifierPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, semitonesValue);
 

@@ -95,7 +95,7 @@ private:
     AutomationRecordManager (const AutomationRecordManager&) = delete;
 
     std::unique_ptr<AutomationRecordManagerBase> pimpl;
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 
     friend class AutomatableParameter;
     void postFirstAutomationChange (AutomatableParameter&, float originalValue, AutomationTrigger);

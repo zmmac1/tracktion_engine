@@ -22,7 +22,7 @@ void CustomControlSurface::CustomControlSurfaceManager::unregisterSurface (Custo
 
 void CustomControlSurface::CustomControlSurfaceManager::saveAllSettings (Engine& e)
 {
-    juce::XmlElement root ("MIDICUSTOMCONTROLSURFACES");
+    yup::XmlElement root ("MIDICUSTOMCONTROLSURFACES");
 
     for (auto s : surfaces)
         root.addChildElement (s->createXml());
@@ -32,7 +32,7 @@ void CustomControlSurface::CustomControlSurfaceManager::saveAllSettings (Engine&
 
 //==============================================================================
 CustomControlSurface::CustomControlSurface (ExternalControllerManager& ecm,
-                                            const juce::String& name,
+                                            const yup::String& name,
                                             ExternalControllerManager::Protocol protocol_)
     : ControlSurface (ecm),
     protocol (protocol_)
@@ -45,7 +45,7 @@ CustomControlSurface::CustomControlSurface (ExternalControllerManager& ecm,
     loadFunctions();
 }
 
-CustomControlSurface::CustomControlSurface (ExternalControllerManager& ecm, const juce::XmlElement& xml)
+CustomControlSurface::CustomControlSurface (ExternalControllerManager& ecm, const yup::XmlElement& xml)
    : ControlSurface (ecm)
 {
     protocol = xml.getStringAttribute ("protocol") == "osc" ? ExternalControllerManager::osc :
@@ -112,7 +112,7 @@ bool CustomControlSurface::isPendingEventAssignable()
     return false;
 }
 
-void CustomControlSurface::updateOrCreateMappingForID (int id, juce::String addr,
+void CustomControlSurface::updateOrCreateMappingForID (int id, yup::String addr,
                                                        int channel, int noteNum, int controllerID)
 {
     Mapping* mappingToUpdate = nullptr;
@@ -139,12 +139,12 @@ void CustomControlSurface::updateOrCreateMappingForID (int id, juce::String addr
     sendChangeMessage();
 }
 
-void CustomControlSurface::addMappingSetsForID (ActionID id, juce::Array<MappingSet>& mappingSet)
+void CustomControlSurface::addMappingSetsForID (ActionID id, yup::Array<MappingSet>& mappingSet)
 {
     if (owner == nullptr)
         return;
 
-    auto selectionColour = owner->getSelectionColour();
+    auto selectionColor = owner->getSelectionColor();
 
     for (int i = mappings.size(); --i >= 0;)
     {
@@ -159,7 +159,7 @@ void CustomControlSurface::addMappingSetsForID (ActionID id, juce::Array<Mapping
             matchedMapping.addr             = mapping->addr;
             matchedMapping.note             = mapping->note;
             matchedMapping.channel          = mapping->channel;
-            matchedMapping.colour           = selectionColour;
+            matchedMapping.colour           = selectionColor;
             matchedMapping.surfaceName      = owner->getName();
 
             mappingSet.add (matchedMapping);
@@ -167,7 +167,7 @@ void CustomControlSurface::addMappingSetsForID (ActionID id, juce::Array<Mapping
     }
 }
 
-juce::String CustomControlSurface::getNameForActionID (ExternalControllerManager& ecm, ActionID id)
+yup::String CustomControlSurface::getNameForActionID (ExternalControllerManager& ecm, ActionID id)
 {
     CRASH_TRACER
 
@@ -178,9 +178,9 @@ juce::String CustomControlSurface::getNameForActionID (ExternalControllerManager
     return {};
 }
 
-juce::Array<ControlSurface*> CustomControlSurface::getCustomSurfaces (ExternalControllerManager& ecm)
+yup::Array<ControlSurface*> CustomControlSurface::getCustomSurfaces (ExternalControllerManager& ecm)
 {
-    juce::Array<ControlSurface*> surfaces;
+    yup::Array<ControlSurface*> surfaces;
 
     if (auto n = ecm.engine.getPropertyStorage().getXmlProperty (SettingID::customMidiControllers))
     {
@@ -196,9 +196,9 @@ juce::Array<ControlSurface*> CustomControlSurface::getCustomSurfaces (ExternalCo
     return surfaces;
 }
 
-juce::Array<CustomControlSurface::MappingSet> CustomControlSurface::getMappingSetsForID (ExternalControllerManager& ecm, ActionID id)
+yup::Array<CustomControlSurface::MappingSet> CustomControlSurface::getMappingSetsForID (ExternalControllerManager& ecm, ActionID id)
 {
-    juce::Array<MappingSet> mappingSet;
+    yup::Array<MappingSet> mappingSet;
 
     for (auto ec : ecm.getControllers())
         if (ec->isEnabled())
@@ -213,9 +213,9 @@ int CustomControlSurface::getControllerNumberFromId (int id) noexcept
     return id == 0x40000 ? -1 : (id - 0x10000);
 }
 
-juce::XmlElement* CustomControlSurface::createXml()
+yup::XmlElement* CustomControlSurface::createXml()
 {
-    auto element = new juce::XmlElement ("MIDICUSTOMCONTROLSURFACE");
+    auto element = new yup::XmlElement ("MIDICUSTOMCONTROLSURFACE");
     element->setAttribute ("name", deviceDescription);
     element->setAttribute ("protocol", protocol == ExternalControllerManager::osc ? "osc" : "midi");
     element->setAttribute ("eatsMidi", eatsAllMidi);
@@ -237,7 +237,7 @@ juce::XmlElement* CustomControlSurface::createXml()
     return element;
 }
 
-bool CustomControlSurface::loadFromXml (const juce::XmlElement& xml)
+bool CustomControlSurface::loadFromXml (const yup::XmlElement& xml)
 {
     eatsAllMidi                 = xml.getBoolAttribute ("eatsMidi", false);
     numberOfFaderChannels       = xml.getIntAttribute ("channels", 8);
@@ -260,17 +260,17 @@ bool CustomControlSurface::loadFromXml (const juce::XmlElement& xml)
     return true;
 }
 
-void CustomControlSurface::importSettings (const juce::File& file)
+void CustomControlSurface::importSettings (const yup::File& file)
 {
     importSettings (file.loadFileAsString());
 }
 
-void CustomControlSurface::importSettings (const juce::String& xmlText)
+void CustomControlSurface::importSettings (const yup::String& xmlText)
 {
     bool ok = false;
     mappings.clearQuick (true);
 
-    if (auto xml = juce::parseXML (xmlText))
+    if (auto xml = yup::parseXML (xmlText))
     {
         loadFromXml (*xml);
         loadFunctions();
@@ -283,10 +283,10 @@ void CustomControlSurface::importSettings (const juce::String& xmlText)
         engine.getUIBehaviour().showWarningAlert (TRANS("Import"), TRANS("Import failed"));
 }
 
-void CustomControlSurface::exportSettings (const juce::File& file)
+void CustomControlSurface::exportSettings (const yup::File& file)
 {
     bool ok = false;
-    std::unique_ptr<juce::XmlElement> xml (createXml());
+    std::unique_ptr<yup::XmlElement> xml (createXml());
 
     if (xml != nullptr)
     {
@@ -314,7 +314,7 @@ void CustomControlSurface::shutDownDevice()
     recreateOSCSockets();
 }
 
-void CustomControlSurface::updateOSCSettings (int in, int out, juce::String addr)
+void CustomControlSurface::updateOSCSettings (int in, int out, yup::String addr)
 {
     oscInputPort = in;
     oscOutputPort = out;
@@ -330,7 +330,7 @@ void CustomControlSurface::recreateOSCSockets()
 
     if (online && oscInputPort > 0)
     {
-        oscReceiver = std::make_unique<juce::OSCReceiver>();
+        oscReceiver = std::make_unique<yup::OSCReceiver>();
         if (! oscReceiver->connect (oscInputPort))
         {
             oscReceiver.reset();
@@ -344,7 +344,7 @@ void CustomControlSurface::recreateOSCSockets()
 
     if (online && oscOutputPort > 0 && oscOutputAddr.isNotEmpty())
     {
-        oscSender = std::make_unique<juce::OSCSender>();
+        oscSender = std::make_unique<yup::OSCSender>();
         if (! oscSender->connect (oscOutputAddr, oscOutputPort))
         {
             oscSender.reset();
@@ -355,7 +355,7 @@ void CustomControlSurface::recreateOSCSockets()
 
 void CustomControlSurface::saveAllSettings (Engine& e)
 {
-    juce::SharedResourcePointer<CustomControlSurfaceManager> manager;
+    yup::SharedResourcePointer<CustomControlSurfaceManager> manager;
     manager->saveAllSettings (e);
 }
 
@@ -363,7 +363,7 @@ void CustomControlSurface::updateMiscFeatures()
 {
 }
 
-bool CustomControlSurface::wantsMessage (int, const juce::MidiMessage& m)
+bool CustomControlSurface::wantsMessage (int, const yup::MidiMessage& m)
 {
     // in T5 there will always be a current list box so we don't wan't to eat all the time
     if (eatsAllMidi || listeningOnRow != -1 || ((m.isNoteOn() || m.isController())
@@ -405,7 +405,7 @@ bool CustomControlSurface::wantsMessage (int, const juce::MidiMessage& m)
     return false;
 }
 
-void CustomControlSurface::oscMessageReceived (const juce::OSCMessage& m)
+void CustomControlSurface::oscMessageReceived (const yup::OSCMessage& m)
 {
     packetsIn++;
 
@@ -444,13 +444,13 @@ void CustomControlSurface::oscMessageReceived (const juce::OSCMessage& m)
                 {
                     try
                     {
-                        juce::OSCMessage mo (addr);
+                        yup::OSCMessage mo (addr);
                         mo.addFloat32 (itr->second);
 
                         if (oscSender->send (mo))
                             packetsOut++;
                     }
-                    catch ([[maybe_unused]] juce::OSCException& err)
+                    catch ([[maybe_unused]] yup::OSCException& err)
                     {
                         DBG("OSC Error: " + err.description);
                     }
@@ -492,7 +492,7 @@ void CustomControlSurface::oscMessageReceived (const juce::OSCMessage& m)
     }
 }
 
-void CustomControlSurface::oscBundleReceived (const juce::OSCBundle& b)
+void CustomControlSurface::oscBundleReceived (const yup::OSCBundle& b)
 {
     for (auto e : b)
         if (e.isMessage())
@@ -661,7 +661,7 @@ void CustomControlSurface::timerCallback()
     }
 }
 
-void CustomControlSurface::acceptMidiMessage (int, const juce::MidiMessage& m)
+void CustomControlSurface::acceptMidiMessage (int, const yup::MidiMessage& m)
 {
     if (! m.isController() && ! m.isNoteOn())
         return;
@@ -725,7 +725,7 @@ void CustomControlSurface::moveFader (int faderIndex, float v)
 
     sendCommandToControllerForActionID (volTrackId + faderIndex, v);
 
-    auto dbText = juce::Decibels::toString (volumeFaderPositionToDB (v));
+    auto dbText = yup::Decibels::toString (volumeFaderPositionToDB (v));
     sendCommandToControllerForActionID (volTextTrackId + faderIndex, dbText);
 }
 
@@ -735,7 +735,7 @@ void CustomControlSurface::moveMasterLevelFader (float newSliderPos)
 
     sendCommandToControllerForActionID (masterVolumeId, newSliderPos);
 
-    auto dbText = juce::Decibels::toString (volumeFaderPositionToDB (newSliderPos));
+    auto dbText = yup::Decibels::toString (volumeFaderPositionToDB (newSliderPos));
     sendCommandToControllerForActionID (masterVolumeTextId, dbText);
 }
 
@@ -751,15 +751,15 @@ void CustomControlSurface::movePanPot (int faderIndex, float v)
     ControlSurface::movePanPot (faderIndex, v);
     sendCommandToControllerForActionID (panTrackId + faderIndex, (v * 0.5f) + 0.5f);
 
-    juce::String panText;
-    auto p = juce::roundToInt (v * 100);
+    yup::String panText;
+    auto p = yup::roundToInt (v * 100);
 
     if (p == 0)
         panText = "C";
     else if (p < 0)
-        panText = juce::String (-p) + "L";
+        panText = yup::String (-p) + "L";
     else
-        panText = juce::String (p) + "R";
+        panText = yup::String (p) + "R";
 
     sendCommandToControllerForActionID (panTextTrackId + faderIndex, panText);
 }
@@ -770,7 +770,7 @@ void CustomControlSurface::moveAux (int faderIndex, int num, const char* bus, fl
 
     sendCommandToControllerForActionID (auxTrackId + faderIndex, v);
 
-    auto dbText = juce::Decibels::toString (volumeFaderPositionToDB (v));
+    auto dbText = yup::Decibels::toString (volumeFaderPositionToDB (v));
     sendCommandToControllerForActionID (auxTextTrackId + faderIndex, dbText);
 }
 
@@ -809,14 +809,14 @@ void CustomControlSurface::automationWriteModeChanged (bool isWriting)
     sendCommandToControllerForActionID (automationRecordId, isWriting);
 }
 
-void CustomControlSurface::faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames)
+void CustomControlSurface::faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames)
 {
     int idx = 0;
 
     for (auto name : trackNames)
     {
         sendCommandToControllerForActionID (nameTrackId + idx, name);
-        sendCommandToControllerForActionID (numberTrackId + idx, juce::String (newStartChannelNumber + idx + 1));
+        sendCommandToControllerForActionID (numberTrackId + idx, yup::String (newStartChannelNumber + idx + 1));
         idx++;
     }
 }
@@ -847,8 +847,8 @@ void CustomControlSurface::timecodeChanged (int barsOrHours, int beatsOrMinutes,
     else
         sprintf (d, sizeof (d), "%02d:%02d:%02d.%03d", barsOrHours, beatsOrMinutes, ticksOrSeconds, millisecs);
 
-    sendCommandToControllerForActionID (timecodeId, juce::String (d));
-    sendCommandToControllerForActionID (emptyTextId, juce::String());
+    sendCommandToControllerForActionID (timecodeId, yup::String (d));
+    sendCommandToControllerForActionID (emptyTextId, yup::String());
 }
 
 void CustomControlSurface::clickOnOffChanged (bool enabled)
@@ -888,8 +888,8 @@ void CustomControlSurface::parameterChanged (int paramIndex, const ParameterSett
     if (paramIndex >= 0)
     {
         sendCommandToControllerForActionID (paramTrackId + paramIndex, setting.value);
-        sendCommandToControllerForActionID (paramNameTrackId + paramIndex, juce::String (setting.label));
-        sendCommandToControllerForActionID (paramTextTrackId + paramIndex, juce::String (setting.valueDescription));
+        sendCommandToControllerForActionID (paramNameTrackId + paramIndex, yup::String (setting.label));
+        sendCommandToControllerForActionID (paramTextTrackId + paramIndex, yup::String (setting.valueDescription));
     }
 }
 
@@ -898,12 +898,12 @@ void CustomControlSurface::clearParameter (int paramIndex)
     if (paramIndex >= 0)
     {
         sendCommandToControllerForActionID (paramTrackId + paramIndex, 0.0f);
-        sendCommandToControllerForActionID (paramNameTrackId + paramIndex, juce::String());
-        sendCommandToControllerForActionID (paramTextTrackId + paramIndex, juce::String());
+        sendCommandToControllerForActionID (paramNameTrackId + paramIndex, yup::String());
+        sendCommandToControllerForActionID (paramTextTrackId + paramIndex, yup::String());
     }
 }
 
-void CustomControlSurface::currentSelectionChanged (juce::String pluginName)
+void CustomControlSurface::currentSelectionChanged (yup::String pluginName)
 {
     sendCommandToControllerForActionID (selectedPluginNameId, pluginName);
 }
@@ -945,13 +945,13 @@ void CustomControlSurface::sendCommandToControllerForActionID (int actionID, flo
                     {
                         try
                         {
-                            juce::OSCMessage m (oscAddr);
+                            yup::OSCMessage m (oscAddr);
                             m.addFloat32 (value);
 
                             if (oscSender->send (m))
                                 packetsOut++;
                         }
-                        catch ([[maybe_unused]] juce::OSCException& err)
+                        catch ([[maybe_unused]] yup::OSCException& err)
                         {
                             DBG("OSC Error: " + err.description);
                         }
@@ -966,19 +966,19 @@ void CustomControlSurface::sendCommandToControllerForActionID (int actionID, flo
             {
                 if (midiNote != -1)
                 {
-                    if (value <= 0.0f)  sendMidiCommandToController (0, juce::MidiMessage::noteOff (midiChannel, midiNote, value));
-                    else                sendMidiCommandToController (0, juce::MidiMessage::noteOn (midiChannel, midiNote, value));
+                    if (value <= 0.0f)  sendMidiCommandToController (0, yup::MidiMessage::noteOff (midiChannel, midiNote, value));
+                    else                sendMidiCommandToController (0, yup::MidiMessage::noteOn (midiChannel, midiNote, value));
                 }
 
                 if (midiController != -1)
-                    sendMidiCommandToController (0, juce::MidiMessage::controllerEvent (midiChannel, midiController,
-                                                                                     juce::MidiMessage::floatValueToMidiByte (value)));
+                    sendMidiCommandToController (0, yup::MidiMessage::controllerEvent (midiChannel, midiController,
+                                                                                     yup::MidiMessage::floatValueToMidiByte (value)));
             }
         }
     }
 }
 
-void CustomControlSurface::sendCommandToControllerForActionID (int actionID, juce::String value)
+void CustomControlSurface::sendCommandToControllerForActionID (int actionID, yup::String value)
 {
     for (auto mapping : mappings)
     {
@@ -992,13 +992,13 @@ void CustomControlSurface::sendCommandToControllerForActionID (int actionID, juc
                 {
                     try
                     {
-                        juce::OSCMessage m (oscAddr);
+                        yup::OSCMessage m (oscAddr);
                         m.addString (value);
 
                         if (oscSender->send (m))
                             packetsOut++;
                     }
-                    catch ([[maybe_unused]] juce::OSCException& err)
+                    catch ([[maybe_unused]] yup::OSCException& err)
                     {
                         DBG("OSC Error: " + err.description);
                     }
@@ -1028,7 +1028,7 @@ bool CustomControlSurface::removeMapping (ActionID id, int controllerID, int not
 }
 
 //==============================================================================
-void CustomControlSurface::showMappingsEditor (juce::DialogWindow::LaunchOptions& o)
+void CustomControlSurface::showMappingsEditor (yup::DialogWindow::LaunchOptions& o)
 {
     if (needsMidiChannel && owner->getMidiInputDevice (0).isEmpty())
     {
@@ -1041,7 +1041,7 @@ void CustomControlSurface::showMappingsEditor (juce::DialogWindow::LaunchOptions
 
     auto* dw = o.create();
     dw->enterModalState (true,
-                         juce::ModalCallbackFunction::create ([this] (int)
+                         yup::ModalCallbackFunction::create ([this] (int)
                          {
                              setLearntParam (false);
                              listenToRow (-1);
@@ -1103,12 +1103,12 @@ void CustomControlSurface::showMappingsListForRow (int row)
         }
     };
 
-    auto mouse = juce::Desktop::getInstance().getMainMouseSource();
+    auto mouse = yup::Desktop::getInstance().getMainMouseSource();
 
     if (auto underMouse = mouse.getComponentUnderMouse())
     {
         auto pt = mouse.getScreenPosition();
-        auto opts = juce::PopupMenu::Options().withTargetComponent (underMouse)
+        auto opts = yup::PopupMenu::Options().withTargetComponent (underMouse)
                                               .withTargetScreenArea ({ int (pt.x), int (pt.y), 1, 1 });
         contextMenu.showMenuAsync (opts, std::move (callback));
     }
@@ -1123,14 +1123,14 @@ CustomControlSurface::Mapping* CustomControlSurface::getMappingForRow (int row) 
     return mappings[row];
 }
 
-std::pair<juce::String, juce::String> CustomControlSurface::getTextForRow (int rowNumber) const
+std::pair<yup::String, yup::String> CustomControlSurface::getTextForRow (int rowNumber) const
 {
     const int numMappings = mappings.size();
-    jassert (juce::isPositiveAndNotGreaterThan (rowNumber, numMappings));
+    jassert (yup::isPositiveAndNotGreaterThan (rowNumber, numMappings));
 
     auto mappingForRow = mappings[rowNumber];
 
-    auto getLeftText = [&] () -> juce::String
+    auto getLeftText = [&] () -> yup::String
     {
         if (rowNumber == listeningOnRow)
         {
@@ -1139,7 +1139,7 @@ std::pair<juce::String, juce::String> CustomControlSurface::getTextForRow (int r
 
             if (lastControllerID > 0 && lastControllerNote == -1)
                 return controllerIDToString (lastControllerID, lastControllerChannel)
-                         + ": " + juce::String (juce::roundToInt (lastControllerValue * 100.0f)) + "%";
+                         + ": " + yup::String (yup::roundToInt (lastControllerValue * 100.0f)) + "%";
 
             if (lastControllerNote != -1 && lastControllerID == 0)
                 return noteIDToString (lastControllerNote, lastControllerChannel);
@@ -1165,47 +1165,47 @@ std::pair<juce::String, juce::String> CustomControlSurface::getTextForRow (int r
         return TRANS("Click here to choose a controller");
     };
 
-    return { getLeftText(), mappingForRow != nullptr ? getFunctionName (mappingForRow->function) : juce::String() };
+    return { getLeftText(), mappingForRow != nullptr ? getFunctionName (mappingForRow->function) : yup::String() };
 }
 
-juce::String CustomControlSurface::noteIDToString (int note, int channelid) const
+yup::String CustomControlSurface::noteIDToString (int note, int channelid) const
 {
     auto text = TRANS("Note On") + " "
-                   + juce::MidiMessage::getMidiNoteName (note, true, true,
+                   + yup::MidiMessage::getMidiNoteName (note, true, true,
                                                          engine.getEngineBehaviour().getMiddleCOctave());
 
-    auto channel = juce::String::formatted (" [%d]", channelid);
+    auto channel = yup::String::formatted (" [%d]", channelid);
 
     return text + channel;
 }
 
-juce::String CustomControlSurface::controllerIDToString (int id, int channelid) const
+yup::String CustomControlSurface::controllerIDToString (int id, int channelid) const
 {
-    auto channel = juce::String::formatted (" [%d]", channelid);
+    auto channel = yup::String::formatted (" [%d]", channelid);
 
     if (id >= 0x40000)
         return TRANS("Channel Pressure Controller") + channel;
 
     if (id >= 0x30000)
-        return "RPN #" + juce::String (id & 0x7fff) + channel;
+        return "RPN #" + yup::String (id & 0x7fff) + channel;
 
     if (id >= 0x20000)
-        return "NRPN #" + juce::String (id & 0x7fff) + channel;
+        return "NRPN #" + yup::String (id & 0x7fff) + channel;
 
     if (id >= 0x10000)
     {
-        auto name = TRANS(juce::MidiMessage::getControllerName (id & 0x7f));
+        auto name = TRANS(yup::MidiMessage::getControllerName (id & 0x7f));
 
         if (name.isNotEmpty())
             name = " (" + name + ")";
 
-        return TRANS("Controller") + " #" + juce::String (id & 0x7f) + name + channel;
+        return TRANS("Controller") + " #" + yup::String (id & 0x7f) + name + channel;
     }
 
     return {};
 }
 
-juce::String CustomControlSurface::getFunctionName (int id) const
+yup::String CustomControlSurface::getFunctionName (int id) const
 {
     for (int i = 0; i < actionFunctionList.size(); ++i)
         if (actionFunctionList.getUnchecked (i)->id == id)
@@ -1265,8 +1265,8 @@ void CustomControlSurface::loadFunctions()
     actionFunctionList.clear();
 
 
-    juce::PopupMenu userFunctionSubMenu;
-    auto userFunctionSubMenuSet = new juce::SortedSet<int>();
+    yup::PopupMenu userFunctionSubMenu;
+    auto userFunctionSubMenuSet = new yup::SortedSet<int>();
     addAllCommandItem (userFunctionSubMenu);
     addFunction (userFunctionSubMenu, *userFunctionSubMenuSet, TRANS("User Function"), TRANS("User Function 1"), userAction1Id, &CustomControlSurface::userFunction1);
     addFunction (userFunctionSubMenu, *userFunctionSubMenuSet, TRANS("User Function"), TRANS("User Function 2"), userAction2Id, &CustomControlSurface::userFunction2);
@@ -1291,8 +1291,8 @@ void CustomControlSurface::loadFunctions()
 
     commandGroups [nextCmdGroupIndex++] = userFunctionSubMenuSet;
 
-    juce::PopupMenu transportSubMenu;
-    auto transportSubMenuSet = new juce::SortedSet<int>();
+    yup::PopupMenu transportSubMenu;
+    auto transportSubMenuSet = new yup::SortedSet<int>();
     addAllCommandItem (transportSubMenu);
     addFunction (transportSubMenu, *transportSubMenuSet, TRANS("Transport"), TRANS("Play"), playId, &CustomControlSurface::play);
     addFunction (transportSubMenu, *transportSubMenuSet, TRANS("Transport"), TRANS("Stop"), stopId, &CustomControlSurface::stop);
@@ -1327,8 +1327,8 @@ void CustomControlSurface::loadFunctions()
     addFunction (transportSubMenu, *transportSubMenuSet, TRANS("Transport"), TRANS("Clear all solos"), clearAllSoloId, &CustomControlSurface::clearAllSolo);
     commandGroups [nextCmdGroupIndex++] = transportSubMenuSet;
 
-    juce::PopupMenu optionsSubMenu;
-    auto optionsSubMenuSet = new juce::SortedSet<int>();
+    yup::PopupMenu optionsSubMenu;
+    auto optionsSubMenuSet = new yup::SortedSet<int>();
     addAllCommandItem (optionsSubMenu);
     addFunction (optionsSubMenu, *optionsSubMenuSet, TRANS("Options"), TRANS("Toggle beats/seconds mode"), toggleBeatsSecondsModeId, &CustomControlSurface::toggleBeatsSecondsMode);
     addFunction (optionsSubMenu, *optionsSubMenuSet, TRANS("Options"), TRANS("Toggle loop"), toggleLoopId, &CustomControlSurface::toggleLoop);
@@ -1342,8 +1342,8 @@ void CustomControlSurface::loadFunctions()
     addFunction (optionsSubMenu, *optionsSubMenuSet, TRANS("Options"), TRANS("Empty Text"), emptyTextId, &CustomControlSurface::null);
     commandGroups [nextCmdGroupIndex++] = optionsSubMenuSet;
 
-    juce::PopupMenu pluginSubMenu;
-    auto pluginSubMenuSet = new juce::SortedSet<int>();
+    yup::PopupMenu pluginSubMenu;
+    auto pluginSubMenuSet = new yup::SortedSet<int>();
     addAllCommandItem (pluginSubMenu);
     addFunction (pluginSubMenu, *pluginSubMenuSet, TRANS("Plugin"), TRANS("Master volume"), masterVolumeId, &CustomControlSurface::masterVolume);
     addFunction (pluginSubMenu, *pluginSubMenuSet, TRANS("Plugin"), TRANS("Master volume text"), masterVolumeTextId, &CustomControlSurface::null);
@@ -1354,7 +1354,7 @@ void CustomControlSurface::loadFunctions()
     addPluginFunction (pluginSubMenu, TRANS("Plugin"), TRANS("Automatable parameter name"), paramNameTrackId, &CustomControlSurface::paramTrack);
     addPluginFunction (pluginSubMenu, TRANS("Plugin"), TRANS("Automatable parameter text"), paramTextTrackId, &CustomControlSurface::paramTrack);
 
-    juce::PopupMenu trackSubMenu;
+    yup::PopupMenu trackSubMenu;
     addTrackFunction (trackSubMenu, TRANS("Track"), TRANS("Name"), nameTrackId, &CustomControlSurface::null);
     addTrackFunction (trackSubMenu, TRANS("Track"), TRANS("Number text"), numberTrackId, &CustomControlSurface::null);
     addTrackFunction (trackSubMenu, TRANS("Track"), TRANS("Volume"), volTrackId, &CustomControlSurface::volTrack);
@@ -1368,8 +1368,8 @@ void CustomControlSurface::loadFunctions()
     addTrackFunction (trackSubMenu, TRANS("Track"), TRANS("Aux"), auxTrackId, &CustomControlSurface::auxTrack);
     addTrackFunction (trackSubMenu, TRANS("Track"), TRANS("Aux Text"), auxTextTrackId, &CustomControlSurface::null);
 
-    juce::PopupMenu clipSubMenu;
-    juce::PopupMenu clipBankSubMenu;
+    yup::PopupMenu clipSubMenu;
+    yup::PopupMenu clipBankSubMenu;
 
     if (engine.getEngineBehaviour().areClipSlotsEnabled())
     {
@@ -1384,7 +1384,7 @@ void CustomControlSurface::loadFunctions()
         addTrackFunction (clipSubMenu, TRANS("Clip Launcher"), TRANS("Stop Clips"), stopClipsTrackId, &CustomControlSurface::stopClips);
         addSceneFunction (clipSubMenu, TRANS("Clip Launcher"), TRANS("Launch Scene"), sceneId, &CustomControlSurface::launchScene);
 
-        auto clipBankSubMenuSet = new juce::SortedSet<int>();
+        auto clipBankSubMenuSet = new yup::SortedSet<int>();
         addAllCommandItem (clipBankSubMenu);
         addFunction (clipBankSubMenu, *clipBankSubMenuSet, TRANS("Switch Clip Launch bank"), TRANS("Up") + " 1", clipBankUp1Id, &CustomControlSurface::clipBankUp1);
         addFunction (clipBankSubMenu, *clipBankSubMenuSet, TRANS("Switch Clip Launch bank"), TRANS("Up") + " 4", clipBankUp4Id, &CustomControlSurface::clipBankUp4);
@@ -1395,8 +1395,8 @@ void CustomControlSurface::loadFunctions()
         commandGroups [nextCmdGroupIndex++] = clipBankSubMenuSet;
     }
 
-    juce::PopupMenu navigationSubMenu;
-    auto navigationSubMenuSet = new juce::SortedSet<int>();
+    yup::PopupMenu navigationSubMenu;
+    auto navigationSubMenuSet = new yup::SortedSet<int>();
     addAllCommandItem (navigationSubMenu);
     addFunction (navigationSubMenu, *navigationSubMenuSet, TRANS("Navigation"), TRANS("Zoom in"), zoomInId, &CustomControlSurface::zoomIn);
     addFunction (navigationSubMenu, *navigationSubMenuSet, TRANS("Navigation"), TRANS("Zoom out"), zoomOutId, &CustomControlSurface::zoomOut);
@@ -1417,8 +1417,8 @@ void CustomControlSurface::loadFunctions()
     addTrackFunction (navigationSubMenu, TRANS("Navigation"), TRANS("Select clip in track"), selectClipInTrackId, &CustomControlSurface::selectClipInTrack);
     addTrackFunction (navigationSubMenu, TRANS("Navigation"), TRANS("Select plugin in track"), selectPluginInTrackId, &CustomControlSurface::selectFilterInTrack);
 
-    juce::PopupMenu bankSubMenu;
-    auto bankSubMenuSet = new juce::SortedSet<int>();
+    yup::PopupMenu bankSubMenu;
+    auto bankSubMenuSet = new yup::SortedSet<int>();
     addAllCommandItem (bankSubMenu);
     addFunction (bankSubMenu, *bankSubMenuSet, TRANS("Switch fader bank"), TRANS("Left"), faderBankLeftId, &CustomControlSurface::faderBankLeft);
     addFunction (bankSubMenu, *bankSubMenuSet, TRANS("Switch fader bank"), TRANS("Left") + " 1", faderBankLeft1Id, &CustomControlSurface::faderBankLeft1);
@@ -1432,8 +1432,8 @@ void CustomControlSurface::loadFunctions()
     addFunction (bankSubMenu, *bankSubMenuSet, TRANS("Switch fader bank"), TRANS("Right") + " 16", faderBankRight16Id, &CustomControlSurface::faderBankRight16);
     commandGroups [nextCmdGroupIndex++] = bankSubMenuSet;
 
-    juce::PopupMenu paramBankSubMenu;
-    auto paramBankSubMenuSet = new juce::SortedSet<int>();
+    yup::PopupMenu paramBankSubMenu;
+    auto paramBankSubMenuSet = new yup::SortedSet<int>();
     addAllCommandItem (paramBankSubMenu);
     addFunction (paramBankSubMenu, *paramBankSubMenuSet, TRANS("Switch param bank"), TRANS("Left"), paramBankLeftId, &CustomControlSurface::paramBankLeft);
     addFunction (paramBankSubMenu, *paramBankSubMenuSet, TRANS("Switch param bank"), TRANS("Left") + " 1", paramBankLeft1Id, &CustomControlSurface::paramBankLeft1);
@@ -1465,11 +1465,11 @@ void CustomControlSurface::loadFunctions()
     contextMenu.addSubMenu (TRANS("Switch fader bank"), bankSubMenu);
     contextMenu.addSubMenu (TRANS("Switch param bank"), paramBankSubMenu);
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     // check for duplicate ids that some sloppy programmer put in
     for (int i = 0; i < actionFunctionList.size(); ++i)
     {
-        juce::SortedSet<int> set;
+        yup::SortedSet<int> set;
 
         if (set.contains (actionFunctionList[i]->id))
             jassertfalse;
@@ -1479,14 +1479,14 @@ void CustomControlSurface::loadFunctions()
    #endif
 }
 
-void CustomControlSurface::addAllCommandItem (juce::PopupMenu& menu)
+void CustomControlSurface::addAllCommandItem (yup::PopupMenu& menu)
 {
     menu.addItem (nextCmdGroupIndex, TRANS("Add all commands"));
     menu.addSeparator();
 }
 
-void CustomControlSurface::addFunction (juce::PopupMenu& menu, juce::SortedSet<int>& commandSet,
-                                        const juce::String& group, const juce::String& name,
+void CustomControlSurface::addFunction (yup::PopupMenu& menu, yup::SortedSet<int>& commandSet,
+                                        const yup::String& group, const yup::String& name,
                                         ActionID aid, ActionFunction actionFunc)
 {
     if (isTextAction (aid) && ! needsOSCSocket)
@@ -1507,8 +1507,8 @@ void CustomControlSurface::addFunction (juce::PopupMenu& menu, juce::SortedSet<i
     commandSet.add (afi->id);
 }
 
-void CustomControlSurface::addPluginFunction (juce::PopupMenu& menu,
-                                              const juce::String& group, const juce::String& name,
+void CustomControlSurface::addPluginFunction (yup::PopupMenu& menu,
+                                              const yup::String& group, const yup::String& name,
                                               ActionID aid, ActionFunction actionFunc)
 {
     if (isTextAction (aid) && ! needsOSCSocket)
@@ -1516,23 +1516,23 @@ void CustomControlSurface::addPluginFunction (juce::PopupMenu& menu,
 
     int id = (int) aid;
 
-    juce::PopupMenu subMenu;
+    yup::PopupMenu subMenu;
     addAllCommandItem (subMenu);
 
-    auto subMenuSet = new juce::SortedSet<int>();
+    auto subMenuSet = new yup::SortedSet<int>();
 
     for (int i = 0; i < numParameterControls; ++i)
     {
         ActionFunctionInfo* afi = new ActionFunctionInfo();
 
-        afi->name       = name + " " + TRANS("Parameter") + " #" + juce::String (i + 1);
+        afi->name       = name + " " + TRANS("Parameter") + " #" + yup::String (i + 1);
         afi->group      = group;
         afi->id         = id + i;
         afi->actionFunc = actionFunc;
         afi->param      = i;
 
         actionFunctionList.add(afi);
-        subMenu.addItem (afi->id, TRANS("Parameter") + " #" + juce::String (i + 1));
+        subMenu.addItem (afi->id, TRANS("Parameter") + " #" + yup::String (i + 1));
         subMenuSet->add(afi->id);
     }
 
@@ -1540,8 +1540,8 @@ void CustomControlSurface::addPluginFunction (juce::PopupMenu& menu,
     commandGroups[nextCmdGroupIndex++] = subMenuSet;
 }
 
-void CustomControlSurface::addTrackFunction (juce::PopupMenu& menu,
-                                             const juce::String& group, const juce::String& name,
+void CustomControlSurface::addTrackFunction (yup::PopupMenu& menu,
+                                             const yup::String& group, const yup::String& name,
                                              ActionID aid, ActionFunction actionFunc)
 {
     if (isTextAction (aid) && ! needsOSCSocket)
@@ -1549,23 +1549,23 @@ void CustomControlSurface::addTrackFunction (juce::PopupMenu& menu,
 
     int id = (int) aid;
 
-    juce::PopupMenu subMenu;
+    yup::PopupMenu subMenu;
     addAllCommandItem (subMenu);
 
-    auto subMenuSet = new juce::SortedSet<int>();
+    auto subMenuSet = new yup::SortedSet<int>();
 
     for (int i = 0; i < numberOfFaderChannels; ++i)
     {
         ActionFunctionInfo* afi = new ActionFunctionInfo();
 
-        afi->name       = name + " " + TRANS("Track") + " #" + juce::String (i + 1);
+        afi->name       = name + " " + TRANS("Track") + " #" + yup::String (i + 1);
         afi->group      = group;
         afi->id         = id + i;
         afi->actionFunc = actionFunc;
         afi->param      = i;
 
         actionFunctionList.add (afi);
-        subMenu.addItem (afi->id, TRANS("Track") + " #" + juce::String (i + 1));
+        subMenu.addItem (afi->id, TRANS("Track") + " #" + yup::String (i + 1));
         subMenuSet->add (afi->id);
     }
 
@@ -1573,8 +1573,8 @@ void CustomControlSurface::addTrackFunction (juce::PopupMenu& menu,
     commandGroups[nextCmdGroupIndex++] = subMenuSet;
 }
 
-void CustomControlSurface::addSceneFunction (juce::PopupMenu& menu,
-                                             const juce::String& group, const juce::String& name,
+void CustomControlSurface::addSceneFunction (yup::PopupMenu& menu,
+                                             const yup::String& group, const yup::String& name,
                                              ActionID aid, ActionFunction actionFunc)
 {
     if (isTextAction (aid) && ! needsOSCSocket)
@@ -1582,23 +1582,23 @@ void CustomControlSurface::addSceneFunction (juce::PopupMenu& menu,
 
     int id = (int) aid;
 
-    juce::PopupMenu subMenu;
+    yup::PopupMenu subMenu;
     addAllCommandItem (subMenu);
 
-    auto subMenuSet = new juce::SortedSet<int>();
+    auto subMenuSet = new yup::SortedSet<int>();
 
     for (int i = 0; i < 8; ++i)
     {
         ActionFunctionInfo* afi = new ActionFunctionInfo();
 
-        afi->name       = name + " " + TRANS("Scene") + " #" + juce::String (i + 1);
+        afi->name       = name + " " + TRANS("Scene") + " #" + yup::String (i + 1);
         afi->group      = group;
         afi->id         = id + i;
         afi->actionFunc = actionFunc;
         afi->param      = i;
 
         actionFunctionList.add (afi);
-        subMenu.addItem (afi->id, TRANS("Scene") + " #" + juce::String (i + 1));
+        subMenu.addItem (afi->id, TRANS("Scene") + " #" + yup::String (i + 1));
         subMenuSet->add (afi->id);
     }
 
@@ -1613,7 +1613,7 @@ bool CustomControlSurface::shouldActOnValue (float val)
         // If the control doesn't track touches, try and debounce via time
         if (oscControlTouched.find (oscActiveAddr) == oscControlTouched.end())
         {
-            double now = juce::Time::getMillisecondCounterHiRes() / 1000.0;
+            double now = yup::Time::getMillisecondCounterHiRes() / 1000.0;
             double lastUsed = oscLastUsedTime[oscActiveAddr];
 
             if (now - lastUsed > 0.75)
@@ -1794,7 +1794,7 @@ void CustomControlSurface::clearAllSolo (float val, int)    { if (shouldActOnVal
 
 void CustomControlSurface::jog (float val, int)
 {
-    int x = juce::roundToInt (val * 127.0f);
+    int x = yup::roundToInt (val * 127.0f);
 
     if (x <= 64)
         userMovedJogWheel (float(x) / 2);

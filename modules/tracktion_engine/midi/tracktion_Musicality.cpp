@@ -10,16 +10,16 @@
 
 namespace tracktion::inline engine {
 
-static const juce::String flat = "b";
-static auto oslash = juce::String (juce::CharPointer_UTF8 ("\xc3\xb8"));
+static const yup::String flat = "b";
+static auto oslash = yup::String (yup::CharPointer_UTF8 ("\xc3\xb8"));
 
-static inline bool isRoman (const juce::String& str) noexcept
+static inline bool isRoman (const yup::String& str) noexcept
 {
     auto firstChar = str[0];
     return firstChar == 'i' || firstChar == 'I' || firstChar == 'v' || firstChar == 'V';
 }
 
-static bool chordNameHasSymbol (const juce::String& name, const juce::String& symbol)
+static bool chordNameHasSymbol (const yup::String& name, const yup::String& symbol)
 {
     if (isRoman (name))
         return false;
@@ -35,7 +35,7 @@ static bool chordNameHasSymbol (const juce::String& name, const juce::String& sy
     return str == symbol;
 }
 
-static juce::String chordNote (const juce::String& name)
+static yup::String chordNote (const yup::String& name)
 {
     if (isRoman (name))
         return name;
@@ -48,7 +48,7 @@ static juce::String chordNote (const juce::String& name)
     return note;
 }
 
-static juce::String chordSymbol (const juce::String& name)
+static yup::String chordSymbol (const yup::String& name)
 {
     if (isRoman (name))
         return name;
@@ -62,7 +62,7 @@ static juce::String chordSymbol (const juce::String& name)
     return name.substring (1);
 }
 
-inline juce::String fixLegacyChordNames (const juce::String& oldName)
+inline yup::String fixLegacyChordNames (const yup::String& oldName)
 {
     if (chordNameHasSymbol (oldName, "maj"))        return chordNote (oldName) + Chord (Chord::majorTriad).getSymbol();
     if (chordNameHasSymbol (oldName, "min"))        return chordNote (oldName) + Chord (Chord::minorTriad).getSymbol();
@@ -85,28 +85,28 @@ Chord::Chord (ChordType c) : type (c)
 {
 }
 
-Chord::Chord (juce::Array<int> steps_, juce::String symbol_)
+Chord::Chord (yup::Array<int> steps_, yup::String symbol_)
     : type (Chord::customChord), steps (steps_), symbol (symbol_)
 {
 }
 
-juce::String Chord::toString()
+yup::String Chord::toString()
 {
-    juce::String res;
-    res += juce::String ((int)type) + "|";
+    yup::String res;
+    res += yup::String ((int)type) + "|";
     res += symbol + "|";
 
     for (auto s : steps)
-        res += juce::String (s);
+        res += yup::String (s);
 
     return res;
 }
 
-Chord Chord::fromString (const juce::String& s)
+Chord Chord::fromString (const yup::String& s)
 {
     Chord chord;
 
-    auto tokens = juce::StringArray::fromTokens (s, "|", "");
+    auto tokens = yup::StringArray::fromTokens (s, "|", "");
     if (tokens.size() >= 2)
     {
         chord.type = (ChordType) tokens[0].getIntValue();
@@ -121,9 +121,9 @@ Chord Chord::fromString (const juce::String& s)
     return { Chord::invalidChord };
 }
 
-juce::Array<Chord::ChordType> Chord::getAllChordType()
+yup::Array<Chord::ChordType> Chord::getAllChordType()
 {
-    juce::Array<ChordType> res;
+    yup::Array<ChordType> res;
 
     for (int i = majorTriad; i <= diminishedMinorNinthChord; i++)
         res.add ((ChordType) i);
@@ -131,7 +131,7 @@ juce::Array<Chord::ChordType> Chord::getAllChordType()
     return res;
 }
 
-juce::String Chord::getName() const
+yup::String Chord::getName() const
 {
     switch (type)
     {
@@ -167,7 +167,7 @@ juce::String Chord::getName() const
     }
 }
 
-juce::String Chord::getShortName() const
+yup::String Chord::getShortName() const
 {
     switch (type)
     {
@@ -203,7 +203,7 @@ juce::String Chord::getShortName() const
     }
 }
 
-juce::String Chord::getSymbol() const
+yup::String Chord::getSymbol() const
 {
     switch (type)
     {
@@ -239,7 +239,7 @@ juce::String Chord::getSymbol() const
     }
 }
 
-juce::Array<int> Chord::getSteps() const
+yup::Array<int> Chord::getSteps() const
 {
     switch (type)
     {
@@ -275,7 +275,7 @@ juce::Array<int> Chord::getSteps() const
     }
 }
 
-juce::Array<int> Chord::getSteps (int inversion) const
+yup::Array<int> Chord::getSteps (int inversion) const
 {
     auto res = getSteps();
 
@@ -372,9 +372,9 @@ Scale::Scale (ScaleType type_) : type (type_)
     }
 }
 
-juce::Array<Scale::ScaleType> Scale::getAllScaleTypes()
+yup::Array<Scale::ScaleType> Scale::getAllScaleTypes()
 {
-    juce::Array<ScaleType> res;
+    yup::Array<ScaleType> res;
 
     for (int i = major; i <= harmonicMinor; i++)
         res.add ((ScaleType)i);
@@ -382,9 +382,9 @@ juce::Array<Scale::ScaleType> Scale::getAllScaleTypes()
     return res;
 }
 
-juce::StringArray Scale::getScaleStrings()
+yup::StringArray Scale::getScaleStrings()
 {
-    juce::StringArray res;
+    yup::StringArray res;
 
     for (int i = major; i <= harmonicMinor; i++)
         res.add (getNameForType ((ScaleType) i));
@@ -392,7 +392,7 @@ juce::StringArray Scale::getScaleStrings()
     return res;
 }
 
-Scale::ScaleType Scale::getTypeFromName (juce::String name)
+Scale::ScaleType Scale::getTypeFromName (yup::String name)
 {
     for (int i = major; i <= harmonicMinor; i++)
         if (name == getNameForType ((ScaleType) i))
@@ -402,17 +402,17 @@ Scale::ScaleType Scale::getTypeFromName (juce::String name)
     return major;
 }
 
-juce::String Scale::getName() const
+yup::String Scale::getName() const
 {
     return getNameForType (type);
 }
 
-juce::String Scale::getShortName() const
+yup::String Scale::getShortName() const
 {
     return getShortNameForType (type);
 }
 
-juce::String Scale::getNameForType (ScaleType type)
+yup::String Scale::getNameForType (ScaleType type)
 {
     switch (type)
     {
@@ -431,7 +431,7 @@ juce::String Scale::getNameForType (ScaleType type)
     }
 }
 
-juce::String Scale::getShortNameForType (ScaleType type)
+yup::String Scale::getShortNameForType (ScaleType type)
 {
     switch (type)
     {
@@ -450,10 +450,10 @@ juce::String Scale::getShortNameForType (ScaleType type)
     }
 }
 
-juce::Array<Chord> Scale::generateTriads (int offset) const
+yup::Array<Chord> Scale::generateTriads (int offset) const
 {
-    juce::Array<Chord> res;
-    juce::Array<Chord> base { Chord::majorTriad, Chord::minorTriad, Chord::minorTriad, Chord::majorTriad, Chord::majorTriad, Chord::minorTriad, Chord::diminishedTriad };
+    yup::Array<Chord> res;
+    yup::Array<Chord> base { Chord::majorTriad, Chord::minorTriad, Chord::minorTriad, Chord::majorTriad, Chord::majorTriad, Chord::minorTriad, Chord::diminishedTriad };
 
     for (int i = 0; i < base.size(); i++)
         res.add (base[(i + offset) % base.size()]);
@@ -461,10 +461,10 @@ juce::Array<Chord> Scale::generateTriads (int offset) const
     return res;
 }
 
-juce::Array<Chord> Scale::generateSixths (int offset) const
+yup::Array<Chord> Scale::generateSixths (int offset) const
 {
-    juce::Array<Chord> res;
-    juce::Array<Chord> base { Chord::majorSixthChord, Chord::minorSixthChord, Chord::invalidChord, Chord::majorSixthChord, Chord::majorSixthChord, Chord::invalidChord, Chord::invalidChord };
+    yup::Array<Chord> res;
+    yup::Array<Chord> base { Chord::majorSixthChord, Chord::minorSixthChord, Chord::invalidChord, Chord::majorSixthChord, Chord::majorSixthChord, Chord::invalidChord, Chord::invalidChord };
 
     for (int i = 0; i < base.size(); i++)
         res.add (base[(i + offset) % base.size()]);
@@ -472,10 +472,10 @@ juce::Array<Chord> Scale::generateSixths (int offset) const
     return res;
 }
 
-juce::Array<Chord> Scale::generateSevenths (int offset) const
+yup::Array<Chord> Scale::generateSevenths (int offset) const
 {
-    juce::Array<Chord> res;
-    juce::Array<Chord> base { Chord::majorSeventhChord, Chord::minorSeventhChord, Chord::minorSeventhChord, Chord::majorSeventhChord, Chord::dominatSeventhChord, Chord::minorSeventhChord, Chord::halfDiminishedSeventhChord };
+    yup::Array<Chord> res;
+    yup::Array<Chord> base { Chord::majorSeventhChord, Chord::minorSeventhChord, Chord::minorSeventhChord, Chord::majorSeventhChord, Chord::dominatSeventhChord, Chord::minorSeventhChord, Chord::halfDiminishedSeventhChord };
 
     for (int i = 0; i < base.size(); i++)
         res.add (base[(i + offset) % base.size()]);
@@ -483,11 +483,11 @@ juce::Array<Chord> Scale::generateSevenths (int offset) const
     return res;
 }
 
-juce::Array<Chord> Scale::generateNinths (int offset) const
+yup::Array<Chord> Scale::generateNinths (int offset) const
 {
-    juce::Array<Chord> res;
+    yup::Array<Chord> res;
     // iii has no diatonic ninth that maps to a named chord (m7b9), so it is left invalid
-    juce::Array<Chord> base { Chord::majorNinthChord, Chord::minorDominantNinthChord, Chord::invalidChord, Chord::majorNinthChord, Chord::dominantNinthChord, Chord::minorDominantNinthChord, Chord::halfDiminishedMinorNinthChord };
+    yup::Array<Chord> base { Chord::majorNinthChord, Chord::minorDominantNinthChord, Chord::invalidChord, Chord::majorNinthChord, Chord::dominantNinthChord, Chord::minorDominantNinthChord, Chord::halfDiminishedMinorNinthChord };
 
     for (int i = 0; i < base.size(); i++)
         res.add (base[(i + offset) % base.size()]);
@@ -495,9 +495,9 @@ juce::Array<Chord> Scale::generateNinths (int offset) const
     return res;
 }
 
-juce::Array<int> Scale::getSteps (int octaves) const
+yup::Array<int> Scale::getSteps (int octaves) const
 {
-    juce::Array<int> res { 0 };
+    yup::Array<int> res { 0 };
     int step = 0;
 
     for (int i = 0; i < steps.size() - 1; i++)
@@ -525,12 +525,12 @@ juce::Array<int> Scale::getSteps (int octaves) const
     return res;
 }
 
-juce::StringArray Scale::getIntervalNames()
+yup::StringArray Scale::getIntervalNames()
 {
     return {"i", "ii", "iii", "iv", "v", "vi", "vii"};
 }
 
-juce::String Scale::getIntervalName (Intervals interval) const
+yup::String Scale::getIntervalName (Intervals interval) const
 {
     auto name = getIntervalNames()[(int)interval];
 
@@ -542,7 +542,7 @@ juce::String Scale::getIntervalName (Intervals interval) const
             break;
         case Chord::augmentedTriad:    name = name.toUpperCase() + "+";
             break;
-        case Chord::diminishedTriad:   name = name + juce::String::charToString (176);
+        case Chord::diminishedTriad:   name = name + yup::String::charToString (176);
             break;
         case Chord::customChord:
         case Chord::invalidChord:
@@ -578,7 +578,7 @@ juce::String Scale::getIntervalName (Intervals interval) const
 //==============================================================================
 struct PatternGenerator::ProgressionList  : public ValueTreeObjectList<PatternGenerator::ProgressionItem>
 {
-    ProgressionList (PatternGenerator& g, const juce::ValueTree& v)
+    ProgressionList (PatternGenerator& g, const yup::ValueTree& v)
         : ValueTreeObjectList<ProgressionItem> (v), generator (g)
     {
         rebuildObjects();
@@ -589,12 +589,12 @@ struct PatternGenerator::ProgressionList  : public ValueTreeObjectList<PatternGe
         freeObjects();
     }
 
-    bool isSuitableType (const juce::ValueTree& v) const override
+    bool isSuitableType (const yup::ValueTree& v) const override
     {
         return v.hasType (IDs::PROGRESSIONITEM);
     }
 
-    ProgressionItem* createNewObject (const juce::ValueTree& v) override
+    ProgressionItem* createNewObject (const yup::ValueTree& v) override
     {
         return new ProgressionItem (generator, v);
     }
@@ -610,11 +610,11 @@ struct PatternGenerator::ProgressionList  : public ValueTreeObjectList<PatternGe
 
     PatternGenerator& generator;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressionList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressionList)
 };
 
 //==============================================================================
-PatternGenerator::ProgressionItem::ProgressionItem (PatternGenerator& g, const juce::ValueTree& s, bool temporary)
+PatternGenerator::ProgressionItem::ProgressionItem (PatternGenerator& g, const yup::ValueTree& s, bool temporary)
     : generator (g), state (s)
 {
     auto um = temporary ? nullptr : g.clip.getUndoManager();
@@ -626,7 +626,7 @@ PatternGenerator::ProgressionItem::ProgressionItem (PatternGenerator& g, const j
     inversion.referTo (state, IDs::inversion, um);
 
     // Chord name format changed between W8 and W9 - update to new version
-    juce::String oldName = state[IDs::name];
+    yup::String oldName = state[IDs::name];
     if (oldName.isNotEmpty() && chordName.get().isEmpty())
     {
         chordName = fixLegacyChordNames (oldName);
@@ -645,36 +645,36 @@ bool PatternGenerator::ProgressionItem::operator== (const ProgressionItem& other
         && lengthInBeats == other.lengthInBeats;
 }
 
-void PatternGenerator::ProgressionItem::setChordName (juce::String name)
+void PatternGenerator::ProgressionItem::setChordName (yup::String name)
 {
     if (isRoman (name))
         chordName = name.toLowerCase().retainCharacters ("iv679");
     else
         chordName = name;
 
-    pitches = juce::String();
+    pitches = yup::String();
 }
 
-void PatternGenerator::ProgressionItem::setChordName (juce::String name, juce::String pitchesIn)
+void PatternGenerator::ProgressionItem::setChordName (yup::String name, yup::String pitchesIn)
 {
     chordName = name;
     pitches   = pitchesIn;
 }
 
-juce::String PatternGenerator::ProgressionItem::getChordName() const
+yup::String PatternGenerator::ProgressionItem::getChordName() const
 {
     return generator.formatChordName (chordName);
 }
 
 void PatternGenerator::ProgressionItem::setRoot (int root)
 {
-    chordName = juce::MidiMessage::getMidiNoteName (root, true, false, 0) + chordSymbol (chordName);
+    chordName = yup::MidiMessage::getMidiNoteName (root, true, false, 0) + chordSymbol (chordName);
 }
 
 void PatternGenerator::ProgressionItem::setChord (int root, Chord::ChordType type)
 {
-    chordName = juce::MidiMessage::getMidiNoteName (root, true, false, 0) + Chord (type).getSymbol();
-    pitches   = juce::String();
+    chordName = yup::MidiMessage::getMidiNoteName (root, true, false, 0) + Chord (type).getSymbol();
+    pitches   = yup::String();
 }
 
 Chord PatternGenerator::ProgressionItem::getChord (const Scale& scale) const
@@ -695,9 +695,9 @@ Chord PatternGenerator::ProgressionItem::getChord (const Scale& scale) const
 
     if (pitches.get().isNotEmpty())
     {
-        juce::Array<int> steps;
+        yup::Array<int> steps;
 
-        for (auto p : juce::StringArray::fromTokens (pitches.get(), ", ", {}))
+        for (auto p : yup::StringArray::fromTokens (pitches.get(), ", ", {}))
             if (p.isNotEmpty())
                 steps.add (p.getIntValue());
 
@@ -720,7 +720,7 @@ bool PatternGenerator::ProgressionItem::isRomanNumeral() const
     return isRoman (chordName);
 }
 
-juce::String PatternGenerator::ProgressionItem::getChordSymbol()
+yup::String PatternGenerator::ProgressionItem::getChordSymbol()
 {
     BeatPosition beat;
 
@@ -737,7 +737,7 @@ juce::String PatternGenerator::ProgressionItem::getChordSymbol()
     Chord chord = getChord (scale);
     bool sharp = generator.clip.edit.pitchSequence.getPitchAtBeat (generator.clip.getStartBeat() + toDuration (beat)).accidentalsSharp;
 
-    return juce::MidiMessage::getMidiNoteName (root, sharp, false, 0) + chord.getSymbol();
+    return yup::MidiMessage::getMidiNoteName (root, sharp, false, 0) + chord.getSymbol();
 }
 
 int PatternGenerator::ProgressionItem::getRootNote (int key, const Scale& scale)
@@ -759,7 +759,7 @@ int PatternGenerator::ProgressionItem::getRootNote (int key, const Scale& scale)
     auto noteName = name.substring (1, 2) == "#" ? name.substring (0, 2) : name.substring (0, 1);
 
     for (int note = 0; note < 12; note++)
-        if (juce::MidiMessage::getMidiNoteName (note, true, false, 0) == noteName)
+        if (yup::MidiMessage::getMidiNoteName (note, true, false, 0) == noteName)
             return note;
 
     jassertfalse;
@@ -770,7 +770,7 @@ int PatternGenerator::ProgressionItem::getRootNote (int key, const Scale& scale)
 //==============================================================================
 //==============================================================================
 struct PatternGenerator::AutoUpdateManager : private ValueTreeAllEventListener,
-                                             public juce::AsyncUpdater
+                                             public yup::AsyncUpdater
 {
     AutoUpdateManager (PatternGenerator& owner_)
         : owner (owner_)
@@ -786,7 +786,7 @@ struct PatternGenerator::AutoUpdateManager : private ValueTreeAllEventListener,
     void valueTreeChanged() override
     {}
 
-    void valueTreePropertyChanged (juce::ValueTree& p, const juce::Identifier& c) override
+    void valueTreePropertyChanged (yup::ValueTree& p, const yup::Identifier& c) override
     {
         if (Clip::isClipState (p))
             if (c == IDs::start || c == IDs::length || c == IDs::offset)
@@ -810,7 +810,7 @@ private:
 const int PatternGenerator::scaleRootGlobalTrack    = -1;
 const int PatternGenerator::scaleRootChordTrack     = -2;
 
-PatternGenerator::PatternGenerator (Clip& c, juce::ValueTree v) : clip (c), state (v)
+PatternGenerator::PatternGenerator (Clip& c, yup::ValueTree v) : clip (c), state (v)
 {
     auto um = c.getUndoManager();
 
@@ -904,12 +904,12 @@ int PatternGenerator::getChordProgressionLength() const
     return progressionList->size();
 }
 
-const juce::Array<PatternGenerator::ProgressionItem*>& PatternGenerator::getChordProgression() const noexcept
+const yup::Array<PatternGenerator::ProgressionItem*>& PatternGenerator::getChordProgression() const noexcept
 {
     return progressionList->objects;
 }
 
-void PatternGenerator::setChordProgression (juce::ValueTree src)
+void PatternGenerator::setChordProgression (yup::ValueTree src)
 {
     jassert (src.isValid() && src.hasType (IDs::PROGRESSION));
 
@@ -923,17 +923,17 @@ void PatternGenerator::setChordProgression (juce::ValueTree src)
         dst.addChild (src.getChild (i).createCopy(), i, um);
 }
 
-juce::ValueTree PatternGenerator::getChordPattern()
+yup::ValueTree PatternGenerator::getChordPattern()
 {
     return state.getChildWithName (IDs::CHORDPATTERN);
 }
 
-juce::ValueTree PatternGenerator::getBassPattern()
+yup::ValueTree PatternGenerator::getBassPattern()
 {
     return state.getChildWithName (IDs::BASSPATTERN);
 }
 
-void PatternGenerator::setChordPattern (juce::ValueTree pattern)
+void PatternGenerator::setChordPattern (yup::ValueTree pattern)
 {
     auto um = clip.getUndoManager();
 
@@ -942,7 +942,7 @@ void PatternGenerator::setChordPattern (juce::ValueTree pattern)
     state.addChild (pattern, -1, um);
 }
 
-void PatternGenerator::setBassPattern (juce::ValueTree pattern)
+void PatternGenerator::setBassPattern (yup::ValueTree pattern)
 {
     auto um = clip.getUndoManager();
 
@@ -951,7 +951,7 @@ void PatternGenerator::setBassPattern (juce::ValueTree pattern)
     state.addChild (pattern, -1, um);
 }
 
-void PatternGenerator::valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier& c)
+void PatternGenerator::valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier& c)
 {
     if (c == IDs::arpSteps || c == IDs::arpUpDown)
     {
@@ -1055,9 +1055,9 @@ int PatternGenerator::getNoteAtBeat (BeatPosition beat) const
     return scaleRoot;
 }
 
-juce::StringArray PatternGenerator::getPossibleTriadNames() const
+yup::StringArray PatternGenerator::getPossibleTriadNames() const
 {
-    juce::StringArray res;
+    yup::StringArray res;
 
     auto scale = getScaleAtBeat (BeatPosition());
 
@@ -1067,23 +1067,23 @@ juce::StringArray PatternGenerator::getPossibleTriadNames() const
     return res;
 }
 
-juce::StringArray PatternGenerator::getPossibleSixthNames() const
+yup::StringArray PatternGenerator::getPossibleSixthNames() const
 {
-    juce::StringArray res;
+    yup::StringArray res;
     auto scale = getScaleAtBeat (BeatPosition());
     auto sixths = scale.getSixths();
 
     // Empty entry for degrees with no diatonic sixth; index stays aligned with the interval
     for (int interval = int (Scale::Intervals::i); interval <= int (Scale::Intervals::vii); interval++)
         res.add (sixths[interval].isValid() ? scale.getIntervalName ((Scale::Intervals) interval) + "6"
-                                            : juce::String());
+                                            : yup::String());
 
     return res;
 }
 
-juce::StringArray PatternGenerator::getPossibleSeventhNames() const
+yup::StringArray PatternGenerator::getPossibleSeventhNames() const
 {
-    juce::StringArray res;
+    yup::StringArray res;
     auto scale = getScaleAtBeat (BeatPosition());
 
     for (int interval = int (Scale::Intervals::i); interval <= int (Scale::Intervals::vii); interval++)
@@ -1092,21 +1092,21 @@ juce::StringArray PatternGenerator::getPossibleSeventhNames() const
     return res;
 }
 
-juce::StringArray PatternGenerator::getPossibleNinthNames() const
+yup::StringArray PatternGenerator::getPossibleNinthNames() const
 {
-    juce::StringArray res;
+    yup::StringArray res;
     auto scale = getScaleAtBeat (BeatPosition());
     auto ninths = scale.getNinths();
 
     // Empty entry for degrees with no diatonic ninth; index stays aligned with the interval
     for (int interval = int (Scale::Intervals::i); interval <= int (Scale::Intervals::vii); interval++)
         res.add (ninths[interval].isValid() ? scale.getIntervalName ((Scale::Intervals) interval) + "9"
-                                            : juce::String());
+                                            : yup::String());
 
     return res;
 }
 
-juce::String PatternGenerator::formatChordName (juce::String simplifiedChordName) const
+yup::String PatternGenerator::formatChordName (yup::String simplifiedChordName) const
 {
     if (isRoman (simplifiedChordName))
     {
@@ -1124,9 +1124,9 @@ juce::String PatternGenerator::formatChordName (juce::String simplifiedChordName
     return simplifiedChordName;
 }
 
-juce::StringArray PatternGenerator::getChordProgressionChordNames (bool simplified) const
+yup::StringArray PatternGenerator::getChordProgressionChordNames (bool simplified) const
 {
-    juce::StringArray res;
+    yup::StringArray res;
 
     for (auto item : *progressionList)
     {
@@ -1141,7 +1141,7 @@ juce::StringArray PatternGenerator::getChordProgressionChordNames (bool simplifi
     return res;
 }
 
-void PatternGenerator::setChordProgressionFromChordNames (juce::StringArray progressionItems)
+void PatternGenerator::setChordProgressionFromChordNames (yup::StringArray progressionItems)
 {
     if (progressionItems.strings.size() > maxChords)
         progressionItems.strings.resize (maxChords);
@@ -1149,7 +1149,7 @@ void PatternGenerator::setChordProgressionFromChordNames (juce::StringArray prog
     auto& um = clip.edit.getUndoManager();
 
     if (! state.getChildWithName (IDs::PROGRESSION).isValid())
-        state.addChild (juce::ValueTree (IDs::PROGRESSION), -1, &um);
+        state.addChild (yup::ValueTree (IDs::PROGRESSION), -1, &um);
 
     auto progression = state.getChildWithName (IDs::PROGRESSION);
 
@@ -1161,7 +1161,7 @@ void PatternGenerator::setChordProgressionFromChordNames (juce::StringArray prog
         if (isRoman (itmName))
             itmName = itmName.toLowerCase().retainCharacters ("iv679");
 
-        juce::ValueTree item (IDs::PROGRESSIONITEM);
+        yup::ValueTree item (IDs::PROGRESSIONITEM);
         item.setProperty (IDs::name, itmName, &um);
 
         progression.addChild (item, -1, &um);
@@ -1190,8 +1190,8 @@ void PatternGenerator::removeRangeFromProgression (int startIndex, int numberToR
     auto progression = state.getChildWithName (IDs::PROGRESSION);
     auto& um = clip.edit.getUndoManager();
 
-    auto endIndex = juce::jlimit (0, progression.getNumChildren(), startIndex + numberToRemove);
-    startIndex = juce::jlimit (0, progression.getNumChildren(), startIndex);
+    auto endIndex = yup::jlimit (0, progression.getNumChildren(), startIndex + numberToRemove);
+    startIndex = yup::jlimit (0, progression.getNumChildren(), startIndex);
 
     if (endIndex > startIndex)
     {
@@ -1238,7 +1238,7 @@ PatternGenerator::NoteType PatternGenerator::getTypeForNote (const MidiClip& mc,
 
     inKey = s.getSteps().contains ((note.getNoteNumber() - root) % 12);
 
-    juce::OwnedArray<ProgressionItem> progressionItems;
+    yup::OwnedArray<ProgressionItem> progressionItems;
     auto progressionOffset = getFlattenedChordProgression (progressionItems);
 
     auto curBeat = BeatPosition::fromBeats (-progressionOffset.inBeats());
@@ -1293,14 +1293,14 @@ PatternGenerator::NoteType PatternGenerator::getTypeForNote (const MidiClip& mc,
     return NotInKeyNote;
 }
 
-BeatDuration PatternGenerator::getFlattenedChordProgression (juce::OwnedArray<ProgressionItem>& progression, bool globalTime)
+BeatDuration PatternGenerator::getFlattenedChordProgression (yup::OwnedArray<ProgressionItem>& progression, bool globalTime)
 {
     if (mode == Mode::off || scaleRoot == scaleRootChordTrack)
     {
         BeatPosition pos;
 
         // Get all the chord clips
-        juce::Array<ChordClip*> chordClips;
+        yup::Array<ChordClip*> chordClips;
 
         for (auto c : clip.edit.getChordTrack()->getClips())
             if (auto cc = dynamic_cast<ChordClip*> (c))
@@ -1327,7 +1327,7 @@ BeatDuration PatternGenerator::getFlattenedChordProgression (juce::OwnedArray<Pr
         }
 
         // Find the starts of chord clips
-        juce::Array<BeatPosition> clipStarts;
+        yup::Array<BeatPosition> clipStarts;
 
         for (auto cc : chordClips)
             clipStarts.add (cc->getStartBeat());
@@ -1340,7 +1340,7 @@ BeatDuration PatternGenerator::getFlattenedChordProgression (juce::OwnedArray<Pr
             if (cc->getStartBeat() > pos)
             {
                 auto length = cc->getStartBeat() - pos;
-                juce::ValueTree s (IDs::PROGRESSIONITEM);
+                yup::ValueTree s (IDs::PROGRESSIONITEM);
                 auto newItem = new ProgressionItem (*this, s, true);
                 newItem->lengthInBeats = length;
                 progression.add (newItem);
@@ -1406,7 +1406,7 @@ BeatDuration PatternGenerator::getFlattenedChordProgression (juce::OwnedArray<Pr
             }
         }
 
-        juce::ValueTree s (IDs::PROGRESSIONITEM);
+        yup::ValueTree s (IDs::PROGRESSIONITEM);
         auto newItem = new ProgressionItem (*this, s, true);
         newItem->lengthInBeats = BeatDuration::fromBeats (100000);
         progression.add (newItem);
@@ -1451,7 +1451,7 @@ void PatternGenerator::clearProgression()
     progression.removeAllChildren (&um);
 }
 
-void PatternGenerator::insertChordIntoProgression (int idx, juce::String chordName)
+void PatternGenerator::insertChordIntoProgression (int idx, yup::String chordName)
 {
     auto progression = state.getChildWithName (IDs::PROGRESSION);
 
@@ -1462,14 +1462,14 @@ void PatternGenerator::insertChordIntoProgression (int idx, juce::String chordNa
         if (isRoman (chordName))
             chordName = chordName.toLowerCase().retainCharacters ("iv679");
 
-        juce::ValueTree item (IDs::PROGRESSIONITEM);
+        yup::ValueTree item (IDs::PROGRESSIONITEM);
         item.setProperty (IDs::name, chordName, &um);
 
         progression.addChild (item, idx, &um);
     }
 }
 
-void PatternGenerator::insertChordIntoProgression (int idx, juce::String chordName, juce::String pitches)
+void PatternGenerator::insertChordIntoProgression (int idx, yup::String chordName, yup::String pitches)
 {
     auto progression = state.getChildWithName (IDs::PROGRESSION);
 
@@ -1501,9 +1501,9 @@ void PatternGenerator::moveChordInProgression(int srcIdx, int dstIdx)
         progression.addChild (itm, dstIdx, &um);
 }
 
-juce::StringArray PatternGenerator::getArpStyles()
+yup::StringArray PatternGenerator::getArpStyles()
 {
-    juce::StringArray res;
+    yup::StringArray res;
     std::string base;
 
     for (int i = 0; i < arpSteps; i++)
@@ -1511,7 +1511,7 @@ juce::StringArray PatternGenerator::getArpStyles()
 
     do
     {
-        res.add (base);
+        res.add (yup::String (base));
     } while (std::next_permutation (base.begin(), base.end()));
 
     if (arpUpDown)
@@ -1545,7 +1545,7 @@ void PatternGenerator::generatePattern()
     if (auto mc = getMidiClip())
     {
         if (auto at = mc->getAudioTrack())
-            at->injectLiveMidiMessage (juce::MidiMessage::allNotesOff (mc->getMidiChannel().getChannelNumber()), {});
+            at->injectLiveMidiMessage (yup::MidiMessage::allNotesOff (mc->getMidiChannel().getChannelNumber()), {});
 
         switch (mode)
         {
@@ -1569,7 +1569,7 @@ void PatternGenerator::generateArpPattern()
 
     CRASH_TRACER
 
-    juce::OwnedArray<ProgressionItem> progressionItems;
+    yup::OwnedArray<ProgressionItem> progressionItems;
     auto progressionOffset = getFlattenedChordProgression (progressionItems);
 
     auto progressionLength = progressionItems.size();
@@ -1584,7 +1584,7 @@ void PatternGenerator::generateArpPattern()
     int stepCur = 0;
 
     // Convert the style string into array of ints
-    juce::Array<int> styleValues;
+    yup::Array<int> styleValues;
 
     for (int i = 0; i < arpStyle.get().length(); i++)
         styleValues.add (arpStyle.get().substring (i, i + 1).getIntValue());
@@ -1630,7 +1630,7 @@ void PatternGenerator::generateArpPattern()
                 const int note = chordRoot + intervals[stepIndex] + octaveOffset;
 
                 addNote (sequence, note, curBeat, stepLength * lengthFactor, int (velocity / 100.0f * 127),
-                         mc->edit.engine.getEngineBehaviour().getDefaultNoteColour(), um);
+                         mc->edit.engine.getEngineBehaviour().getDefaultNoteColor(), um);
 
                 // if we are at first beat of a new stage in the progression, play the root note if wanted
                 if (stepStart && arpPlayRoot)
@@ -1639,7 +1639,7 @@ void PatternGenerator::generateArpPattern()
 
                     const int rootNote = chordRoot + octaveOffset - 12;
                     addNote (sequence, rootNote, curBeat, stepLengthLeft, int (velocity / 100.0f * 127),
-                             mc->edit.engine.getEngineBehaviour().getDefaultNoteColour(), um);
+                             mc->edit.engine.getEngineBehaviour().getDefaultNoteColor(), um);
                 }
             }
 
@@ -1692,14 +1692,14 @@ void PatternGenerator::generateChordPattern()
 
     CRASH_TRACER
 
-    juce::OwnedArray<ProgressionItem> progressionItems;
+    yup::OwnedArray<ProgressionItem> progressionItems;
     auto progressionOffset = getFlattenedChordProgression (progressionItems);
 
     const int progressionLength = progressionItems.size();
     if (progressionLength == 0)
         return;
 
-    juce::Array<juce::Array<ChordNote>> notes;
+    yup::Array<yup::Array<ChordNote>> notes;
 
     // unpack the chord pattern
     auto pattern = getChordPattern();
@@ -1792,7 +1792,7 @@ void PatternGenerator::generateChordPattern()
                             addNote (sequence, note, curBeat + toDuration (chordNote.start),
                                      std::min (chordNote.length * lengthFactor, patternLength - toDuration (chordNote.start)),
                                      int (velocity / 100.0f * chordNote.velocity),
-                                     mc->edit.engine.getEngineBehaviour().getDefaultNoteColour(), um);
+                                     mc->edit.engine.getEngineBehaviour().getDefaultNoteColor(), um);
                         }
                     }
                 }
@@ -1826,7 +1826,7 @@ void PatternGenerator::generateMelodyPattern()
     CRASH_TRACER
     clearPattern();
 
-    juce::OwnedArray<ProgressionItem> progressionItems;
+    yup::OwnedArray<ProgressionItem> progressionItems;
     auto progressionOffset = getFlattenedChordProgression (progressionItems);
     auto progressionLength = progressionItems.size();
 
@@ -1841,7 +1841,7 @@ void PatternGenerator::generateMelodyPattern()
     auto beatsPerWhole = tempoSequence.getTimeSigAt (mc->getPosition().getStart()).denominator.get();
     auto noteLengthBeat = melodyNoteLength.get() * beatsPerWhole;
 
-    juce::Array<ChordNote> notes;
+    yup::Array<ChordNote> notes;
 
     for (int i = 0; i < std::ceil (getMaximumChordLength() / noteLengthBeat) * 4; i++)
         notes.add (ChordNote (toPosition (noteLengthBeat * i),
@@ -1882,7 +1882,7 @@ void PatternGenerator::generateMelodyPattern()
                 if (allNotes)
                 {
                     int notesAdded = 0;
-                    juce::Array<int> chordSteps;
+                    yup::Array<int> chordSteps;
 
                     for (auto s : chord.getSteps (0))
                     {
@@ -1908,10 +1908,10 @@ void PatternGenerator::generateMelodyPattern()
                                                                      std::min (chordNote.length * lengthFactor,
                                                                                patternLength - toDuration (chordNote.start)),
                                                                      (int) (velocity / 100.0f * chordNote.velocity),
-                                                                     mc->edit.engine.getEngineBehaviour().getDefaultNoteColour(), um))
+                                                                     mc->edit.engine.getEngineBehaviour().getDefaultNoteColor(), um))
                                         {
                                             newNote->setMute (true, um);
-                                            newNote->setColour (chordSteps.contains (note1) ? 0 : 2, um);
+                                            newNote->setColor (chordSteps.contains (note1) ? 0 : 2, um);
                                         }
                                     }
                                 }
@@ -1934,7 +1934,7 @@ void PatternGenerator::generateMelodyPattern()
                                                              std::min (chordNote.length * lengthFactor,
                                                                        patternLength - toDuration (chordNote.start)),
                                                              (int) (velocity / 100.0f * chordNote.velocity),
-                                                             mc->edit.engine.getEngineBehaviour().getDefaultNoteColour(), um))
+                                                             mc->edit.engine.getEngineBehaviour().getDefaultNoteColor(), um))
                                     newNote->setMute (true, um);
 
 
@@ -1945,7 +1945,7 @@ void PatternGenerator::generateMelodyPattern()
                                                              std::min (chordNote.length * lengthFactor,
                                                                        patternLength - toDuration (chordNote.start)),
                                                              (int) (velocity / 100.0f * chordNote.velocity),
-                                                             mc->edit.engine.getEngineBehaviour().getDefaultNoteColour(), um))
+                                                             mc->edit.engine.getEngineBehaviour().getDefaultNoteColor(), um))
                                     newNote->setMute (true, um);
 
                         }
@@ -1985,14 +1985,14 @@ void PatternGenerator::generateBassPattern()
     CRASH_TRACER
     clearPattern();
 
-    juce::OwnedArray<ProgressionItem> progressionItems;
+    yup::OwnedArray<ProgressionItem> progressionItems;
     auto progressionOffset = getFlattenedChordProgression (progressionItems);
     auto progressionLength = progressionItems.size();
 
     if (progressionLength == 0)
         return;
 
-    juce::Array<juce::Array<BassNote>> notes;
+    yup::Array<yup::Array<BassNote>> notes;
 
     // Unpack the bass pattern
     auto pattern = getBassPattern();
@@ -2051,7 +2051,7 @@ void PatternGenerator::generateBassPattern()
             break;
 
         auto scale = getScaleAtBeat (curBeat);
-        juce::Array<int> steps = scale.getSteps (3);
+        yup::Array<int> steps = scale.getSteps (3);
 
         if (auto progressionItem = progressionItems[progressionCur])
         {
@@ -2079,7 +2079,7 @@ void PatternGenerator::generateBassPattern()
                                      std::min (bassNote.length * lengthFactor,
                                                patternLength - toDuration (bassNote.start)),
                                      (int) (velocity / 100.0f * bassNote.velocity),
-                                     mc->edit.engine.getEngineBehaviour().getDefaultNoteColour(), um);
+                                     mc->edit.engine.getEngineBehaviour().getDefaultNoteColor(), um);
                         }
                     }
                 }
@@ -2175,7 +2175,7 @@ HashCode PatternGenerator::hashNotes (MidiList& sequence, int version)
         hash ^= static_cast<HashCode> (note->getNoteNumber() * 31)
               ^ static_cast<HashCode> (note->getStartBeat().inBeats()  * 73)
               ^ static_cast<HashCode> (note->getLengthBeats().inBeats() * 233)
-              ^ static_cast<HashCode> (note->getColour() * 467)
+              ^ static_cast<HashCode> (note->getColor() * 467)
               ^ static_cast<HashCode> (note->isMute() ? 877 : 947)
               ^ static_cast<HashCode> (note->getVelocity() * 3083);
 
@@ -2216,9 +2216,9 @@ void PatternGenerator::refreshPatternIfNeeded()
 
 //==============================================================================
 // Krumhansl-Schmuckler Key-Finding Algorithm.
-juce::Array<KeyResult> determineKeyOfNotes (const juce::Array<MidiNote*>& notes)
+yup::Array<KeyResult> determineKeyOfNotes (const yup::Array<MidiNote*>& notes)
 {
-    juce::Array<KeyResult> results;
+    yup::Array<KeyResult> results;
 
     double durations[12] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 

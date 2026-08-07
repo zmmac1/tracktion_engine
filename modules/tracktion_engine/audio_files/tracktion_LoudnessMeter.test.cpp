@@ -23,9 +23,9 @@ TEST_SUITE ("tracktion_engine")
 
         /** Builds a mono buffer from a generator fn (sampleIndex) -> value. */
         template<typename SampleGenerator>
-        juce::AudioBuffer<float> makeBuffer (int numSamples, SampleGenerator&& generator)
+        yup::AudioBuffer<float> makeBuffer (int numSamples, SampleGenerator&& generator)
         {
-            juce::AudioBuffer<float> buffer (1, numSamples);
+            yup::AudioBuffer<float> buffer (1, numSamples);
 
             for (int i = 0; i < numSamples; ++i)
                 buffer.setSample (0, i, generator (i));
@@ -35,14 +35,14 @@ TEST_SUITE ("tracktion_engine")
 
         static float sine (int i, double frequency, float amplitude)
         {
-            return amplitude * std::sin (juce::MathConstants<float>::twoPi * (float) frequency
+            return amplitude * std::sin (yup::MathConstants<float>::twoPi * (float) frequency
                                           * (float) i / (float) testSampleRate);
         }
 
         /** Tone bursts at different levels separated by silence, so that both
             the absolute and the relative gate have something to reject.
         */
-        static juce::AudioBuffer<float> makeVariedLevelSignal()
+        static yup::AudioBuffer<float> makeVariedLevelSignal()
         {
             const auto oneSecond = (int) testSampleRate;
 
@@ -61,7 +61,7 @@ TEST_SUITE ("tracktion_engine")
             });
         }
 
-        static void processInBlocks (LoudnessMeter& meter, const juce::AudioBuffer<float>& buffer,
+        static void processInBlocks (LoudnessMeter& meter, const yup::AudioBuffer<float>& buffer,
                                      const std::vector<int>& blockSizes)
         {
             const auto numChannels = buffer.getNumChannels();
@@ -89,7 +89,7 @@ TEST_SUITE ("tracktion_engine")
         /** The same, but through the choc view overload, so the views have a
             non-zero frame offset.
         */
-        static void processInBlocksAsView (LoudnessMeter& meter, const juce::AudioBuffer<float>& buffer,
+        static void processInBlocksAsView (LoudnessMeter& meter, const yup::AudioBuffer<float>& buffer,
                                            const std::vector<int>& blockSizes)
         {
             auto view = choc::buffer::createChannelArrayView (buffer.getArrayOfReadPointers(),
@@ -115,7 +115,7 @@ TEST_SUITE ("tracktion_engine")
             loudness which keeps every gating block, to check the meter's fixed
             histogram against.
         */
-        static double referenceIntegratedLufs (const juce::AudioBuffer<float>& buffer)
+        static double referenceIntegratedLufs (const yup::AudioBuffer<float>& buffer)
         {
             struct Biquad
             {
@@ -135,7 +135,7 @@ TEST_SUITE ("tracktion_engine")
 
             {
                 const double f0 = 1681.974450955533, gainDb = 3.999843853973347, q = 0.7071752369554196;
-                const double k = std::tan (juce::MathConstants<double>::pi * f0 / testSampleRate);
+                const double k = std::tan (yup::MathConstants<double>::pi * f0 / testSampleRate);
                 const double vh = std::pow (10.0, gainDb / 20.0);
                 const double vb = std::pow (vh, 0.4996667741545416);
                 const double a0 = 1.0 + k / q + k * k;
@@ -149,7 +149,7 @@ TEST_SUITE ("tracktion_engine")
 
             {
                 const double f0 = 38.13547087602444, q = 0.5003270373238773;
-                const double k = std::tan (juce::MathConstants<double>::pi * f0 / testSampleRate);
+                const double k = std::tan (yup::MathConstants<double>::pi * f0 / testSampleRate);
                 const double a0 = 1.0 + k / q + k * k;
 
                 highpass.b0 = 1.0;
@@ -273,7 +273,7 @@ TEST_SUITE ("tracktion_engine")
         auto measure = [] (const std::vector<int>& tonedChannels, float lfeAmplitude)
         {
             const auto numSamples = 4 * (int) testSampleRate;
-            juce::AudioBuffer<float> buffer (6, numSamples);
+            yup::AudioBuffer<float> buffer (6, numSamples);
             buffer.clear();
 
             for (auto ch : tonedChannels)
@@ -314,7 +314,7 @@ TEST_SUITE ("tracktion_engine")
         const auto fiveOh = []
         {
             const auto numSamples = 4 * (int) testSampleRate;
-            juce::AudioBuffer<float> buffer (5, numSamples);
+            yup::AudioBuffer<float> buffer (5, numSamples);
             buffer.clear();
 
             for (auto ch : { 0, 1, 3 })
@@ -411,7 +411,7 @@ TEST_SUITE ("tracktion_engine")
         using namespace loudness_meter_tests;
 
         auto mono = makeVariedLevelSignal();
-        juce::AudioBuffer<float> stereo (2, mono.getNumSamples());
+        yup::AudioBuffer<float> stereo (2, mono.getNumSamples());
 
         for (int i = 0; i < mono.getNumSamples(); ++i)
         {

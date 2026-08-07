@@ -15,29 +15,29 @@ namespace tracktion::inline engine {
 /**
     A raw, proprietary, simple floating point format used for freeze files, etc.
 */
-class FloatAudioFormat   : public juce::AudioFormat
+class FloatAudioFormat   : public yup::AudioFormat
 {
 public:
     FloatAudioFormat();
     ~FloatAudioFormat() override;
 
     //==============================================================================
-    juce::Array<int> getPossibleSampleRates() override;
-    juce::Array<int> getPossibleBitDepths() override;
-    bool canDoStereo() override;
-    bool canDoMono() override;
-    bool canHandleFile (const juce::File&) override;
+    yup::Array<int> getPossibleSampleRates() const override;
+    yup::Array<int> getPossibleBitDepths() const override;
+    bool canDoStereo() const override;
+    bool canDoMono() const override;
+    bool canHandleFile (const yup::File&);
 
     //==============================================================================
-    using juce::AudioFormat::createReaderFor;
-    juce::AudioFormatReader* createReaderFor (juce::InputStream*, bool deleteStreamIfOpeningFails) override;
+    using yup::AudioFormat::createReaderFor;
+    yup::AudioFormatReader* createReaderFor (yup::InputStream*, bool deleteStreamIfOpeningFails);
 
-    using juce::AudioFormat::createMemoryMappedReader;
-    juce::MemoryMappedAudioFormatReader* createMemoryMappedReader (const juce::File&) override;
+    using yup::AudioFormat::createMemoryMappedReader;
+    yup::MemoryMappedAudioFormatReader* createMemoryMappedReader (const yup::File&) override;
 
-    using juce::AudioFormat::createWriterFor;
-    std::unique_ptr<juce::AudioFormatWriter> createWriterFor (std::unique_ptr<juce::OutputStream>&,
-                                                              const juce::AudioFormatWriterOptions&) override;
+    using yup::AudioFormat::createWriterFor;
+    std::unique_ptr<yup::AudioFormatWriter> createWriterFor (std::unique_ptr<yup::OutputStream>&,
+                                                              const yup::WriteOptions&) override;
 };
 
 } // namespace tracktion::inline engine

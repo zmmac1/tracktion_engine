@@ -28,14 +28,14 @@
 
 namespace tracktion::inline engine {
 
-TimeStretcher::ElastiqueProOptions::ElastiqueProOptions (const juce::String& string)
+TimeStretcher::ElastiqueProOptions::ElastiqueProOptions (const yup::String& string)
 {
     if (string.isEmpty())
         return;
 
     if (string.startsWith ("1/"))
     {
-        juce::StringArray tokens;
+        yup::StringArray tokens;
         tokens.addTokens (string, "/", {});
 
         if (tokens.size() == 5)
@@ -51,10 +51,10 @@ TimeStretcher::ElastiqueProOptions::ElastiqueProOptions (const juce::String& str
     jassertfalse; //unknown string format
 }
 
-juce::String TimeStretcher::ElastiqueProOptions::toString() const
+yup::String TimeStretcher::ElastiqueProOptions::toString() const
 {
     // version / midside / sync / preserve / order
-    return juce::String::formatted ("1/%d/%d/%d/%d",
+    return yup::String::formatted ("1/%d/%d/%d/%d",
                                     midSideStereo        ? 1 : 0,
                                     syncTimeStrPitchShft ? 1 : 0,
                                     preserveFormants     ? 1 : 0,
@@ -104,7 +104,7 @@ struct ElastiqueStretcher  : public TimeStretcher::Stretcher
         jassert (sourceSampleRate > 0.0);
         int res = CElastiqueProV3If::CreateInstance (elastique, samplesPerBlock, numChannels, (float) sourceSampleRate,
                                                      getElastiqueMode (mode), minFactor);
-        jassert (res == 0); juce::ignoreUnused (res);
+        jassert (res == 0); yup::ignoreUnused (res);
 
         if (elastique == nullptr)
         {
@@ -133,10 +133,10 @@ struct ElastiqueStretcher  : public TimeStretcher::Stretcher
 
     bool setSpeedAndPitch (float speedRatio, float semitonesUp) override
     {
-        float pitch = juce::jlimit (0.25f, 4.0f, Pitch::semitonesToRatio (semitonesUp));
+        float pitch = yup::jlimit (0.25f, 4.0f, Pitch::semitonesToRatio (semitonesUp));
         bool sync  = (elastiqueMode == TimeStretcher::elastiquePro) ? elastiqueProOptions.syncTimeStrPitchShft : false;
         int r = elastique->SetStretchPitchQFactor (speedRatio, pitch, sync);
-        jassert (r == 0); juce::ignoreUnused (r);
+        jassert (r == 0); yup::ignoreUnused (r);
 
         if (elastiqueMode == TimeStretcher::elastiquePro && elastiqueProOptions.preserveFormants)
         {
@@ -163,7 +163,7 @@ struct ElastiqueStretcher  : public TimeStretcher::Stretcher
     {
         CRASH_TRACER
         int err = elastique->ProcessData ((float**) inChannels, numSamples, (float**) outChannels);
-        jassert (err == 0); juce::ignoreUnused (err);
+        jassert (err == 0); yup::ignoreUnused (err);
         return samplesPerOutputBuffer;
     }
 
@@ -206,7 +206,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ElastiqueStretcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ElastiqueStretcher)
 };
 
 
@@ -326,7 +326,7 @@ struct ElastiqueDirectStretcher : public TimeStretcher::Stretcher
         if (const int numReady = outputFifo.getNumReady(); numReady > 0)
         {
             const int numToReturn = std::min (numReady, samplesPerOutputBuffer);
-            juce::AudioBuffer<float> outputView (outChannels, numChannels, numToReturn);
+            yup::AudioBuffer<float> outputView (outChannels, numChannels, numToReturn);
 
             if (! outputFifo.read (outputView, 0))
             {
@@ -355,7 +355,7 @@ struct ElastiqueDirectStretcher : public TimeStretcher::Stretcher
         if (const int numReady = outputFifo.getNumReady(); numReady > 0)
         {
             const int numToReturn = std::min (numReady, samplesPerOutputBuffer);
-            juce::AudioBuffer<float> outputView (outChannels, numChannels, numToReturn);
+            yup::AudioBuffer<float> outputView (outChannels, numChannels, numToReturn);
             [[maybe_unused]] const bool success = outputFifo.read (outputView, 0);
             jassert (success);
 
@@ -408,7 +408,7 @@ private:
         if (! newSpeedAndPitchPending)
             return;
 
-        float pitch = juce::jlimit (0.25f, 4.0f, Pitch::semitonesToRatio (newSemitonesUp));
+        float pitch = yup::jlimit (0.25f, 4.0f, Pitch::semitonesToRatio (newSemitonesUp));
         const bool sync = elastiqueMode == TimeStretcher::elastiqueDirectPro ? elastiqueProOptions.syncTimeStrPitchShft : false;
         const int res = elastique->SetStretchPitchQFactor (newSpeedRatio, pitch, sync);
         newSpeedAndPitchPending = res != 0;
@@ -469,7 +469,7 @@ private:
         return numFramesReturned;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ElastiqueDirectStretcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ElastiqueDirectStretcher)
 };
 
 
@@ -516,7 +516,7 @@ struct SoundTouchStretcher  : public TimeStretcher::Stretcher,
     int getFramesNeeded() const override
     {
         const int numAvailable = (int) numSamples();
-        const int numRequiredForOneBlock = juce::roundToInt (samplesPerOutputBuffer * inputOutputSampleRatio);
+        const int numRequiredForOneBlock = yup::roundToInt (samplesPerOutputBuffer * inputOutputSampleRatio);
 
         return std::max (0, numRequiredForOneBlock - numAvailable);
     }
@@ -612,7 +612,7 @@ private:
         }
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoundTouchStretcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoundTouchStretcher)
 };
 #endif
 
@@ -715,7 +715,7 @@ struct RubberBandStretcher  : public TimeStretcher::Stretcher
 
     bool setSpeedAndPitch (float speedRatio, float semitonesUp) override
     {
-        const float pitch = juce::jlimit (0.25f, 4.0f, tracktion::engine::Pitch::semitonesToRatio (semitonesUp));
+        const float pitch = yup::jlimit (0.25f, 4.0f, tracktion::engine::Pitch::semitonesToRatio (semitonesUp));
 
         rubberBandStretcher.setPitchScale (pitch);
         rubberBandStretcher.setTimeRatio (speedRatio);
@@ -745,7 +745,7 @@ struct RubberBandStretcher  : public TimeStretcher::Stretcher
         const bool r = rubberBandStretcher.getPitchScale() == pitch
                     && rubberBandStretcher.getTimeRatio() == speedRatio;
         jassert (r);
-        juce::ignoreUnused (r);
+        yup::ignoreUnused (r);
 
         return r;
     }
@@ -818,7 +818,7 @@ private:
     int numSamplesToDrop = -1;
     bool hasDoneFinalBlock = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RubberBandStretcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RubberBandStretcher)
 };
 
 #endif // TRACKTION_ENABLE_TIMESTRETCH_RUBBERBAND
@@ -898,7 +898,7 @@ struct SignalsmithStretcher  : public TimeStretcher::Stretcher
 
     int getFramesNeeded() const override
     {
-        return juce::roundToInt (samplesPerOutputBuffer / speedRatio);
+        return yup::roundToInt (samplesPerOutputBuffer / speedRatio);
     }
 
     int getMaxFramesNeeded() const override
@@ -935,7 +935,7 @@ private:
     float speedRatio = 1.0f;
     bool hasDoneFinalBlock = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SignalsmithStretcher)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SignalsmithStretcher)
 };
 
 // Registers Signalsmith Stretch's licence with the list the host app shows in
@@ -978,20 +978,20 @@ namespace tracktion::inline engine {
 TimeStretcher::TimeStretcher() {}
 TimeStretcher::~TimeStretcher() {}
 
-static juce::String getARADefault()                 { return "ARA"; }
-static juce::String getElastiquePro()               { return "Elastique (" + TRANS("Pro") + ")"; }
-static juce::String getElastiqueEfficeint()         { return "Elastique (" + TRANS("Efficient") + ")"; }
-static juce::String getElastiqueMobile()            { return "Elastique (" + TRANS("Mobile") + ")"; }
-static juce::String getElastiqueMono()              { return "Elastique (" + TRANS("Monophonic") + ")"; }
-static juce::String getSoundTouchNormal()           { return "SoundTouch (" + TRANS("Normal") + ")"; }
-static juce::String getSoundTouchBetter()           { return "SoundTouch (" + TRANS("Better") + ")"; }
-static juce::String getRubberBandMelodic()          { return "RubberBand (" + TRANS("Melodic") + ")"; }
-static juce::String getRubberBandPercussive()       { return "RubberBand (" + TRANS("Percussive") + ")"; }
-static juce::String getElastiqueDirectPro()         { return "Elastique Direct (" + TRANS("Pro") + ")"; }
-static juce::String getElastiqueDirectEfficeint()   { return "Elastique Direct (" + TRANS("Efficient") + ")"; }
-static juce::String getElastiqueDirectMobile()      { return "Elastique Direct (" + TRANS("Mobile") + ")"; }
-static juce::String getSignalsmithDefault()          { return "Signalsmith (" + TRANS("Default") + ")"; }
-static juce::String getSignalsmithCheaper()          { return "Signalsmith (" + TRANS("Cheaper") + ")"; }
+static yup::String getARADefault()                 { return "ARA"; }
+static yup::String getElastiquePro()               { return "Elastique (" + TRANS("Pro") + ")"; }
+static yup::String getElastiqueEfficeint()         { return "Elastique (" + TRANS("Efficient") + ")"; }
+static yup::String getElastiqueMobile()            { return "Elastique (" + TRANS("Mobile") + ")"; }
+static yup::String getElastiqueMono()              { return "Elastique (" + TRANS("Monophonic") + ")"; }
+static yup::String getSoundTouchNormal()           { return "SoundTouch (" + TRANS("Normal") + ")"; }
+static yup::String getSoundTouchBetter()           { return "SoundTouch (" + TRANS("Better") + ")"; }
+static yup::String getRubberBandMelodic()          { return "RubberBand (" + TRANS("Melodic") + ")"; }
+static yup::String getRubberBandPercussive()       { return "RubberBand (" + TRANS("Percussive") + ")"; }
+static yup::String getElastiqueDirectPro()         { return "Elastique Direct (" + TRANS("Pro") + ")"; }
+static yup::String getElastiqueDirectEfficeint()   { return "Elastique Direct (" + TRANS("Efficient") + ")"; }
+static yup::String getElastiqueDirectMobile()      { return "Elastique Direct (" + TRANS("Mobile") + ")"; }
+static yup::String getSignalsmithDefault()          { return "Signalsmith (" + TRANS("Default") + ")"; }
+static yup::String getSignalsmithCheaper()          { return "Signalsmith (" + TRANS("Cheaper") + ")"; }
 
 TimeStretcher::Mode TimeStretcher::checkModeIsAvailable (Mode m)
 {
@@ -1053,9 +1053,9 @@ TimeStretcher::Mode TimeStretcher::checkModeIsAvailable (Mode m)
     }
 }
 
-juce::StringArray TimeStretcher::getPossibleModes (Engine& e, bool excludeARA)
+yup::StringArray TimeStretcher::getPossibleModes (Engine& e, bool excludeARA)
 {
-    juce::StringArray s;
+    yup::StringArray s;
 
    #if TRACKTION_ENABLE_TIMESTRETCH_ELASTIQUE
     s.add (getElastiquePro());
@@ -1090,13 +1090,13 @@ juce::StringArray TimeStretcher::getPossibleModes (Engine& e, bool excludeARA)
             s.add (desc.name);
     }
    #else
-    juce::ignoreUnused (e, excludeARA);
+    yup::ignoreUnused (e, excludeARA);
    #endif
 
     return s;
 }
 
-TimeStretcher::Mode TimeStretcher::getModeFromName (Engine& e, const juce::String& name)
+TimeStretcher::Mode TimeStretcher::getModeFromName (Engine& e, const yup::String& name)
 {
    #if TRACKTION_ENABLE_TIMESTRETCH_ELASTIQUE
     if (name == getElastiquePro())              return elastiquePro;
@@ -1134,7 +1134,7 @@ TimeStretcher::Mode TimeStretcher::getModeFromName (Engine& e, const juce::Strin
                                                        : disabled;
 }
 
-juce::String TimeStretcher::getNameOfMode (const Mode mode)
+yup::String TimeStretcher::getNameOfMode (const Mode mode)
 {
     switch (mode)
     {
@@ -1166,7 +1166,7 @@ bool TimeStretcher::isARA (Mode mode)
    #if TRACKTION_ENABLE_ARA
     return mode == ara;
    #else
-    juce::ignoreUnused (mode);
+    yup::ignoreUnused (mode);
     return false;
    #endif
 }
@@ -1179,7 +1179,7 @@ bool TimeStretcher::isInitialised() const
 void TimeStretcher::initialise (double sourceSampleRate, int samplesPerBlock,
                                 int numChannels, Mode mode, ElastiqueProOptions options, bool realtime)
 {
-    juce::ignoreUnused (sourceSampleRate, numChannels, mode, options, realtime);
+    yup::ignoreUnused (sourceSampleRate, numChannels, mode, options, realtime);
     jassert (! isARA (mode));
 
     samplesPerBlockRequested = samplesPerBlock;
@@ -1218,7 +1218,7 @@ void TimeStretcher::initialise (double sourceSampleRate, int samplesPerBlock,
        #if TRACKTION_ENABLE_TIMESTRETCH_SOUNDTOUCH
         case soundtouchNormal:
         case soundtouchBetter:
-            juce::ignoreUnused (options, realtime);
+            yup::ignoreUnused (options, realtime);
             stretcher = std::make_unique<SoundTouchStretcher> (sourceSampleRate, samplesPerBlock, numChannels,
                                                                mode == soundtouchBetter);
             break;
@@ -1231,7 +1231,7 @@ void TimeStretcher::initialise (double sourceSampleRate, int samplesPerBlock,
        #if TRACKTION_ENABLE_TIMESTRETCH_RUBBERBAND
         case rubberbandMelodic:
         case rubberbandPercussive:
-            juce::ignoreUnused (options, realtime);
+            yup::ignoreUnused (options, realtime);
             stretcher = std::make_unique<tracktion::engine::RubberBandStretcher> (sourceSampleRate, samplesPerBlock, numChannels,
                                                                                   mode == rubberbandPercussive);
             break;
@@ -1244,7 +1244,7 @@ void TimeStretcher::initialise (double sourceSampleRate, int samplesPerBlock,
        #if TRACKTION_ENABLE_TIMESTRETCH_SIGNALSMITH
         case signalsmithDefault:
         case signalsmithCheaper:
-            juce::ignoreUnused (options);
+            yup::ignoreUnused (options);
             stretcher = std::make_unique<SignalsmithStretcher> (sourceSampleRate, samplesPerBlock, numChannels,
                                                                 mode, realtime);
             break;

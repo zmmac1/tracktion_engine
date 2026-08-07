@@ -33,25 +33,25 @@ public:
 
         ThreadPoolJob::JobStatus runJob() override;
 
-        using Ptr = juce::ReferenceCountedObjectPtr<GeneratorJob>;
+        using Ptr = yup::ReferenceCountedObjectPtr<GeneratorJob>;
 
         AudioFile proxy;
         std::atomic<float> progress { 0.0f };
 
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GeneratorJob)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GeneratorJob)
     };
 
     void beginJob (GeneratorJob*);
 
 private:
-    juce::Array<GeneratorJob*> activeJobs;
-    juce::CriticalSection jobListLock;
+    yup::Array<GeneratorJob*> activeJobs;
+    yup::CriticalSection jobListLock;
 
     GeneratorJob* findJob (const AudioFile&) const noexcept;
     void removeFinishedJob (GeneratorJob*);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProxyGenerator)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProxyGenerator)
 };
 
 } // namespace tracktion::inline engine

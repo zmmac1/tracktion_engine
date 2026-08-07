@@ -18,26 +18,26 @@ public:
     ~TextPlugin() override;
 
     static const char* getPluginName()                  { return NEEDS_TRANS("Text"); }
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
     //==============================================================================
     static const char* xmlTypeName;
 
     bool canBeAddedToFolderTrack() override             { return true; }
-    juce::String getName() const override               { return textTitle.get().isNotEmpty() ? textTitle : TRANS("Text Plugin"); }
-    juce::String getPluginType() override               { return xmlTypeName; }
+    yup::String getName() const override               { return textTitle.get().isNotEmpty() ? textTitle : TRANS("Text Plugin"); }
+    yup::String getPluginType() override               { return xmlTypeName; }
     void initialise (const PluginInitialisationInfo&) override {}
     void deinitialise() override                        {}
     void applyToBuffer (const PluginRenderContext&) override {}
     int getNumOutputChannelsGivenInputs (int numInputChannels) override     { return numInputChannels; }
     BusLayout getBusses() const override   { return BusLayout::singlePassThrough(); }
     bool producesAudioWhenNoAudioInput() override       { return false; }
-    juce::String getSelectableDescription() override    { return TRANS("Text Plugin"); }
+    yup::String getSelectableDescription() override    { return TRANS("Text Plugin"); }
 
-    juce::CachedValue<juce::String> textTitle, textBody;
+    juce::CachedValue<yup::String> textTitle, textBody;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextPlugin)
 };
 
 } // namespace tracktion::inline engine

@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-ChordTrack::ChordTrack (Edit& ed, const juce::ValueTree& v)
+ChordTrack::ChordTrack (Edit& ed, const yup::ValueTree& v)
     : ClipTrack (ed, v, false)
 {
 }
@@ -20,7 +20,7 @@ ChordTrack::~ChordTrack()
     notifyListenersOfDeletion();
 }
 
-juce::String ChordTrack::getTrackWarning() const
+yup::String ChordTrack::getTrackWarning() const
 {
     auto& clips = getClips();
 

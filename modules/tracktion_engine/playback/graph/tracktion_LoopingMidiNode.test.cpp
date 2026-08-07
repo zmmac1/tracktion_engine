@@ -17,12 +17,12 @@ namespace tracktion::inline engine {
 //==============================================================================
 namespace looping_midi_test_helpers
 {
-    static juce::MidiMessageSequence getSeqFromFile (juce::File f)
+    static yup::MidiMessageSequence getSeqFromFile (yup::File f)
     {
-        juce::MidiFile midiFile;
+        yup::MidiFile midiFile;
 
         {
-            juce::FileInputStream in (f);
+            yup::FileInputStream in (f);
 
             if (! in.openedOk() || ! midiFile.readFrom (in))
                 return {};
@@ -34,7 +34,7 @@ namespace looping_midi_test_helpers
         return *midiFile.getTrack (1);
     }
 
-    static juce::MidiMessageSequence renderMidiClip (MidiClip& mc, graph::test_utilities::TestSetup ts,
+    static yup::MidiMessageSequence renderMidiClip (MidiClip& mc, graph::test_utilities::TestSetup ts,
                                                      TimeRange rangeToRender)
     {
         auto renderOpts = RenderOptions::forClipRender ({ &mc }, true);
@@ -45,7 +45,7 @@ namespace looping_midi_test_helpers
         params.blockSizeForAudio = ts.blockSize;
         params.time = rangeToRender;
 
-        juce::TemporaryFile t1;
+        yup::TemporaryFile t1;
         params.destFile = t1.getFile();
         const auto seqFile = Renderer::renderToFile ("proxy", params);
 
@@ -61,7 +61,7 @@ namespace looping_midi_test_helpers
         params.sampleRateForAudio = ts.sampleRate;
         params.blockSizeForAudio = ts.blockSize;
 
-        juce::TemporaryFile t1, t2;
+        yup::TemporaryFile t1, t2;
 
         mc.setUsesProxy (true);
         CHECK (mc.canUseProxy());
@@ -83,7 +83,7 @@ namespace looping_midi_test_helpers
         double timestamp;
     };
 
-    static void runSequenceClippingTest (std::vector<BytesAndTimeStamp> data, juce::Range<double> clipRange, size_t numEventsExpected)
+    static void runSequenceClippingTest (std::vector<BytesAndTimeStamp> data, yup::Range<double> clipRange, size_t numEventsExpected)
     {
         choc::midi::Sequence seq;
 
@@ -115,9 +115,9 @@ TEST_CASE ("LoopingMidiNode")
 
     for (auto setup : tracktion::graph::test_utilities::getTestSetups())
     {
-        MESSAGE (juce::String ("Test setup: sample rate SR, block size BS, random blocks RND")
-                    .replace ("SR", juce::String (setup.sampleRate))
-                    .replace ("BS", juce::String (setup.blockSize))
+        MESSAGE (yup::String ("Test setup: sample rate SR, block size BS, random blocks RND")
+                    .replace ("SR", yup::String (setup.sampleRate))
+                    .replace ("BS", yup::String (setup.blockSize))
                     .replace ("RND", setup.randomiseBlockSizes ? "Y" : "N").toStdString());
 
         // runMidiTests
@@ -179,7 +179,7 @@ TEST_CASE ("LoopingMidiNode")
             if (numLoopIterations > 0)
                 mc->setNumberOfLoops (numLoopIterations);
 
-            std::vector<juce::MidiMessage> noteEvents;
+            std::vector<yup::MidiMessage> noteEvents;
             const auto renderedSequence = renderMidiClip (*mc, ts, { 0_tp, 100_tp });
 
             for (auto meh : renderedSequence)
@@ -255,7 +255,7 @@ TEST_CASE ("LoopingMidiNode")
         mc->setSendingBankChanges (sendBankSelect);
 
         auto& sequence = mc->getSequence();
-        sequence.copyFrom (MidiList (juce::ValueTree::fromXml (seqXml), nullptr), nullptr);
+        sequence.copyFrom (MidiList (yup::ValueTree::fromXml (seqXml), nullptr), nullptr);
         mc->setEnd (edit->tempoSequence.toTime (sequence.getLastBeatNumber()), true);
 
         for (auto timeBase : { MidiList::TimeBase::seconds, MidiList::TimeBase::beats, MidiList::TimeBase::beatsRaw })

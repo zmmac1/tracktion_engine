@@ -75,7 +75,7 @@ namespace ProjectUtilities
         outside the project folder and copies these in, updating the ProjectItem to reference
         the new source files.
     */
-    int importExternalFiles (Project& proj, juce::Array<ProjectItemRef> refsToImport);
+    int importExternalFiles (Project& proj, yup::Array<ProjectItemRef> refsToImport);
 
     /** Looks through the given list of ProjectItemRefs for ProjectItems that are in a Project
         other than this Project, and creates new ProjectItems for them in this Project.
@@ -87,7 +87,7 @@ namespace ProjectUtilities
 
         @returns the number of ProjectItems imported.
     */
-    int importExternalReferences (Project& proj, juce::Array<ProjectItemRef> refsToImport);
+    int importExternalReferences (Project& proj, yup::Array<ProjectItemRef> refsToImport);
 
     /** Looks for clips that have source files outside of the project folder, and copies them in,
         updating the ProjectItem references.
@@ -98,7 +98,7 @@ namespace ProjectUtilities
 
         @returns The number of files copied imported and an error message if one occured
     */
-    std::pair<int, juce::String> consolidateEdit (Edit& edit);
+    std::pair<int, yup::String> consolidateEdit (Edit& edit);
 
     /** Returns true if the Edit has any ProjectItem references to files outside the project directory. */
     bool canConsolidateEdit (Edit& edit);
@@ -112,7 +112,7 @@ namespace ProjectUtilities
 
         @returns The number of files copied imported and an error message if one occured
     */
-    std::pair<int, juce::String> consolidateProject (Project& project);
+    std::pair<int, yup::String> consolidateProject (Project& project);
 
     /** Returns true if the Project has any ProjectItem references to files outside the project directory. */
     bool canConsolidateProject (Project& project);

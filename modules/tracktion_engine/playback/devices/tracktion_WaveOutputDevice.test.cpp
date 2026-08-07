@@ -43,8 +43,8 @@ namespace tracktion::inline engine
             CHECK (device->getChannels()[1].indexInDevice == 0);
 
             // Channel types should be preserved
-            CHECK (device->getChannels()[0].channel == juce::AudioChannelSet::left);
-            CHECK (device->getChannels()[1].channel == juce::AudioChannelSet::right);
+            CHECK (device->getChannels()[0].channel == yup::AudioChannelSet::left);
+            CHECK (device->getChannels()[1].channel == yup::AudioChannelSet::right);
 
             // Un-reversing should restore original order
             device->reverseChannels (false);
@@ -111,7 +111,7 @@ namespace tracktion::inline engine
             auto& engine = *Engine::getEngines()[0];
 
             // Create a stereo sin file: both channels have sine (mono clip will be duplicated to stereo)
-            auto sinFile = getSinFile<juce::WavAudioFormat> (44100.0, 1.0, 1, 220.0f);
+            auto sinFile = getSinFile<yup::WavAudioFormat> (44100.0, 1.0, 1, 220.0f);
             AudioFile af (engine, sinFile->getFile());
 
             // -- Normal (non-reversed) playback --
@@ -146,11 +146,11 @@ namespace tracktion::inline engine
 
             for (choc::buffer::FrameCount frame = 0; frame < 44100u; ++frame)
             {
-                stereoBuffer.getSample (0, frame) = std::sin (static_cast<float> (frame) * juce::MathConstants<float>::twoPi * 220.0f / 44100.0f);
+                stereoBuffer.getSample (0, frame) = std::sin (static_cast<float> (frame) * yup::MathConstants<float>::twoPi * 220.0f / 44100.0f);
                 stereoBuffer.getSample (1, frame) = 0.0f;
             }
 
-            auto stereoFile = writeToTemporaryFile<juce::WavAudioFormat> (stereoBuffer, 44100.0);
+            auto stereoFile = writeToTemporaryFile<yup::WavAudioFormat> (stereoBuffer, 44100.0);
             AudioFile stereoAf (engine, stereoFile->getFile());
 
             // Normal playback: ch0 should have sine, ch1 should be silent
@@ -271,9 +271,9 @@ namespace tracktion::inline engine
             std::atomic<bool> hasStarted { false };
             std::atomic<int> blocksProcessed { 0 };
 
-            juce::AudioBuffer<float> silenceBuffer (params.outputChannels, params.blockSize);
+            yup::AudioBuffer<float> silenceBuffer (params.outputChannels, params.blockSize);
             silenceBuffer.clear();
-            juce::MidiBuffer emptyMidi;
+            yup::MidiBuffer emptyMidi;
 
             std::thread audioThread ([&]
             {

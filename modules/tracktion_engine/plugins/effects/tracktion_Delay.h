@@ -42,10 +42,10 @@ struct DelayBufferBase
     }
 
     int bufferPos = 0, bufferSamples = 0;
-    juce::MemoryBlock buffers[2];
+    yup::MemoryBlock buffers[2];
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayBufferBase)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayBufferBase)
 };
 
 
@@ -60,18 +60,18 @@ public:
     static const char* getPluginName()                  { return NEEDS_TRANS("Delay"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override               { return TRANS("Delay"); }
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getSelectableDescription() override    { return TRANS("Delay Plugin"); }
+    yup::String getName() const override               { return TRANS("Delay"); }
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getSelectableDescription() override    { return TRANS("Delay Plugin"); }
 
-    int getNumOutputChannelsGivenInputs (int numInputChannels) override     { return juce::jmin (numInputChannels, 2); }
+    int getNumOutputChannelsGivenInputs (int numInputChannels) override     { return yup::jmin (numInputChannels, 2); }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
     void reset() override;
     void applyToBuffer (const PluginRenderContext&) override;
 
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     juce::CachedValue<float> feedbackValue, mixValue;
     juce::CachedValue<int> lengthMs;
@@ -84,7 +84,7 @@ public:
 private:
     DelayBufferBase delayBuffer;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DelayPlugin)
 };
 
 } // namespace tracktion::inline engine

@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-SourceFileReference::SourceFileReference (Edit& e, juce::ValueTree& v, const juce::Identifier& prop)
+SourceFileReference::SourceFileReference (Edit& e, yup::ValueTree& v, const yup::Identifier& prop)
     : edit (e), source (v, prop, &e.getUndoManager()), state (v)
 {
     ignoreUnused (state);
@@ -22,7 +22,7 @@ SourceFileReference::~SourceFileReference()
 
 namespace {
 
-juce::File findCommonAncestor (const juce::File& a, const juce::File& b)
+yup::File findCommonAncestor (const yup::File& a, const yup::File& b)
 {
     for (auto dir = a; dir != dir.getParentDirectory(); dir = dir.getParentDirectory())
         if (b.isAChildOf (dir) || b == dir)
@@ -35,33 +35,33 @@ juce::File findCommonAncestor (const juce::File& a, const juce::File& b)
     return {};
 }
 
-int getPathDepth (const juce::File& f)
+int getPathDepth (const yup::File& f)
 {
     int depth = 0;
 
-    if (f != juce::File())
+    if (f != yup::File())
         for (auto dir = f; dir != dir.getParentDirectory(); dir = dir.getParentDirectory())
             ++depth;
 
     return depth;
 }
 
-bool isSystemOrTempFolder (const juce::File& f)
+bool isSystemOrTempFolder (const yup::File& f)
 {
     auto path = f.getFullPathName();
 
-   #if JUCE_MAC
+   #if YUP_MAC
     if (path.startsWith ("/System") || path.startsWith ("/Library")
         || path.startsWith ("/usr") || path.startsWith ("/var")
         || path.startsWith ("/private/var"))
         return true;
    #elif JUCE_WINDOWS
-    auto winDir = juce::File::getSpecialLocation (juce::File::windowsSystemDirectory)
+    auto winDir = yup::File::getSpecialLocation (yup::File::windowsSystemDirectory)
                       .getParentDirectory().getFullPathName();
     if (path.startsWithIgnoreCase (winDir))
         return true;
 
-    auto progFiles = juce::File::getSpecialLocation (juce::File::globalApplicationsDirectory).getFullPathName();
+    auto progFiles = yup::File::getSpecialLocation (yup::File::globalApplicationsDirectory).getFullPathName();
     if (path.startsWithIgnoreCase (progFiles))
         return true;
    #elif JUCE_LINUX
@@ -71,16 +71,16 @@ bool isSystemOrTempFolder (const juce::File& f)
         return true;
    #endif
 
-    auto tempDir = juce::File::getSpecialLocation (juce::File::tempDirectory);
+    auto tempDir = yup::File::getSpecialLocation (yup::File::tempDirectory);
     if (f.isAChildOf (tempDir))
         return true;
 
     return false;
 }
 
-bool shouldUseRelativePath (Edit& edit, const juce::File& audioFile, const juce::File& editFile)
+bool shouldUseRelativePath (Edit& edit, const yup::File& audioFile, const yup::File& editFile)
 {
-    if (editFile == juce::File())
+    if (editFile == yup::File())
         return false;
 
    #if JUCE_WINDOWS
@@ -132,7 +132,7 @@ bool shouldUseRelativePath (Edit& edit, const juce::File& audioFile, const juce:
 
 } // anonymous namespace
 
-juce::String SourceFileReference::findPathFromFile (Edit& edit, const juce::File& newFile, bool useRelativePath)
+yup::String SourceFileReference::findPathFromFile (Edit& edit, const yup::File& newFile, bool useRelativePath)
 {
     if (! useRelativePath)
         return newFile.getFullPathName();
@@ -146,7 +146,7 @@ juce::String SourceFileReference::findPathFromFile (Edit& edit, const juce::File
     return newFile.getFullPathName();
 }
 
-juce::File SourceFileReference::findFileFromString (Edit& edit, const juce::String& sourceDescription)
+yup::File SourceFileReference::findFileFromString (Edit& edit, const yup::String& sourceDescription)
 {
     if (sourceDescription.isEmpty())
         return {};
@@ -167,7 +167,7 @@ juce::File SourceFileReference::findFileFromString (Edit& edit, const juce::Stri
     return getEditFileFromProjectManager (edit).getChildFile (sourceDescription);
 }
 
-juce::File SourceFileReference::getFile() const
+yup::File SourceFileReference::getFile() const
 {
     jassert (source.get() == state[source.getPropertyID()].toString());
     return findFileFromString (edit, source.get());
@@ -202,7 +202,7 @@ ProjectItem::Ptr SourceFileReference::getSourceProjectItem() const
     return {};
 }
 
-void SourceFileReference::setToFile (const juce::File& file, PathStyle pathStyle, bool allowProjectItems)
+void SourceFileReference::setToFile (const yup::File& file, PathStyle pathStyle, bool allowProjectItems)
 {
     auto project = getProjectForEdit (edit);
 

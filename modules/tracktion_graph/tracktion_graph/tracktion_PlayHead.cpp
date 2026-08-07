@@ -60,7 +60,7 @@ TEST_SUITE ("tracktion_graph")
             {
                 PlayHead playHead;
                 playHead.play ({ 0, 10'000 }, false);
-                juce::Range<int64_t> referenceRange;
+                yup::Range<int64_t> referenceRange;
 
                 CHECK_EQ (playHead.getPosition(), (int64_t) 0);
                 CHECK_EQ (playHead.referenceSamplePositionToTimelinePosition (0), (int64_t) 0);

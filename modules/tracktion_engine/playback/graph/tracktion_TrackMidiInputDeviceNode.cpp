@@ -63,7 +63,7 @@ void TrackMidiInputDeviceNode::process (ProcessContext& pc)
 
     // And pass MIDI to device
     for (auto& m : sourceBuffers.midi)
-        midiInputDevice.handleIncomingMidiMessage (nullptr, juce::MidiMessage (m, midiStreamTime + m.getTimeStamp()));
+        midiInputDevice.handleIncomingMidiMessage (nullptr, yup::MidiMessage (m, midiStreamTime + m.getTimeStamp()));
 }
 
 } // namespace tracktion::inline engine

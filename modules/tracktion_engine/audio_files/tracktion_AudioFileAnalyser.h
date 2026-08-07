@@ -31,12 +31,12 @@ public:
     /** Called repeatedly with successive blocks of the file's audio.
         Only the first numSamples of the buffer are valid.
     */
-    virtual void process (const juce::AudioBuffer<float>&, int numSamples) = 0;
+    virtual void process (const yup::AudioBuffer<float>&, int numSamples) = 0;
 
     /** Called once after the last block to add this analyser's results to
         the shared result object.
     */
-    virtual void addResults (juce::DynamicObject&) = 0;
+    virtual void addResults (yup::DynamicObject&) = 0;
 };
 
 //==============================================================================
@@ -55,7 +55,7 @@ struct AudioAnalysisOptions
     (sampleRate, channels, seconds) always included. All values are rounded
     for compactness: the output is designed to be read by an LLM.
 */
-tl::expected<juce::var, juce::String> analyseAudioFile (Engine&, const juce::File&,
+tl::expected<yup::var, yup::String> analyseAudioFile (Engine&, const yup::File&,
                                                         const std::vector<AudioFileAnalyser*>&);
 
 /** Analyses a file with the standard level/spectrum/envelope analysers.
@@ -67,7 +67,7 @@ tl::expected<juce::var, juce::String> analyseAudioFile (Engine&, const juce::Fil
     spectral centroid, 85% rolloff and low/mid/high balance.
     Envelope: peak and RMS in dB over evenly-spaced windows.
 */
-tl::expected<juce::var, juce::String> analyseAudioFile (Engine&, const juce::File&,
+tl::expected<yup::var, yup::String> analyseAudioFile (Engine&, const yup::File&,
                                                         const AudioAnalysisOptions& = {});
 
 } // namespace tracktion::inline engine

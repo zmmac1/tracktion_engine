@@ -87,7 +87,7 @@ public:
                                   (choc::buffer::FrameCount) info.blockSize });
     }
 
-    void preProcess (choc::buffer::FrameCount, juce::Range<int64_t>) override
+    void preProcess (choc::buffer::FrameCount, yup::Range<int64_t>) override
     {
         if (canUseSourceBuffers)
             setBufferViewToUse (input.get(), input->getProcessedOutput().audio);

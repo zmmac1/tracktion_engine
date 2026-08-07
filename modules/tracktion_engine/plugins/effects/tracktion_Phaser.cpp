@@ -32,7 +32,7 @@ void PhaserPlugin::initialise (const PluginInitialisationInfo& info)
     std::memset (filterVals, 0, sizeof (filterVals));
 
     const float delayMs = 100.0f;
-    sweep = minSweep = (juce::MathConstants<double>::pi * delayMs) / sampleRate;
+    sweep = minSweep = (yup::MathConstants<double>::pi * delayMs) / sampleRate;
     sweepFactor = 1.001f;
 }
 
@@ -52,7 +52,7 @@ void PhaserPlugin::applyToBuffer (const PluginRenderContext& fc)
     const double sweepDown = 1.0 / sweepUp;
 
     const float delayMs = 100.0f;
-    const float maxSweep = (float) ((juce::MathConstants<double>::pi * delayMs * range) / sampleRate);
+    const float maxSweep = (float) ((yup::MathConstants<double>::pi * delayMs * range) / sampleRate);
 
     double swpFactor = sweepFactor > 1.0 ? sweepUp : sweepDown;
     double swp = sweep;
@@ -108,12 +108,12 @@ void PhaserPlugin::applyToBuffer (const PluginRenderContext& fc)
     sweepFactor = swpFactor;
 }
 
-juce::String PhaserPlugin::getSelectableDescription()
+yup::String PhaserPlugin::getSelectableDescription()
 {
     return TRANS("Phaser Plugin");
 }
 
-void PhaserPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void PhaserPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
     copyPropertiesToCachedValues (v, depth, rate, feedbackGain);
 

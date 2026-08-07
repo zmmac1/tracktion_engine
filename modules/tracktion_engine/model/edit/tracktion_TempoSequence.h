@@ -32,7 +32,7 @@ tempo::Sequence::Position createPosition (const TempoSequence&);
     tempo::Sequence::Position object to iterate it. @see createPosition
 */
 class TempoSequence  : public Selectable,
-                       private juce::AsyncUpdater
+                       private yup::AsyncUpdater
 {
 public:
     //==============================================================================
@@ -46,10 +46,10 @@ public:
     Edit& getEdit() const                           { return edit; }
 
     /** Returns the state this TempoSequence models. */
-    const juce::ValueTree& getState() const         { return state; }
+    const yup::ValueTree& getState() const         { return state; }
 
     /** Sets the state this TempoSequence should refer to. */
-    void setState (const juce::ValueTree&, bool remapEdit);
+    void setState (const yup::ValueTree&, bool remapEdit);
 
     /** Resets this to a default, empty state. */
     void createEmptyState();
@@ -59,7 +59,7 @@ public:
 
     //==============================================================================
     /** Returns an array of the TimeSigSetting. */
-    const juce::Array<TimeSigSetting*>& getTimeSigs() const;
+    const yup::Array<TimeSigSetting*>& getTimeSigs() const;
 
     /** Returns the number of TimeSigSetting[s] in the sequence. */
     int getNumTimeSigs() const;
@@ -81,7 +81,7 @@ public:
 
     //==============================================================================
     /** Returns the TempoSettings. */
-    const juce::Array<TempoSetting*>& getTempos() const;
+    const yup::Array<TempoSetting*>& getTempos() const;
 
     /** Returns the current number of TempoSettings. */
     int getNumTempos() const;
@@ -208,7 +208,7 @@ public:
     /** @internal */
     juce::UndoManager* getUndoManager() const noexcept;
     /** @internal */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     /** @internal */
     void freeResources();
     /** @internal */
@@ -220,7 +220,7 @@ private:
     friend class TimeSigSetting;
 
     //==============================================================================
-    juce::ValueTree state;
+    yup::ValueTree state;
 
     struct TempoSettingList;
     struct TimeSigList;
@@ -240,7 +240,7 @@ private:
     TimeSigSetting::Ptr insertTimeSig (TimePosition, juce::UndoManager*);
     HashCode createHashForTemposInRange (TimeRange) const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoSequence)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TempoSequence)
 };
 
 
@@ -264,11 +264,11 @@ private:
     struct AutomationPos
     {
         AutomationCurve& curve;
-        juce::Array<BeatPosition> beats;
+        yup::Array<BeatPosition> beats;
     };
 
-    juce::Array<ClipPos> clips;
-    juce::Array<AutomationPos> automation;
+    yup::Array<ClipPos> clips;
+    yup::Array<AutomationPos> automation;
     BeatRange loopPositionBeats;
     BeatPosition startPositionBeats;
 };

@@ -98,7 +98,7 @@ bool RackReturnNode::isReadyToProcess()
     return wetInput->hasProcessed() && dryInput->hasProcessed();
 }
 
-void RackReturnNode::preProcess (choc::buffer::FrameCount, juce::Range<int64_t>)
+void RackReturnNode::preProcess (choc::buffer::FrameCount, yup::Range<int64_t>)
 {
     if (canUseWetSourceBuffers)
         setBufferViewToUse (wetInput.get(), wetInput->getProcessedOutput().audio);

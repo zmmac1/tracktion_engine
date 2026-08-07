@@ -31,7 +31,7 @@ namespace tracktion::inline engine
 
             CHECK_EQ(engine.getDeviceManager().getWaveInputDevices()[0]->getRecordAdjustment(), 0_td);
 
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, 1);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, 1);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
 
             auto& destTrack = *getAudioTracks (*edit)[0];
@@ -53,7 +53,7 @@ namespace tracktion::inline engine
 
             CHECK_EQ (squareBuffer.getNumSamples(), recordedFileBuffer.getNumSamples());
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileBuffer, squareBuffer,
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Device input latency")
@@ -69,7 +69,7 @@ namespace tracktion::inline engine
             auto& tc = edit->getTransport();
             tc.ensureContextAllocated();
 
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, 1);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, 1);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
             AudioFile af (engine, squareFile->getFile());
 
@@ -97,7 +97,7 @@ namespace tracktion::inline engine
 
             CHECK_EQ (squareBuffer.getNumSamples(), recordedFileBuffer.getNumSamples());
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileBuffer, squareBuffer,
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Device input & output latency, loop-back")
@@ -118,7 +118,7 @@ namespace tracktion::inline engine
             auto& tc = edit->getTransport();
             tc.ensureContextAllocated();
 
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, 1);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, 1);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
             AudioFile af (engine, squareFile->getFile());
             auto& sourceTrack = *getAudioTracks (*edit)[0];
@@ -156,7 +156,7 @@ namespace tracktion::inline engine
             // for round-trip latency with the loop-back test
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileView.fromFrame (blockNumFrames),
                                                            toBufferView (squareBuffer).getStart (recordedFileView.getNumFrames()- blockNumFrames),
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Device input & output latency, loop-back corrected")
@@ -209,7 +209,7 @@ namespace tracktion::inline engine
             auto& tc = edit->getTransport();
             tc.ensureContextAllocated();
 
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, 1);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, 1);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
             AudioFile af (engine, squareFile->getFile());
             auto& sourceTrack = *getAudioTracks (*edit)[0];
@@ -243,7 +243,7 @@ namespace tracktion::inline engine
             CHECK_EQ (squareBuffer.getNumSamples(), recordedFileBuffer.getNumSamples());
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileView,
                                                            toBufferView (squareBuffer),
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Track device")
@@ -254,7 +254,7 @@ namespace tracktion::inline engine
 
             auto edit = engine::test_utilities::createTestEdit (engine, 2, Edit::EditRole::forEditing);
             auto& tc = edit->getTransport();
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, 2);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, 2);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
 
             AudioFile af (engine, squareFile->getFile());
@@ -284,7 +284,7 @@ namespace tracktion::inline engine
 
             CHECK_EQ (af.getLengthInSamples(), recordedFileBuffer.getNumSamples());
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileBuffer, squareBuffer,
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Track device with latency plugin")
@@ -297,7 +297,7 @@ namespace tracktion::inline engine
 
             auto edit = engine::test_utilities::createTestEdit (engine, 2, Edit::EditRole::forEditing);
             auto& tc = edit->getTransport();
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, 2);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, 2);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
 
             AudioFile af (engine, squareFile->getFile());
@@ -329,7 +329,7 @@ namespace tracktion::inline engine
 
             CHECK_EQ (af.getLengthInSamples(), recordedFileBuffer.getNumSamples());
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileBuffer, squareBuffer,
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Track device with insert plugin, loop-back")
@@ -353,7 +353,7 @@ namespace tracktion::inline engine
             tc.ensureContextAllocated();
 
             // Create a square file to be used as a clip on track 1
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, 1);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, 1);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
             AudioFile af (engine, squareFile->getFile());
 
@@ -404,7 +404,7 @@ namespace tracktion::inline engine
             // for round-trip latency with the loop-back test
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileView.fromFrame (blockNumFrames),
                                                            toBufferView (squareBuffer).getStart (recordedFileView.getNumFrames()- blockNumFrames),
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Multi-channel recording")
@@ -419,7 +419,7 @@ namespace tracktion::inline engine
             auto& tc = edit->getTransport();
             tc.ensureContextAllocated();
 
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, 1);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, 1);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
 
             auto& destTrack = *getAudioTracks (*edit)[0];
@@ -434,7 +434,7 @@ namespace tracktion::inline engine
             test_utilities::TempCurrentWorkingDirectory tempDir;
             tc.record (false);
 
-            juce::AudioBuffer<float> inputBuffer (numChannels, squareBuffer.getNumSamples());
+            yup::AudioBuffer<float> inputBuffer (numChannels, squareBuffer.getNumSamples());
             inputBuffer.clear();
 
             for (int ch = 0; ch < numChannels; ++ch)
@@ -458,7 +458,7 @@ namespace tracktion::inline engine
             CHECK_EQ (recordedFileBuffer.getNumChannels(), expectedChannels);
             CHECK_EQ (squareBuffer.getNumSamples(), recordedFileBuffer.getNumSamples());
 
-            juce::AudioBuffer<float> expectedBuffer (expectedChannels, squareBuffer.getNumSamples());
+            yup::AudioBuffer<float> expectedBuffer (expectedChannels, squareBuffer.getNumSamples());
 
             for (int ch = 0; ch < expectedChannels; ++ch)
             {
@@ -466,7 +466,7 @@ namespace tracktion::inline engine
             }
 
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileBuffer, expectedBuffer,
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Multi-channel track device recording")
@@ -481,7 +481,7 @@ namespace tracktion::inline engine
 
             // Create a 4-channel square wave source file
             constexpr int sourceChannels = 4;
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 5.0, sourceChannels);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 5.0, sourceChannels);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
             CHECK_EQ (squareBuffer.getNumChannels(), sourceChannels);
 
@@ -516,7 +516,7 @@ namespace tracktion::inline engine
             CHECK_EQ (af.getLengthInSamples(), recordedFileBuffer.getNumSamples());
 
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileBuffer, squareBuffer,
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
         TEST_CASE ("WaveInputDevice: Stereo track device recording")
@@ -530,7 +530,7 @@ namespace tracktion::inline engine
             auto edit = engine::test_utilities::createTestEdit (engine, 2, Edit::EditRole::forEditing);
             auto& tc = edit->getTransport();
 
-            auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, 2.0, 2);
+            auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, 2.0, 2);
             auto squareBuffer = *engine::test_utilities::loadFileInToBuffer (engine, squareFile->getFile());
             AudioFile af (engine, squareFile->getFile());
             auto& sourceTrack = *getAudioTracks (*edit)[0];
@@ -560,14 +560,14 @@ namespace tracktion::inline engine
             CHECK_EQ (af.getLengthInSamples(), recordedFileBuffer.getNumSamples());
 
             // Verify the WAV file can be read back correctly
-            if (auto reader = std::unique_ptr<juce::AudioFormatReader> (
+            if (auto reader = std::unique_ptr<yup::AudioFormatReader> (
                     AudioFileUtils::createReaderFor (engine, recordedFile)))
             {
                 CHECK_EQ (static_cast<int> (reader->numChannels), 2);
             }
 
             CHECK (graph::test_utilities::buffersAreEqual (recordedFileBuffer, squareBuffer,
-                                                           juce::Decibels::decibelsToGain (-99.0f)));
+                                                           yup::Decibels::decibelsToGain (-99.0f)));
         }
 
     }

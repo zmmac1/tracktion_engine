@@ -11,7 +11,7 @@
 namespace tracktion { inline namespace engine
 {
 
-IODevice::IODevice (Engine& e, juce::String n, juce::String idToUse)
+IODevice::IODevice (Engine& e, yup::String n, yup::String idToUse)
    : engine (e), deviceID (std::move (idToUse)), name (std::move (n))
 {
     alias = engine.getPropertyStorage().getPropertyItem (SettingID::invalid, getAliasPropName());
@@ -21,22 +21,22 @@ IODevice::~IODevice()
 {
 }
 
-juce::String IODevice::getAliasPropName() const
+yup::String IODevice::getAliasPropName() const
 {
     return "devicealias_" + deviceID;
 }
 
-juce::String IODevice::getAliasOrName() const
+yup::String IODevice::getAliasOrName() const
 {
     return alias.isNotEmpty() ? alias : name;
 }
 
-juce::String IODevice::getAliasIfSet() const
+yup::String IODevice::getAliasIfSet() const
 {
     return alias;
 }
 
-void IODevice::setAlias (const juce::String& a)
+void IODevice::setAlias (const yup::String& a)
 {
     auto newAlias = a.substring (0, 50).trim();
 
@@ -56,7 +56,7 @@ void IODevice::setAlias (const juce::String& a)
     }
 }
 
-juce::String IODevice::getSelectableDescription()
+yup::String IODevice::getSelectableDescription()
 {
     return getAliasOrName() + " (" + TRANS(getDeviceTypeDescription()) + ")";
 }

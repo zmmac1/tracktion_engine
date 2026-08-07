@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-TempoSetting::TempoSetting (TempoSequence& ts, const juce::ValueTree& v)
+TempoSetting::TempoSetting (TempoSequence& ts, const yup::ValueTree& v)
     : ReferenceCountedObject(),
       ownerSequence (ts), state (v)
 {
@@ -25,7 +25,7 @@ TempoSetting::~TempoSetting()
 {
 }
 
-juce::ValueTree TempoSetting::create (BeatPosition beat, double newBPM, float curveVal)
+yup::ValueTree TempoSetting::create (BeatPosition beat, double newBPM, float curveVal)
 {
     return createValueTree (IDs::TEMPO,
                             IDs::startBeat, beat.inBeats(),
@@ -39,7 +39,7 @@ Edit& TempoSetting::getEdit() const
 }
 
 //==============================================================================
-juce::String TempoSetting::getSelectableDescription()
+yup::String TempoSetting::getSelectableDescription()
 {
     return TRANS("Tempo");
 }
@@ -57,8 +57,8 @@ void TempoSetting::set (BeatPosition newStartBeat, double newBPM, float newCurve
     bpm.forceUpdateOfCachedValue();
     curve.forceUpdateOfCachedValue();
 
-    newBPM   = juce::jlimit (minBPM, maxBPM, newBPM);
-    newCurve = juce::jlimit (-1.0f, 1.0f, newCurve);
+    newBPM   = yup::jlimit (minBPM, maxBPM, newBPM);
+    newCurve = yup::jlimit (-1.0f, 1.0f, newCurve);
 
     if (newBPM != bpm || startBeatNumber != newStartBeat || curve != newCurve)
     {

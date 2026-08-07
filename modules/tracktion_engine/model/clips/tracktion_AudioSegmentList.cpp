@@ -10,17 +10,17 @@
 
 namespace tracktion::inline engine {
 
-inline void dumpSegments (const juce::Array<AudioSegmentList::Segment>& segments)
+inline void dumpSegments (const yup::Array<AudioSegmentList::Segment>& segments)
 {
 
     DBG ("******************************************");
     for (auto& s : segments)
     {
-        juce::String text;
+        yup::String text;
 
-        text += "Start: " + juce::String (s.start.inSeconds()) + "(" + juce::String (s.startSample) + ")\n";
-        text += "Length: " + juce::String (s.length.inSeconds()) + "(" + juce::String (s.lengthSample) + ")\n";
-        text += "Transpose: " + juce::String (s.transpose) + "\n";
+        text += "Start: " + yup::String (s.start.inSeconds()) + "(" + yup::String (s.startSample) + ")\n";
+        text += "Length: " + yup::String (s.length.inSeconds()) + "(" + yup::String (s.lengthSample) + ")\n";
+        text += "Transpose: " + yup::String (s.transpose) + "\n";
         text += "===============================================";
 
         DBG(text);
@@ -87,9 +87,9 @@ AudioSegmentList::AudioSegmentList (AudioClipBase& acb, bool relTime, bool shoul
         return false;
     };
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     auto f = pm.findSourceFile (clip.getSourceFileReference().getSourceProjectItemRef());
-    jassert (f == juce::File() || f == clip.getSourceFileReference().getFile());
+    jassert (f == yup::File() || f == clip.getSourceFileReference().getFile());
    #endif
 
     if (clip.getCurrentSourceFile().existsAsFile() || anyTakesValid())
@@ -136,7 +136,7 @@ std::unique_ptr<AudioSegmentList> AudioSegmentList::create (AudioClipBase& acb, 
         TimeRange region (std::max (TimePosition(), wtm.getWarpedStart()),
                           wtm.getWarpEndMarkerTime());
 
-        juce::Array<TimeRange> warpTimeRegions;
+        yup::Array<TimeRange> warpTimeRegions;
         callBlockingCatching ([&] { warpTimeRegions = wtm.getWarpTimeRegions (region); });
         auto position = warpTimeRegions.size() > 0 ? warpTimeRegions.getUnchecked (0).getStart() : TimePosition();
 
@@ -215,7 +215,7 @@ void AudioSegmentList::chopSegment (Segment& seg, TimePosition at, int insertPos
     newSeg.fadeIn  = true;
     newSeg.fadeOut = seg.fadeOut;
 
-    newSeg.lengthSample = juce::roundToInt (double (seg.lengthSample) * newSeg.length.inSeconds() / seg.length.inSeconds());
+    newSeg.lengthSample = yup::roundToInt (double (seg.lengthSample) * newSeg.length.inSeconds() / seg.length.inSeconds());
     newSeg.startSample  = seg.getSampleRange().getEnd() - newSeg.lengthSample;
 
     seg.length = seg.length - newSeg.length;
@@ -322,8 +322,8 @@ void AudioSegmentList::buildNormal (bool crossfade)
         seg.start        = clipPos.getStart();
         seg.length       = clipPos.getLength();
 
-        seg.startSample  = juce::jlimit ((SampleCount) 0, wi.lengthInSamples, (SampleCount) (clipPos.getOffset().inSeconds() * rate));
-        seg.lengthSample = juce::jlimit ((SampleCount) 0, wi.lengthInSamples, (SampleCount) (clipPos.getLength().inSeconds() * rate));
+        seg.startSample  = yup::jlimit ((SampleCount) 0, wi.lengthInSamples, (SampleCount) (clipPos.getOffset().inSeconds() * rate));
+        seg.lengthSample = yup::jlimit ((SampleCount) 0, wi.lengthInSamples, (SampleCount) (clipPos.getLength().inSeconds() * rate));
 
         seg.transpose    = getPitchAt (clipPos.getStart() + 0.0001s);
         seg.stretchRatio = (float) clip.getSpeedRatio();
@@ -404,9 +404,9 @@ void AudioSegmentList::chopSegmentsForChords()
     }
 }
 
-static juce::Array<SampleCount> findSyncSamples (const LoopInfo& loopInfo, SampleRange range)
+static yup::Array<SampleCount> findSyncSamples (const LoopInfo& loopInfo, SampleRange range)
 {
-    juce::Array<SampleCount> syncSamples;
+    yup::Array<SampleCount> syncSamples;
     auto numLoopPoints = loopInfo.getNumLoopPoints();
 
     if (numLoopPoints == 0)
@@ -435,9 +435,9 @@ static juce::Array<SampleCount> findSyncSamples (const LoopInfo& loopInfo, Sampl
     return syncSamples;
 }
 
-static juce::Array<SampleCount> trimInitialSyncSamples (const juce::Array<SampleCount>& samples, SampleCount start)
+static yup::Array<SampleCount> trimInitialSyncSamples (const yup::Array<SampleCount>& samples, SampleCount start)
 {
-    juce::Array<SampleCount> result;
+    yup::Array<SampleCount> result;
     result.add (start);
 
     for (auto& s : samples)

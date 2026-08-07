@@ -41,13 +41,13 @@ NodeRenderContext::NodeRenderContext (Renderer::RenderTask& owner_, Renderer::Pa
                                       std::unique_ptr<tracktion::graph::PlayHead> playHead_,
                                       std::unique_ptr<tracktion::graph::PlayHeadState> playHeadState_,
                                       std::unique_ptr<ProcessState> processState_,
-                                      juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* sourceToUpdate_)
+                                      yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* sourceToUpdate_)
     : owner (owner_),
       r (p), originalParams (p),
       playHead (std::move (playHead_)),
       playHeadState (std::move (playHeadState_)),
       processState (std::move (processState_)),
-      status (juce::Result::ok()),
+      status (yup::Result::ok()),
       ditherers (256, r.bitDepth),
       sourceToUpdate (sourceToUpdate_)
 {
@@ -76,7 +76,7 @@ NodeRenderContext::NodeRenderContext (Renderer::RenderTask& owner_, Renderer::Pa
 
         r.audioFormat = r.engine->getAudioFileFormatManager().getFrozenFileFormat();
 
-        intermediateFile = std::make_unique<juce::TemporaryFile> (r.destFile.withFileExtension (r.audioFormat->getFileExtensions()[0]));
+        intermediateFile = std::make_unique<yup::TemporaryFile> (r.destFile.withFileExtension (r.audioFormat->getFileExtensions()[0]));
         r.destFile = intermediateFile->getFile();
 
         r.shouldNormalise = false;
@@ -92,7 +92,7 @@ NodeRenderContext::NodeRenderContext (Renderer::RenderTask& owner_, Renderer::Pa
 
         if (p.checkNodesForAudio && ! props.hasAudio)
         {
-            status = juce::Result::fail (TRANS("Didn't find any audio to render"));
+            status = yup::Result::fail (TRANS("Didn't find any audio to render"));
             return;
         }
 
@@ -101,7 +101,7 @@ NodeRenderContext::NodeRenderContext (Renderer::RenderTask& owner_, Renderer::Pa
         else if (! r.channelConfig.isEmpty())
             outputChannelConfig = r.channelConfig;
         else
-            outputChannelConfig = ChannelConfiguration::canonical (juce::jmax (2, (int) props.numberOfChannels));
+            outputChannelConfig = ChannelConfiguration::canonical (yup::jmax (2, (int) props.numberOfChannels));
     }
 
     numOutputChans = outputChannelConfig.getNumChannels();
@@ -135,9 +135,9 @@ NodeRenderContext::NodeRenderContext (Renderer::RenderTask& owner_, Renderer::Pa
                                                     r.audioFormat, numOutputChans, r.sampleRateForAudio,
                                                     r.bitDepth, r.metadata, r.quality);
 
-    if (r.destFile != juce::File() && ! writer->isOpen())
+    if (r.destFile != yup::File() && ! writer->isOpen())
     {
-        status = juce::Result::fail (TRANS("Couldn't write to target file"));
+        status = yup::Result::fail (TRANS("Couldn't write to target file"));
         return;
     }
 
@@ -148,7 +148,7 @@ NodeRenderContext::NodeRenderContext (Renderer::RenderTask& owner_, Renderer::Pa
 
     // how long each block must take in real-time
     realTimePerBlock = (int) (blockLength.inSeconds() * 1000.0 + 0.99);
-    lastTime = juce::Time::getMillisecondCounterHiRes();
+    lastTime = yup::Time::getMillisecondCounterHiRes();
     sleepCounter = 10;
 
     currentTempoPosition = std::make_unique<tempo::Sequence::Position> (createPosition (r.edit->tempoSequence));
@@ -218,7 +218,7 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
     if (--sleepCounter <= 0)
     {
         sleepCounter = sleepCounterMax;
-        juce::Thread::sleep (1);
+        yup::Thread::sleep (1);
     }
 
     if (owner.shouldCancel())
@@ -239,7 +239,7 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
     auto blockEnd = streamTime + blockLength;
 
     if (precount > 0)
-        blockEnd = juce::jmin (r.time.getStart(), blockEnd);
+        blockEnd = yup::jmin (r.time.getStart(), blockEnd);
 
     if (precount > numPreRenderBlocks / 2)
         playHead->setPosition (toSamples (streamTime, r.sampleRateForAudio));
@@ -257,12 +257,12 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
 
     if (r.realTimeRender)
     {
-        auto timeNow = juce::Time::getMillisecondCounterHiRes();
+        auto timeNow = yup::Time::getMillisecondCounterHiRes();
         auto timeToWait = (int) (realTimePerBlock - (timeNow - lastTime));
         lastTime = timeNow;
 
         if (timeToWait > 0)
-            juce::Thread::sleep (timeToWait);
+            yup::Thread::sleep (timeToWait);
     }
 
     currentTempoPosition->set (streamTime);
@@ -270,7 +270,7 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
     resetFP();
 
     const TimeRange streamTimeRange (streamTime, blockEnd);
-    const auto referenceSampleRange = juce::Range<int64_t>::withStartAndLength (toSamples (streamTimeRange.getStart(), originalParams.sampleRateForAudio), r.blockSizeForAudio);
+    const auto referenceSampleRange = yup::Range<int64_t>::withStartAndLength (toSamples (streamTimeRange.getStart(), originalParams.sampleRateForAudio), r.blockSizeForAudio);
 
     // Update modifier timers
     r.edit->updateModifierTimers (streamTime, r.blockSizeForAudio);
@@ -304,12 +304,12 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
         int maxSrc = 0;
 
         for (const auto& e : outputChannelMap.entries)
-            maxSrc = juce::jmax (maxSrc, e.source + 1);
+            maxSrc = yup::jmax (maxSrc, e.source + 1);
 
         return maxSrc;
     }();
-    const int graphBufferChans = needsChannelRemap ? juce::jmax (maxSourceChan, numOutputChans) : numOutputChans;
-    juce::AudioBuffer<float> renderingBuffer (graphBufferChans, bufferSize);
+    const int graphBufferChans = needsChannelRemap ? yup::jmax (maxSourceChan, numOutputChans) : numOutputChans;
+    yup::AudioBuffer<float> renderingBuffer (graphBufferChans, bufferSize);
     renderingBuffer.clear();
     midiBuffer.clear();
 
@@ -322,7 +322,7 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
     // Remap channels from graph order to requested output order
     if (needsChannelRemap)
     {
-        juce::AudioBuffer<float> remappedBuffer (numOutputChans, (int) numFrames);
+        yup::AudioBuffer<float> remappedBuffer (numOutputChans, (int) numFrames);
         remappedBuffer.clear();
 
         for (const auto& entry : outputChannelMap.entries)
@@ -340,7 +340,7 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
     {
         jassert (playHeadState->isContiguousWithPreviousBlock());
 
-        auto numSamplesDone = (uint32_t) juce::jmin (samplesToWrite, (int64_t) r.blockSizeForAudio);
+        auto numSamplesDone = (uint32_t) yup::jmin (samplesToWrite, (int64_t) r.blockSizeForAudio);
         samplesToWrite -= numSamplesDone;
 
         auto blockSize = (uint32_t) numSamplesDone;
@@ -367,7 +367,7 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
     else
     {
         // for the pre-count blocks, sleep to give things a chance to get going
-        juce::Thread::sleep ((int) (blockLength.inSeconds() * 1000));
+        yup::Thread::sleep ((int) (blockLength.inSeconds() * 1000));
     }
 
     if (streamTime > r.time.getEnd() + r.endAllowance)
@@ -382,13 +382,13 @@ bool NodeRenderContext::renderNextBlock (std::atomic<float>& progressToUpdate)
         return true;
     }
 
-    auto prog = (float) ((streamTime - r.time.getStart()) / juce::jmax (1_td, r.time.getLength()));
+    auto prog = (float) ((streamTime - r.time.getStart()) / yup::jmax (1_td, r.time.getLength()));
 
     if (needsToNormaliseAndTrim)
         prog *= 0.9f;
 
     jassert (! std::isnan (prog));
-    progressToUpdate = juce::jlimit (0.0f, 1.0f, prog);
+    progressToUpdate = yup::jlimit (0.0f, 1.0f, prog);
     --precount;
     streamTime = blockEnd;
 
@@ -402,14 +402,14 @@ NodeRenderContext::WriteResult NodeRenderContext::writeAudioBlock (choc::buffer:
     // Prepare buffer to use
     auto blockSizeSamples = (int) block.getNumFrames();
 
-    juce::AudioBuffer<float> buffer (block.data.channels, numOutputChans, blockSizeSamples);
+    yup::AudioBuffer<float> buffer (block.data.channels, numOutputChans, blockSizeSamples);
 
     // Apply dithering and mag/rms analysis
     if (r.ditheringEnabled && r.bitDepth < 32)
         ditherers.apply (buffer, blockSizeSamples);
 
     auto mag = buffer.getMagnitude (0, blockSizeSamples);
-    peak = juce::jmax (peak, mag);
+    peak = yup::jmax (peak, mag);
 
     if (! hasStartedSavingToFile)
         hasStartedSavingToFile = (mag > 0.0f);
@@ -440,7 +440,7 @@ NodeRenderContext::WriteResult NodeRenderContext::writeAudioBlock (choc::buffer:
 }
 
 //==============================================================================
-juce::String NodeRenderContext::renderMidi (Renderer::RenderTask& owner,
+yup::String NodeRenderContext::renderMidi (Renderer::RenderTask& owner,
                                             Renderer::Parameters& r,
                                             std::unique_ptr<tracktion::graph::Node> n,
                                             std::unique_ptr<tracktion::graph::PlayHead> playHead,
@@ -461,7 +461,7 @@ juce::String NodeRenderContext::renderMidi (Renderer::RenderTask& owner,
                                                                           getPoolCreatorFunction (static_cast<tracktion::graph::ThreadPoolStrategy> (EditPlaybackContext::getThreadPoolStrategy())));
                   });
     // Ensure the node player gets deleted on the message thread
-    const juce::ErasedScopeGuard scope ([&nodePlayer] { callBlocking ([&] { nodePlayer.reset(); }); });
+    const yup::ErasedScopeGuard scope ([&nodePlayer] { callBlocking ([&] { nodePlayer.reset(); }); });
 
     nodePlayer->setNumThreads ((size_t) r.engine->getEngineBehaviour().getNumberOfCPUsToUseForAudio() - 1);
 
@@ -491,7 +491,7 @@ juce::String NodeRenderContext::renderMidi (Renderer::RenderTask& owner,
 
     while (! leafNodesReady())
     {
-        juce::Thread::sleep (100);
+        yup::Thread::sleep (100);
 
         if (owner.shouldCancel())
             return TRANS("Render cancelled");
@@ -500,9 +500,9 @@ juce::String NodeRenderContext::renderMidi (Renderer::RenderTask& owner,
     // Then render the blocks
     auto currentTempoPosition = createPosition (r.edit->tempoSequence);
 
-    juce::AudioBuffer<float> renderingBuffer (2, samplesPerBlock + 256);
+    yup::AudioBuffer<float> renderingBuffer (2, samplesPerBlock + 256);
     tracktion::engine::MidiMessageArray blockMidiBuffer;
-    juce::MidiMessageSequence outputSequence;
+    yup::MidiMessageSequence outputSequence;
 
     for (;;)
     {
@@ -535,12 +535,12 @@ juce::String NodeRenderContext::renderMidi (Renderer::RenderTask& owner,
             tempo::Sequence::Position eventPos (currentTempoPosition);
             eventPos.set (TimePosition::fromSeconds (m.getTimeStamp()) + (streamTime - r.time.getStart()));
 
-            outputSequence.addEvent (juce::MidiMessage (m, Edit::ticksPerQuarterNote * eventPos.getPPQTime()));
+            outputSequence.addEvent (yup::MidiMessage (m, Edit::ticksPerQuarterNote * eventPos.getPPQTime()));
         }
 
         streamTime = blockEnd;
 
-        progress = juce::jlimit (0.0f, 1.0f, (float) ((streamTime - r.time.getStart()) / r.time.getLength()));
+        progress = yup::jlimit (0.0f, 1.0f, (float) ((streamTime - r.time.getStart()) / r.time.getLength()));
     }
 
     playHead->stop();

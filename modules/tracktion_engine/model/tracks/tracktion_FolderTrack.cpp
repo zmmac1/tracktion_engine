@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-FolderTrack::FolderTrack (Edit& ed, const juce::ValueTree& v)
+FolderTrack::FolderTrack (Edit& ed, const yup::ValueTree& v)
     : Track (ed, v, true)
 {
     soloed.referTo (state, IDs::solo, nullptr);
@@ -31,7 +31,7 @@ void FolderTrack::initialise()
     updatePlugins();
 }
 
-juce::String FolderTrack::getSelectableDescription()
+yup::String FolderTrack::getSelectableDescription()
 {
     return (isSubmixFolder() ? TRANS("Submix") : TRANS("Folder")) + " - \"" + getName() + "\"";
 }
@@ -45,7 +45,7 @@ void FolderTrack::sanityCheckName()
 {
     auto n = Track::getName();
 
-    auto checkName = [&n] (const juce::String& type)
+    auto checkName = [&n] (const yup::String& type)
     {
         return ((n.startsWithIgnoreCase ("Folder ")
                  || n.startsWithIgnoreCase (TRANS(type) + " "))
@@ -59,7 +59,7 @@ void FolderTrack::sanityCheckName()
     }
 }
 
-juce::String FolderTrack::getName() const
+yup::String FolderTrack::getName() const
 {
     auto n = Track::getName();
 
@@ -109,9 +109,9 @@ TrackOutput* FolderTrack::getOutput() const noexcept
     return nullptr;
 }
 
-juce::Array<Track*> FolderTrack::getInputTracks() const
+yup::Array<Track*> FolderTrack::getInputTracks() const
 {
-    juce::Array<Track*> tracks;
+    yup::Array<Track*> tracks;
 
     for (auto track : getAllSubTracks (false))
     {
@@ -241,7 +241,7 @@ void FolderTrack::generateCollectionClips (SelectionManager& sm)
     if (dirtyClips)
     {
         dirtyClips = false;
-        juce::Array<Clip*> selectedClips;
+        yup::Array<Clip*> selectedClips;
 
         for (int i = collectionClips.size(); --i >= 0;)
         {
@@ -299,7 +299,7 @@ void FolderTrack::generateCollectionClips (SelectionManager& sm)
             }
         }
 
-        juce::Array<Clip*> clips;
+        yup::Array<Clip*> clips;
 
         // find all the clips on sub tracks
         for (auto at : getAllAudioSubTracks (true))
@@ -497,7 +497,7 @@ void FolderTrack::updatePlugins()
     volumePlugin = pluginList.findFirstPluginOfType<VolumeAndPanPlugin>();
 }
 
-void FolderTrack::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
+void FolderTrack::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c)
 {
     if (c.hasType (IDs::PLUGIN))
         pluginUpdater.triggerAsyncUpdate();
@@ -505,7 +505,7 @@ void FolderTrack::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
     Track::valueTreeChildAdded (p, c);
 }
 
-void FolderTrack::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int index)
+void FolderTrack::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int index)
 {
     if (c.hasType (IDs::PLUGIN))
         pluginUpdater.triggerAsyncUpdate();
@@ -513,7 +513,7 @@ void FolderTrack::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c,
     Track::valueTreeChildRemoved (p, c, index);
 }
 
-void FolderTrack::valueTreeChildOrderChanged (juce::ValueTree& p, int oldIndex, int newIndex)
+void FolderTrack::valueTreeChildOrderChanged (yup::ValueTree& p, int oldIndex, int newIndex)
 {
     if (p.getChild (oldIndex).hasType (IDs::PLUGIN) || p.getChild (newIndex).hasType (IDs::PLUGIN))
         pluginUpdater.triggerAsyncUpdate();

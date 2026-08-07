@@ -51,17 +51,17 @@ public:
 
         Engine* engine = nullptr;                               ///< The Engine to use
         Edit* edit = nullptr;                                   ///< The Edit to render, must not be nullptr by the time it is rendered
-        juce::BigInteger tracksToDo;                            ///< An bitset of tracks to render, if this is empty, all tracks will be rendered. @see toBitSet/toTrackArray
-        juce::Array<Clip*> allowedClips;                        ///< An array of clips to render, if this is empty, all clips will be included
+        yup::BigInteger tracksToDo;                            ///< An bitset of tracks to render, if this is empty, all tracks will be rendered. @see toBitSet/toTrackArray
+        yup::Array<Clip*> allowedClips;                        ///< An array of clips to render, if this is empty, all clips will be included
 
         /** Tracks whose contents keep processing even while the track is muted, so they
             can feed the rendered tracks' sidechains, aux buses and racks without being
             heard directly. Used with RenderSpecification::mutedTracks stem sources.
         */
-        juce::Array<EditItemID> tracksToProcessWhileMuted;
+        yup::Array<EditItemID> tracksToProcessWhileMuted;
 
-        juce::File destFile;                                    ///< The destination file to write to, must be writable
-        juce::AudioFormat* audioFormat = nullptr;               ///< The AudioFormat to use, can be nullptr if createMidiFile is true
+        yup::File destFile;                                    ///< The destination file to write to, must be writable
+        yup::AudioFormat* audioFormat = nullptr;               ///< The AudioFormat to use, can be nullptr if createMidiFile is true
 
         int bitDepth = 16;                                      ///< If this is an audio render, the bit depth to use
         int blockSizeForAudio = 512;                            ///< The block size to use
@@ -100,8 +100,8 @@ public:
         bool ditheringEnabled = false;                          ///< If true, low-level noise will be added to the output for non-float formats
         bool checkNodesForAudio = true;                         ///< If true, attempting to render an Edit that doesn't produce audio will fail
 
-        int quality = 0;                                        ///< For audio formats that support it, the desired quality index @see juce::AudioFormat::createWriterFor
-        juce::StringPairArray metadata;                         ///< A map of meta data to add to the file
+        int quality = 0;                                        ///< For audio formats that support it, the desired quality index @see yup::AudioFormat::createWriterFor
+        yup::StringPairArray metadata;                         ///< A map of meta data to add to the file
 
         bool wrapRemainder = false;                             /**< If true, the tail rendered during the endAllowance period is mixed
                                                                      back onto the start of the file and the file is truncated to the
@@ -128,20 +128,20 @@ public:
     {
     public:
         /// Constructs a RenderTask for a set of parameters
-        RenderTask (const juce::String& taskDescription,
+        RenderTask (const yup::String& taskDescription,
                     const Renderer::Parameters&,
                     std::atomic<float>* progressToUpdate,
-                    juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver*);
+                    yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver*);
 
         /// Constructs a RenderTask for a set of parameters and existing graph
-        RenderTask (const juce::String& taskDescription,
+        RenderTask (const yup::String& taskDescription,
                     const Renderer::Parameters&,
                     std::unique_ptr<tracktion::graph::Node>,
                     std::unique_ptr<tracktion::graph::PlayHead>,
                     std::unique_ptr<tracktion::graph::PlayHeadState>,
                     std::unique_ptr<ProcessState>,
                     std::atomic<float>* progressToUpdate,
-                    juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver*);
+                    yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver*);
 
         /// Destructor
         ~RenderTask() override;
@@ -156,7 +156,7 @@ public:
         Renderer::Parameters params;
 
         /// An error message if the render failed to start
-        juce::String errorMessage;
+        yup::String errorMessage;
 
         //==============================================================================
         /** A predicate polled to find out whether the render should stop.
@@ -185,7 +185,7 @@ public:
         /** @internal */
         static void setAllPluginsRealtime (const Plugin::Array&, bool realtime);
         /** @internal */
-        static bool addMidiMetaDataAndWriteToFile (juce::File, juce::MidiMessageSequence, const TempoSequence&);
+        static bool addMidiMetaDataAndWriteToFile (yup::File, yup::MidiMessageSequence, const TempoSequence&);
         /** @internal */
         bool performNormalisingAndTrimming (const Renderer::Parameters& target,
                                             const Renderer::Parameters& intermediate);
@@ -203,21 +203,21 @@ public:
 
         std::atomic<float> progressInternal { 0.0f };
         std::atomic<float>& progress;
-        juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* sourceToUpdate = nullptr;
+        yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* sourceToUpdate = nullptr;
         CancellationCheck cancellationCheck;
 
         //==============================================================================
         bool renderAudio (Renderer::Parameters&);
         bool renderMidi (Renderer::Parameters&);
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderTask)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderTask)
     };
 
     //==============================================================================
     /** Cheks a file for write access etc. and presents pop-up options to the user
         if problems occur.
     */
-    static void checkTargetFile (Engine&, const juce::File&,
+    static void checkTargetFile (Engine&, const yup::File&,
                                   std::function<void (bool)> callback);
 
     /** Deinitialises all the plugins for the Edit. */
@@ -228,26 +228,26 @@ public:
     /// @see EditRenderer below for async render operations
     //==============================================================================
     /** Renders an Edit to a file and creates a new ProjectItem for it. */
-    static ProjectItem::Ptr renderToProjectItem (const juce::String& taskDescription,
+    static ProjectItem::Ptr renderToProjectItem (const yup::String& taskDescription,
                                                  const Parameters&,
                                                  ProjectItem::Category);
 
     /** Renders an Edit to a file given by the Parameters. */
-    static juce::File renderToFile (const juce::String& taskDescription, const Parameters&);
+    static yup::File renderToFile (const yup::String& taskDescription, const Parameters&);
 
     /** Renders an Edit to a file within the given time range and the track indicies described by the BigInteger. */
-    static bool renderToFile (const juce::String& taskDescription,
-                              const juce::File& outputFile,
+    static bool renderToFile (const yup::String& taskDescription,
+                              const yup::File& outputFile,
                               Edit& edit,
                               TimeRange range,
-                              const juce::BigInteger& tracksToDo,
+                              const yup::BigInteger& tracksToDo,
                               bool usePlugins = true,
                               bool useACID = true,
-                              juce::Array<Clip*> clips = {},
+                              yup::Array<Clip*> clips = {},
                               bool useThread = true);
 
     /** Renders an entire Edit to a file. */
-    static bool renderToFile (Edit&, const juce::File&, bool useThread = true);
+    static bool renderToFile (Edit&, const yup::File&, bool useThread = true);
 
     //==============================================================================
     /** @see measureStatistics() */
@@ -259,18 +259,18 @@ public:
     };
 
     /** Renders a section of an edit to measure various details about its audio content */
-    static Statistics measureStatistics (const juce::String& taskDescription,
+    static Statistics measureStatistics (const yup::String& taskDescription,
                                          Edit& edit, TimeRange range,
-                                         const juce::BigInteger& tracksToDo,
+                                         const yup::BigInteger& tracksToDo,
                                          int blockSizeForAudio, double sampleRateForAudio = 44100.0);
 
     //==============================================================================
     /// @internal
     struct RenderResult
     {
-        RenderResult() : result (juce::Result::fail ({})) {}
+        RenderResult() : result (yup::Result::fail ({})) {}
 
-        RenderResult (const juce::Result& r, ProjectItem::Ptr mo)  : result (r)
+        RenderResult (const yup::Result& r, ProjectItem::Ptr mo)  : result (r)
         {
             if (mo != nullptr)
                 items.add (mo);
@@ -286,8 +286,8 @@ public:
             return *this;
         }
 
-        juce::Result result;
-        juce::ReferenceCountedArray<ProjectItem> items;
+        yup::Result result;
+        yup::ReferenceCountedArray<ProjectItem> items;
     };
 
     //==============================================================================
@@ -317,7 +317,7 @@ public:
         Edit& edit;
         Track::Array tracks;
         std::vector<bool> playSlotClips;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedClipSlotDisabler)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedClipSlotDisabler)
     };
 };
 
@@ -325,7 +325,7 @@ public:
 //==============================================================================
 //==============================================================================
 /// Creates ACID metadata info from the Edit
-juce::StringPairArray createAcidInfo (Edit&, TimeRange);
+yup::StringPairArray createAcidInfo (Edit&, TimeRange);
 
 //==============================================================================
 //==============================================================================
@@ -360,7 +360,7 @@ public:
         std::unique_ptr<ScopedThreadExitStatusEnabler> threadExitEnabler;
         std::atomic<float> progress { 0.0f };
         std::atomic<bool> hasBeenCancelled { false };
-        std::shared_ptr<juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> thumbnailToUpdate;
+        std::shared_ptr<yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> thumbnailToUpdate;
 
         // A cancelled render can't tear its graph down on its own thread, so it hands
         // the task over to be destroyed on the message thread once the thread has gone
@@ -375,8 +375,8 @@ public:
         operation or poll to get progress.
     */
     static std::shared_ptr<Handle> render (Renderer::Parameters,
-                                           std::function<void (tl::expected<juce::File, std::string>)> finishedCallback,
-                                           std::shared_ptr<juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> thumbnailToUpdate = {});
+                                           std::function<void (tl::expected<yup::File, std::string>)> finishedCallback,
+                                           std::shared_ptr<yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> thumbnailToUpdate = {});
 };
 
 
@@ -386,9 +386,9 @@ public:
 namespace render_utils
 {
 /** @internal */
-std::unique_ptr<Renderer::RenderTask> createRenderTask (Renderer::Parameters, juce::String desc,
+std::unique_ptr<Renderer::RenderTask> createRenderTask (Renderer::Parameters, yup::String desc,
                                                         std::atomic<float>* progressToUpdate,
-                                                        juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* thumbnail);
+                                                        yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* thumbnail);
 }
 
 } // namespace tracktion::inline engine

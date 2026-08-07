@@ -15,7 +15,7 @@ namespace tracktion::inline engine {
     a ValueTree to hold them so that they can be saved and reloaded.
     They can also be converted into a set of Renderer::Properties.
 */
-class RenderOptions  : private juce::ValueTree::Listener
+class RenderOptions  : private yup::ValueTree::Listener
 {
 public:
     enum TargetFileFormat
@@ -43,7 +43,7 @@ public:
     //==============================================================================
     RenderOptions (Engine&);
     RenderOptions (const RenderOptions&, juce::UndoManager*);
-    RenderOptions (Engine&, const juce::ValueTree&, juce::UndoManager*);
+    RenderOptions (Engine&, const yup::ValueTree&, juce::UndoManager*);
     ~RenderOptions() override;
 
     RenderOptions() = delete;
@@ -71,7 +71,7 @@ public:
     Renderer::Parameters getRenderParameters (MidiClip&);
 
     /** Returns an AudioFormat to use for the current render properties. */
-    juce::AudioFormat* getAudioFormat();
+    yup::AudioFormat* getAudioFormat();
 
     /** Adds the given ProjectItem to the Edit using the render properties for positioning info. */
     Clip::Ptr applyRenderToEdit (Edit&, ProjectItem::Ptr, TimeRange time, SelectionManager*) const;
@@ -79,8 +79,8 @@ public:
     //==============================================================================
     /** Creates a default RenderOptions object for a general purpose exporter. */
     static std::unique_ptr<RenderOptions> forGeneralExporter (Edit&);
-    static std::unique_ptr<RenderOptions> forTrackRender (juce::Array<Track*> tracks, AddRenderOptions addOption);
-    static std::unique_ptr<RenderOptions> forClipRender (juce::Array<Clip*> clips, bool midiNotes);
+    static std::unique_ptr<RenderOptions> forTrackRender (yup::Array<Track*> tracks, AddRenderOptions addOption);
+    static std::unique_ptr<RenderOptions> forClipRender (yup::Array<Clip*> clips, bool midiNotes);
     static std::unique_ptr<RenderOptions> forEditClip (Clip& editClip);
 
     //==============================================================================
@@ -110,23 +110,23 @@ public:
 
     //==============================================================================
     TargetFileFormat setFormat (TargetFileFormat);
-    void setFormatType (const juce::String& typeString);
-    juce::String getFormatTypeName (TargetFileFormat);
+    void setFormatType (const yup::String& typeString);
+    yup::String getFormatTypeName (TargetFileFormat);
 
-    juce::Array<EditItemID> getTrackIDs() const                 { return tracks; }
-    void setTrackIDs (const juce::Array<EditItemID>&);
+    yup::Array<EditItemID> getTrackIDs() const                 { return tracks; }
+    void setTrackIDs (const yup::Array<EditItemID>&);
     HashCode getTracksHash() const;
 
     void setSampleRate (int);
     void setBitDepth (int depth)                                { bitDepth = depth; }
 
-    juce::StringArray getQualitiesList() const;
+    yup::StringArray getQualitiesList() const;
     int getQualityIndex() const                                 { return qualityIndex; }
     void setQualityIndex (int q)                                { qualityIndex = q; }
 
-    juce::File getDestFile() const noexcept                     { return destFile; }
-    juce::String getFileExtension() const;
-    juce::String getCurrentFileExtension();
+    yup::File getDestFile() const noexcept                     { return destFile; }
+    yup::String getFileExtension() const;
+    yup::String getCurrentFileExtension();
 
     TargetFileFormat getFormat() const noexcept                 { return format; }
     int getBitDepth() const                                     { return bitDepth; }
@@ -137,7 +137,7 @@ public:
 
     bool shouldAddAcidMetadata() const                          { return addAcidMetadata; }
 
-    juce::BigInteger getTrackIndexes (const Edit&) const;
+    yup::BigInteger getTrackIndexes (const Edit&) const;
     bool getRemoveSilence() const noexcept                      { return removeSilence; }
     bool getMarkedRegion() const noexcept                       { return markedRegion; }
     int getNumTracks() const noexcept                           { return tracks.size(); }
@@ -151,25 +151,25 @@ public:
         overwrite an existing file, the optional callback is invoked once the
         filename has actually been updated.
     */
-    void setFilename (juce::String, bool canPromptToOverwriteExisting,
+    void setFilename (yup::String, bool canPromptToOverwriteExisting,
                       std::function<void()> onComplete = nullptr);
     void updateHash();
 
     //==============================================================================
-    juce::StringArray getFormatTypes();
-    juce::StringArray getAddRenderOptionText();
+    yup::StringArray getFormatTypes();
+    yup::StringArray getAddRenderOptionText();
 
-    static TimeDuration findEndAllowance (Edit&, juce::Array<EditItemID>* tracks, juce::Array<Clip*>*);
+    static TimeDuration findEndAllowance (Edit&, yup::Array<EditItemID>* tracks, yup::Array<Clip*>*);
     static bool isMarkedRegionBigEnough (TimeRange);
 
     Engine& engine;
 
     juce::CachedValue<RenderType> type;
-    juce::CachedValue<juce::String> tracksProperty;
+    juce::CachedValue<yup::String> tracksProperty;
 
     juce::CachedValue<bool> createMidiFile;
     juce::CachedValue<TargetFileFormat> format;
-    juce::CachedValue<juce::String> channelConfigStr;
+    juce::CachedValue<yup::String> channelConfigStr;
     juce::CachedValue<double> sampleRate;
     juce::CachedValue<int> bitDepth, qualityIndex;
     juce::CachedValue<double> rmsLevelDb, peakLevelDb;
@@ -184,29 +184,29 @@ public:
     // These optional lambdas will be called when the addRenderToLibrary flag
     // is set, and can be used to do something with the finished item
     std::function<void(AudioClipBase&)> offerToAddClipToLibrary;
-    std::function<void(const juce::File&)> offerToAddFileToLibrary;
+    std::function<void(const yup::File&)> offerToAddFileToLibrary;
 
 private:
     //==============================================================================
-    juce::ValueTree state;
+    yup::ValueTree state;
 
     void relinkCachedValues (juce::UndoManager*);
 
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override {}
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override {}
-    void valueTreeChildOrderChanged (juce::ValueTree&, int, int) override {}
-    void valueTreeParentChanged (juce::ValueTree&) override {}
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override {}
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override {}
+    void valueTreeChildOrderChanged (yup::ValueTree&, int, int) override {}
+    void valueTreeParentChanged (yup::ValueTree&) override {}
 
     //==============================================================================
-    juce::Array<EditItemID> tracks;
-    juce::File destFile;
-    juce::Array<Clip*> allowedClips;
+    yup::Array<EditItemID> tracks;
+    yup::File destFile;
+    yup::Array<Clip*> allowedClips;
     TimeDuration endAllowance;
     HashCode hash = 0;
     bool uiNeedsRefresh = true;
 
-    static void updateLastUsedRenderPath (RenderOptions&, const juce::String& itemID);
+    static void updateLastUsedRenderPath (RenderOptions&, const yup::String& itemID);
 
     //==============================================================================
     void updateFileName();
@@ -216,7 +216,7 @@ private:
 
 } // namespace tracktion::inline engine
 
-namespace juce
+namespace yup
 {
     template <>
     struct VariantConverter<tracktion::engine::RenderOptions::RenderType>

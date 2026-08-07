@@ -37,7 +37,7 @@ public:
 
         MidiLearnState& state;
         ChangeType type;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedChangeCaller)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedChangeCaller)
     };
 
     //==============================================================================
@@ -59,13 +59,13 @@ public:
     Engine& engine;
 
 private:
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
     bool learnActive = false;
 
     void addListener (Listener* l)      { listeners.add (l); }
     void removeListener (Listener* l)   { listeners.remove (l); }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiLearnState)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiLearnState)
 };
 
 //==============================================================================
@@ -82,9 +82,9 @@ public:
     struct Assignment
     {
         Assignment() : id (CustomControlSurface::none) {}
-        Assignment (juce::String n, CustomControlSurface::ActionID i) : name (n), id (i) {}
+        Assignment (yup::String n, CustomControlSurface::ActionID i) : name (n), id (i) {}
 
-        juce::String name;
+        yup::String name;
         CustomControlSurface::ActionID id;
     };
 
@@ -96,7 +96,7 @@ public:
     void addAssignent (Assignment);
 
     /** This should return any assignments that should be shown by the pop-up component. */
-    juce::Array<Assignment>& getAssignments()       { return assignemnts; }
+    yup::Array<Assignment>& getAssignments()       { return assignemnts; }
 
     /** Should return true if only one action can be assigned from this control. */
     bool isSingleAssignment() const noexcept        { return assignemnts.size() == 1; }
@@ -104,7 +104,7 @@ public:
     /** Builds a menu of actions that can be assigned by this control. The menu IDs should be
         the CustomControlSurface::ActionID they represent for easy assignment triggering.
     */
-    void buildMenu (juce::PopupMenu&);
+    void buildMenu (yup::PopupMenu&);
 
     /** If you've shown a custom menu this will be called with the result which you should handle appropriately.
         This uses the result number as a CustomControlSurface action Id and adds it to the
@@ -122,7 +122,7 @@ public:
     virtual bool isAssignable() = 0;
 
     /** Should return a brief description such as "Track 1 Aux Send" or "Track 4 Record Arm" */
-    virtual juce::String getDescription() = 0;
+    virtual yup::String getDescription() = 0;
 
     /** Should return the track that this control represents or nullptr if it is track independant. */
     virtual Track::Ptr getControlledTrack()            { return {}; }
@@ -130,7 +130,7 @@ public:
     Engine& engine;
 
 private:
-    juce::Array<Assignment> assignemnts;
+    yup::Array<Assignment> assignemnts;
 };
 
 } // namespace tracktion::inline engine

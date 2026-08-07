@@ -12,7 +12,7 @@ namespace tracktion::inline engine {
 
 namespace
 {
-    void convertMidiPropertiesFromStrings (juce::ValueTree& midi)
+    void convertMidiPropertiesFromStrings (yup::ValueTree& midi)
     {
         if (midi.hasType (IDs::NOTE))
         {
@@ -56,17 +56,17 @@ static void removeMidiEventFromSelection (Type* event)
             - Notes may be stopped if they overlap with existing notes
             - MPENotes have no concept of time so we store this for each note
 */
-class MPEtoNoteExpression   : private juce::MPEInstrument::Listener
+class MPEtoNoteExpression   : private yup::MPEInstrument::Listener
 {
 public:
-    MPEtoNoteExpression (MidiList& o, const TempoSequence* ts, juce::MPEZoneLayout layout, BeatPosition editBeatOfListTimeZero, juce::UndoManager* um)
+    MPEtoNoteExpression (MidiList& o, const TempoSequence* ts, yup::MPEZoneLayout layout, BeatPosition editBeatOfListTimeZero, juce::UndoManager* um)
         : list (o), tempoSequence (ts), firstBeatNum (editBeatOfListTimeZero), undoManager (um)
     {
         mpeInstrument.setZoneLayout (layout);
         mpeInstrument.addListener (this);
     }
 
-    void processMidiMessage (const juce::MidiMessage& message)
+    void processMidiMessage (const yup::MidiMessage& message)
     {
         currentEventBeat = tempoSequence != nullptr ? (tempoSequence->toBeats (TimePosition::fromSeconds (message.getTimeStamp())) - toDuration (firstBeatNum))
                                                     : BeatPosition::fromBeats (message.getTimeStamp());
@@ -79,11 +79,11 @@ private:
     const TempoSequence* tempoSequence;
     const BeatPosition firstBeatNum;
     juce::UndoManager* undoManager;
-    juce::MPEInstrument mpeInstrument;
+    yup::MPEInstrument mpeInstrument;
 
     struct ActiveNote
     {
-        ActiveNote (juce::MPENote n, BeatPosition beat)
+        ActiveNote (yup::MPENote n, BeatPosition beat)
             : startNote (n), startBeat (beat)
         {
             modulations.ensureStorageAllocated (50);
@@ -112,15 +112,15 @@ private:
             return false;
         }
 
-        juce::MPENote startNote;
+        yup::MPENote startNote;
         BeatPosition startBeat;
-        juce::Array<Modulation> modulations;
+        yup::Array<Modulation> modulations;
     };
 
-    juce::OwnedArray<ActiveNote> activeNotes;
+    yup::OwnedArray<ActiveNote> activeNotes;
     BeatPosition currentEventBeat;
 
-    ActiveNote* getActiveNote (juce::MPENote note)
+    ActiveNote* getActiveNote (yup::MPENote note)
     {
         for (auto activeNote : activeNotes)
             if (activeNote->startNote.noteID == note.noteID)
@@ -129,7 +129,7 @@ private:
         return {};
     }
 
-    void addNoteToList (juce::MPENote note, BeatPosition endBeat)
+    void addNoteToList (yup::MPENote note, BeatPosition endBeat)
     {
         if (auto an = getActiveNote (note))
         {
@@ -172,7 +172,7 @@ private:
                     }
 
                     jassertfalse;
-                    return juce::Identifier();
+                    return yup::Identifier();
                 };
 
                 const auto relativeBeat = mod.beat - startBeat;
@@ -184,40 +184,40 @@ private:
         }
     }
 
-    void noteAdded (juce::MPENote note) override
+    void noteAdded (yup::MPENote note) override
     {
         activeNotes.add (new ActiveNote (note, currentEventBeat));
         jassert (activeNotes.size() <= 16);
     }
 
-    void notePressureChanged (juce::MPENote note) override
+    void notePressureChanged (yup::MPENote note) override
     {
         if (auto an = getActiveNote (note))
             an->modulations.add (ActiveNote::Modulation { currentEventBeat, note.pressure.asUnsignedFloat(), ActiveNote::pressure });
     }
 
-    void notePitchbendChanged (juce::MPENote note) override
+    void notePitchbendChanged (yup::MPENote note) override
     {
         if (auto an = getActiveNote (note))
             an->modulations.add (ActiveNote::Modulation { currentEventBeat, float (note.totalPitchbendInSemitones), ActiveNote::pitchbend });
     }
 
-    void noteTimbreChanged (juce::MPENote note) override
+    void noteTimbreChanged (yup::MPENote note) override
     {
         if (auto an = getActiveNote (note))
             an->modulations.add (ActiveNote::Modulation { currentEventBeat, note.timbre.asUnsignedFloat(), ActiveNote::timbre });
     }
 
-    void noteKeyStateChanged (juce::MPENote) override
+    void noteKeyStateChanged (yup::MPENote) override
     {
     }
 
-    void noteReleased (juce::MPENote note) override
+    void noteReleased (yup::MPENote note) override
     {
         addNoteToList (note, currentEventBeat);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPEtoNoteExpression)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPEtoNoteExpression)
 };
 
 //==============================================================================
@@ -232,38 +232,38 @@ bool MidiExpression::listHasExpression (const MidiList& midiList) noexcept
 
 namespace NoteHelpers
 {
-    inline juce::MidiMessage createNoteOn (int midiChannel, int noteNumber, float noteOnVelocity) noexcept
+    inline yup::MidiMessage createNoteOn (int midiChannel, int noteNumber, float noteOnVelocity) noexcept
     {
         // a note cannot be started with a zero note-on velocity:
         const float noteOnVelocityToUse = std::max (noteOnVelocity, 1.0f / 127.0f);
-        return juce::MidiMessage::noteOn (midiChannel, noteNumber, noteOnVelocityToUse);
+        return yup::MidiMessage::noteOn (midiChannel, noteNumber, noteOnVelocityToUse);
     }
 
-    inline juce::MidiMessage createPitchbend (int midiChannel, float pitchbend, float pitchbendRange) noexcept
+    inline yup::MidiMessage createPitchbend (int midiChannel, float pitchbend, float pitchbendRange) noexcept
     {
-        const int midiPitchWheelPos = juce::MidiMessage::pitchbendToPitchwheelPos (pitchbend, pitchbendRange);
-        return juce::MidiMessage::pitchWheel (midiChannel, midiPitchWheelPos);
+        const int midiPitchWheelPos = yup::MidiMessage::pitchbendToPitchwheelPos (pitchbend, pitchbendRange);
+        return yup::MidiMessage::pitchWheel (midiChannel, midiPitchWheelPos);
     }
 
-    inline juce::MidiMessage createPressure (int midiChannel, float pressure) noexcept
+    inline yup::MidiMessage createPressure (int midiChannel, float pressure) noexcept
     {
-        auto midiPressure = juce::MidiMessage::floatValueToMidiByte (pressure);
-        return juce::MidiMessage::channelPressureChange (midiChannel, midiPressure);
+        auto midiPressure = yup::MidiMessage::floatValueToMidiByte (pressure);
+        return yup::MidiMessage::channelPressureChange (midiChannel, midiPressure);
     }
 
-    inline juce::MidiMessage createTimbre (int midiChannel, float timbre) noexcept
+    inline yup::MidiMessage createTimbre (int midiChannel, float timbre) noexcept
     {
-        auto midiCcValue = juce::MidiMessage::floatValueToMidiByte (timbre);
-        return juce::MidiMessage::controllerEvent (midiChannel, 74, midiCcValue);
+        auto midiCcValue = yup::MidiMessage::floatValueToMidiByte (timbre);
+        return yup::MidiMessage::controllerEvent (midiChannel, 74, midiCcValue);
     }
 
-    inline juce::MidiMessage createNoteOff (int midiChannel, int noteNumber, float noteOffVelocity) noexcept
+    inline yup::MidiMessage createNoteOff (int midiChannel, int noteNumber, float noteOffVelocity) noexcept
     {
-        return juce::MidiMessage::noteOff (midiChannel, noteNumber, noteOffVelocity);
+        return yup::MidiMessage::noteOff (midiChannel, noteNumber, noteOffVelocity);
     }
 }
 
-inline void addMidiNoteOnExpressionToSequence (juce::MidiMessageSequence& seq, const juce::ValueTree& state, int midiChannel, double noteOnTime) noexcept
+inline void addMidiNoteOnExpressionToSequence (yup::MidiMessageSequence& seq, const yup::ValueTree& state, int midiChannel, double noteOnTime) noexcept
 {
     using namespace NoteHelpers;
     jassert (state.hasType (IDs::NOTE));
@@ -272,12 +272,12 @@ inline void addMidiNoteOnExpressionToSequence (juce::MidiMessageSequence& seq, c
     const float pressure  = state.getProperty (IDs::pres, MidiList::defaultInitialPressureValue);
     const float timbre    = state.getProperty (IDs::timb, MidiList::defaultInitialTimbreValue);
 
-    seq.addEvent (juce::MidiMessage (createPitchbend (midiChannel, pitchbend, 48.0f), noteOnTime));
-    seq.addEvent (juce::MidiMessage (createPressure (midiChannel, pressure), noteOnTime));
-    seq.addEvent (juce::MidiMessage (createTimbre (midiChannel, timbre), noteOnTime));
+    seq.addEvent (yup::MidiMessage (createPitchbend (midiChannel, pitchbend, 48.0f), noteOnTime));
+    seq.addEvent (yup::MidiMessage (createPressure (midiChannel, pressure), noteOnTime));
+    seq.addEvent (yup::MidiMessage (createTimbre (midiChannel, timbre), noteOnTime));
 }
 
-static void addMidiExpressionToSequence (juce::MidiMessageSequence& seq, const juce::ValueTree& state,
+static void addMidiExpressionToSequence (yup::MidiMessageSequence& seq, const yup::ValueTree& state,
                                          const MidiClip& clip, MidiList::TimeBase tb, int midiChannel,
                                          BeatPosition notePlaybackBeat, BeatPosition notePlaybackEndBeat) noexcept
 {
@@ -293,16 +293,16 @@ static void addMidiExpressionToSequence (juce::MidiMessageSequence& seq, const j
                                                       : ts.toTime (beat).inSeconds();
 
     if (state.hasType (IDs::PITCHBEND))
-        seq.addEvent (juce::MidiMessage (createPitchbend (midiChannel, state[IDs::v], 48.0f), time));
+        seq.addEvent (yup::MidiMessage (createPitchbend (midiChannel, state[IDs::v], 48.0f), time));
     else if (state.hasType (IDs::PRESSURE))
-        seq.addEvent (juce::MidiMessage (createPressure (midiChannel, state[IDs::v]), time));
+        seq.addEvent (yup::MidiMessage (createPressure (midiChannel, state[IDs::v]), time));
     else if (state.hasType (IDs::TIMBRE))
-        seq.addEvent (juce::MidiMessage (createTimbre (midiChannel, state[IDs::v]), time));
+        seq.addEvent (yup::MidiMessage (createTimbre (midiChannel, state[IDs::v]), time));
     else
         jassertfalse;
 }
 
-static void addExpressiveNoteToSequence (juce::MidiMessageSequence& seq, const MidiClip& clip, MidiList::TimeBase tb, const MidiNote& note, int midiChannel, const GrooveTemplate* grooveTemplate)
+static void addExpressiveNoteToSequence (yup::MidiMessageSequence& seq, const MidiClip& clip, MidiList::TimeBase tb, const MidiNote& note, int midiChannel, const GrooveTemplate* grooveTemplate)
 {
     if (note.isMute() || note.getLengthBeats() <= BeatDuration::fromBeats (0.00001))
         return;
@@ -326,8 +326,8 @@ static void addExpressiveNoteToSequence (juce::MidiMessageSequence& seq, const M
 
     // Then note-on
     using namespace NoteHelpers;
-    const auto noteOnVelocity = juce::jlimit (0.0f, 1.0f, float (note.getVelocity()) / 127.0f);
-    seq.addEvent (juce::MidiMessage (createNoteOn (midiChannel, note.getNoteNumber(), noteOnVelocity), downTime));
+    const auto noteOnVelocity = yup::jlimit (0.0f, 1.0f, float (note.getVelocity()) / 127.0f);
+    seq.addEvent (yup::MidiMessage (createNoteOn (midiChannel, note.getNoteNumber(), noteOnVelocity), downTime));
 
     // Then modulating expression
     for (auto v : state)
@@ -335,11 +335,11 @@ static void addExpressiveNoteToSequence (juce::MidiMessageSequence& seq, const M
 
     // Finally note-off
     const auto noteOffVelocity = state.hasProperty (IDs::lift) ? float (int (state[IDs::lift])) / 127.0f : 0.0f;
-    seq.addEvent (juce::MidiMessage (createNoteOff (midiChannel, note.getNoteNumber(), noteOffVelocity), upTime));
+    seq.addEvent (yup::MidiMessage (createNoteOff (midiChannel, note.getNoteNumber(), noteOffVelocity), upTime));
 }
 
 //==============================================================================
-static void addToSequence (juce::MidiMessageSequence& seq, const MidiClip& clip, MidiList::TimeBase tb,
+static void addToSequence (yup::MidiMessageSequence& seq, const MidiClip& clip, MidiList::TimeBase tb,
                            const MidiNote& note, int channelNumber, bool addNoteUp,
                            const GrooveTemplate* grooveTemplate)
 {
@@ -378,17 +378,17 @@ static void addToSequence (juce::MidiMessageSequence& seq, const MidiClip& clip,
 
         if (upTime > downTime && upTime > 0.0)
         {
-            seq.addEvent (juce::MidiMessage::noteOn (channelNumber, noteNumber, velocity), std::max (0.0, downTime));
-            seq.addEvent (juce::MidiMessage::noteOff (channelNumber, noteNumber, static_cast<uint8_t> (note.getNoteOffVelocity())), upTime);
+            seq.addEvent (yup::MidiMessage::noteOn (channelNumber, noteNumber, velocity), std::max (0.0, downTime));
+            seq.addEvent (yup::MidiMessage::noteOff (channelNumber, noteNumber, static_cast<uint8_t> (note.getNoteOffVelocity())), upTime);
         }
     }
     else if (downTime >= 0.0)
     {
-        seq.addEvent (juce::MidiMessage::noteOn (channelNumber, noteNumber, velocity), downTime);
+        seq.addEvent (yup::MidiMessage::noteOn (channelNumber, noteNumber, velocity), downTime);
     }
 }
 
-static void addToSequence (juce::MidiMessageSequence& seq, const MidiClip& clip, MidiList::TimeBase tb,
+static void addToSequence (yup::MidiMessageSequence& seq, const MidiClip& clip, MidiList::TimeBase tb,
                            const MidiControllerEvent& controller, int channelNumber)
 {
     const auto time = [&]
@@ -405,9 +405,9 @@ static void addToSequence (juce::MidiMessageSequence& seq, const MidiClip& clip,
     const auto type = controller.getType();
     const auto value = controller.getControllerValue();
 
-    if (juce::isPositiveAndBelow (type, 128))
+    if (yup::isPositiveAndBelow (type, 128))
     {
-        seq.addEvent (juce::MidiMessage::controllerEvent (channelNumber, type, value >> 7), time);
+        seq.addEvent (yup::MidiMessage::controllerEvent (channelNumber, type, value >> 7), time);
         return;
     }
 
@@ -418,23 +418,23 @@ static void addToSequence (juce::MidiMessageSequence& seq, const MidiClip& clip,
             {
                 auto id = clip.getAudioTrack()->getIdForBank (controller.getMetadata());
 
-                seq.addEvent (juce::MidiMessage::controllerEvent (channelNumber, 0x00, MidiControllerEvent::bankIDToCoarse (id)), time);
-                seq.addEvent (juce::MidiMessage::controllerEvent (channelNumber, 0x20, MidiControllerEvent::bankIDToFine (id)), time);
+                seq.addEvent (yup::MidiMessage::controllerEvent (channelNumber, 0x00, MidiControllerEvent::bankIDToCoarse (id)), time);
+                seq.addEvent (yup::MidiMessage::controllerEvent (channelNumber, 0x20, MidiControllerEvent::bankIDToFine (id)), time);
             }
 
-            seq.addEvent (juce::MidiMessage::programChange (channelNumber, value >> 7), time);
+            seq.addEvent (yup::MidiMessage::programChange (channelNumber, value >> 7), time);
             break;
 
         case MidiControllerEvent::aftertouchType:
-            seq.addEvent (juce::MidiMessage::aftertouchChange (channelNumber, controller.getMetadata(), value >> 7), time);
+            seq.addEvent (yup::MidiMessage::aftertouchChange (channelNumber, controller.getMetadata(), value >> 7), time);
             break;
 
         case MidiControllerEvent::pitchWheelType:
-            seq.addEvent (juce::MidiMessage::pitchWheel (channelNumber, value), time);
+            seq.addEvent (yup::MidiMessage::pitchWheel (channelNumber, value), time);
             break;
 
         case MidiControllerEvent::channelPressureType:
-            seq.addEvent (juce::MidiMessage::channelPressureChange (channelNumber, value >> 7), time);
+            seq.addEvent (yup::MidiMessage::channelPressureChange (channelNumber, value >> 7), time);
             break;
 
         default:
@@ -443,7 +443,7 @@ static void addToSequence (juce::MidiMessageSequence& seq, const MidiClip& clip,
     }
 }
 
-static void addToSequence (juce::MidiMessageSequence& seq, const MidiClip& clip, MidiList::TimeBase tb, const MidiSysexEvent& sysex)
+static void addToSequence (yup::MidiMessageSequence& seq, const MidiClip& clip, MidiList::TimeBase tb, const MidiSysexEvent& sysex)
 {
     const auto time = [&]
                       {
@@ -469,7 +469,7 @@ class MPEChannelAssigner
 public:
     //==========================================================================
     /** Constructor. */
-    MPEChannelAssigner (juce::MidiMessageSequence& s, const MidiClip& c, MidiList::TimeBase tb, const GrooveTemplate* g)
+    MPEChannelAssigner (yup::MidiMessageSequence& s, const MidiClip& c, MidiList::TimeBase tb, const GrooveTemplate* g)
         : seq (s), clip (c), timeBase (tb), groove (g)
     {
         zoneLayout.setLowerZone (15);
@@ -512,7 +512,7 @@ private:
             return notes.isEmpty();
         }
 
-        juce::Array<MidiNote*> notes;
+        yup::Array<MidiNote*> notes;
         int lastNoteNumberPlayed = -1;
     };
 
@@ -612,17 +612,17 @@ private:
     }
 
     //==========================================================================
-    juce::MidiMessageSequence& seq;
+    yup::MidiMessageSequence& seq;
     const MidiClip& clip;
     const MidiList::TimeBase timeBase;
     const GrooveTemplate* groove;
-    juce::MPEZoneLayout zoneLayout;
+    yup::MPEZoneLayout zoneLayout;
     MidiChannel midiChannels[16];
     int midiChannelBegin, midiChannelEnd, midiChannelLastAssigned;
 };
 
 //==============================================================================
-static juce::ValueTree createNoteValueTree (int pitch, BeatPosition beat, BeatDuration length, int vel, int col)
+static yup::ValueTree createNoteValueTree (int pitch, BeatPosition beat, BeatDuration length, int vel, int col)
 {
     return createValueTree (IDs::NOTE,
                             IDs::p, pitch,
@@ -632,16 +632,16 @@ static juce::ValueTree createNoteValueTree (int pitch, BeatPosition beat, BeatDu
                             IDs::c, col);
 }
 
-juce::ValueTree MidiNote::createNote (const MidiNote& n, BeatPosition newStart, BeatDuration newLength)
+yup::ValueTree MidiNote::createNote (const MidiNote& n, BeatPosition newStart, BeatDuration newLength)
 {
-    juce::ValueTree v (n.state.createCopy());
+    yup::ValueTree v (n.state.createCopy());
     v.setProperty (IDs::b, newStart.inBeats(), nullptr);
     v.setProperty (IDs::l, newLength.inBeats(), nullptr);
 
     return v;
 }
 
-MidiNote::MidiNote (const juce::ValueTree& v)
+MidiNote::MidiNote (const yup::ValueTree& v)
     : state (v)
 {
     updatePropertiesFromState();
@@ -649,23 +649,23 @@ MidiNote::MidiNote (const juce::ValueTree& v)
 
 void MidiNote::updatePropertiesFromState()
 {
-    noteNumber      = (uint8_t) juce::jlimit (0, 127, static_cast<int> (state.getProperty (IDs::p)));
+    noteNumber      = (uint8_t) yup::jlimit (0, 127, static_cast<int> (state.getProperty (IDs::p)));
     startBeat       = BeatPosition::fromBeats (static_cast<double> (state.getProperty (IDs::b)));
     lengthInBeats   = std::max (BeatDuration(), BeatDuration::fromBeats (static_cast<double> (state.getProperty (IDs::l))));
-    velocity        = (uint8_t) juce::jlimit (0, 127, static_cast<int> (state.getProperty (IDs::v)));
-    colour          = (uint8_t) juce::jlimit (0, 127, static_cast<int> (state.getProperty (IDs::c)));
+    velocity        = (uint8_t) yup::jlimit (0, 127, static_cast<int> (state.getProperty (IDs::v)));
+    colour          = (uint8_t) yup::jlimit (0, 127, static_cast<int> (state.getProperty (IDs::c)));
     mute            = state.getProperty (IDs::m) ? 1 : 0;
 }
 
 template<>
 struct MidiList::EventDelegate<MidiNote>
 {
-    static bool isSuitableType (const juce::ValueTree& v)
+    static bool isSuitableType (const yup::ValueTree& v)
     {
         return v.hasType (IDs::NOTE);
     }
 
-    static bool updateObject (MidiNote& m, const juce::Identifier& i)
+    static bool updateObject (MidiNote& m, const yup::Identifier& i)
     {
         m.updatePropertiesFromState();
         return i == IDs::b;
@@ -768,7 +768,7 @@ void MidiNote::setStartAndLength (BeatPosition newStartBeat, BeatDuration newLen
 
 void MidiNote::setNoteNumber (int newNoteNumber, juce::UndoManager* undoManager)
 {
-    newNoteNumber = juce::jlimit (0, 127, newNoteNumber);
+    newNoteNumber = yup::jlimit (0, 127, newNoteNumber);
 
     if (getNoteNumber() != newNoteNumber)
     {
@@ -779,7 +779,7 @@ void MidiNote::setNoteNumber (int newNoteNumber, juce::UndoManager* undoManager)
 
 void MidiNote::setVelocity (int newVelocity, juce::UndoManager* undoManager)
 {
-    newVelocity = juce::jlimit (0, 127, newVelocity);
+    newVelocity = yup::jlimit (0, 127, newVelocity);
 
     if (getVelocity() != newVelocity)
     {
@@ -795,19 +795,19 @@ int MidiNote::getNoteOffVelocity() const noexcept
 
 void MidiNote::setNoteOffVelocity (int newOffVelocity, juce::UndoManager* um)
 {
-    jassert (juce::isPositiveAndNotGreaterThan (newOffVelocity, 127));
-    newOffVelocity = juce::jlimit (0, 127, newOffVelocity);
+    jassert (yup::isPositiveAndNotGreaterThan (newOffVelocity, 127));
+    newOffVelocity = yup::jlimit (0, 127, newOffVelocity);
     state.setProperty (IDs::lift, newOffVelocity, um);
 }
 
-void MidiNote::setColour (int newColourIndex, juce::UndoManager* um)
+void MidiNote::setColor (int newColorIndex, juce::UndoManager* um)
 {
-    newColourIndex = juce::jlimit (0, 127, newColourIndex);
+    newColorIndex = yup::jlimit (0, 127, newColorIndex);
 
-    if (getColour() != newColourIndex)
+    if (getColor() != newColorIndex)
     {
-        state.setProperty (IDs::c, newColourIndex, um);
-        colour = (uint8_t) newColourIndex;
+        state.setProperty (IDs::c, newColorIndex, um);
+        colour = (uint8_t) newColorIndex;
     }
 }
 
@@ -851,14 +851,14 @@ BeatPosition MidiNote::getPlaybackBeats (NoteEdge edge, const MidiClip& clip, co
 }
 
 //==============================================================================
-juce::ValueTree MidiControllerEvent::createControllerEvent (const MidiControllerEvent& e, BeatPosition beat)
+yup::ValueTree MidiControllerEvent::createControllerEvent (const MidiControllerEvent& e, BeatPosition beat)
 {
-    juce::ValueTree v (e.state.createCopy());
+    yup::ValueTree v (e.state.createCopy());
     v.setProperty (IDs::b, beat.inBeats(), nullptr);
     return v;
 }
 
-juce::ValueTree MidiControllerEvent::createControllerEvent (BeatPosition beat, int controllerType, int controllerValue)
+yup::ValueTree MidiControllerEvent::createControllerEvent (BeatPosition beat, int controllerType, int controllerValue)
 {
     return createValueTree (IDs::CONTROL,
                             IDs::b,     beat.inBeats(),
@@ -866,14 +866,14 @@ juce::ValueTree MidiControllerEvent::createControllerEvent (BeatPosition beat, i
                             IDs::val,   controllerValue);
 }
 
-juce::ValueTree MidiControllerEvent::createControllerEvent (BeatPosition beat, int controllerType, int controllerValue, int metadata)
+yup::ValueTree MidiControllerEvent::createControllerEvent (BeatPosition beat, int controllerType, int controllerValue, int metadata)
 {
     auto v = createControllerEvent (beat, controllerType, controllerValue);
     v.setProperty (IDs::metadata, metadata, nullptr);
     return v;
 }
 
-MidiControllerEvent::MidiControllerEvent (const juce::ValueTree& v)
+MidiControllerEvent::MidiControllerEvent (const yup::ValueTree& v)
     : state (v),
       beatNumber (BeatPosition::fromBeats (static_cast<double> (v.getProperty (IDs::b)))),
       type (int (v.getProperty (IDs::type))),
@@ -893,12 +893,12 @@ void MidiControllerEvent::updatePropertiesFromState() noexcept
 template<>
 struct MidiList::EventDelegate<MidiControllerEvent>
 {
-    static bool isSuitableType (const juce::ValueTree& v)
+    static bool isSuitableType (const yup::ValueTree& v)
     {
         return v.hasType (IDs::CONTROL);
     }
 
-    static bool updateObject (MidiControllerEvent& e, const juce::Identifier& i)
+    static bool updateObject (MidiControllerEvent& e, const yup::Identifier& i)
     {
         e.updatePropertiesFromState();
         return i == IDs::b;
@@ -911,10 +911,10 @@ struct MidiList::EventDelegate<MidiControllerEvent>
 };
 
 //==============================================================================
-juce::String MidiControllerEvent::getControllerTypeName (int type) noexcept
+yup::String MidiControllerEvent::getControllerTypeName (int type) noexcept
 {
-    if (juce::isPositiveAndBelow (type, 128))
-        return TRANS(juce::MidiMessage::getControllerName (type));
+    if (yup::isPositiveAndBelow (type, 128))
+        return TRANS(yup::MidiMessage::getControllerName (type));
 
     switch (type)
     {
@@ -940,14 +940,14 @@ TimePosition MidiControllerEvent::getEditTime (const MidiClip& c) const
     return c.edit.tempoSequence.toTime (getEditBeats (c));
 }
 
-juce::String MidiControllerEvent::getLevelDescription (MidiClip* ownerClip) const
+yup::String MidiControllerEvent::getLevelDescription (MidiClip* ownerClip) const
 {
     const int coarseValue = value >> 7;
 
     if (type == programChangeType)
     {
-        juce::String bank;
-        auto program = juce::String (coarseValue + 1) + " - ";
+        yup::String bank;
+        auto program = yup::String (coarseValue + 1) + " - ";
 
         if (ownerClip != nullptr && ownerClip->getTrack() != nullptr)
         {
@@ -957,8 +957,8 @@ juce::String MidiControllerEvent::getLevelDescription (MidiClip* ownerClip) cons
         }
         else
         {
-            bank = TRANS("Bank") + " " + juce::String ((value & 0x0F) + 1);
-            program += TRANS(juce::MidiMessage::getGMInstrumentName (coarseValue));
+            bank = TRANS("Bank") + " " + yup::String ((value & 0x0F) + 1);
+            program += TRANS(yup::MidiMessage::getGMInstrumentName (coarseValue));
         }
 
         return bank + ": " + program;
@@ -966,8 +966,8 @@ juce::String MidiControllerEvent::getLevelDescription (MidiClip* ownerClip) cons
 
     if (type == pitchWheelType)
     {
-        juce::String s (TRANS("Pitch Wheel") + ": ");
-        const int percent = juce::jlimit (-100, 100, (int)((value - 0x2000) * (100.5 / 0x2000)));
+        yup::String s (TRANS("Pitch Wheel") + ": ");
+        const int percent = yup::jlimit (-100, 100, (int)((value - 0x2000) * (100.5 / 0x2000)));
 
         if (percent > 0)
             s += "+";
@@ -978,22 +978,22 @@ juce::String MidiControllerEvent::getLevelDescription (MidiClip* ownerClip) cons
     }
 
     if (type == channelPressureType)
-        return TRANS("Channel Pressure") + " - " + juce::String (coarseValue);
+        return TRANS("Channel Pressure") + " - " + yup::String (coarseValue);
 
     if (type == aftertouchType)
-        return TRANS("Aftertouch") + " - " + juce::String (coarseValue);
+        return TRANS("Aftertouch") + " - " + yup::String (coarseValue);
 
-    if (juce::isPositiveAndBelow (type, 128))
+    if (yup::isPositiveAndBelow (type, 128))
     {
-        auto controllerName = TRANS(juce::MidiMessage::getControllerName (type));
+        auto controllerName = TRANS(yup::MidiMessage::getControllerName (type));
 
         if (controllerName.isEmpty())
-            controllerName = TRANS("Controller Number") + " " + juce::String (type);
+            controllerName = TRANS("Controller Number") + " " + yup::String (type);
 
-        return controllerName + " - " + juce::String (coarseValue);
+        return controllerName + " - " + yup::String (coarseValue);
     }
 
-    return juce::String (coarseValue);
+    return yup::String (coarseValue);
 }
 
 void MidiControllerEvent::setMetadata (int m, juce::UndoManager* um)
@@ -1046,26 +1046,26 @@ int MidiControllerEvent::getControllerDefautValue (int type)
 }
 
 //==============================================================================
-static juce::String midiToHex (const juce::MidiMessage& m)
+static yup::String midiToHex (const yup::MidiMessage& m)
 {
-    return juce::String::toHexString (m.getRawData(), m.getRawDataSize(), 0);
+    return yup::String::toHexString (m.getRawData(), m.getRawDataSize(), 0);
 }
 
-juce::ValueTree MidiSysexEvent::createSysexEvent (const MidiSysexEvent& e, BeatPosition time)
+yup::ValueTree MidiSysexEvent::createSysexEvent (const MidiSysexEvent& e, BeatPosition time)
 {
-    juce::ValueTree v (e.state.createCopy());
+    yup::ValueTree v (e.state.createCopy());
     v.setProperty (IDs::time, time.inBeats(), nullptr);
     return v;
 }
 
-juce::ValueTree MidiSysexEvent::createSysexEvent (const juce::MidiMessage& m, BeatPosition time)
+yup::ValueTree MidiSysexEvent::createSysexEvent (const yup::MidiMessage& m, BeatPosition time)
 {
     return createValueTree (IDs::SYSEX,
                             IDs::time, time.inBeats(),
                             IDs::data, midiToHex (m));
 }
 
-MidiSysexEvent::MidiSysexEvent (const juce::ValueTree& v)  : state (v)
+MidiSysexEvent::MidiSysexEvent (const yup::ValueTree& v)  : state (v)
 {
     updateMessage();
 }
@@ -1074,11 +1074,11 @@ void MidiSysexEvent::updateMessage()
 {
     auto time = state.getProperty (IDs::time);
 
-    juce::MemoryBlock d;
+    yup::MemoryBlock d;
     d.loadFromHexString (state.getProperty (IDs::data).toString());
 
     if (d.getSize() > 0)
-        message = juce::MidiMessage (d.getData(), (int) d.getSize(), time);
+        message = yup::MidiMessage (d.getData(), (int) d.getSize(), time);
     else
         message.setTimeStamp (time);
 }
@@ -1091,12 +1091,12 @@ void MidiSysexEvent::updateTime()
 template<>
 struct MidiList::EventDelegate<MidiSysexEvent>
 {
-    static bool isSuitableType (const juce::ValueTree& v)
+    static bool isSuitableType (const yup::ValueTree& v)
     {
         return v.hasType (IDs::SYSEX);
     }
 
-    static bool updateObject (MidiSysexEvent& m, const juce::Identifier& i)
+    static bool updateObject (MidiSysexEvent& m, const yup::Identifier& i)
     {
         if (i == IDs::time)
         {
@@ -1126,7 +1126,7 @@ BeatPosition MidiSysexEvent::getEditBeats (const MidiClip& c) const
     return c.getQuantisation().roundBeatToNearest (getBeatPosition() - toDuration (c.getLoopStartBeats()) + toDuration (c.getContentStartBeat()));
 }
 
-void MidiSysexEvent::setMessage (const juce::MidiMessage& m, juce::UndoManager* um)
+void MidiSysexEvent::setMessage (const yup::MidiMessage& m, juce::UndoManager* um)
 {
     state.setProperty (IDs::data, midiToHex (m), um);
 }
@@ -1137,7 +1137,7 @@ void MidiSysexEvent::setBeatPosition (BeatPosition newBeatNumber, juce::UndoMana
 }
 
 //==============================================================================
-juce::ValueTree MidiList::createMidiList()
+yup::ValueTree MidiList::createMidiList()
 {
     return createValueTree (IDs::SEQUENCE,
                             IDs::ver, 1,
@@ -1150,7 +1150,7 @@ MidiList::MidiList()  : state (IDs::SEQUENCE)
     initialise (nullptr);
 }
 
-MidiList::MidiList (const juce::ValueTree& v, juce::UndoManager* um)
+MidiList::MidiList (const yup::ValueTree& v, juce::UndoManager* um)
     : state (v)
 {
     jassert (state.hasType (IDs::SEQUENCE));
@@ -1206,9 +1206,9 @@ void MidiList::setMidiChannel (MidiChannel newChannel)
 
 //==============================================================================
 template<typename EventType>
-const juce::Array<EventType*>& getEventsChecked (const juce::Array<EventType*>& events)
+const yup::Array<EventType*>& getEventsChecked (const yup::Array<EventType*>& events)
 {
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     BeatPosition lastBeat;
 
     for (auto* e : events)
@@ -1222,19 +1222,19 @@ const juce::Array<EventType*>& getEventsChecked (const juce::Array<EventType*>& 
     return events;
 }
 
-const juce::Array<MidiNote*>& MidiList::getNotes() const
+const yup::Array<MidiNote*>& MidiList::getNotes() const
 {
     jassert (noteList != nullptr);
     return getEventsChecked (noteList->getSortedList());
 }
 
-const juce::Array<MidiControllerEvent*>& MidiList::getControllerEvents() const
+const yup::Array<MidiControllerEvent*>& MidiList::getControllerEvents() const
 {
     jassert (controllerList != nullptr);
     return getEventsChecked (controllerList->getSortedList());
 }
 
-const juce::Array<MidiSysexEvent*>& MidiList::getSysexEvents() const
+const yup::Array<MidiSysexEvent*>& MidiList::getSysexEvents() const
 {
     jassert (sysexList != nullptr);
     return getEventsChecked (sysexList->getSortedList());
@@ -1274,7 +1274,7 @@ void MidiList::rescale (double factor, juce::UndoManager* um)
 
 void MidiList::trimOutside (BeatPosition start, BeatPosition end, juce::UndoManager* um)
 {
-    juce::Array<juce::ValueTree> itemsToRemove;
+    yup::Array<yup::ValueTree> itemsToRemove;
 
     for (auto n : getNotes())
     {
@@ -1326,7 +1326,7 @@ BeatPosition MidiList::getLastBeatNumber() const
     return t;
 }
 
-MidiNote* MidiList::getNoteFor (const juce::ValueTree& s)
+MidiNote* MidiList::getNoteFor (const yup::ValueTree& s)
 {
     for (auto n : getNotes())
         if (n->state == s)
@@ -1335,7 +1335,7 @@ MidiNote* MidiList::getNoteFor (const juce::ValueTree& s)
     return {};
 }
 
-juce::Range<int> MidiList::getNoteNumberRange() const
+yup::Range<int> MidiList::getNoteNumberRange() const
 {
     if (getNumNotes() == 0)
         return {};
@@ -1457,7 +1457,7 @@ void MidiList::setControllerValueAt (int controllerType, BeatPosition beatNumber
 
 static int interpolate (int startValue, int rangeValues, BeatPosition startBeat, BeatPosition beat, BeatDuration rangeBeats) noexcept
 {
-    return juce::roundToInt (startValue + (rangeValues * (beat - startBeat).inBeats() / rangeBeats.inBeats()));
+    return yup::roundToInt (startValue + (rangeValues * (beat - startBeat).inBeats() / rangeBeats.inBeats()));
 }
 
 void MidiList::insertRepeatedControllerValue (int type, int startVal, int endVal,
@@ -1475,8 +1475,8 @@ void MidiList::insertRepeatedControllerValue (int type, int startVal, int endVal
 
     auto maxNumSteps = std::max (2, type == MidiControllerEvent::pitchWheelType ? std::abs (rangeValues)
                                                                                 : std::abs (rangeValues) >> 7);
-    auto numSteps = juce::roundToInt (rangeBeats.inBeats() / intervalBeats.inBeats());
-    auto limitedNumSteps = juce::jlimit (2, maxNumSteps, numSteps);
+    auto numSteps = yup::roundToInt (rangeBeats.inBeats() / intervalBeats.inBeats());
+    auto limitedNumSteps = yup::jlimit (2, maxNumSteps, numSteps);
 
     if (numSteps != limitedNumSteps)
     {
@@ -1499,7 +1499,7 @@ void MidiList::insertRepeatedControllerValue (int type, int startVal, int endVal
 
 void MidiList::removeControllersBetween (int controllerType, BeatPosition beatStart, BeatPosition beatEnd, juce::UndoManager* um)
 {
-    juce::Array<juce::ValueTree> itemsToRemove;
+    yup::Array<yup::ValueTree> itemsToRemove;
 
     for (auto e : getControllerEvents())
         if (e->getType() == controllerType && e->getBeatPosition() >= beatStart && e->getBeatPosition() < beatEnd)
@@ -1510,7 +1510,7 @@ void MidiList::removeControllersBetween (int controllerType, BeatPosition beatSt
 }
 
 //==============================================================================
-MidiSysexEvent* MidiList::getSysexEventFor (const juce::ValueTree& v) const
+MidiSysexEvent* MidiList::getSysexEventFor (const yup::ValueTree& v) const
 {
     for (auto n : getSysexEvents())
         if (n->state == v)
@@ -1519,7 +1519,7 @@ MidiSysexEvent* MidiList::getSysexEventFor (const juce::ValueTree& v) const
     return {};
 }
 
-MidiSysexEvent& MidiList::addSysExEvent (const juce::MidiMessage& message, BeatPosition beat, juce::UndoManager* um)
+MidiSysexEvent& MidiList::addSysExEvent (const yup::MidiMessage& message, BeatPosition beat, juce::UndoManager* um)
 {
     auto v = MidiSysexEvent::createSysexEvent (message, beat);
     state.addChild (v, -1, um);
@@ -1541,36 +1541,36 @@ void MidiList::removeAllSysexes (juce::UndoManager* um)
 }
 
 //==============================================================================
-bool MidiList::fileHasTempoChanges (const juce::File& f)
+bool MidiList::fileHasTempoChanges (const yup::File& f)
 {
-    juce::MidiFile midiFile;
+    yup::MidiFile midiFile;
 
     {
-        juce::FileInputStream in (f);
+        yup::FileInputStream in (f);
 
         if (! in.openedOk() || ! midiFile.readFrom (in))
             return false;
     }
 
-    juce::MidiMessageSequence tempoEvents;
+    yup::MidiMessageSequence tempoEvents;
     midiFile.findAllTempoEvents (tempoEvents);
     midiFile.findAllTimeSigEvents (tempoEvents);
 
     return tempoEvents.getNumEvents() > 0;
 }
 
-bool MidiList::looksLikeMPEData (const juce::File& f)
+bool MidiList::looksLikeMPEData (const yup::File& f)
 {
-    juce::MidiFile midiFile;
+    yup::MidiFile midiFile;
 
     {
-        juce::FileInputStream in (f);
+        yup::FileInputStream in (f);
 
         if (! in.openedOk() || ! midiFile.readFrom (in))
             return false;
     }
 
-    juce::BigInteger noteChannelsUsed, controllerChannelsUsed;
+    yup::BigInteger noteChannelsUsed, controllerChannelsUsed;
 
     for (int currentTrack = midiFile.getNumTracks(); --currentTrack >= 0;)
     {
@@ -1597,26 +1597,26 @@ bool MidiList::looksLikeMPEData (const juce::File& f)
     return false;
 }
 
-bool MidiList::readSeparateTracksFromFile (const juce::File& f,
-                                           juce::OwnedArray<MidiList>& lists,
-                                           juce::Array<BeatPosition>& tempoChangeBeatNumbers,
-                                           juce::Array<double>& bpms,
-                                           juce::Array<int>& numerators,
-                                           juce::Array<int>& denominators,
+bool MidiList::readSeparateTracksFromFile (const yup::File& f,
+                                           yup::OwnedArray<MidiList>& lists,
+                                           yup::Array<BeatPosition>& tempoChangeBeatNumbers,
+                                           yup::Array<double>& bpms,
+                                           yup::Array<int>& numerators,
+                                           yup::Array<int>& denominators,
                                            BeatDuration& songLength,
                                            bool importAsNoteExpression)
 {
     songLength = BeatDuration();
-    juce::MidiFile midiFile;
+    yup::MidiFile midiFile;
 
     {
-        juce::FileInputStream in (f);
+        yup::FileInputStream in (f);
 
         if (! in.openedOk() || ! midiFile.readFrom (in))
             return false;
     }
 
-    juce::MidiMessageSequence tempoEvents;
+    yup::MidiMessageSequence tempoEvents;
     midiFile.findAllTempoEvents (tempoEvents);
     midiFile.findAllTimeSigEvents (tempoEvents);
 
@@ -1668,7 +1668,7 @@ bool MidiList::readSeparateTracksFromFile (const juce::File& f,
 
     if (importAsNoteExpression)
     {
-        juce::MidiMessageSequence destSequence;
+        yup::MidiMessageSequence destSequence;
 
         for (int currentTrack = 0; currentTrack < midiFile.getNumTracks(); ++currentTrack)
         {
@@ -1722,7 +1722,7 @@ bool MidiList::readSeparateTracksFromFile (const juce::File& f,
 
                 for (int channel = 0; channel <= 16; ++channel)
                 {
-                    juce::MidiMessageSequence channelSequence;
+                    yup::MidiMessageSequence channelSequence;
                     MidiChannel midiChannel ((uint8_t) std::max (1, channel));
 
                     if (channel == 0)
@@ -1754,7 +1754,7 @@ bool MidiList::readSeparateTracksFromFile (const juce::File& f,
 }
 
 //==============================================================================
-void MidiList::importMidiSequence (const juce::MidiMessageSequence& sequence, Edit* edit,
+void MidiList::importMidiSequence (const yup::MidiMessageSequence& sequence, Edit* edit,
                                    TimePosition editTimeOfListTimeZero, juce::UndoManager* um)
 {
     auto ts = edit != nullptr ? &edit->tempoSequence : nullptr;
@@ -1790,7 +1790,7 @@ void MidiList::importMidiSequence (const juce::MidiMessageSequence& sequence, Ed
                          beatTime,
                          ts != nullptr ? ((ts->toBeats (keyUpTime) - firstBeatNum) - toDuration (beatTime))
                                        : (BeatDuration::fromBeats (keyUpTime.inSeconds()) - toDuration (beatTime)),
-                         m.getVelocity(), edit != nullptr ? edit->engine.getEngineBehaviour().getDefaultNoteColour() : 0, um);
+                         m.getVelocity(), edit != nullptr ? edit->engine.getEngineBehaviour().getDefaultNoteColor() : 0, um);
             }
             else if (m.isAftertouch())
             {
@@ -1808,7 +1808,7 @@ void MidiList::importMidiSequence (const juce::MidiMessageSequence& sequence, Ed
             else if (m.isProgramChange())
             {
                 if (importedName.isEmpty())
-                    importedName = TRANS(juce::MidiMessage::getGMInstrumentName (m.getProgramChangeNumber()));
+                    importedName = TRANS(yup::MidiMessage::getGMInstrumentName (m.getProgramChangeNumber()));
 
                 addControllerEvent (beatTime, MidiControllerEvent::programChangeType, m.getProgramChangeNumber() << 7, um);
             }
@@ -1820,17 +1820,17 @@ void MidiList::importMidiSequence (const juce::MidiMessageSequence& sequence, Ed
     }
 
     if (importedName.isEmpty())
-        importedName = TRANS("channel") + " " + juce::String (channelNumber);
+        importedName = TRANS("channel") + " " + yup::String (channelNumber);
 }
 
-void MidiList::importFromEditTimeSequenceWithNoteExpression (const juce::MidiMessageSequence& sequence, Edit* edit,
+void MidiList::importFromEditTimeSequenceWithNoteExpression (const yup::MidiMessageSequence& sequence, Edit* edit,
                                                              TimePosition editTimeOfListTimeZero, juce::UndoManager* um)
 {
     auto ts = edit != nullptr ? &edit->tempoSequence : nullptr;
     auto firstBeatNum = ts != nullptr ? ts->toBeats (editTimeOfListTimeZero) : BeatPosition();
     const int channelNumber = getMidiChannel().getChannelNumber();
 
-    juce::MPEZoneLayout layout;
+    yup::MPEZoneLayout layout;
     layout.setLowerZone (15);
     MPEtoNoteExpression noteQueue (*this, ts, layout, firstBeatNum, um);
 
@@ -1874,7 +1874,7 @@ void MidiList::importFromEditTimeSequenceWithNoteExpression (const juce::MidiMes
             else if (m.isProgramChange())
             {
                 if (importedName.isEmpty())
-                    importedName = TRANS(juce::MidiMessage::getGMInstrumentName (m.getProgramChangeNumber()));
+                    importedName = TRANS(yup::MidiMessage::getGMInstrumentName (m.getProgramChangeNumber()));
 
                 addControllerEvent (beatTime, MidiControllerEvent::programChangeType, m.getProgramChangeNumber() << 7, um);
             }
@@ -1886,18 +1886,18 @@ void MidiList::importFromEditTimeSequenceWithNoteExpression (const juce::MidiMes
     }
 
     if (importedName.isEmpty())
-        importedName = TRANS("channel") + " " + juce::String (channelNumber);
+        importedName = TRANS("channel") + " " + yup::String (channelNumber);
 }
 
 //==============================================================================
-juce::MidiMessageSequence MidiList::exportToPlaybackMidiSequence (MidiClip& clip, TimeBase tb, bool generateMPE) const
+yup::MidiMessageSequence MidiList::exportToPlaybackMidiSequence (MidiClip& clip, TimeBase tb, bool generateMPE) const
 {
     return clip.edit.engine.getEngineBehaviour().createPlaybackMidiSequence (*this, clip, tb, generateMPE);
 }
 
-juce::MidiMessageSequence MidiList::createDefaultPlaybackMidiSequence (const MidiList& list, MidiClip& clip, TimeBase timeBase, bool generateMPE)
+yup::MidiMessageSequence MidiList::createDefaultPlaybackMidiSequence (const MidiList& list, MidiClip& clip, TimeBase timeBase, bool generateMPE)
 {
-    juce::MidiMessageSequence destSequence;
+    yup::MidiMessageSequence destSequence;
 
     auto& ts = clip.edit.tempoSequence;
     auto midiStartBeat = clip.getContentStartBeat();
@@ -1924,7 +1924,7 @@ juce::MidiMessageSequence MidiList::createDefaultPlaybackMidiSequence (const Mid
 
     {
         // Add cumulative controller events that are off the start
-        juce::Array<int> doneControllers;
+        yup::Array<int> doneControllers;
 
         for (auto e : controllerEvents)
         {

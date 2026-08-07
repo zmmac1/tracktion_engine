@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-EditInputDevices::EditInputDevices (Edit& e, const juce::ValueTree& v)
+EditInputDevices::EditInputDevices (Edit& e, const yup::ValueTree& v)
     : edit (e), state (v)
 {
     editState.addListener (this);
@@ -31,7 +31,7 @@ int EditInputDevices::getMaxNumInputs() const
     return 4;
 }
 
-static bool isForDevice (const juce::ValueTree& v, const InputDevice& d, bool fallbackToNameCheck)
+static bool isForDevice (const yup::ValueTree& v, const InputDevice& d, bool fallbackToNameCheck)
 {
     auto typeProp = v.getPropertyPointer (IDs::type);
 
@@ -47,7 +47,7 @@ static bool isForDevice (const juce::ValueTree& v, const InputDevice& d, bool fa
     return fallbackToNameCheck && v[IDs::name] == d.getName();
 }
 
-static juce::ValueTree findDeviceState (const juce::ValueTree& parent, const InputDevice& d)
+static yup::ValueTree findDeviceState (const yup::ValueTree& parent, const InputDevice& d)
 {
     for (const auto& v : parent)
         if (isForDevice (v, d, false))
@@ -60,7 +60,7 @@ static juce::ValueTree findDeviceState (const juce::ValueTree& parent, const Inp
     return {};
 }
 
-static bool isTrackInputDeviceMIDI (const juce::ValueTree& v)
+static bool isTrackInputDeviceMIDI (const yup::ValueTree& v)
 {
     return v[IDs::type].toString().trim() == "MIDI";
 }
@@ -104,9 +104,9 @@ InputDeviceInstance* EditInputDevices::getInputInstance (const AudioTrack& at, i
     return {};
 }
 
-juce::Array<InputDeviceInstance*> EditInputDevices::getDevicesForTargetTrack (const AudioTrack& at) const
+yup::Array<InputDeviceInstance*> EditInputDevices::getDevicesForTargetTrack (const AudioTrack& at) const
 {
-    juce::Array<InputDeviceInstance*> devices;
+    yup::Array<InputDeviceInstance*> devices;
 
     for (auto idi : edit.getAllInputDevices())
         if (idi->getTargets().contains (at.itemID))
@@ -115,7 +115,7 @@ juce::Array<InputDeviceInstance*> EditInputDevices::getDevicesForTargetTrack (co
     return devices;
 }
 
-juce::ValueTree EditInputDevices::getInstanceStateForInputDevice (const InputDevice& d)
+yup::ValueTree EditInputDevices::getInstanceStateForInputDevice (const InputDevice& d)
 {
     if (auto v = findDeviceState (state, d); v.isValid())
     {
@@ -125,7 +125,7 @@ juce::ValueTree EditInputDevices::getInstanceStateForInputDevice (const InputDev
         return v;
     }
 
-    juce::ValueTree v (IDs::INPUTDEVICE);
+    yup::ValueTree v (IDs::INPUTDEVICE);
 
     if (d.getDeviceType() == InputDevice::DeviceType::trackWaveDevice)
     {
@@ -151,7 +151,7 @@ juce::ValueTree EditInputDevices::getInstanceStateForInputDevice (const InputDev
 void EditInputDevices::removeNonExistantInputDeviceStates()
 {
     auto& dm = edit.engine.getDeviceManager();
-    juce::Array<InputDevice*> devices;
+    yup::Array<InputDevice*> devices;
 
     for (auto& d : dm.midiInputs)
         devices.add (d.get());
@@ -172,7 +172,7 @@ void EditInputDevices::removeNonExistantInputDeviceStates()
         }
     }
 
-    auto isDevicePresent = [devices] (const juce::ValueTree& v)
+    auto isDevicePresent = [devices] (const yup::ValueTree& v)
     {
         for (auto* d : devices)
             if (isForDevice (v, *d, true))
@@ -186,7 +186,7 @@ void EditInputDevices::removeNonExistantInputDeviceStates()
             state.removeChild (i, nullptr);
 }
 
-void EditInputDevices::addTrackDeviceInstanceToContext (const juce::ValueTree& v) const
+void EditInputDevices::addTrackDeviceInstanceToContext (const yup::ValueTree& v) const
 {
     if (auto* id = getTrackDeviceForState (v))
     {
@@ -200,14 +200,14 @@ void EditInputDevices::addTrackDeviceInstanceToContext (const juce::ValueTree& v
     }
 }
 
-void EditInputDevices::removeTrackDeviceInstanceToContext (const juce::ValueTree& v) const
+void EditInputDevices::removeTrackDeviceInstanceToContext (const yup::ValueTree& v) const
 {
     if (auto* id = getTrackDeviceForState (v))
         if (auto* epc = edit.getCurrentPlaybackContext())
             epc->removeInstanceForDevice (*id);
 }
 
-InputDevice* EditInputDevices::getTrackDeviceForState (const juce::ValueTree& v) const
+InputDevice* EditInputDevices::getTrackDeviceForState (const yup::ValueTree& v) const
 {
     auto trackID = EditItemID::fromProperty (v, IDs::sourceTrack);
 
@@ -225,7 +225,7 @@ InputDevice* EditInputDevices::getTrackDeviceForState (const juce::ValueTree& v)
     return {};
 }
 
-void EditInputDevices::changeListenerCallback (juce::ChangeBroadcaster*)
+void EditInputDevices::changeListenerCallback (yup::ChangeBroadcaster*)
 {
     removeNonExistantInputDeviceStates();
 }
@@ -235,20 +235,20 @@ void EditInputDevices::handleAsyncUpdate()
     removeNonExistantInputDeviceStates();
 }
 
-static bool isTrackDevice (const juce::ValueTree& v)
+static bool isTrackDevice (const yup::ValueTree& v)
 {
     jassert (v.hasType (IDs::INPUTDEVICE));
     return v.hasProperty (IDs::sourceTrack);
 }
 
-void EditInputDevices::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
+void EditInputDevices::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c)
 {
     if (p == state)
         if (c.hasType (IDs::INPUTDEVICE) && isTrackDevice (c))
             addTrackDeviceInstanceToContext (c);
 }
 
-void EditInputDevices::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int)
+void EditInputDevices::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int)
 {
     if (p == state)
         if (c.hasType (IDs::INPUTDEVICE) && isTrackDevice (c))

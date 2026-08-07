@@ -12,7 +12,7 @@ namespace tracktion::inline engine {
 
 //==============================================================================
 template <typename FloatType>
-static void getSumAndDiff (const juce::AudioBuffer<FloatType>& buffer,
+static void getSumAndDiff (const yup::AudioBuffer<FloatType>& buffer,
                            FloatType& sum, FloatType& diff,
                            int startIndex, int numSamples)
 {
@@ -31,12 +31,12 @@ static void getSumAndDiff (const juce::AudioBuffer<FloatType>& buffer,
         {
             auto mag = buffer.getMagnitude (i, startIndex, numSamples);
             s += mag;
-            lo = juce::jmin (lo, mag);
-            hi = juce::jmax (hi, mag);
+            lo = yup::jmin (lo, mag);
+            hi = yup::jmax (hi, mag);
         }
 
         sum = s / static_cast<FloatType> (buffer.getNumChannels());
-        diff = juce::jmax (FloatType(), hi - lo);
+        diff = yup::jmax (FloatType(), hi - lo);
     }
 }
 
@@ -59,7 +59,7 @@ int LevelMeasurer::Client::getNumChannelsUsed() const noexcept
 
 void LevelMeasurer::Client::reset() noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     for (auto& l : audioLevels)
         l = {};
 
@@ -71,7 +71,7 @@ void LevelMeasurer::Client::reset() noexcept
 
 bool LevelMeasurer::Client::getAndClearOverload() noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     auto result = clearOverload;
     clearOverload = false;
     return result;
@@ -79,7 +79,7 @@ bool LevelMeasurer::Client::getAndClearOverload() noexcept
 
 bool LevelMeasurer::Client::getAndClearPeak() noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     auto result = clearPeak;
     clearPeak = false;
     return result;
@@ -87,7 +87,7 @@ bool LevelMeasurer::Client::getAndClearPeak() noexcept
 
 DbTimePair LevelMeasurer::Client::getAndClearMidiLevel() noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     auto result = midiLevels;
     midiLevels.dB = -100.0f;
     return result;
@@ -95,7 +95,7 @@ DbTimePair LevelMeasurer::Client::getAndClearMidiLevel() noexcept
 
 DbTimePair LevelMeasurer::Client::getAndClearAudioLevel (int chan) noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
 
     if (chan < 0 || chan >= (int) audioLevels.size())
         return {};
@@ -107,27 +107,27 @@ DbTimePair LevelMeasurer::Client::getAndClearAudioLevel (int chan) noexcept
 
 void LevelMeasurer::Client::setNumChannelsUsed (int numChannels) noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     ensureNumChannels (numChannels);
     numChannelsUsed = numChannels;
 }
 
 void LevelMeasurer::Client::setOverload (int channel, bool hasOverloaded) noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     ensureNumChannels (channel + 1);
     overload[(size_t) channel] = hasOverloaded;
 }
 
 void LevelMeasurer::Client::setClearOverload (bool clear) noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     clearOverload = clear;
 }
 
 void LevelMeasurer::Client::setClearPeak (bool clear) noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     clearPeak = clear;
 }
 
@@ -142,7 +142,7 @@ void LevelMeasurer::Client::ensureNumChannels (int needed)
 
 void LevelMeasurer::Client::updateAudioLevel (int channel, DbTimePair newAudioLevel) noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     ensureNumChannels (channel + 1);
 
     if (newAudioLevel.dB >= audioLevels[(size_t) channel].dB)
@@ -151,7 +151,7 @@ void LevelMeasurer::Client::updateAudioLevel (int channel, DbTimePair newAudioLe
 
 void LevelMeasurer::Client::updateMidiLevel (DbTimePair newMidiLevel) noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
 
     if (newMidiLevel.dB >= midiLevels.dB)
         midiLevels = newMidiLevel;
@@ -159,7 +159,7 @@ void LevelMeasurer::Client::updateMidiLevel (DbTimePair newMidiLevel) noexcept
 
 void LevelMeasurer::Client::updateAllChannels (const ChannelLevel* levels, int numChannels) noexcept
 {
-    juce::SpinLock::ScopedLockType sl (mutex);
+    yup::SpinLock::ScopedLockType sl (mutex);
     ensureNumChannels (numChannels);
     numChannelsUsed = numChannels;
 
@@ -175,7 +175,7 @@ void LevelMeasurer::Client::updateAllChannels (const ChannelLevel* levels, int n
 
 
 //==============================================================================
-void LevelMeasurer::processBuffer (juce::AudioBuffer<float>& buffer, int start, int numSamples)
+void LevelMeasurer::processBuffer (yup::AudioBuffer<float>& buffer, int start, int numSamples)
 {
     const std::scoped_lock sl (clientsMutex);
 
@@ -183,7 +183,7 @@ void LevelMeasurer::processBuffer (juce::AudioBuffer<float>& buffer, int start, 
         return;
 
     auto numChans = buffer.getNumChannels();
-    auto now = juce::Time::getApproximateMillisecondCounter();
+    auto now = yup::Time::getApproximateMillisecondCounter();
 
     // Compute all channel levels first, then batch-update each client with a single lock
     int resultNumChans;
@@ -235,9 +235,9 @@ void LevelMeasurer::processMidi (MidiMessageArray& midiBuffer, const float*)
 
     for (auto& m : midiBuffer)
         if (m.isNoteOn())
-            max = juce::jmax (max, m.getFloatVelocity());
+            max = yup::jmax (max, m.getFloatVelocity());
 
-    auto now = juce::Time::getApproximateMillisecondCounter();
+    auto now = yup::Time::getApproximateMillisecondCounter();
 
     for (auto c : clients)
         c->updateMidiLevel ({ now, gainToDb (max) });
@@ -250,7 +250,7 @@ void LevelMeasurer::processMidiLevel (float level)
     if (clients.isEmpty() || ! showMidi)
         return;
 
-    auto now = juce::Time::getApproximateMillisecondCounter();
+    auto now = yup::Time::getApproximateMillisecondCounter();
 
     for (auto c : clients)
         c->updateMidiLevel ({ now, gainToDb (level) });
@@ -307,7 +307,7 @@ void LevelMeasurer::setShowMidi (bool show)
 //==============================================================================
 void SharedLevelMeasurer::startNextBlock (double streamTime)
 {
-    juce::SpinLock::ScopedLockType lock (spinLock);
+    yup::SpinLock::ScopedLockType lock (spinLock);
 
     if (streamTime != lastStreamTime)
     {
@@ -320,19 +320,19 @@ void SharedLevelMeasurer::startNextBlock (double streamTime)
 
 void SharedLevelMeasurer::setSize (int channels, int numSamples)
 {
-    juce::SpinLock::ScopedLockType lock (spinLock);
+    yup::SpinLock::ScopedLockType lock (spinLock);
 
     if (channels > sumBuffer.getNumChannels() || numSamples > sumBuffer.getNumSamples())
         sumBuffer.setSize (channels, numSamples);
 }
 
-void SharedLevelMeasurer::addBuffer (const juce::AudioBuffer<float>& inBuffer, int startSample, int numSamples)
+void SharedLevelMeasurer::addBuffer (const yup::AudioBuffer<float>& inBuffer, int startSample, int numSamples)
 {
     setSize (inBuffer.getNumChannels(), numSamples);
 
-    juce::SpinLock::ScopedLockType lock (spinLock);
+    yup::SpinLock::ScopedLockType lock (spinLock);
 
-    for (int i = 0; i < juce::jmin (sumBuffer.getNumChannels(), inBuffer.getNumChannels()); ++i)
+    for (int i = 0; i < yup::jmin (sumBuffer.getNumChannels(), inBuffer.getNumChannels()); ++i)
         sumBuffer.addFrom (i, 0, inBuffer, i, startSample, numSamples);
 }
 

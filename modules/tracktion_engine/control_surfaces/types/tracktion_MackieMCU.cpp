@@ -61,7 +61,7 @@ void MackieMCU::indicesChanged()
 }
 
 //==============================================================================
-void MackieMCU::setDisplay (int devIdx, const juce::String& text, int pos)
+void MackieMCU::setDisplay (int devIdx, const yup::String& text, int pos)
 {
     CRASH_TRACER
 
@@ -89,15 +89,15 @@ void MackieMCU::clearDisplaySegment (int devIdx, int column, int row)
     setDisplaySegment (devIdx, column, row, "      ");
 }
 
-void MackieMCU::setDisplaySegment (int devIdx, int column, int row, const juce::String& text)
+void MackieMCU::setDisplaySegment (int devIdx, int column, int row, const yup::String& text)
 {
     CRASH_TRACER
     setDisplay (devIdx, text.substring (0, 6).paddedRight (' ', 6), column * 7 + row * 56);
 }
 
-void MackieMCU::centreDisplaySegment (int devIdx, int column, int row, const juce::String& text)
+void MackieMCU::centreDisplaySegment (int devIdx, int column, int row, const yup::String& text)
 {
-    setDisplaySegment (devIdx, column, row, juce::String::repeatedString (" ", (6 - text.length()) / 2) + text);
+    setDisplaySegment (devIdx, column, row, yup::String::repeatedString (" ", (6 - text.length()) / 2) + text);
 }
 
 void MackieMCU::handleAsyncUpdate()
@@ -235,7 +235,7 @@ void MackieMCU::initialiseDevice (bool /*connect*/)
     cpuVisible = false;
     cpuMeterTimer->stopTimer();
 
-    juce::Thread::sleep (100);
+    yup::Thread::sleep (100);
     setSignalMetersEnabled (deviceIdx, true);
 
     assignmentMode = PluginMode;
@@ -277,8 +277,8 @@ void MackieMCU::cpuTimerCallback()
 {
     if (cpuVisible)
     {
-        auto cpuPercent = juce::roundToInt (engine.getDeviceManager().getCpuUsage() * 100.0f);
-        setAssignmentText (juce::String (juce::jlimit (0, 99, cpuPercent)).paddedLeft ('0', 2));
+        auto cpuPercent = yup::roundToInt (engine.getDeviceManager().getCpuUsage() * 100.0f);
+        setAssignmentText (yup::String (yup::jlimit (0, 99, cpuPercent)).paddedLeft ('0', 2));
     }
 }
 
@@ -286,7 +286,7 @@ void MackieMCU::auxTimerCallback()
 {
     auxTimer->stopTimer();
 
-    juce::Array<int> auxCopy;
+    yup::Array<int> auxCopy;
     auxCopy.swapWith (userMovedAuxes);
 
     for (int i = auxCopy.size(); --i >= 0;)
@@ -298,12 +298,12 @@ void MackieMCU::auxTimerCallback()
     }
 }
 
-void MackieMCU::acceptMidiMessage (int, const juce::MidiMessage& m)
+void MackieMCU::acceptMidiMessage (int, const yup::MidiMessage& m)
 {
     acceptMidiMessageInt (deviceIdx, m);
 }
 
-void MackieMCU::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& m)
+void MackieMCU::acceptMidiMessageInt (int deviceIndex, const yup::MidiMessage& m)
 {
     const unsigned char* const d = m.getRawData();
     const unsigned char d1 = d[1];
@@ -322,7 +322,7 @@ void MackieMCU::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& 
             if ((d[2] & 0x40) != 0)
                 diff = -diff;
 
-            panPos[chan] = juce::jlimit (-1.0f, 1.0f, panPos[chan] + diff);
+            panPos[chan] = yup::jlimit (-1.0f, 1.0f, panPos[chan] + diff);
 
             if (flipped)
             {
@@ -350,7 +350,7 @@ void MackieMCU::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& 
     else if (d[0] >= 0xe0 && d[0] <= 0xe8)
     {
         // fader
-        const float pos = juce::jlimit (0.0f, 1.0f, static_cast<float> (((((int)d[2]) << 7) + d[1])) * (1.0f / 0x3f70));
+        const float pos = yup::jlimit (0.0f, 1.0f, static_cast<float> (((((int)d[2]) << 7) + d[1])) * (1.0f / 0x3f70));
 
         // send it back to the MCU
         sendMidiCommandToController (deviceIndex, d, 3);
@@ -408,7 +408,7 @@ void MackieMCU::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& 
             {
                 if (d[2] != 0)
                 {
-                    auto now = juce::Time::getMillisecondCounter();
+                    auto now = yup::Time::getMillisecondCounter();
 
                     if (now < lastRewindPress + 300)
                     {
@@ -897,10 +897,10 @@ void MackieMCU::acceptMidiMessageInt (int deviceIndex, const juce::MidiMessage& 
             else if (d1 == 0x66 || d1 == 0x67)
             {
                 // user switch A or B
-                juce::KeyPress key (d1 == 0x66 ? mcuFootswitch1Key
+                yup::KeyPress key (d1 == 0x66 ? mcuFootswitch1Key
                                                : mcuFootswitch2Key);
 
-                if (auto focused = juce::Component::getCurrentlyFocusedComponent())
+                if (auto focused = yup::Component::getCurrentlyFocusedComponent())
                     focused->keyPressed (key);
             }
         }
@@ -936,7 +936,7 @@ void MackieMCU::flip()
     updateDeviceState();
 }
 
-static uint8_t convertCharToMCUCode (juce::juce_wchar c) noexcept
+static uint8_t convertCharToMCUCode (yup::juce_wchar c) noexcept
 {
     if (c >= 'a' && c <= 'z')   return (uint8_t) ((c - 'a') + 1);
     if (c >= 'A' && c <= 'Z')   return (uint8_t) ((c - 'A') + 1);
@@ -945,7 +945,7 @@ static uint8_t convertCharToMCUCode (juce::juce_wchar c) noexcept
     return 0x20;
 }
 
-void MackieMCU::setAssignmentText (const juce::String& text)
+void MackieMCU::setAssignmentText (const yup::String& text)
 {
     sendMidiCommandToController (deviceIdx, 0xb0, 0x4b, convertCharToMCUCode (text[0]));
     sendMidiCommandToController (deviceIdx, 0xb0, 0x4a, convertCharToMCUCode (text[1]));
@@ -1021,7 +1021,7 @@ void MackieMCU::timerCallback()
         if (auxBank == -1)
             setAssignmentText("Au");
         else
-            setAssignmentText("a" + juce::String (auxBank + 1));
+            setAssignmentText("a" + yup::String (auxBank + 1));
     }
     else if (assignmentMode == MarkerMode)
     {
@@ -1033,7 +1033,7 @@ void MackieMCU::moveFaderInt (int dev, int channelNum, float newSliderPos)
 {
     jassert (channelNum <= 8);
 
-    int faderPos = juce::jlimit (0, 0x3fff, (int)(newSliderPos * 0x3fff));
+    int faderPos = yup::jlimit (0, 0x3fff, (int)(newSliderPos * 0x3fff));
 
     if (std::abs ((int) lastFaderPos[dev][channelNum] - faderPos) > 2)
     {
@@ -1075,7 +1075,7 @@ void MackieMCU::movePanPotInt (int dev, int channelNum, float newPan)
     panPos [dev * 8 + channelNum] = newPan;
 
     sendMidiCommandToController (dev, 0xb0, (uint8_t) (0x30 + channelNum),
-                                 (uint8_t) juce::jlimit (0x01, 0x0b, 6 + juce::roundToInt (5 * newPan)));
+                                 (uint8_t) yup::jlimit (0x01, 0x0b, 6 + yup::roundToInt (5 * newPan)));
 }
 
 void MackieMCU::movePanPot (int channelNum_, float newPan)
@@ -1091,9 +1091,9 @@ void MackieMCU::movePanPot (int channelNum_, float newPan)
         movePanPotInt (dev, channelNum, newPan);
 }
 
-juce::String MackieMCU::auxString (int chan) const
+yup::String MackieMCU::auxString (int chan) const
 {
-    return juce::Decibels::toString (volumeFaderPositionToDB (auxLevels[chan]), 1, -96.0f);
+    return yup::Decibels::toString (volumeFaderPositionToDB (auxLevels[chan]), 1, -96.0f);
 }
 
 void MackieMCU::moveAux (int channelNum_, int num, const char* bus, float newPos)
@@ -1121,7 +1121,7 @@ void MackieMCU::moveAux (int channelNum_, int num, const char* bus, float newPos
                 if (userMovedAuxes.contains (channelNum_))
                     setDisplaySegment (dev, channelNum, 1, auxString (channelNum_));
                 else
-                    setDisplaySegment (dev, channelNum, 1, juce::String (bus));
+                    setDisplaySegment (dev, channelNum, 1, yup::String (bus));
             }
         }
     }
@@ -1227,8 +1227,8 @@ void MackieMCU::parameterChanged (int parameterNumber_, const ParameterSetting& 
 
     if (assignmentMode == PluginMode)
     {
-        centreDisplaySegment (dev, parameterNumber, 0, juce::String::fromUTF8 (newValue.label));
-        centreDisplaySegment (dev, parameterNumber, 1, juce::String::fromUTF8 (newValue.valueDescription));
+        centreDisplaySegment (dev, parameterNumber, 0, yup::String::fromUTF8 (newValue.label));
+        centreDisplaySegment (dev, parameterNumber, 1, yup::String::fromUTF8 (newValue.valueDescription));
 
         if (flipped)
             moveFaderInt (dev, parameterNumber, newValue.value);
@@ -1254,7 +1254,7 @@ void MackieMCU::clearParameter (int parameterNumber_)
     }
 }
 
-void MackieMCU::faderBankChanged (int newStartChannelNumber, const juce::StringArray& trackNames)
+void MackieMCU::faderBankChanged (int newStartChannelNumber, const yup::StringArray& trackNames)
 {
     if (assignmentMode == PanMode || assignmentMode == AuxMode)
     {
@@ -1295,7 +1295,7 @@ void MackieMCU::channelLevelChanged (int channelNum_, std::span<const float> lev
         for (auto v : levels)
             peak = std::max (peak, v);
 
-        auto newValue = (uint8_t) juce::jlimit (0, 13, juce::roundToInt (13.0f * peak));
+        auto newValue = (uint8_t) yup::jlimit (0, 13, yup::roundToInt (13.0f * peak));
 
         if (lastChannelLevels[channelNum_] != newValue)
         {
@@ -1316,7 +1316,7 @@ void MackieMCU::masterLevelsChanged (std::span<const float>)
 
 void MackieMCU::updateTCDisplay (const char* newDigits)
 {
-    for (int i = 0; i < juce::numElementsInArray (timecodeDigits); ++i)
+    for (int i = 0; i < yup::numElementsInArray (timecodeDigits); ++i)
     {
         const char c = newDigits[i];
 
@@ -1435,8 +1435,8 @@ void MackieMCU::markerChanged (int parameterNumber_, const MarkerSetting& newVal
 
     if (assignmentMode == MarkerMode)
     {
-        setDisplaySegment (dev, parameterNumber, 0, juce::String (newValue.number));
-        setDisplaySegment (dev, parameterNumber, 1, juce::String::fromUTF8 (newValue.label));
+        setDisplaySegment (dev, parameterNumber, 0, yup::String (newValue.number));
+        setDisplaySegment (dev, parameterNumber, 1, yup::String::fromUTF8 (newValue.label));
 
         if (flipped)
             moveFaderInt (dev, parameterNumber, 0);

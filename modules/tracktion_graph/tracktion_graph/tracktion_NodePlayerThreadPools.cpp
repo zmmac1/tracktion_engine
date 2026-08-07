@@ -40,7 +40,7 @@ struct ThreadPoolCV : public LockFreeMultiThreadedNodePlayer::ThreadPool
     {
     }
 
-    void createThreads (size_t numThreads, juce::AudioWorkgroup workgroupToUse) override
+    void createThreads (size_t numThreads, yup::AudioWorkgroup workgroupToUse) override
     {
         if (threads.size() == numThreads)
             return;
@@ -48,7 +48,7 @@ struct ThreadPoolCV : public LockFreeMultiThreadedNodePlayer::ThreadPool
         resetExitSignal();
         workgroup = workgroupToUse;
 
-        const auto rtOpts = juce::Thread::RealtimeOptions()
+        const auto rtOpts = yup::Thread::RealtimeOptions()
                       .withPriority (10)
                       .withApproximateAudioProcessingTime (player.getBlockSize(), player.getSampleRate());
 
@@ -139,7 +139,7 @@ private:
     mutable std::mutex mutex;
     mutable std::condition_variable condition;
     mutable std::atomic<bool> triggered { false };
-    juce::AudioWorkgroup workgroup;
+    yup::AudioWorkgroup workgroup;
 
     bool shouldWaitOrIsNotTriggered()
     {
@@ -151,7 +151,7 @@ private:
 
     void runThread()
     {
-        juce::WorkgroupToken token;
+        yup::WorkgroupToken token;
         workgroup.join (token);
 
         for (;;)
@@ -175,7 +175,7 @@ struct ThreadPoolRT : public LockFreeMultiThreadedNodePlayer::ThreadPool
     {
     }
 
-    void createThreads (size_t numThreads, juce::AudioWorkgroup workgroupToUse) override
+    void createThreads (size_t numThreads, yup::AudioWorkgroup workgroupToUse) override
     {
         if (threads.size() == numThreads)
             return;
@@ -183,7 +183,7 @@ struct ThreadPoolRT : public LockFreeMultiThreadedNodePlayer::ThreadPool
         resetExitSignal();
         workgroup = workgroupToUse;
 
-        const auto rtOpts = juce::Thread::RealtimeOptions()
+        const auto rtOpts = yup::Thread::RealtimeOptions()
                       .withPriority (10)
                       .withApproximateAudioProcessingTime (player.getBlockSize(), player.getSampleRate());
 
@@ -251,11 +251,11 @@ struct ThreadPoolRT : public LockFreeMultiThreadedNodePlayer::ThreadPool
 
 private:
     std::vector<std::thread> threads;
-    juce::AudioWorkgroup workgroup;
+    yup::AudioWorkgroup workgroup;
 
     void runThread()
     {
-        juce::WorkgroupToken token;
+        yup::WorkgroupToken token;
         workgroup.join (token);
 
         for (;;)
@@ -285,7 +285,7 @@ struct ThreadPoolHybrid : public LockFreeMultiThreadedNodePlayer::ThreadPool
     {
     }
 
-    void createThreads (size_t numThreads, juce::AudioWorkgroup workgroupToUse) override
+    void createThreads (size_t numThreads, yup::AudioWorkgroup workgroupToUse) override
     {
         if (threads.size() == numThreads)
             return;
@@ -293,7 +293,7 @@ struct ThreadPoolHybrid : public LockFreeMultiThreadedNodePlayer::ThreadPool
         resetExitSignal();
         workgroup = workgroupToUse;
 
-        const auto rtOpts = juce::Thread::RealtimeOptions()
+        const auto rtOpts = yup::Thread::RealtimeOptions()
                               .withPriority (10)
                               .withApproximateAudioProcessingTime (player.getBlockSize(), player.getSampleRate());
 
@@ -402,7 +402,7 @@ private:
     mutable std::mutex mutex;
     mutable std::condition_variable condition;
     mutable std::atomic<bool> triggered { false };
-    juce::AudioWorkgroup workgroup;
+    yup::AudioWorkgroup workgroup;
 
 
     bool shouldWaitOrIsNotTriggered()
@@ -415,7 +415,7 @@ private:
 
     void runThread()
     {
-        juce::WorkgroupToken token;
+        yup::WorkgroupToken token;
         workgroup.join (token);
 
         for (;;)
@@ -440,7 +440,7 @@ struct ThreadPoolSem : public LockFreeMultiThreadedNodePlayer::ThreadPool
     {
     }
 
-    void createThreads (size_t numThreads, juce::AudioWorkgroup workgroupToUse) override
+    void createThreads (size_t numThreads, yup::AudioWorkgroup workgroupToUse) override
     {
         if (threads.size() == numThreads)
             return;
@@ -449,7 +449,7 @@ struct ThreadPoolSem : public LockFreeMultiThreadedNodePlayer::ThreadPool
         semaphore = std::make_unique<SemaphoreType> ((int) numThreads);
         workgroup = workgroupToUse;
 
-        const auto rtOpts = juce::Thread::RealtimeOptions()
+        const auto rtOpts = yup::Thread::RealtimeOptions()
                       .withPriority (10)
                       .withApproximateAudioProcessingTime (player.getBlockSize(), player.getSampleRate());
 
@@ -518,11 +518,11 @@ struct ThreadPoolSem : public LockFreeMultiThreadedNodePlayer::ThreadPool
 private:
     std::vector<std::thread> threads;
     std::unique_ptr<SemaphoreType> semaphore;
-    juce::AudioWorkgroup workgroup;
+    yup::AudioWorkgroup workgroup;
 
     void runThread()
     {
-        juce::WorkgroupToken token;
+        yup::WorkgroupToken token;
         workgroup.join (token);
 
         for (;;)
@@ -547,7 +547,7 @@ struct ThreadPoolSemHybrid : public LockFreeMultiThreadedNodePlayer::ThreadPool
     {
     }
 
-    void createThreads (size_t numThreads, juce::AudioWorkgroup workgroupToUse) override
+    void createThreads (size_t numThreads, yup::AudioWorkgroup workgroupToUse) override
     {
         if (threads.size() == numThreads)
             return;
@@ -556,7 +556,7 @@ struct ThreadPoolSemHybrid : public LockFreeMultiThreadedNodePlayer::ThreadPool
         semaphore = std::make_unique<SemaphoreType> ((int) numThreads);
         workgroup = workgroupToUse;
 
-        const auto rtOpts = juce::Thread::RealtimeOptions()
+        const auto rtOpts = yup::Thread::RealtimeOptions()
                       .withPriority (10)
                       .withApproximateAudioProcessingTime (player.getBlockSize(), player.getSampleRate());
 
@@ -650,14 +650,14 @@ struct ThreadPoolSemHybrid : public LockFreeMultiThreadedNodePlayer::ThreadPool
 private:
     std::vector<std::thread> threads;
     std::unique_ptr<SemaphoreType> semaphore;
-    juce::AudioWorkgroup workgroup;
+    yup::AudioWorkgroup workgroup;
 
     void runThread()
     {
-        juce::WorkgroupToken token;
+        yup::WorkgroupToken token;
         workgroup.join (token);
         
-        juce::FloatVectorOperations::disableDenormalisedNumberSupport();
+        yup::FloatVectorOperations::disableDenormalisedNumberSupport();
 
         for (;;)
         {

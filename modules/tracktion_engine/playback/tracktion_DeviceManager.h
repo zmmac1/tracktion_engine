@@ -16,11 +16,11 @@ class HostedAudioDeviceInterface;
 //==============================================================================
 /**
 */
-class DeviceManager     : public juce::ChangeBroadcaster,
-                          public juce::ChangeListener,
-                          private juce::AudioIODeviceCallback,
-                          private juce::AsyncUpdater,
-                          private juce::Timer
+class DeviceManager     : public yup::ChangeBroadcaster,
+                          public yup::ChangeListener,
+                          private yup::AudioIODeviceCallback,
+                          private yup::AsyncUpdater,
+                          private yup::Timer
 {
     friend class Engine;
     DeviceManager (Engine&);
@@ -106,27 +106,27 @@ public:
     int getNumOutputDevices() const;
     OutputDevice* getOutputDeviceAt (int index) const;
 
-    InputDevice* findInputDeviceForID (const juce::String& id) const;
-    InputDevice* findInputDeviceWithName (const juce::String& name) const;
-    std::shared_ptr<MidiInputDevice> findMidiInputDeviceForID (const juce::String& id) const;
+    InputDevice* findInputDeviceForID (const yup::String& id) const;
+    InputDevice* findInputDeviceWithName (const yup::String& name) const;
+    std::shared_ptr<MidiInputDevice> findMidiInputDeviceForID (const yup::String& id) const;
 
-    OutputDevice* findOutputDeviceForID (const juce::String& id) const;
-    OutputDevice* findOutputDeviceWithName (const juce::String& name) const;
+    OutputDevice* findOutputDeviceForID (const yup::String& id) const;
+    OutputDevice* findOutputDeviceWithName (const yup::String& name) const;
 
     //==============================================================================
     int getNumWaveOutDevices() const                            { return waveOutputs.size(); }
     WaveOutputDevice* getWaveOutDevice (int index) const        { return waveOutputs[index]; }
 
-    void setDefaultWaveOutDevice (juce::String deviceID);
+    void setDefaultWaveOutDevice (yup::String deviceID);
     WaveOutputDevice* getDefaultWaveOutDevice() const;
-    juce::String getDefaultWaveOutDeviceID() const              { return defaultWaveOutID; }
+    yup::String getDefaultWaveOutDeviceID() const              { return defaultWaveOutID; }
 
     int getNumWaveInDevices() const                             { return waveInputs.size(); }
     WaveInputDevice* getWaveInDevice (int index) const          { return waveInputs[index]; }
 
-    void setDefaultWaveInDevice (juce::String deviceID);
+    void setDefaultWaveInDevice (yup::String deviceID);
     WaveInputDevice* getDefaultWaveInDevice() const;
-    juce::String getDefaultWaveInDeviceID() const               { return defaultWaveInID; }
+    yup::String getDefaultWaveInDeviceID() const               { return defaultWaveInID; }
 
     std::vector<WaveOutputDevice*> getWaveOutputDevices();
     std::vector<WaveInputDevice*> getWaveInputDevices();
@@ -140,8 +140,8 @@ public:
     void setAllWaveInputsToNumChannels (uint32_t numChannels);
     void setAllWaveOutputsToNumChannels (uint32_t numChannels);
 
-    juce::StringArray getPossibleChannelGroupsForDevice (WaveOutputDevice&, uint32_t maxNumChannels) const;
-    juce::StringArray getPossibleChannelGroupsForDevice (WaveInputDevice&, uint32_t maxNumChannels) const;
+    yup::StringArray getPossibleChannelGroupsForDevice (WaveOutputDevice&, uint32_t maxNumChannels) const;
+    yup::StringArray getPossibleChannelGroupsForDevice (WaveInputDevice&, uint32_t maxNumChannels) const;
 
     //==============================================================================
     /** Wave device channel-grouping layout presets.
@@ -155,42 +155,42 @@ public:
     */
 
     /** Returns the current channel grouping as an XML layout (an AUDIODEVICE_LAYOUT element). */
-    juce::XmlElement getCurrentWaveDeviceLayout() const;
+    yup::XmlElement getCurrentWaveDeviceLayout() const;
 
     /** Applies a previously captured layout to the current device, rebuilding the wave devices. */
-    void applyWaveDeviceLayout (const juce::XmlElement&);
+    void applyWaveDeviceLayout (const yup::XmlElement&);
 
     /** Returns the names of all stored channel-layout presets. */
-    juce::StringArray getWaveDeviceLayoutPresetNames();
+    yup::StringArray getWaveDeviceLayoutPresetNames();
 
     /** Stores the current channel grouping as a named preset (overwriting any preset with the same name). */
-    void saveWaveDeviceLayoutPreset (const juce::String& name);
+    void saveWaveDeviceLayoutPreset (const yup::String& name);
 
     /** Recalls a named preset and applies it to the current device. */
-    void loadWaveDeviceLayoutPreset (const juce::String& name);
+    void loadWaveDeviceLayoutPreset (const yup::String& name);
 
     /** Deletes a named preset. */
-    void deleteWaveDeviceLayoutPreset (const juce::String& name);
+    void deleteWaveDeviceLayoutPreset (const yup::String& name);
 
     //==============================================================================
     int getNumMidiOutDevices() const                            { return (int) midiOutputs.size(); }
     MidiOutputDevice* getMidiOutDevice (int index) const        { return index >= 0 && index < (int) midiOutputs.size() ? midiOutputs[(size_t) index].get() : nullptr; }
 
-    void setDefaultMidiOutDevice (juce::String deviceID);
+    void setDefaultMidiOutDevice (yup::String deviceID);
     MidiOutputDevice* getDefaultMidiOutDevice() const;
-    juce::String getDefaultMidiOutDeviceID() const              { return defaultMidiOutID; }
+    yup::String getDefaultMidiOutDeviceID() const              { return defaultMidiOutID; }
 
     int getNumMidiInDevices() const;
     std::shared_ptr<MidiInputDevice> getMidiInDevice (int index) const;
 
     std::vector<std::shared_ptr<MidiInputDevice>> getMidiInDevices() const;
 
-    void setDefaultMidiInDevice (juce::String deviceID);
+    void setDefaultMidiInDevice (yup::String deviceID);
     MidiInputDevice* getDefaultMidiInDevice() const;
-    juce::String getDefaultMidiInDeviceID() const               { return defaultMidiInID; }
+    yup::String getDefaultMidiInDeviceID() const               { return defaultMidiInID; }
 
-    void injectMIDIMessageToDefaultDevice (const juce::MidiMessage&);
-    void broadcastMessageToAllVirtualDevices (PhysicalMidiInputDevice&, const juce::MidiMessage&);
+    void injectMIDIMessageToDefaultDevice (const yup::MidiMessage&);
+    void broadcastMessageToAllVirtualDevices (PhysicalMidiInputDevice&, const yup::MidiMessage&);
 
     void broadcastStreamTimeToMidiDevices (double streamTime);
     bool shouldSendMidiTimecode() const noexcept                { return sendMidiTimecode; }
@@ -208,13 +208,13 @@ public:
     //==============================================================================
     void checkDefaultDevicesAreValid();
 
-    static juce::String getDefaultAudioOutDeviceName (bool translated);
-    static juce::String getDefaultMidiOutDeviceName (bool translated);
+    static yup::String getDefaultAudioOutDeviceName (bool translated);
+    static yup::String getDefaultMidiOutDeviceName (bool translated);
 
-    static juce::String getDefaultAudioInDeviceName (bool translated);
-    static juce::String getDefaultMidiInDeviceName (bool translated);
+    static yup::String getDefaultAudioInDeviceName (bool translated);
+    static yup::String getDefaultMidiInDeviceName (bool translated);
 
-    juce::Result createVirtualMidiDevice (const juce::String& name);
+    yup::Result createVirtualMidiDevice (const yup::String& name);
     void deleteVirtualMidiDevice (VirtualMidiInputDevice&);
 
     Engine& engine;
@@ -225,10 +225,10 @@ public:
         system audio devices in plugin builds.
         @see EngineBehaviour::addSystemAudioIODeviceTypes
     */
-    struct TracktionEngineAudioDeviceManager  : public juce::AudioDeviceManager
+    struct TracktionEngineAudioDeviceManager  : public yup::AudioDeviceManager
     {
         TracktionEngineAudioDeviceManager (Engine&);
-        void createAudioDeviceTypes (juce::OwnedArray<juce::AudioIODeviceType>&) override;
+        void createAudioDeviceTypes (yup::OwnedArray<yup::AudioIODeviceType>&) override;
 
         Engine& engine;
     };
@@ -241,8 +241,8 @@ public:
     std::vector<std::shared_ptr<MidiInputDevice>> midiInputs; // Only thread-safe from the message thread
     std::vector<std::shared_ptr<MidiOutputDevice>> midiOutputs;
 
-    juce::OwnedArray<WaveInputDevice> waveInputs;
-    juce::OwnedArray<WaveOutputDevice> waveOutputs;
+    yup::OwnedArray<WaveInputDevice> waveInputs;
+    yup::OwnedArray<WaveOutputDevice> waveOutputs;
 
     //==============================================================================
     void addContext (EditPlaybackContext*);
@@ -253,10 +253,10 @@ public:
         This can be used to set a limiter or similar on the whole ouput.
         It shouldn't be used for musical effects.
     */
-    void setGlobalOutputAudioProcessor (std::unique_ptr<juce::AudioProcessor>);
+    void setGlobalOutputAudioProcessor (std::unique_ptr<yup::AudioProcessor>);
 
     /** Returns a previously set globalOutputAudioProcessor. */
-    juce::AudioProcessor* getGlobalOutputAudioProcessor() const     { return globalOutputAudioProcessor.get(); }
+    yup::AudioProcessor* getGlobalOutputAudioProcessor() const     { return globalOutputAudioProcessor.get(); }
 
     /** If this is set, it will get called (possibly on the midi thread) when incoming
         messages seem to be unused. May want to use it to warn the user.
@@ -276,7 +276,7 @@ private:
     int maxBlockSize = 0;
 
     int defaultNumInputChannelsToOpen = 512, defaultNumOutputChannelsToOpen = 512;
-    juce::String defaultWaveOutID, defaultMidiOutID, defaultWaveInID, defaultMidiInID;
+    yup::String defaultWaveOutID, defaultMidiOutID, defaultWaveInID, defaultMidiInID;
     std::vector<int> activeOutputChannels;
 
     int midiRescanIntervalSeconds = 4;
@@ -291,10 +291,10 @@ private:
     std::unique_ptr<PrepareToStartCaller> prepareToStartCaller;
 
     std::shared_mutex contextLock;
-    juce::Array<EditPlaybackContext*> activeContexts;
-    std::unique_ptr<juce::AudioProcessor> globalOutputAudioProcessor;
-    juce::HeapBlock<const float*> inputChannelsScratch;
-    juce::HeapBlock<float*> outputChannelsScratch;
+    yup::Array<EditPlaybackContext*> activeContexts;
+    std::unique_ptr<yup::AudioProcessor> globalOutputAudioProcessor;
+    yup::HeapBlock<const float*> inputChannelsScratch;
+    yup::HeapBlock<float*> outputChannelsScratch;
 
     mutable std::shared_mutex midiInputsMutex;
 
@@ -319,12 +319,12 @@ private:
 
     void deviceListChanged (bool);
     void handleAsyncUpdate() override;
-    void changeListenerCallback (juce::ChangeBroadcaster*) override;
+    void changeListenerCallback (yup::ChangeBroadcaster*) override;
 
     void audioDeviceIOCallbackWithContext (const float* const* inputChannelData, int totalNumInputChannels,
                                            float* const* outputChannelData, int totalNumOutputChannels, int numSamples,
-                                           const juce::AudioIODeviceCallbackContext&) override;
-    void audioDeviceAboutToStart (juce::AudioIODevice*) override;
+                                           const yup::AudioIODeviceCallbackContext&) override;
+    void audioDeviceAboutToStart (yup::AudioIODevice*) override;
     void audioDeviceStopped() override;
     void prepareToStart();
 
@@ -339,7 +339,7 @@ private:
     bool isDeviceInChannelStereo (int) const;
     bool isDeviceInEnabled (int);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeviceManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeviceManager)
 };
 
 } // namespace tracktion::inline engine

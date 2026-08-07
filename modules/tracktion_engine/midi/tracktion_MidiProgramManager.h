@@ -18,31 +18,31 @@ class MidiProgramManager
 public:
     MidiProgramManager (Engine&);
 
-    juce::StringArray getMidiProgramSetNames();
-    juce::String getProgramName (int set, int bank, int program);
-    juce::String getBankName (int set, int bank);
+    yup::StringArray getMidiProgramSetNames();
+    yup::String getProgramName (int set, int bank, int program);
+    yup::String getBankName (int set, int bank);
     int getBankID (int set, int bank);
     void setBankID (int set, int bank, int id);
-    void setProgramName (int set, int bank, int program, const juce::String& newName);
-    void setBankName (int set, int bank, const juce::String& newName);
+    void setProgramName (int set, int bank, int program, const yup::String& newName);
+    void setBankName (int set, int bank, const yup::String& newName);
     void clearProgramName (int set, int bank, int program);
-    juce::String getDefaultName (int bank, int program, bool zeroBased);
-    juce::String getDefaultCustomName();
-    int getSetIndex (const juce::String& setName);
+    yup::String getDefaultName (int bank, int program, bool zeroBased);
+    yup::String getDefaultCustomName();
+    int getSetIndex (const yup::String& setName);
     bool isZeroBased (int set);
     void setZeroBased (int set, bool zeroBased);
 
-    bool doesSetExist (const juce::String& name) const noexcept;
+    bool doesSetExist (const yup::String& name) const noexcept;
     bool canEditProgramSet (int set) const noexcept;
     bool canDeleteProgramSet (int set) const noexcept;
-    void addNewSet (const juce::String& name);
-    void addNewSet (const juce::String& name, const juce::XmlElement&);
+    void addNewSet (const yup::String& name);
+    void addNewSet (const yup::String& name, const yup::XmlElement&);
     void deleteSet (int set);
-    bool importSet (int set, const juce::File&);
-    bool exportSet (int set, const juce::File&);
+    bool importSet (int set, const yup::File&);
+    bool exportSet (int set, const yup::File&);
 
-    static juce::StringArray getListOfPresets (Engine&);
-    juce::String getPresetXml (juce::String presetName);
+    static yup::StringArray getListOfPresets (Engine&);
+    yup::String getPresetXml (yup::String presetName);
 
     void saveAll();
 
@@ -51,28 +51,28 @@ public:
 protected:
     struct MidiBank
     {
-        juce::XmlElement* createXml();
-        void updateFromXml (const juce::XmlElement&);
+        yup::XmlElement* createXml();
+        void updateFromXml (const yup::XmlElement&);
 
-        juce::String name;
+        yup::String name;
         int id = 0;
-        std::map<int, juce::String> programNames;
+        std::map<int, yup::String> programNames;
     };
 
     struct MidiProgramSet
     {
         MidiProgramSet();
-        juce::XmlElement* createXml();
-        void updateFromXml (const juce::XmlElement&);
+        yup::XmlElement* createXml();
+        void updateFromXml (const yup::XmlElement&);
 
-        juce::String name;
+        yup::String name;
         bool zeroBased = true;
         MidiBank midiBanks[16];
     };
 
-    juce::OwnedArray<MidiProgramSet> programSets;
+    yup::OwnedArray<MidiProgramSet> programSets;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiProgramManager)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiProgramManager)
 };
 
 } // namespace tracktion::inline engine

@@ -28,8 +28,8 @@ public:
         ~ScopedTrackUnsoloer();
 
         Edit& edit;
-        juce::BigInteger soloed, soloIsolated;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedTrackUnsoloer)
+        yup::BigInteger soloed, soloIsolated;
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedTrackUnsoloer)
     };
 
     /** Temporarily solo isolates and unmutes some tracks. Useful for rendering */
@@ -40,23 +40,23 @@ public:
 
         Edit& edit;
         Track::Array tracks;
-        juce::BigInteger muted, notSoloIsolated;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedTrackSoloIsolator)
+        yup::BigInteger muted, notSoloIsolated;
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedTrackSoloIsolator)
     };
 
     /** Temporarily disables a range of plugins in a track. */
     struct ScopedPluginDisabler
     {
-        ScopedPluginDisabler (Track& track, juce::Range<int> pluginsToDisable);
+        ScopedPluginDisabler (Track& track, yup::Range<int> pluginsToDisable);
         ~ScopedPluginDisabler();
 
     private:
         Track& track;
-        juce::Range<int> indexes;
-        juce::BigInteger enabled;
+        yup::Range<int> indexes;
+        yup::BigInteger enabled;
 
         void enablePlugins (bool enable);
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedPluginDisabler)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedPluginDisabler)
     };
 
     /** Freezes a track if this plugin changes track. */
@@ -68,7 +68,7 @@ public:
         EditItemID trackID;
         FreezePointPlugin& owner;
         bool wasFrozen;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedTrackFreezer)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedTrackFreezer)
     };
 
     static std::unique_ptr<ScopedTrackFreezer> createTrackFreezer (const Plugin::Ptr&);
@@ -77,16 +77,16 @@ public:
     ~FreezePointPlugin() override;
 
     static const char* getPluginName()      { return NEEDS_TRANS("Freeze Point"); }
-    static juce::ValueTree create();
+    static yup::ValueTree create();
 
     //==============================================================================
     static const char* xmlTypeName;
 
     void initialiseFully() override;
-    juce::String getName() const override               { return TRANS("Freeze"); }
-    juce::String getPluginType() override               { return xmlTypeName; }
-    juce::String getTooltip() override                  { return TRANS("Track will freeze up to this plugin"); }
-    juce::String getSelectableDescription() override    { return TRANS("Freeze Point Plugin"); }
+    yup::String getName() const override               { return TRANS("Freeze"); }
+    yup::String getPluginType() override               { return xmlTypeName; }
+    yup::String getTooltip() override                  { return TRANS("Track will freeze up to this plugin"); }
+    yup::String getSelectableDescription() override    { return TRANS("Freeze Point Plugin"); }
     bool producesAudioWhenNoAudioInput() override       { return false; }
     bool canBeAddedToClip() override                    { return false; }
     bool canBeAddedToRack() override                    { return false; }
@@ -108,7 +108,7 @@ private:
 
     void updateTrackFreezeStatus();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FreezePointPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FreezePointPlugin)
 };
 
 } // namespace tracktion::inline engine

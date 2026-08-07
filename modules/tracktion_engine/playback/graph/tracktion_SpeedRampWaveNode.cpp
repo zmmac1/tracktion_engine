@@ -17,7 +17,7 @@ struct SpeedRampWaveNode::PerChannelState
 {
     PerChannelState()    { resampler.reset(); }
 
-    juce::LagrangeInterpolator resampler;
+    yup::LagrangeInterpolator resampler;
     float lastSample = 0;
 };
 
@@ -118,7 +118,7 @@ void SpeedRampWaveNode::process (ProcessContext& pc)
 //==============================================================================
 int64_t SpeedRampWaveNode::editTimeToFileSample (TimePosition editTime) const noexcept
 {
-    editTime = juce::jlimit (speedFadeDescription.inTimeRange.getStart(),
+    editTime = yup::jlimit (speedFadeDescription.inTimeRange.getStart(),
                              speedFadeDescription.outTimeRange.getEnd(),
                              editTime);
 
@@ -170,7 +170,7 @@ bool SpeedRampWaveNode::updateFileSampleRate()
     return true;
 }
 
-void SpeedRampWaveNode::processSection (ProcessContext& pc, juce::Range<int64_t> timelineRange)
+void SpeedRampWaveNode::processSection (ProcessContext& pc, yup::Range<int64_t> timelineRange)
 {
     const auto sectionEditTime = tracktion::timeRangeFromSamples (timelineRange, outputSampleRate);
 
@@ -321,21 +321,21 @@ double SpeedRampWaveNode::rescale (AudioFadeCurve::Type t, double proportion, bo
     switch (t)
     {
         case AudioFadeCurve::convex:
-            return rampUp ? (-2.0 * std::cos ((juce::MathConstants<double>::pi * proportion) / 2.0)) / juce::MathConstants<double>::pi + 1.0
-                          : 1.0 - ((-2.0 * std::cos ((juce::MathConstants<double>::pi * (proportion - 1.0)) / 2.0)) / juce::MathConstants<double>::pi + 1.0);
+            return rampUp ? (-2.0 * std::cos ((yup::MathConstants<double>::pi * proportion) / 2.0)) / yup::MathConstants<double>::pi + 1.0
+                          : 1.0 - ((-2.0 * std::cos ((yup::MathConstants<double>::pi * (proportion - 1.0)) / 2.0)) / yup::MathConstants<double>::pi + 1.0);
 
         case AudioFadeCurve::concave:
-            return rampUp ? proportion - (2.0 * std::sin ((juce::MathConstants<double>::pi * proportion) / 2.0)) / juce::MathConstants<double>::pi + (2.0 / juce::MathConstants<double>::pi)
-                          : ((2.0 * std::sin ((juce::MathConstants<double>::pi * (proportion + 1.0)) / 2.0)) / juce::MathConstants<double>::pi) + proportion - (2.0 / juce::MathConstants<double>::pi);
+            return rampUp ? proportion - (2.0 * std::sin ((yup::MathConstants<double>::pi * proportion) / 2.0)) / yup::MathConstants<double>::pi + (2.0 / yup::MathConstants<double>::pi)
+                          : ((2.0 * std::sin ((yup::MathConstants<double>::pi * (proportion + 1.0)) / 2.0)) / yup::MathConstants<double>::pi) + proportion - (2.0 / yup::MathConstants<double>::pi);
 
         case AudioFadeCurve::sCurve:
-            return rampUp ? (proportion / 2.0) - (std::sin (juce::MathConstants<double>::pi * proportion) / (2.0 * juce::MathConstants<double>::pi)) + 0.5
-                          : std::sin (juce::MathConstants<double>::pi * proportion) / (2.0 * juce::MathConstants<double>::pi) + (proportion / 2.0);
+            return rampUp ? (proportion / 2.0) - (std::sin (yup::MathConstants<double>::pi * proportion) / (2.0 * yup::MathConstants<double>::pi)) + 0.5
+                          : std::sin (yup::MathConstants<double>::pi * proportion) / (2.0 * yup::MathConstants<double>::pi) + (proportion / 2.0);
 
         case AudioFadeCurve::linear:
         default:
-            return rampUp ? (juce::square (proportion) * 0.5) + 0.5
-                          : ((-juce::square (proportion - 1.0)) * 0.5) + 0.5;
+            return rampUp ? (yup::square (proportion) * 0.5) + 0.5
+                          : ((-yup::square (proportion - 1.0)) * 0.5) + 0.5;
     }
 }
 

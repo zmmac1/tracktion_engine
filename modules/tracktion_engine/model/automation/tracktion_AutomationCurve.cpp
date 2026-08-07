@@ -18,11 +18,11 @@ AutomationCurve::AutomationCurve (Edit& e, TimeBase tb)
 }
 
 AutomationCurve::AutomationCurve (Edit& e, TimeBase tb,
-                                  const juce::ValueTree& p, const juce::ValueTree& v)
+                                  const yup::ValueTree& p, const yup::ValueTree& v)
     : edit (e), timeBase (tb), parentState (p), state (v)
 {
     if (! state.isValid())
-        state = juce::ValueTree (IDs::AUTOMATIONCURVE);
+        state = yup::ValueTree (IDs::AUTOMATIONCURVE);
 
     bypass.referTo (state, IDs::bypass, nullptr);
 }
@@ -34,7 +34,7 @@ AutomationCurve::AutomationCurve (const AutomationCurve& o)
     bypass.referTo (state, IDs::bypass, nullptr);
 }
 
-void AutomationCurve::setState (const juce::ValueTree& v)
+void AutomationCurve::setState (const yup::ValueTree& v)
 {
     state = v;
     jassert (state.hasType (IDs::AUTOMATIONCURVE));
@@ -42,17 +42,17 @@ void AutomationCurve::setState (const juce::ValueTree& v)
     bypass.referTo (state, IDs::bypass, nullptr);
 }
 
-void AutomationCurve::setParentState (const juce::ValueTree& v)
+void AutomationCurve::setParentState (const yup::ValueTree& v)
 {
     parentState = v;
 }
 
-void AutomationCurve::setParameterID (juce::String paramID)
+void AutomationCurve::setParameterID (yup::String paramID)
 {
     state.setProperty (IDs::paramID, std::move (paramID), nullptr);
 }
 
-juce::String AutomationCurve::getParameterID() const
+yup::String AutomationCurve::getParameterID() const
 {
     return state[IDs::paramID];
 }
@@ -265,7 +265,7 @@ static double getDistanceFromLine (double& x, double& y,
     auto dy = y2 - y1;
     auto length = hypot (dx, dy);
 
-    auto alongLine = (length > 0) ? juce::jlimit (0.0, 1.0, ((x - x1) * dx + (y - y1) * dy) / (length * length))
+    auto alongLine = (length > 0) ? yup::jlimit (0.0, 1.0, ((x - x1) * dx + (y - y1) * dy) / (length * length))
                                   : ((x < x1) ? 0.0 : 1.0);
 
     auto nearX = x1 + (x2 - x1) * alongLine;
@@ -284,7 +284,7 @@ static double getDistanceFromLine (double& x, double& y,
 
 
 //==============================================================================
-juce::ValueTree AutomationCurve::AutomationPoint::toValueTree() const
+yup::ValueTree AutomationCurve::AutomationPoint::toValueTree() const
 {
     return createValueTree (IDs::POINT,
                             IDs::t, toUnderlying (time),
@@ -337,7 +337,7 @@ EditPosition AutomationCurve::createPosition (double rawPos) const
     return BeatPosition::fromBeats (rawPos);
 }
 
-EditPosition AutomationCurve::getPosition (const juce::ValueTree& pointState) const
+EditPosition AutomationCurve::getPosition (const yup::ValueTree& pointState) const
 {
     assert (pointState.hasType (IDs::POINT));
     return createPosition (static_cast<double> (pointState[IDs::t]));
@@ -404,11 +404,11 @@ void AutomationCurve::setPointTime  (int index, TimePosition newTime, juce::Undo
 void AutomationCurve::setPointValue (int index, float newValue, juce::UndoManager* um)          { state.getChild (index).setProperty (IDs::v, newValue, um); }
 void AutomationCurve::setCurveValue (int index, float newCurve, juce::UndoManager* um)          { state.getChild (index).setProperty (IDs::c, newCurve, um); }
 
-int AutomationCurve::movePoint (int index, EditPosition newPos, float newValue, std::optional<juce::Range<float>> valueLimits, bool removeInterveningPoints, juce::UndoManager* um)
+int AutomationCurve::movePoint (int index, EditPosition newPos, float newValue, std::optional<yup::Range<float>> valueLimits, bool removeInterveningPoints, juce::UndoManager* um)
 {
     auto& ts = edit.tempoSequence;
 
-    if (juce::isPositiveAndBelow (index, getNumPoints()))
+    if (yup::isPositiveAndBelow (index, getNumPoints()))
     {
         if (removeInterveningPoints)
         {
@@ -476,7 +476,7 @@ int AutomationCurve::movePoint (int index, EditPosition newPos, float newValue, 
 
 int AutomationCurve::movePoint (AutomatableParameter& param, int index, TimePosition newTime, float newValue, bool removeInterveningPoints, juce::UndoManager* um)
 {
-    if (juce::isPositiveAndBelow (index, getNumPoints()))
+    if (yup::isPositiveAndBelow (index, getNumPoints()))
     {
         if (removeInterveningPoints)
         {
@@ -548,9 +548,9 @@ void AutomationCurve::clear (juce::UndoManager* um)
     state.removeAllChildren (um);
 }
 
-juce::Array<AutomationCurve::AutomationPoint> AutomationCurve::getPointsInRegion (TimeRange range) const
+yup::Array<AutomationCurve::AutomationPoint> AutomationCurve::getPointsInRegion (TimeRange range) const
 {
-    juce::Array<AutomationPoint> results;
+    yup::Array<AutomationPoint> results;
     auto numPoints = getNumPoints();
 
     for (int i = 0; i < numPoints; ++i)
@@ -566,9 +566,9 @@ juce::Array<AutomationCurve::AutomationPoint> AutomationCurve::getPointsInRegion
     return results;
 }
 
-juce::Array<AutomationCurve::AutomationPoint> AutomationCurve::getPointsInRegion (EditTimeRange range) const
+yup::Array<AutomationCurve::AutomationPoint> AutomationCurve::getPointsInRegion (EditTimeRange range) const
 {
-    juce::Array<AutomationPoint> results;
+    yup::Array<AutomationPoint> results;
     auto numPoints = getNumPoints();
     auto& ts = edit.tempoSequence;
 
@@ -847,24 +847,24 @@ void AutomationCurve::simplify (TimeRange range, double minTimeDifference, float
     simplify (range, TimeDuration::fromSeconds (minTimeDifference), minValueDifference, um);
 }
 
-void AutomationCurve::rescaleValues (float factor, EditTimeRange range, juce::Range<float> limits, juce::UndoManager* um)
+void AutomationCurve::rescaleValues (float factor, EditTimeRange range, yup::Range<float> limits, juce::UndoManager* um)
 {
     auto& ts = edit.tempoSequence;
 
     if (factor != 1.0f)
         for (int i = getNumPoints(); --i >= 0;)
             if (contains (range, getPointPosition (i), ts))
-                setPointValue (i, juce::jlimit (limits.getStart(), limits.getEnd(), getPointValue (i) * factor), um);
+                setPointValue (i, yup::jlimit (limits.getStart(), limits.getEnd(), getPointValue (i) * factor), um);
 }
 
-void AutomationCurve::addToValues (float valueDelta, EditTimeRange range, juce::Range<float> limits, juce::UndoManager* um)
+void AutomationCurve::addToValues (float valueDelta, EditTimeRange range, yup::Range<float> limits, juce::UndoManager* um)
 {
     auto& ts = edit.tempoSequence;
 
     if (valueDelta != 0)
         for (int i = getNumPoints(); --i >= 0;)
             if (contains (range, getPointPosition (i), ts))
-                setPointValue (i, juce::jlimit (limits.getStart(), limits.getEnd(), getPointValue (i) + valueDelta), um);
+                setPointValue (i, yup::jlimit (limits.getStart(), limits.getEnd(), getPointValue (i) + valueDelta), um);
 }
 
 void AutomationCurve::rescaleAllPositions (double factor, juce::UndoManager* um)
@@ -876,20 +876,20 @@ void AutomationCurve::rescaleAllPositions (double factor, juce::UndoManager* um)
                                             um);
 }
 
-void AutomationCurve::rescaleValues (float factor, TimeRange range, juce::Range<float> limits, juce::UndoManager* um)
+void AutomationCurve::rescaleValues (float factor, TimeRange range, yup::Range<float> limits, juce::UndoManager* um)
 {
     if (factor != 1.0f)
         for (int i = getNumPoints(); --i >= 0;)
             if (range.contains (getPointTime (i)))
-                setPointValue (i, juce::jlimit (limits.getStart(), limits.getEnd(), getPointValue (i) * factor), um);
+                setPointValue (i, yup::jlimit (limits.getStart(), limits.getEnd(), getPointValue (i) * factor), um);
 }
 
-void AutomationCurve::addToValues (float valueDelta, TimeRange range, juce::Range<float> limits, juce::UndoManager* um)
+void AutomationCurve::addToValues (float valueDelta, TimeRange range, yup::Range<float> limits, juce::UndoManager* um)
 {
     if (valueDelta != 0)
         for (int i = getNumPoints(); --i >= 0;)
             if (range.contains (getPointTime (i)))
-                setPointValue (i, juce::jlimit (limits.getStart(), limits.getEnd(), getPointValue (i) + valueDelta), um);
+                setPointValue (i, yup::jlimit (limits.getStart(), limits.getEnd(), getPointValue (i) + valueDelta), um);
 }
 
 CurvePoint AutomationCurve::getBezierPoint (int index) const noexcept
@@ -898,7 +898,7 @@ CurvePoint AutomationCurve::getBezierPoint (int index) const noexcept
     auto y1 = getPointValue (index);
     auto x2 = toUnderlying (getPointPosition  (index + 1));
     auto y2 = getPointValue (index + 1);
-    auto c  = juce::jlimit (-1.0f, 1.0f, getPointCurve (index) * 2.0f);
+    auto c  = yup::jlimit (-1.0f, 1.0f, getPointCurve (index) * 2.0f);
 
     auto [x, y] = core::getBezierPoint (x1, y1, x2, y2, c);
 
@@ -995,19 +995,19 @@ void AutomationCurve::insertSpace (AutomatableParameter& param, TimePosition tim
                        getPointTime (k) + length,
                        getPointValue (k), false, um);
 
-    if (! juce::approximatelyEqual (valueAtInsertionTime, getValueAt (time, defaultValue)))
+    if (! yup::approximatelyEqual (valueAtInsertionTime, getValueAt (time, defaultValue)))
         addPoint (time, valueAtInsertionTime, 0.0f, um);
 
-    if (! juce::approximatelyEqual (valueAtInsertionTime, getValueAt (time + length, defaultValue)))
+    if (! yup::approximatelyEqual (valueAtInsertionTime, getValueAt (time + length, defaultValue)))
         addPoint (time + length, valueAtInsertionTime, 0.0f, um);
 }
 
-void AutomationCurve::removeAllAutomationCurvesRecursively (const juce::ValueTree& v)
+void AutomationCurve::removeAllAutomationCurvesRecursively (const yup::ValueTree& v)
 {
     for (int i = v.getNumChildren(); --i >= 0;)
     {
         if (v.getChild (i).hasType (IDs::AUTOMATIONCURVE))
-            juce::ValueTree (v).removeChild (i, nullptr);
+            yup::ValueTree (v).removeChild (i, nullptr);
         else
             removeAllAutomationCurvesRecursively (v.getChild (i));
     }
@@ -1016,10 +1016,10 @@ void AutomationCurve::removeAllAutomationCurvesRecursively (const juce::ValueTre
 
 //==============================================================================
 int simplify (AutomationCurve& curve, int strength,
-              EditTimeRange time, juce::Range<float> valueRange,
+              EditTimeRange time, yup::Range<float> valueRange,
               juce::UndoManager* um)
 {
-    jassert (juce::isPositiveAndNotGreaterThan (strength, 2));
+    jassert (yup::isPositiveAndNotGreaterThan (strength, 2));
 
     double td = 0.08;
     float vd = 0.06f;

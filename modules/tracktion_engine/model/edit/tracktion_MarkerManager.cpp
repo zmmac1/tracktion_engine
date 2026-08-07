@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-MarkerManager::MarkerManager (Edit& e, const juce::ValueTree& v)
+MarkerManager::MarkerManager (Edit& e, const yup::ValueTree& v)
     : edit (e), state (v)
 {
     state.addListener (this);
@@ -21,10 +21,10 @@ MarkerManager::~MarkerManager()
     state.removeListener (this);
 }
 
-juce::ReferenceCountedArray<MarkerClip> MarkerManager::getMarkers() const
+yup::ReferenceCountedArray<MarkerClip> MarkerManager::getMarkers() const
 {
     CRASH_TRACER
-    juce::ReferenceCountedArray<MarkerClip> results;
+    yup::ReferenceCountedArray<MarkerClip> results;
 
     if (auto mt = edit.getMarkerTrack())
         for (auto clip : mt->getClips())
@@ -37,7 +37,7 @@ juce::ReferenceCountedArray<MarkerClip> MarkerManager::getMarkers() const
 
 int MarkerManager::getNextUniqueID (int start)
 {
-    juce::SortedSet<int> uniqueIDs;
+    yup::SortedSet<int> uniqueIDs;
 
     for (auto m : getMarkers())
         uniqueIDs.add (m->getMarkerID());
@@ -149,15 +149,15 @@ MarkerClip::Ptr MarkerManager::createMarker (int number, TimePosition pos, TimeD
     return createMarker (number, pos, length, getNewMarkerMode(), sm);
 }
 
-void MarkerManager::valueTreeChanged (const juce::ValueTree& v)
+void MarkerManager::valueTreeChanged (const yup::ValueTree& v)
 {
     if (v.hasType (IDs::MARKERTRACK) || v.getParent().hasType (IDs::MARKERTRACK))
         sendChangeMessage();
 }
 
-void MarkerManager::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier&)  { valueTreeChanged (v); }
-void MarkerManager::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree&)              { valueTreeChanged (p); }
-void MarkerManager::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree&, int)       { valueTreeChanged (p); }
-void MarkerManager::valueTreeParentChanged (juce::ValueTree& v)                             { valueTreeChanged (v); }
+void MarkerManager::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier&)  { valueTreeChanged (v); }
+void MarkerManager::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree&)              { valueTreeChanged (p); }
+void MarkerManager::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree&, int)       { valueTreeChanged (p); }
+void MarkerManager::valueTreeParentChanged (yup::ValueTree& v)                             { valueTreeChanged (v); }
 
 } // namespace tracktion::inline engine

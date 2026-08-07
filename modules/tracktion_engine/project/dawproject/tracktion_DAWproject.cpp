@@ -12,7 +12,7 @@ namespace tracktion::inline engine { namespace dawproject {
 
 //==============================================================================
 std::unique_ptr<Edit> parseDAWproject (Engine& engine,
-                                       const juce::File& file,
+                                       const yup::File& file,
                                        ParseOptions options)
 {
     if (! file.existsAsFile())
@@ -26,7 +26,7 @@ std::unique_ptr<Edit> parseDAWproject (Engine& engine,
 }
 
 //==============================================================================
-tl::expected<std::unique_ptr<juce::XmlElement>, juce::String> createDAWproject (Edit& edit,
+tl::expected<std::unique_ptr<yup::XmlElement>, yup::String> createDAWproject (Edit& edit,
                                                                                 WriteOptions options)
 {
     DAWprojectExporter exporter (edit, options);
@@ -34,7 +34,7 @@ tl::expected<std::unique_ptr<juce::XmlElement>, juce::String> createDAWproject (
 }
 
 //==============================================================================
-juce::Result writeDAWprojectFile (const juce::File& file,
+yup::Result writeDAWprojectFile (const yup::File& file,
                                   Edit& edit,
                                   WriteOptions options)
 {

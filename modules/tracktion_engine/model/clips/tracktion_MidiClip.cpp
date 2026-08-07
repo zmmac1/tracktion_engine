@@ -15,8 +15,8 @@ static std::unique_ptr<MidiList> createLoopRangeDefinesAllRepetitionsSequence (M
     const auto loopStartBeats = clip.getLoopStartBeats();
     const auto loopLengthBeats = clip.getLoopLengthBeats();
 
-    const auto extraLoops = juce::roundToInt (std::ceil (clip.getOffsetInBeats() / loopLengthBeats));
-    const auto loopTimes  = juce::roundToInt (std::ceil (clip.getLengthInBeats() / loopLengthBeats)) + extraLoops;
+    const auto extraLoops = yup::roundToInt (std::ceil (clip.getOffsetInBeats() / loopLengthBeats));
+    const auto loopTimes  = yup::roundToInt (std::ceil (clip.getLengthInBeats() / loopLengthBeats)) + extraLoops;
 
     const auto& notes = sourceSequence.getNotes();
     const auto& sysex = sourceSequence.getSysexEvents();
@@ -80,7 +80,7 @@ static std::unique_ptr<MidiList> createLoopRangeDefinesSubsequentRepetitionsSequ
 }
 
 //==============================================================================
-MidiClip::MidiClip (const juce::ValueTree& v, EditItemID id, ClipOwner& targetParent)
+MidiClip::MidiClip (const yup::ValueTree& v, EditItemID id, ClipOwner& targetParent)
     : Clip (v, targetParent, id, Type::midi)
 {
     auto um = getUndoManager();
@@ -111,7 +111,7 @@ MidiClip::MidiClip (const juce::ValueTree& v, EditItemID id, ClipOwner& targetPa
 
     const int loopType = edit.engine.getEngineBehaviour().getDefaultLoopedSequenceType();
     loopedSequenceType.referTo (state, IDs::loopedSequenceType, um,
-                                static_cast<LoopedSequenceType> (juce::jlimit (0, 1, loopType)));
+                                static_cast<LoopedSequenceType> (yup::jlimit (0, 1, loopType)));
     jassert (loopType == int (LoopedSequenceType::loopRangeDefinesAllRepetitions)
              || loopType == int (LoopedSequenceType::loopRangeDefinesSubsequentRepetitions));
 
@@ -224,14 +224,14 @@ void MidiClip::cloneFrom (Clip* c)
 }
 
 //==============================================================================
-juce::String MidiClip::getSelectableDescription()
+yup::String MidiClip::getSelectableDescription()
 {
     return TRANS("MIDI Clip") + " - \"" + getName() + "\"";
 }
 
-juce::Colour MidiClip::getDefaultColour() const
+yup::Color MidiClip::getDefaultColor() const
 {
-    return juce::Colours::red.withHue (3.0f / 9.0f);
+    return yup::Colors::red.withHue (3.0f / 9.0f);
 }
 
 bool MidiClip::usesGrooveStrength() const
@@ -328,7 +328,7 @@ void MidiClip::trimBeyondEnds (bool beyondStart, bool beyondEnd, juce::UndoManag
     }
 }
 
-void MidiClip::legatoNote (MidiNote& note, const juce::Array<MidiNote*>& notesToUse,
+void MidiClip::legatoNote (MidiNote& note, const yup::Array<MidiNote*>& notesToUse,
                            const BeatPosition maxEndBeat, juce::UndoManager& um)
 {
     // this looks rather convoluted but must account for various edge cases in order to behave in a similar way to Live
@@ -369,7 +369,7 @@ void MidiClip::legatoNote (MidiNote& note, const juce::Array<MidiNote*>& notesTo
 }
 
 //==============================================================================
-MidiList* MidiClip::getMidiListForState (const juce::ValueTree& v)
+MidiList* MidiClip::getMidiListForState (const yup::ValueTree& v)
 {
     for (int i = channelSequence.size(); --i >= 0;)
         if (auto ml = channelSequence.getUnchecked (i))
@@ -447,7 +447,7 @@ void MidiClip::scaleVerticallyToFit()
     }
 }
 
-void MidiClip::addTake (juce::MidiMessageSequence& ms,
+void MidiClip::addTake (yup::MidiMessageSequence& ms,
                         MidiList::NoteAutomationType automationType)
 {
     auto um = getUndoManager();
@@ -541,9 +541,9 @@ int MidiClip::getNumTakes (bool includeComps)
     return hasAnyTakes() ? getCompManager().getNumTakes() : 0;
 }
 
-juce::StringArray MidiClip::getTakeDescriptions() const
+yup::StringArray MidiClip::getTakeDescriptions() const
 {
-    juce::StringArray s;
+    yup::StringArray s;
     int numTakes = 0;
 
     if (midiCompManager != nullptr)
@@ -552,19 +552,19 @@ juce::StringArray MidiClip::getTakeDescriptions() const
         {
             if (! midiCompManager->isTakeComp (i))
             {
-                s.add (juce::String (i + 1) + ". " + TRANS("Take") + " #" + juce::String (i + 1));
+                s.add (yup::String (i + 1) + ". " + TRANS("Take") + " #" + yup::String (i + 1));
                 ++numTakes;
             }
             else
             {
-                s.add (juce::String (i + 1) + ". " + TRANS("Comp") + " #" + juce::String (i + 1 - numTakes));
+                s.add (yup::String (i + 1) + ". " + TRANS("Comp") + " #" + yup::String (i + 1 - numTakes));
             }
         }
     }
     else
     {
         for (int i = 0; i < channelSequence.size(); ++i)
-            s.add ("Take #" + juce::String (i + 1));
+            s.add ("Take #" + yup::String (i + 1));
     }
 
     return s;
@@ -572,7 +572,7 @@ juce::StringArray MidiClip::getTakeDescriptions() const
 
 void MidiClip::setCurrentTake (int takeIndex)
 {
-    if (currentTake != takeIndex && juce::isPositiveAndBelow (takeIndex, channelSequence.size()))
+    if (currentTake != takeIndex && yup::isPositiveAndBelow (takeIndex, channelSequence.size()))
         currentTake = takeIndex;
 }
 
@@ -640,7 +640,7 @@ Clip::Array MidiClip::unpackTakes (bool toNewTracks)
 
             if (targetTrack != nullptr)
             {
-                if (auto mc = targetTrack->insertMIDIClip (TRANS("Take") + " #" + juce::String (i + 1),
+                if (auto mc = targetTrack->insertMIDIClip (TRANS("Take") + " #" + yup::String (i + 1),
                                                            getEditTimeRange(), nullptr))
                 {
                     mc->getSequence().copyFrom (*srcList, nullptr);
@@ -663,7 +663,7 @@ Clip::Array MidiClip::unpackTakes (bool toNewTracks)
 }
 
 //==============================================================================
-void MidiClip::mergeInMidiSequence (juce::MidiMessageSequence& ms,
+void MidiClip::mergeInMidiSequence (yup::MidiMessageSequence& ms,
                                     MidiList::NoteAutomationType automationType)
 {
     auto& take = getSequence();
@@ -782,7 +782,7 @@ LiveClipLevel MidiClip::getLiveClipLevel()
     return { level };
 }
 
-void MidiClip::valueTreePropertyChanged (juce::ValueTree& tree, const juce::Identifier& id)
+void MidiClip::valueTreePropertyChanged (yup::ValueTree& tree, const yup::Identifier& id)
 {
     if (tree == state)
     {
@@ -840,7 +840,7 @@ void MidiClip::valueTreePropertyChanged (juce::ValueTree& tree, const juce::Iden
     }
 }
 
-void MidiClip::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
+void MidiClip::valueTreeChildAdded (yup::ValueTree& p, yup::ValueTree& c)
 {
     if (p.hasType (IDs::SEQUENCE))
         clearCachedLoopSequence();
@@ -851,7 +851,7 @@ void MidiClip::valueTreeChildAdded (juce::ValueTree& p, juce::ValueTree& c)
         patternGenerator = std::make_unique<PatternGenerator> (*this, c);
 }
 
-void MidiClip::valueTreeChildRemoved (juce::ValueTree& p, juce::ValueTree& c, int)
+void MidiClip::valueTreeChildRemoved (yup::ValueTree& p, yup::ValueTree& c, int)
 {
     if (p.hasType (IDs::SEQUENCE))
     {
@@ -885,7 +885,7 @@ void MidiClip::clearCachedLoopSequence()
 PatternGenerator* MidiClip::getPatternGenerator()
 {
     if (! state.getChildWithName (IDs::PATTERNGENERATOR).isValid())
-        state.addChild (juce::ValueTree (IDs::PATTERNGENERATOR), -1, &edit.getUndoManager());
+        state.addChild (yup::ValueTree (IDs::PATTERNGENERATOR), -1, &edit.getUndoManager());
 
     jassert (patternGenerator != nullptr);
     return patternGenerator.get();
@@ -902,7 +902,7 @@ void MidiClip::pitchTempoTrackChanged()
 
 //==============================================================================
 //==============================================================================
-void mergeInMidiSequence (MidiClip& mc, juce::MidiMessageSequence ms, TimeDuration startTime,
+void mergeInMidiSequence (MidiClip& mc, yup::MidiMessageSequence ms, TimeDuration startTime,
                           MidiList::NoteAutomationType automationType)
 {
     ms.addTimeToMessages (startTime.inSeconds());

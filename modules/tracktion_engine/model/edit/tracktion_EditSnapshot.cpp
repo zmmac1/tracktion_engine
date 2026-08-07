@@ -15,9 +15,9 @@ struct EditSnapshotList
 {
     EditSnapshotList() = default;
 
-    EditSnapshot::Ptr getEditSnapshot (const juce::File& f)
+    EditSnapshot::Ptr getEditSnapshot (const yup::File& f)
     {
-        const juce::ScopedLock sl (getLock());
+        const yup::ScopedLock sl (getLock());
 
         for (auto s : snapshots)
             if (s->getFile() == f)
@@ -36,30 +36,30 @@ struct EditSnapshotList
         snapshots.removeAllInstancesOf (&snapshot);
     }
 
-    const juce::CriticalSection& getLock()
+    const yup::CriticalSection& getLock()
     {
         return snapshots.getLock();
     }
 
 private:
-    juce::Array<EditSnapshot*, juce::CriticalSection> snapshots;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditSnapshotList)
+    yup::Array<EditSnapshot*, yup::CriticalSection> snapshots;
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditSnapshotList)
 };
 
 //==============================================================================
 struct EditSnapshot::ListHolder
 {
-    juce::SharedResourcePointer<EditSnapshotList> list;
+    yup::SharedResourcePointer<EditSnapshotList> list;
 };
 
 //==============================================================================
-EditSnapshot::Ptr EditSnapshot::getEditSnapshot (Engine& engine, juce::File editFile)
+EditSnapshot::Ptr EditSnapshot::getEditSnapshot (Engine& engine, yup::File editFile)
 {
-    if (editFile == juce::File())
+    if (editFile == yup::File())
         return {};
 
-    juce::SharedResourcePointer<EditSnapshotList> list;
-    const juce::ScopedLock sl (list->getLock());
+    yup::SharedResourcePointer<EditSnapshotList> list;
+    const yup::ScopedLock sl (list->getLock());
 
     if (auto snapshot = list->getEditSnapshot (editFile))
         return snapshot;
@@ -68,7 +68,7 @@ EditSnapshot::Ptr EditSnapshot::getEditSnapshot (Engine& engine, juce::File edit
 }
 
 //==============================================================================
-EditSnapshot::EditSnapshot (Engine& e, juce::File f)
+EditSnapshot::EditSnapshot (Engine& e, yup::File f)
     : engine (e),
       listHolder (std::make_unique<ListHolder>()),
       sourceFile (std::move (f))
@@ -83,7 +83,7 @@ EditSnapshot::~EditSnapshot()
     listHolder->list->removeSnapshot (*this);
 }
 
-void EditSnapshot::setState (juce::ValueTree newState, TimeDuration editLength)
+void EditSnapshot::setState (yup::ValueTree newState, TimeDuration editLength)
 {
     if (state.getReferenceCount() == 1)
         state = std::move (newState);
@@ -104,11 +104,11 @@ void EditSnapshot::refreshCacheAndNotifyListeners()
     listeners.call (&Listener::editChanged, *this);
 }
 
-void EditSnapshot::addSubTracksRecursively (const juce::XmlElement& parent, int& audioTrackNameNumber)
+void EditSnapshot::addSubTracksRecursively (const yup::XmlElement& parent, int& audioTrackNameNumber)
 {
     for (auto track : parent.getChildIterator())
     {
-        juce::Identifier trackType (track->getTagName());
+        yup::Identifier trackType (track->getTagName());
 
         if (! TrackList::isTrack (trackType))
             continue;
@@ -123,7 +123,7 @@ void EditSnapshot::addSubTracksRecursively (const juce::XmlElement& parent, int&
         if (trackType == IDs::TRACK || trackType == IDs::MARKERTRACK)
         {
             if (trackName.isEmpty())
-                trackName = TRANS("Track") + " "  + juce::String (audioTrackNameNumber);
+                trackName = TRANS("Track") + " "  + yup::String (audioTrackNameNumber);
 
             if (trackType == IDs::TRACK)
             {
@@ -145,8 +145,8 @@ void EditSnapshot::addSubTracksRecursively (const juce::XmlElement& parent, int&
     }
 }
 
-void EditSnapshot::refreshFromXml (const juce::XmlElement& xml,
-                                   const juce::String& newName, double newLength)
+void EditSnapshot::refreshFromXml (const yup::XmlElement& xml,
+                                   const yup::String& newName, double newLength)
 {
     clear();
     name = newName;
@@ -155,12 +155,12 @@ void EditSnapshot::refreshFromXml (const juce::XmlElement& xml,
     // last significant change
     auto changeHexString = xml.getStringAttribute (IDs::lastSignificantChange);
     lastSaveTime = changeHexString.isEmpty() ? sourceFile.getLastModificationTime()
-                                             : juce::Time (changeHexString.getHexValue64());
+                                             : yup::Time (changeHexString.getHexValue64());
 
     // marks
     if (auto viewState = xml.getChildByName (IDs::TRANSPORT))
     {
-        auto loopRange = juce::Range<double>::between (viewState->getDoubleAttribute (IDs::loopPoint1),
+        auto loopRange = yup::Range<double>::between (viewState->getDoubleAttribute (IDs::loopPoint1),
                                                        viewState->getDoubleAttribute (IDs::loopPoint2));
         markIn = loopRange.getStart();
         markOut = loopRange.getEnd();
@@ -260,7 +260,7 @@ void EditSnapshot::clear()
     markers.clear();
 }
 
-void EditSnapshot::addEditClips (const juce::XmlElement& track)
+void EditSnapshot::addEditClips (const yup::XmlElement& track)
 {
     for (auto clip : track.getChildIterator())
     {
@@ -274,7 +274,7 @@ void EditSnapshot::addEditClips (const juce::XmlElement& track)
     }
 }
 
-void EditSnapshot::addClipSources (const juce::XmlElement& track)
+void EditSnapshot::addClipSources (const yup::XmlElement& track)
 {
     for (auto clip : track.getChildIterator())
     {
@@ -285,13 +285,13 @@ void EditSnapshot::addClipSources (const juce::XmlElement& track)
     }
 }
 
-void EditSnapshot::addMarkers (const juce::XmlElement& track)
+void EditSnapshot::addMarkers (const yup::XmlElement& track)
 {
     for (auto clip : track.getChildIterator())
     {
         Marker m;
         m.name      = clip->getStringAttribute ("name", TRANS("unnamed"));
-        m.colour    = juce::Colour::fromString (clip->getStringAttribute ("colour", TRANS("unnamed")));
+        m.colour    = yup::Color::fromString (clip->getStringAttribute ("colour", TRANS("unnamed")));
         auto start  = TimePosition::fromSeconds (clip->getDoubleAttribute ("start", 0.0));
         auto len    = TimeDuration::fromSeconds (clip->getDoubleAttribute ("length", 0.0));
         m.time      = { start, start + len };
@@ -302,7 +302,7 @@ void EditSnapshot::addMarkers (const juce::XmlElement& track)
 }
 
 
-static void addNestedEditObjects (EditSnapshot& baseEdit, juce::ReferenceCountedArray<EditSnapshot>& edits)
+static void addNestedEditObjects (EditSnapshot& baseEdit, yup::ReferenceCountedArray<EditSnapshot>& edits)
 {
     if (edits.contains (&baseEdit))
         return;
@@ -314,10 +314,10 @@ static void addNestedEditObjects (EditSnapshot& baseEdit, juce::ReferenceCounted
             addNestedEditObjects (*ptr, edits);
 }
 
-juce::ReferenceCountedArray<EditSnapshot> EditSnapshot::getNestedEditObjects()
+yup::ReferenceCountedArray<EditSnapshot> EditSnapshot::getNestedEditObjects()
 {
     CRASH_TRACER
-    juce::ReferenceCountedArray<EditSnapshot> result;
+    yup::ReferenceCountedArray<EditSnapshot> result;
     addNestedEditObjects (*this, result);
     return result;
 }

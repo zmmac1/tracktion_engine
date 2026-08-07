@@ -11,10 +11,10 @@
 namespace tracktion::inline engine {
 
 /** Returns true if the file is a legacy .trkarch archive. */
-bool isLegacyArchive (Engine&, const juce::File&);
+bool isLegacyArchive (Engine&, const yup::File&);
 
 /** Returns true if the file is any supported archive format (legacy or zip). */
-bool isArchive (Engine&, const juce::File&);
+bool isArchive (Engine&, const yup::File&);
 
 //==============================================================================
 /** Job that archives a Project or single Edit into a standard zip file.
@@ -40,7 +40,7 @@ public:
     };
 
     ArchiveJob (Source source,
-                const juce::File& destZipFile,
+                const yup::File& destZipFile,
                 CompressionLevel);
 
     ~ArchiveJob() override;
@@ -56,14 +56,14 @@ public:
     bool runSynchronously();
 
     /** After runJob(), returns error message (empty on success). */
-    juce::String getError() const;
+    yup::String getError() const;
 
 private:
     Source source;
-    juce::File destZipFile;
+    yup::File destZipFile;
     CompressionLevel compressionLevel;
     std::atomic<float> progress { 0.0f };
-    juce::String errorMessage;
+    yup::String errorMessage;
 
     // Steps
     bool copyToTempDir();
@@ -74,7 +74,7 @@ private:
     choc::file::TempFile tempDir;
     Project::Ptr tempProject;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArchiveJob)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArchiveJob)
 };
 
 } // namespace tracktion::inline engine

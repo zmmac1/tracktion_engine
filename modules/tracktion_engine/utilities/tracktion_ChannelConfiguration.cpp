@@ -17,36 +17,36 @@ namespace tracktion { inline namespace engine
 
 ChannelIndex::ChannelIndex() {}
 
-ChannelIndex::ChannelIndex (int index, juce::AudioChannelSet::ChannelType c)
+ChannelIndex::ChannelIndex (int index, yup::AudioChannelSet::ChannelType c)
     : indexInDevice (index), channel (c)
 {
 }
 
 ChannelIndex ChannelIndex::createMono (int indexInDevice)
 {
-    return ChannelIndex (indexInDevice, juce::AudioChannelSet::ChannelType (juce::AudioChannelSet::discreteChannel0 + indexInDevice));
+    return ChannelIndex (indexInDevice, yup::AudioChannelSet::ChannelType (yup::AudioChannelSet::discreteChannel0 + indexInDevice));
 }
 
 bool ChannelIndex::operator== (const ChannelIndex& other) const  { return indexInDevice == other.indexInDevice && channel == other.channel; }
 bool ChannelIndex::operator!= (const ChannelIndex& other) const  { return ! operator== (other); }
 
-juce::AudioChannelSet::ChannelType channelTypeFromAbbreviatedName (const juce::String& abbreviatedName)
+yup::AudioChannelSet::ChannelType channelTypeFromAbbreviatedName (const yup::String& abbreviatedName)
 {
     struct NamedChannelTypeCache
     {
         NamedChannelTypeCache()
         {
-            for (int i = 0; i < juce::AudioChannelSet::discreteChannel0; ++i)
+            for (int i = 0; i < yup::AudioChannelSet::discreteChannel0; ++i)
             {
-                const auto channelType = static_cast<juce::AudioChannelSet::ChannelType> (i);
-                auto name = juce::AudioChannelSet::getAbbreviatedChannelTypeName (channelType);
+                const auto channelType = static_cast<yup::AudioChannelSet::ChannelType> (i);
+                auto name = yup::AudioChannelSet::getAbbreviatedChannelTypeName (channelType);
 
                 if (name.isNotEmpty())
                     map[name] = channelType;
             }
         }
 
-        std::map<juce::String, juce::AudioChannelSet::ChannelType> map;
+        std::map<yup::String, yup::AudioChannelSet::ChannelType> map;
     };
 
     static NamedChannelTypeCache cache;
@@ -57,20 +57,20 @@ juce::AudioChannelSet::ChannelType channelTypeFromAbbreviatedName (const juce::S
 
     // Discrete channels are serialised as their 1-based number (e.g. "1", "2", ...)
     if (auto discreteIndex = abbreviatedName.getIntValue(); discreteIndex > 0)
-        return static_cast<juce::AudioChannelSet::ChannelType> (juce::AudioChannelSet::discreteChannel0 + discreteIndex - 1);
+        return static_cast<yup::AudioChannelSet::ChannelType> (yup::AudioChannelSet::discreteChannel0 + discreteIndex - 1);
 
-    return juce::AudioChannelSet::unknown;
+    return yup::AudioChannelSet::unknown;
 }
 
-juce::AudioChannelSet channelSetFromSpeakerArrangementString (const juce::String& arrangement)
+yup::AudioChannelSet channelSetFromSpeakerArrangementString (const yup::String& arrangement)
 {
-    juce::AudioChannelSet cs;
+    yup::AudioChannelSet cs;
 
-    for (auto& channel : juce::StringArray::fromTokens (arrangement, false))
+    for (auto& channel : yup::StringArray::fromTokens (arrangement, false))
     {
         const auto ct = channelTypeFromAbbreviatedName (channel);
 
-        if (ct != juce::AudioChannelSet::unknown)
+        if (ct != yup::AudioChannelSet::unknown)
             cs.addChannel (ct);
     }
 
@@ -100,55 +100,55 @@ ChannelConfiguration::ChannelConfiguration (const ChannelIndex* chans, size_t nu
 ChannelConfiguration ChannelConfiguration::mono (int deviceChannelIndex)
 {
     ChannelConfiguration config;
-    config.channels.push_back (ChannelIndex (deviceChannelIndex, juce::AudioChannelSet::centre));
+    config.channels.push_back (ChannelIndex (deviceChannelIndex, yup::AudioChannelSet::centre));
     return config;
 }
 
 ChannelConfiguration ChannelConfiguration::left (int deviceChannelIndex)
 {
     ChannelConfiguration config;
-    config.channels.push_back (ChannelIndex (deviceChannelIndex, juce::AudioChannelSet::left));
+    config.channels.push_back (ChannelIndex (deviceChannelIndex, yup::AudioChannelSet::left));
     return config;
 }
 
 ChannelConfiguration ChannelConfiguration::right (int deviceChannelIndex)
 {
     ChannelConfiguration config;
-    config.channels.push_back (ChannelIndex (deviceChannelIndex, juce::AudioChannelSet::right));
+    config.channels.push_back (ChannelIndex (deviceChannelIndex, yup::AudioChannelSet::right));
     return config;
 }
 
 ChannelConfiguration ChannelConfiguration::stereo (int firstDeviceChannelIndex)
 {
     ChannelConfiguration config;
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex, juce::AudioChannelSet::left));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 1, juce::AudioChannelSet::right));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex, yup::AudioChannelSet::left));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 1, yup::AudioChannelSet::right));
     return config;
 }
 
 ChannelConfiguration ChannelConfiguration::surround5_1 (int firstDeviceChannelIndex)
 {
     ChannelConfiguration config;
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 0, juce::AudioChannelSet::left));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 1, juce::AudioChannelSet::right));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 2, juce::AudioChannelSet::centre));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 3, juce::AudioChannelSet::LFE));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 4, juce::AudioChannelSet::leftSurround));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 5, juce::AudioChannelSet::rightSurround));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 0, yup::AudioChannelSet::left));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 1, yup::AudioChannelSet::right));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 2, yup::AudioChannelSet::centre));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 3, yup::AudioChannelSet::LFE));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 4, yup::AudioChannelSet::leftSurround));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 5, yup::AudioChannelSet::rightSurround));
     return config;
 }
 
 ChannelConfiguration ChannelConfiguration::surround7_1 (int firstDeviceChannelIndex)
 {
     ChannelConfiguration config;
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 0, juce::AudioChannelSet::left));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 1, juce::AudioChannelSet::right));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 2, juce::AudioChannelSet::centre));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 3, juce::AudioChannelSet::LFE));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 4, juce::AudioChannelSet::leftSurroundRear));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 5, juce::AudioChannelSet::rightSurroundRear));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 6, juce::AudioChannelSet::leftSurroundSide));
-    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 7, juce::AudioChannelSet::rightSurroundSide));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 0, yup::AudioChannelSet::left));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 1, yup::AudioChannelSet::right));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 2, yup::AudioChannelSet::centre));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 3, yup::AudioChannelSet::LFE));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 4, yup::AudioChannelSet::leftSurroundRear));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 5, yup::AudioChannelSet::rightSurroundRear));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 6, yup::AudioChannelSet::leftSurroundSide));
+    config.channels.push_back (ChannelIndex (firstDeviceChannelIndex + 7, yup::AudioChannelSet::rightSurroundSide));
     return config;
 }
 
@@ -173,7 +173,7 @@ ChannelConfiguration ChannelConfiguration::canonical (int numChannels, int first
     return discreteChannels (numChannels, firstDeviceChannelIndex);
 }
 
-ChannelConfiguration ChannelConfiguration::fromChannelSet (const juce::AudioChannelSet& channelSet, int firstDeviceChannelIndex)
+ChannelConfiguration ChannelConfiguration::fromChannelSet (const yup::AudioChannelSet& channelSet, int firstDeviceChannelIndex)
 {
     ChannelConfiguration config;
     const int numChannels = channelSet.size();
@@ -194,8 +194,8 @@ bool ChannelConfiguration::isStereo() const noexcept
     if (channels.size() != 2)
         return false;
 
-    return channels[0].channel == juce::AudioChannelSet::left
-        && channels[1].channel == juce::AudioChannelSet::right;
+    return channels[0].channel == yup::AudioChannelSet::left
+        && channels[1].channel == yup::AudioChannelSet::right;
 }
 
 bool ChannelConfiguration::contains (const ChannelIndex& channel) const noexcept
@@ -256,9 +256,9 @@ ChannelConfiguration ChannelConfiguration::intersection (const ChannelConfigurat
     return result;
 }
 
-juce::AudioChannelSet ChannelConfiguration::toChannelSet() const
+yup::AudioChannelSet ChannelConfiguration::toChannelSet() const
 {
-    juce::AudioChannelSet channelSet;
+    yup::AudioChannelSet channelSet;
 
     for (const auto& ci : channels)
         channelSet.addChannel (ci.channel);
@@ -273,12 +273,12 @@ void ChannelConfiguration::setNumChannels (int numChannels, int firstDeviceChann
 
     if (numChannels == 1)
     {
-        channels.push_back (ChannelIndex (firstDeviceChannelIndex, juce::AudioChannelSet::centre));
+        channels.push_back (ChannelIndex (firstDeviceChannelIndex, yup::AudioChannelSet::centre));
     }
     else if (numChannels == 2)
     {
-        channels.push_back (ChannelIndex (firstDeviceChannelIndex, juce::AudioChannelSet::left));
-        channels.push_back (ChannelIndex (firstDeviceChannelIndex + 1, juce::AudioChannelSet::right));
+        channels.push_back (ChannelIndex (firstDeviceChannelIndex, yup::AudioChannelSet::left));
+        channels.push_back (ChannelIndex (firstDeviceChannelIndex + 1, yup::AudioChannelSet::right));
     }
     else
     {
@@ -309,7 +309,7 @@ choc::value::Value ChannelConfiguration::toJSON() const
             const auto& channel = channels[index];
             return choc::json::create (
                 "index", channel.indexInDevice,
-                "type", juce::AudioChannelSet::getAbbreviatedChannelTypeName (channel.channel).toStdString());
+                "type", yup::AudioChannelSet::getAbbreviatedChannelTypeName (channel.channel).toStdString());
         });
 }
 
@@ -323,7 +323,7 @@ ChannelConfiguration ChannelConfiguration::fromJSON (const choc::value::ValueVie
         {
             auto index = channel["index"].getWithDefault<int> (-1);
             auto type = channel["type"].toString();
-            config.channels.push_back (ChannelIndex (index, channelTypeFromAbbreviatedName (type)));
+            config.channels.push_back (ChannelIndex (index, channelTypeFromAbbreviatedName (yup::String(type))));
         }
     }
 
@@ -373,9 +373,9 @@ ChannelConfiguration ChannelConfiguration::reversed() const
     return result;
 }
 
-juce::String ChannelConfiguration::getDescription() const
+yup::String ChannelConfiguration::getDescription() const
 {
-    juce::MemoryOutputStream desc;
+    yup::MemoryOutputStream desc;
     bool isFirst = true;
 
     for (const auto& ci : channels)
@@ -385,13 +385,13 @@ juce::String ChannelConfiguration::getDescription() const
         else
             isFirst = false;
 
-        desc << ci.indexInDevice << " (" << juce::AudioChannelSet::getAbbreviatedChannelTypeName (ci.channel) << ")";
+        desc << ci.indexInDevice << " (" << yup::AudioChannelSet::getAbbreviatedChannelTypeName (ci.channel) << ")";
     }
 
     return desc.toString();
 }
 
-juce::String ChannelConfiguration::getMatchingPresetName() const
+yup::String ChannelConfiguration::getMatchingPresetName() const
 {
     for (const auto& preset : getChannelConfigurationPresets())
         if (preset.config == *this)

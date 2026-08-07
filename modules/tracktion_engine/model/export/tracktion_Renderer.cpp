@@ -20,9 +20,9 @@ void Renderer::turnOffAllPlugins (Edit& edit)
 
 namespace render_utils
 {
-    std::unique_ptr<Renderer::RenderTask> createRenderTask (Renderer::Parameters r, juce::String desc,
+    std::unique_ptr<Renderer::RenderTask> createRenderTask (Renderer::Parameters r, yup::String desc,
                                                             std::atomic<float>* progressToUpdate,
-                                                            juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* thumbnail)
+                                                            yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* thumbnail)
     {
         auto tracksToDo = toTrackArray (*r.edit, r.tracksToDo);
 
@@ -67,7 +67,7 @@ struct Ditherers
             d.reset (bitDepth);
     }
 
-    void apply (juce::AudioBuffer<float>& buffer, int numSamples)
+    void apply (yup::AudioBuffer<float>& buffer, int numSamples)
     {
         auto numChannels = buffer.getNumChannels();
 
@@ -75,7 +75,7 @@ struct Ditherers
             ditherers.getReference (i).process (buffer.getWritePointer (i), numSamples);
     }
 
-    juce::Array<Ditherer> ditherers;
+    yup::Array<Ditherer> ditherers;
 };
 
 //==============================================================================
@@ -85,43 +85,43 @@ inline void addAcidInfo (Edit& edit, Renderer::Parameters& r)
         r.metadata.addArray (createAcidInfo (edit, r.time));
 }
 
-juce::StringPairArray createAcidInfo (Edit& edit, TimeRange time)
+yup::StringPairArray createAcidInfo (Edit& edit, TimeRange time)
 {
-    juce::StringPairArray metadata;
+    yup::StringPairArray metadata;
 
     auto& pitch = edit.pitchSequence.getPitchAt (time.getStart());
     auto& tempo = edit.tempoSequence.getTempoAt (time.getStart());
     auto& timeSig = edit.tempoSequence.getTimeSigAt (time.getStart());
 
-    metadata.set (juce::WavAudioFormat::acidOneShot, "0");
-    metadata.set (juce::WavAudioFormat::acidRootSet, "1");
-    metadata.set (juce::WavAudioFormat::acidDiskBased, "1");
-    metadata.set (juce::WavAudioFormat::acidizerFlag, "1");
-    metadata.set (juce::WavAudioFormat::acidRootNote, juce::String (pitch.getPitch()));
+    metadata.set (yup::WavAudioFormat::acidOneShot, "0");
+    metadata.set (yup::WavAudioFormat::acidRootSet, "1");
+    metadata.set (yup::WavAudioFormat::acidDiskBased, "1");
+    metadata.set (yup::WavAudioFormat::acidizerFlag, "1");
+    metadata.set (yup::WavAudioFormat::acidRootNote, yup::String (pitch.getPitch()));
 
     auto beats = tempo.getBpm() * (time.getLength().inSeconds() / 60);
 
     if (std::abs (beats - int (beats)) < 0.001)
     {
-        metadata.set (juce::WavAudioFormat::acidStretch, "1");
-        metadata.set (juce::WavAudioFormat::acidBeats, juce::String (juce::roundToInt (beats)));
-        metadata.set (juce::WavAudioFormat::acidDenominator, juce::String (timeSig.denominator.get()));
-        metadata.set (juce::WavAudioFormat::acidNumerator, juce::String (timeSig.numerator.get()));
-        metadata.set (juce::WavAudioFormat::acidTempo, juce::String (tempo.getBpm()));
+        metadata.set (yup::WavAudioFormat::acidStretch, "1");
+        metadata.set (yup::WavAudioFormat::acidBeats, yup::String (yup::roundToInt (beats)));
+        metadata.set (yup::WavAudioFormat::acidDenominator, yup::String (timeSig.denominator.get()));
+        metadata.set (yup::WavAudioFormat::acidNumerator, yup::String (timeSig.numerator.get()));
+        metadata.set (yup::WavAudioFormat::acidTempo, yup::String (tempo.getBpm()));
     }
     else
     {
-        metadata.set (juce::WavAudioFormat::acidStretch, "0");
+        metadata.set (yup::WavAudioFormat::acidStretch, "0");
     }
 
     return metadata;
 }
 
 //==============================================================================
-Renderer::RenderTask::RenderTask (const juce::String& taskDescription,
+Renderer::RenderTask::RenderTask (const yup::String& taskDescription,
                                   const Renderer::Parameters& r,
                                   std::atomic<float>* progressToUpdate,
-                                  juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* source)
+                                  yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* source)
     : ThreadPoolJobWithProgress (taskDescription),
       params (r),
       progress (progressToUpdate == nullptr ? progressInternal : *progressToUpdate),
@@ -149,14 +149,14 @@ Renderer::RenderTask::RenderTask (const juce::String& taskDescription,
     callBlocking ([this, &r, &cnp] { graphNode = createNodeForEdit (*r.edit, cnp); });
 }
 
-Renderer::RenderTask::RenderTask (const juce::String& taskDescription,
+Renderer::RenderTask::RenderTask (const yup::String& taskDescription,
                                   const Renderer::Parameters& rp,
                                   std::unique_ptr<tracktion::graph::Node> n,
                                   std::unique_ptr<tracktion::graph::PlayHead> playHead_,
                                   std::unique_ptr<tracktion::graph::PlayHeadState> playHeadState_,
                                   std::unique_ptr<ProcessState> processState_,
                                   std::atomic<float>* progressToUpdate,
-                                  juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* source)
+                                  yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver* source)
    : ThreadPoolJobWithProgress (taskDescription),
      params (rp),
      graphNode (std::move (n)), playHead (std::move (playHead_)), playHeadState (std::move (playHeadState_)), processState (std::move (processState_)),
@@ -181,15 +181,15 @@ Renderer::RenderTask::CancellationCheck Renderer::RenderTask::getDefaultCancella
 {
     return []
     {
-        // A RenderTask can be driven by a pool job, a juce::Thread or a raw
+        // A RenderTask can be driven by a pool job, a yup::Thread or a raw
         // std::thread, and each signals cancellation differently. These all read the
         // calling thread's state, so this has to be evaluated on the thread running
         // the render rather than cached per-instance
-        if (auto job = juce::ThreadPoolJob::getCurrentThreadPoolJob())
+        if (auto job = yup::ThreadPoolJob::getCurrentThreadPoolJob())
             if (job->shouldExit())
                 return true;
 
-        if (juce::Thread::currentThreadShouldExit())
+        if (yup::Thread::currentThreadShouldExit())
             return true;
 
         if (isCurrentThreadSupplyingExitStatus() && shouldCurrentThreadExit())
@@ -208,10 +208,10 @@ bool Renderer::RenderTask::shouldCancel() const
     return cancellationCheck != nullptr && cancellationCheck();
 }
 
-juce::ThreadPoolJob::JobStatus Renderer::RenderTask::runJob()
+yup::ThreadPoolJob::JobStatus Renderer::RenderTask::runJob()
 {
     CRASH_TRACER
-    juce::FloatVectorOperations::disableDenormalisedNumberSupport();
+    yup::FloatVectorOperations::disableDenormalisedNumberSupport();
 
     if (params.createMidiFile)
         renderMidi (params);
@@ -231,7 +231,7 @@ bool Renderer::RenderTask::foldWrapRemainder (const Renderer::Parameters& target
     auto& engine = params.edit->engine;
     const auto regionSamples = (SampleCount) tracktion::toSamples (target.time.getLength(), target.sampleRateForAudio);
 
-    std::unique_ptr<juce::AudioFormatReader> reader (AudioFileUtils::createReaderFor (engine, intermediate.destFile));
+    std::unique_ptr<yup::AudioFormatReader> reader (AudioFileUtils::createReaderFor (engine, intermediate.destFile));
 
     if (reader == nullptr)
     {
@@ -243,7 +243,7 @@ bool Renderer::RenderTask::foldWrapRemainder (const Renderer::Parameters& target
     if (reader->lengthInSamples <= regionSamples || regionSamples <= 0)
         return true;
 
-    juce::TemporaryFile foldedFile (intermediate.destFile);
+    yup::TemporaryFile foldedFile (intermediate.destFile);
     const int numChannels = (int) reader->numChannels;
 
     {
@@ -258,8 +258,8 @@ bool Renderer::RenderTask::foldWrapRemainder (const Renderer::Parameters& target
         }
 
         const int blockSize = 16384;
-        juce::AudioBuffer<float> regionBuffer (numChannels, blockSize);
-        juce::AudioBuffer<float> tailBuffer (numChannels, blockSize);
+        yup::AudioBuffer<float> regionBuffer (numChannels, blockSize);
+        yup::AudioBuffer<float> tailBuffer (numChannels, blockSize);
 
         for (SampleCount pos = 0; pos < regionSamples;)
         {
@@ -305,7 +305,7 @@ bool Renderer::RenderTask::foldWrapRemainder (const Renderer::Parameters& target
     silence both change the audio, so anything measured earlier would be stale
     for those paths.
 */
-static LoudnessMeter::Readings measureLoudness (juce::AudioFormatReader& reader)
+static LoudnessMeter::Readings measureLoudness (yup::AudioFormatReader& reader)
 {
     const int blockSize = 16384;
     const auto numChannels = (int) reader.numChannels;
@@ -313,7 +313,7 @@ static LoudnessMeter::Readings measureLoudness (juce::AudioFormatReader& reader)
     LoudnessMeter meter;
     meter.prepare (reader.sampleRate, numChannels, blockSize);
 
-    juce::AudioBuffer<float> buffer (numChannels, blockSize);
+    yup::AudioBuffer<float> buffer (numChannels, blockSize);
 
     for (SampleCount pos = 0; pos < reader.lengthInSamples;)
     {
@@ -359,7 +359,7 @@ bool Renderer::RenderTask::performNormalisingAndTrimming (const Renderer::Parame
     if (target.shouldNormalise || target.shouldNormaliseByRMS || target.shouldNormaliseByLUFS)
         setJobName (TRANS("Normalising") + "...");
 
-    std::unique_ptr<juce::AudioFormatReader> reader (AudioFileUtils::createReaderFor (params.edit->engine,
+    std::unique_ptr<yup::AudioFormatReader> reader (AudioFileUtils::createReaderFor (params.edit->engine,
                                                                                       intermediate.destFile));
 
     if (reader == nullptr)
@@ -403,23 +403,23 @@ bool Renderer::RenderTask::performNormalisingAndTrimming (const Renderer::Parame
             if (target.limitTruePeak && readings.truePeakDb > LoudnessMeter::silenceFloorDb)
                 gainDb = std::min (gainDb, target.truePeakCeilingDb - readings.truePeakDb);
 
-            gain = juce::jlimit (0.0f, 100.0f, dbToGain (gainDb));
+            gain = yup::jlimit (0.0f, 100.0f, dbToGain (gainDb));
         }
     }
     else if (target.shouldNormaliseByRMS)
-        gain = juce::jlimit (0.0f, 100.0f, dbToGain (target.normaliseToLevelDb) / (intermediate.resultRMS + 2.0f / 32768.0f));
+        gain = yup::jlimit (0.0f, 100.0f, dbToGain (target.normaliseToLevelDb) / (intermediate.resultRMS + 2.0f / 32768.0f));
     else if (target.shouldNormalise)
-        gain = juce::jlimit (0.0f, 100.0f, dbToGain (target.normaliseToLevelDb) * (1.0f / (intermediate.resultMagnitude * 1.005f + 2.0f / 32768.0f)));
+        gain = yup::jlimit (0.0f, 100.0f, dbToGain (target.normaliseToLevelDb) * (1.0f / (intermediate.resultMagnitude * 1.005f + 2.0f / 32768.0f)));
 
     Ditherers ditherers ((int) reader->numChannels, target.bitDepth);
 
     const int blockSize = 16384;
-    juce::AudioBuffer<float> tempBuffer ((int) reader->numChannels, blockSize + 256);
+    yup::AudioBuffer<float> tempBuffer ((int) reader->numChannels, blockSize + 256);
 
     for (SampleCount pos = 0; pos < reader->lengthInSamples;)
     {
         auto numLeft = reader->lengthInSamples - pos;
-        auto samps = int (std::min (juce::int64 (tempBuffer.getNumSamples()), std::min (juce::int64 (blockSize), numLeft)));
+        auto samps = int (std::min (yup::int64 (tempBuffer.getNumSamples()), std::min (yup::int64 (blockSize), numLeft)));
 
         reader->read (&tempBuffer, 0, samps, pos, true, reader->numChannels > 1);
 
@@ -487,7 +487,7 @@ void Renderer::RenderTask::flushAllPlugins (const Plugin::Array& plugins,
                                             double sampleRate, int samplesPerBlock)
 {
     CRASH_TRACER
-    juce::AudioBuffer<float> buffer (1, samplesPerBlock);
+    yup::AudioBuffer<float> buffer (1, samplesPerBlock);
 
     for (int i = 0; i < plugins.size(); ++i)
     {
@@ -544,17 +544,17 @@ bool Renderer::RenderTask::renderMidi (Renderer::Parameters& r)
     return errorMessage.isEmpty();
 }
 
-bool Renderer::RenderTask::addMidiMetaDataAndWriteToFile (juce::File destFile, juce::MidiMessageSequence outputSequence, const TempoSequence& tempoSequence)
+bool Renderer::RenderTask::addMidiMetaDataAndWriteToFile (yup::File destFile, yup::MidiMessageSequence outputSequence, const TempoSequence& tempoSequence)
 {
     outputSequence.updateMatchedPairs();
 
     if (outputSequence.getNumEvents() == 0)
         return false;
 
-    if (juce::FileOutputStream out (destFile);
+    if (yup::FileOutputStream out (destFile);
         out.openedOk())
     {
-        juce::MidiMessageSequence midiTempoSequence;
+        yup::MidiMessageSequence midiTempoSequence;
         auto currentTempoPosition = createPosition (tempoSequence);
 
         for (int i = 0; i < tempoSequence.getNumTempos(); ++i)
@@ -568,12 +568,12 @@ bool Renderer::RenderTask::addMidiMetaDataAndWriteToFile (juce::File destFile, j
             const double beatLengthMicrosecs = 60000000.0 / ts->getBpm();
             const double microsecondsPerQuarterNote = beatLengthMicrosecs * matchingTimeSig.denominator / 4.0;
 
-            auto m = juce::MidiMessage::timeSignatureMetaEvent (matchingTimeSig.numerator,
+            auto m = yup::MidiMessage::timeSignatureMetaEvent (matchingTimeSig.numerator,
                                                                 matchingTimeSig.denominator);
             m.setTimeStamp (time);
             midiTempoSequence.addEvent (m);
 
-            m = juce::MidiMessage::tempoMetaEvent (juce::roundToInt (microsecondsPerQuarterNote));
+            m = yup::MidiMessage::tempoMetaEvent (yup::roundToInt (microsecondsPerQuarterNote));
             m.setTimeStamp (time);
             midiTempoSequence.addEvent (m);
         }
@@ -582,10 +582,10 @@ bool Renderer::RenderTask::addMidiMetaDataAndWriteToFile (juce::File destFile, j
         if (name.startsWith ("."))
             name = name.fromFirstOccurrenceOf (".", false, false).upToLastOccurrenceOf ("_temp", false, false);
 
-        midiTempoSequence.addEvent (juce::MidiMessage::textMetaEvent (3, name));
-        outputSequence.addEvent (juce::MidiMessage::textMetaEvent (3, name));
+        midiTempoSequence.addEvent (yup::MidiMessage::textMetaEvent (3, name));
+        outputSequence.addEvent (yup::MidiMessage::textMetaEvent (3, name));
 
-        juce::MidiFile mf;
+        yup::MidiFile mf;
         mf.addTrack (midiTempoSequence);
         mf.addTrack (outputSequence);
 
@@ -600,14 +600,14 @@ bool Renderer::RenderTask::addMidiMetaDataAndWriteToFile (juce::File destFile, j
 
 
 //==============================================================================
-bool Renderer::renderToFile (const juce::String& taskDescription,
-                             const juce::File& outputFile,
+bool Renderer::renderToFile (const yup::String& taskDescription,
+                             const yup::File& outputFile,
                              Edit& edit,
                              TimeRange range,
-                             const juce::BigInteger& tracksToDo,
+                             const yup::BigInteger& tracksToDo,
                              bool usePlugins,
                              bool useACID,
-                             juce::Array<Clip*> clips,
+                             yup::Array<Clip*> clips,
                              bool useThread)
 {
     CRASH_TRACER
@@ -650,7 +650,7 @@ bool Renderer::renderToFile (const juce::String& taskDescription,
             }
             else
             {
-                while (task->runJob() == juce::ThreadPoolJob::jobNeedsRunningAgain)
+                while (task->runJob() == yup::ThreadPoolJob::jobNeedsRunningAgain)
                 {}
             }
         }
@@ -661,12 +661,12 @@ bool Renderer::renderToFile (const juce::String& taskDescription,
     return outputFile.existsAsFile();
 }
 
-bool Renderer::renderToFile (Edit& edit, const juce::File& f, bool useThread)
+bool Renderer::renderToFile (Edit& edit, const yup::File& f, bool useThread)
 {
     return renderToFile ({}, f, edit, { 0_tp, edit.getLength() }, toBitSet (getAllTracks (edit)), true, true, {}, useThread);
 }
 
-juce::File Renderer::renderToFile (const juce::String& taskDescription, const Parameters& r)
+yup::File Renderer::renderToFile (const yup::String& taskDescription, const Parameters& r)
 {
     CRASH_TRACER
 
@@ -713,7 +713,7 @@ juce::File Renderer::renderToFile (const juce::String& taskDescription, const Pa
     return {};
 }
 
-ProjectItem::Ptr Renderer::renderToProjectItem (const juce::String& taskDescription, const Parameters& r, ProjectItem::Category category)
+ProjectItem::Ptr Renderer::renderToProjectItem (const yup::String& taskDescription, const Parameters& r, ProjectItem::Category category)
 {
     CRASH_TRACER
 
@@ -747,9 +747,9 @@ ProjectItem::Ptr Renderer::renderToProjectItem (const juce::String& taskDescript
 
     if (renderedFile.existsAsFile())
     {
-        juce::String desc;
+        yup::String desc;
         desc << TRANS("Rendered from edit") << r.edit->getName().quoted() << " "
-             << TRANS("On") << " " << juce::Time::getCurrentTime().toString (true, true);
+             << TRANS("On") << " " << yup::Time::getCurrentTime().toString (true, true);
 
         return proj->createNewItem (renderedFile,
                                     r.createMidiFile ? ProjectItem::midiItemType()
@@ -764,8 +764,8 @@ ProjectItem::Ptr Renderer::renderToProjectItem (const juce::String& taskDescript
 }
 
 //==============================================================================
-Renderer::Statistics Renderer::measureStatistics (const juce::String& taskDescription, Edit& edit,
-                                                  TimeRange range, const juce::BigInteger& tracksToDo,
+Renderer::Statistics Renderer::measureStatistics (const yup::String& taskDescription, Edit& edit,
+                                                  TimeRange range, const yup::BigInteger& tracksToDo,
                                                   int blockSizeForAudio, double sampleRateForAudio)
 {
     CRASH_TRACER
@@ -800,7 +800,7 @@ Renderer::Statistics Renderer::measureStatistics (const juce::String& taskDescri
     return result;
 }
 
-void Renderer::checkTargetFile (Engine& e, const juce::File& file,
+void Renderer::checkTargetFile (Engine& e, const yup::File& file,
                                 std::function<void (bool)> callback)
 {
     auto& ui = e.getUIBehaviour();
@@ -892,8 +892,8 @@ float EditRenderer::Handle::getProgress() const
 }
 
 auto EditRenderer::render (Renderer::Parameters r,
-                           std::function<void (tl::expected<juce::File, std::string>)> finishedCallback_,
-                           std::shared_ptr<juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> thumbnailToUpdate) -> std::shared_ptr<Handle>
+                           std::function<void (tl::expected<yup::File, std::string>)> finishedCallback_,
+                           std::shared_ptr<yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> thumbnailToUpdate) -> std::shared_ptr<Handle>
 {
     assert (finishedCallback_ && "You must supply a finished callback");
 
@@ -951,7 +951,7 @@ auto EditRenderer::render (Renderer::Parameters r,
                 return finishedCallback (tl::unexpected (NEEDS_TRANS("Cancelled")));
             }
 
-            if (task->runJob() == juce::ThreadPoolJob::jobNeedsRunningAgain)
+            if (task->runJob() == yup::ThreadPoolJob::jobNeedsRunningAgain)
                 continue;
 
             // Finished. Destroy the task before calling back as its teardown needs the

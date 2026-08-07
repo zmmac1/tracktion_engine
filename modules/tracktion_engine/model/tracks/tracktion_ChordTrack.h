@@ -14,16 +14,16 @@ namespace tracktion::inline engine {
 class ChordTrack  : public ClipTrack
 {
 public:
-    ChordTrack (Edit&, const juce::ValueTree&);
+    ChordTrack (Edit&, const yup::ValueTree&);
     ~ChordTrack() override;
 
     bool isChordTrack() const override                  { return true; }
-    juce::String getSelectableDescription() override    { return TRANS("Chord Track"); }
+    yup::String getSelectableDescription() override    { return TRANS("Chord Track"); }
     bool canContainPlugin (Plugin*) const override      { return false; }
 
-    juce::String getTrackWarning() const;
+    yup::String getTrackWarning() const;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChordTrack)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChordTrack)
 };
 
 } // namespace tracktion::inline engine

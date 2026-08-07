@@ -52,13 +52,13 @@ void freePlaybackContextIfNotRecording (TransportControl&);
     You shouldn't need to directly create one of these, create an Edit and then
     obtain it from there. @see Edit::getTransport
 */
-class TransportControl   : public juce::ChangeBroadcaster,
-                           private juce::Timer
+class TransportControl   : public yup::ChangeBroadcaster,
+                           private yup::Timer
 
 {
 public:
     /** Constructs a TransportControl for an Edit. */
-    TransportControl (Edit&, const juce::ValueTree&);
+    TransportControl (Edit&, const yup::ValueTree&);
     /** Destructor. */
     ~TransportControl() override;
 
@@ -110,10 +110,10 @@ public:
     /** Applys a retrospective record to any assigned input devices, creating clips
         for any historical input.
     */
-    juce::Result applyRetrospectiveRecord (bool armedOnly);
+    yup::Result applyRetrospectiveRecord (bool armedOnly);
 
     /** Perfoms a retrospective record operation and returns any new files. */
-    juce::Array<juce::File> getRetrospectiveRecordAsAudioFiles();
+    yup::Array<yup::File> getRetrospectiveRecordAsAudioFiles();
 
     /** Syncs this Edit's playback to another Edit.
         @param editToSyncTo             The Edit to sync playback to
@@ -257,7 +257,7 @@ public:
 
     private:
         TransportControl& transport;
-        JUCE_DECLARE_NON_COPYABLE (ReallocationInhibitor)
+        YUP_DECLARE_NON_COPYABLE (ReallocationInhibitor)
     };
 
     /** Returns true if no ReallocationInhibitors currently exist. */
@@ -276,7 +276,7 @@ public:
         TransportControl& tc;
         bool wasPlaying = false;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedPlaybackRestarter)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedPlaybackRestarter)
     };
 
     //==============================================================================
@@ -299,12 +299,12 @@ public:
         bool wasAllocated = false;
         ScopedPlaybackRestarter playbackRestarter { tc };
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedContextAllocator)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedContextAllocator)
     };
 
     //==============================================================================
     /** Returns all the active TransportControl[s] in the Engine. */
-    static juce::Array<TransportControl*> getAllActiveTransports (Engine&);
+    static yup::Array<TransportControl*> getAllActiveTransports (Engine&);
 
     /** Returns the number of Edits currently playing. */
     static int getNumPlayingTransports (Engine&);
@@ -361,7 +361,7 @@ public:
         */
         virtual void recordingFinished (InputDeviceInstance&,
                                         EditItemID /*targetID*/,
-                                        const juce::ReferenceCountedArray<Clip>& /*recordedClips*/)
+                                        const yup::ReferenceCountedArray<Clip>& /*recordedClips*/)
         {}
     };
 
@@ -374,7 +374,7 @@ public:
     //==============================================================================
     Engine& engine;         /**< The Engine this Edit belongs to. */
     Edit& edit;             /**< The Edit this transport belongs to. @see Edit::getTransport. */
-    juce::ValueTree state;  /**< The state of this transport. */
+    yup::ValueTree state;  /**< The state of this transport. */
 
     juce::CachedValue<TimePosition> startPosition; /**< The position to start playing from. */
 
@@ -391,14 +391,14 @@ public:
     /** @internal */
     void callRecordingAboutToStopListeners (InputDeviceInstance&, EditItemID);
     /** @internal */
-    void callRecordingFinishedListeners (InputDeviceInstance&, EditItemID, juce::ReferenceCountedArray<Clip>);
+    void callRecordingFinishedListeners (InputDeviceInstance&, EditItemID, yup::ReferenceCountedArray<Clip>);
 
 private:
     //==============================================================================
     struct TransportState;
     std::unique_ptr<TransportState> transportState;
     std::unique_ptr<EditPlaybackContext> playbackContext;
-    juce::ListenerList<Listener> listeners;
+    yup::ListenerList<Listener> listeners;
 
     TimecodeSnapType currentSnapType;
     bool isDelayedChangePending = false;
@@ -440,8 +440,8 @@ private:
     void performNudgeLeft();
     void performNudgeRight();
 
-    void sendMMC (const juce::MidiMessage&);
-    void sendMMCCommand (juce::MidiMessage::MidiMachineControlCommand);
+    void sendMMC (const yup::MidiMessage&);
+    void sendMMCCommand (yup::MidiMessage::MidiMachineControlCommand);
     bool sendMMCStartPlay();
     bool sendMMCStartRecord();
 
@@ -455,7 +455,7 @@ private:
 
     void timerCallback() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransportControl)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransportControl)
 };
 
 } // namespace tracktion::inline engine

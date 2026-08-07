@@ -26,16 +26,16 @@ namespace
             const auto beats = seq.toBeats (t);
             const auto diff = std::abs (beats.inBeats() - b.inBeats());
             CHECK_MESSAGE (diff <= 0.001,
-                           (juce::String ("Converting TTTs to beats. Expected EEE beats, calculated CCC beats")
-                                .replace ("TTT", juce::String (t.inSeconds())).replace ("EEE", juce::String (b.inBeats())).replace ("CCC", juce::String (beats.inBeats()))).toStdString());
+                           (yup::String ("Converting TTTs to beats. Expected EEE beats, calculated CCC beats")
+                                .replace ("TTT", yup::String (t.inSeconds())).replace ("EEE", yup::String (b.inBeats())).replace ("CCC", yup::String (beats.inBeats()))).toStdString());
         }
 
         {
             const auto time = seq.toTime (b);
             const auto diff = std::abs (time.inSeconds() - t.inSeconds());
             CHECK_MESSAGE (diff <= 0.001,
-                           (juce::String ("Converting BBB beats to time. Expected EEEs, calculated CCCs")
-                                .replace ("BBB", juce::String (b.inBeats())).replace ("EEE", juce::String (t.inSeconds())).replace ("CCC", juce::String (time.inSeconds()))).toStdString());
+                           (yup::String ("Converting BBB beats to time. Expected EEEs, calculated CCCs")
+                                .replace ("BBB", yup::String (b.inBeats())).replace ("EEE", yup::String (t.inSeconds())).replace ("CCC", yup::String (time.inSeconds()))).toStdString());
         }
     }
 
@@ -418,11 +418,11 @@ namespace tracktion::inline engine {
 
 //==============================================================================
 //==============================================================================
-class TempoBenchmarks   : public juce::UnitTest
+class TempoBenchmarks   : public yup::UnitTest
 {
 public:
     TempoBenchmarks()
-        : juce::UnitTest ("Tempo", "tracktion_benchmarks")
+        : yup::UnitTest ("Tempo", "tracktion_benchmarks")
     {}
 
     void runTest() override
@@ -448,7 +448,7 @@ public:
         constexpr int numIterations = 100;
         constexpr int numBeats = 100;
         constexpr int numConversions = 10'000;
-        juce::Random r (4200);
+        yup::Random r (4200);
 
         using choc::text::replace;
         Benchmark bm1 (createBenchmarkDescription ("Tempo Sequence", replace ("Create sequence 4/4, curve = CCC", "CCC", std::to_string (curve)), "100 tempos, every beat"));
@@ -520,7 +520,7 @@ public:
         constexpr int numIterations = 100;
         constexpr int numBeats = 100;
         constexpr int numConversions = 10'000;
-        juce::Random r (4200);
+        yup::Random r (4200);
 
         using choc::text::replace;
         Benchmark bm1 (createBenchmarkDescription ("Tempo Position", replace ("Create sequence 4/4, curve = CCC", "CCC", std::to_string (curve)), "100 tempos, every beat"));

@@ -33,13 +33,13 @@ struct ModifierTimer
 struct Modifier : public AutomatableEditItem,
                   public Selectable,
                   public AutomatableParameter::ModifierSource,
-                  public juce::ReferenceCountedObject
+                  public yup::ReferenceCountedObject
 {
-    using Ptr = juce::ReferenceCountedObjectPtr<Modifier>;
-    using Array = juce::ReferenceCountedArray<Modifier>;
+    using Ptr = yup::ReferenceCountedObjectPtr<Modifier>;
+    using Array = yup::ReferenceCountedArray<Modifier>;
 
     /** Creates a Modifier for a given state. */
-    Modifier (Edit&, const juce::ValueTree&);
+    Modifier (Edit&, const yup::ValueTree&);
     /** Destructor. */
     ~Modifier() override;
 
@@ -55,14 +55,14 @@ struct Modifier : public AutomatableEditItem,
     virtual float getCurrentValue() = 0;
 
     /** Must return a new ModifierAssignment for a given state. */
-    virtual AutomatableParameter::ModifierAssignment* createAssignment (const juce::ValueTree&) = 0;
+    virtual AutomatableParameter::ModifierAssignment* createAssignment (const yup::ValueTree&) = 0;
 
     //==============================================================================
     /** Can return an array of names represeting MIDI inputs. */
-    virtual juce::StringArray getMidiInputNames()               { return {}; }
+    virtual yup::StringArray getMidiInputNames()               { return {}; }
 
     /** Can return an array of names represeting audio inputs. */
-    virtual juce::StringArray getAudioInputNames()              { return {}; }
+    virtual yup::StringArray getAudioInputNames()              { return {}; }
 
     /** Determines the position in the FX chain where the modifier should be processed. */
     enum class ProcessingPosition
@@ -115,8 +115,8 @@ struct Modifier : public AutomatableEditItem,
     std::vector<float> getValues (TimeDuration numSecondsBeforeNow) const;
 
     //==============================================================================
-    juce::ValueTree state;                  /**< Modifier internal state. */
-    juce::CachedValue<juce::Colour> colour; /**< Colour property. */
+    yup::ValueTree state;                  /**< Modifier internal state. */
+    juce::CachedValue<yup::Color> colour; /**< Color property. */
 
     juce::CachedValue<float> enabled;       /**< Enabled property. */
     AutomatableParameter::Ptr enabledParam; /**< Parameter to change the enabled state. */
@@ -145,32 +145,32 @@ private:
 /**
     Holds a list of Modifiers that have been added to a Track.
 */
-class ModifierList  : public juce::ChangeBroadcaster,
+class ModifierList  : public yup::ChangeBroadcaster,
                       private ValueTreeObjectList<Modifier>
 {
 public:
     /** Creates a ModifierList for an Edit and given state.
         Usually this is created by a Track @see Track::getModifierList.
     */
-    ModifierList (Edit&, const juce::ValueTree&);
+    ModifierList (Edit&, const yup::ValueTree&);
     /** Destructor. */
     ~ModifierList() override;
 
     /** Tests whether the Identifier is of a known Modifier type. */
-    static bool isModifier (const juce::Identifier&);
+    static bool isModifier (const yup::Identifier&);
 
     /** Returns all the Modifiers in the list. */
-    juce::ReferenceCountedArray<Modifier> getModifiers() const;
+    yup::ReferenceCountedArray<Modifier> getModifiers() const;
 
     //==============================================================================
     /** Adds a Modifier from a state at a given index. */
-    juce::ReferenceCountedObjectPtr<Modifier> insertModifier (juce::ValueTree, int index, SelectionManager*);
+    yup::ReferenceCountedObjectPtr<Modifier> insertModifier (yup::ValueTree, int index, SelectionManager*);
 
     //==============================================================================
     /** @internal */
-    bool isSuitableType (const juce::ValueTree&) const override;
+    bool isSuitableType (const yup::ValueTree&) const override;
     /** @internal */
-    Modifier* createNewObject (const juce::ValueTree&) override;
+    Modifier* createNewObject (const yup::ValueTree&) override;
     /** @internal */
     void deleteObject (Modifier*) override;
 
@@ -182,15 +182,15 @@ public:
     void objectOrderChanged() override;
 
     Edit& edit;
-    juce::ValueTree state;
+    yup::ValueTree state;
 };
 
 //==============================================================================
 /** Returns the modifers of a specific type. */
 template<typename ModifierType>
-juce::ReferenceCountedArray<ModifierType> getModifiersOfType (const ModifierList& ml)
+yup::ReferenceCountedArray<ModifierType> getModifiersOfType (const ModifierList& ml)
 {
-    juce::ReferenceCountedArray<ModifierType> mods;
+    yup::ReferenceCountedArray<ModifierType> mods;
 
     for (auto m : ml.getModifiers())
         if (auto type = dynamic_cast<ModifierType*> (m))

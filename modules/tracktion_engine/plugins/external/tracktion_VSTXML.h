@@ -13,7 +13,7 @@ namespace tracktion::inline engine {
 class VSTXML
 {
 public:
-    static VSTXML* createFor (const juce::XmlElement& xml)
+    static VSTXML* createFor (const yup::XmlElement& xml)
     {
         if (xml.hasTagName ("VSTParametersStructure"))
             return new VSTXML (xml);
@@ -38,25 +38,25 @@ public:
     struct Param  : public Base
     {
         int paramID = 0;
-        juce::String expr, name, label;
-        juce::StringArray shortNames;
-        juce::String type;
+        yup::String expr, name, label;
+        yup::StringArray shortNames;
+        yup::String type;
         int numberOfStates = 0;
         float defaultValue = 0.0f;
     };
 
     struct Group  : public Base
     {
-        juce::String name;
-        juce::OwnedArray<Base> paramTree;
+        yup::String name;
+        yup::OwnedArray<Base> paramTree;
     };
 
     struct Range
     {
         Range() noexcept {}
-        Range (const juce::String& s)       { set (s); }
+        Range (const yup::String& s)       { set (s); }
 
-        void set (const juce::String& s)
+        void set (const yup::String& s)
         {
             inclusiveLow  = s.startsWithChar ('[');
             inclusiveHigh = s.endsWithChar   (']');
@@ -82,20 +82,20 @@ public:
 
     struct Entry
     {
-        juce::String name;
+        yup::String name;
         Range range;
     };
 
     struct ValueType
     {
-        juce::String name, label;
-        juce::OwnedArray<Entry> entries;
+        yup::String name, label;
+        yup::OwnedArray<Entry> entries;
     };
 
     struct Template
     {
-        juce::String name;
-        juce::OwnedArray<Param> params;
+        yup::String name;
+        yup::OwnedArray<Param> params;
     };
 
     const Param* getParamForID (int paramID, const Group* grp) const
@@ -114,7 +114,7 @@ public:
         return {};
     }
 
-    const ValueType* getValueType (const juce::String& name) const
+    const ValueType* getValueType (const yup::String& name) const
     {
         for (auto v : valueTypes)
             if (v->name == name)
@@ -123,12 +123,12 @@ public:
         return {};
     }
 
-    juce::OwnedArray<Base> paramTree;
-    juce::OwnedArray<ValueType> valueTypes;
-    juce::OwnedArray<Template> templates;
+    yup::OwnedArray<Base> paramTree;
+    yup::OwnedArray<ValueType> valueTypes;
+    yup::OwnedArray<Template> templates;
 
 private:
-    VSTXML (const juce::XmlElement& xml)
+    VSTXML (const yup::XmlElement& xml)
     {
         for (auto item : xml.getChildIterator())
         {
@@ -139,7 +139,7 @@ private:
         }
     }
 
-    void parseParam (const juce::XmlElement& item, Group* group, Template* temp)
+    void parseParam (const yup::XmlElement& item, Group* group, Template* temp)
     {
         auto param = new Param();
 
@@ -173,7 +173,7 @@ private:
         }
     }
 
-    void parseValueType (const juce::XmlElement& item)
+    void parseValueType (const yup::XmlElement& item)
     {
         auto vt = new ValueType();
         valueTypes.add (vt);
@@ -207,7 +207,7 @@ private:
         }
     }
 
-    void parseTemplate (const juce::XmlElement& item)
+    void parseTemplate (const yup::XmlElement& item)
     {
         auto temp = new Template();
         templates.add (temp);
@@ -217,7 +217,7 @@ private:
             parseParam (*param, nullptr, temp);
     }
 
-    void parseGroup (const juce::XmlElement& item, Group* parentGroup)
+    void parseGroup (const yup::XmlElement& item, Group* parentGroup)
     {
         auto group = new Group();
 
@@ -235,7 +235,7 @@ private:
 
         if (item.hasAttribute ("template"))
         {
-            juce::StringArray variables;
+            yup::StringArray variables;
             variables.addTokens (item.getStringAttribute ("values"), ";", {});
             variables.trim();
 
@@ -270,10 +270,10 @@ private:
         }
     }
 
-    int evaluate (juce::String expr, const juce::StringArray& variables) const
+    int evaluate (yup::String expr, const yup::StringArray& variables) const
     {
-        juce::StringArray names;
-        juce::Array<int> vals;
+        yup::StringArray names;
+        yup::Array<int> vals;
 
         for (auto& v : variables)
         {
@@ -292,7 +292,7 @@ private:
                 if (idx < 0)
                     break;
 
-                expr = expr.replaceSection (idx, names[i].length(), juce::String (vals[i]));
+                expr = expr.replaceSection (idx, names[i].length(), yup::String (vals[i]));
             }
         }
 
@@ -300,7 +300,7 @@ private:
                    .replace ("+", " + ")
                    .replace ("-", " - ");
 
-        juce::StringArray tokens;
+        yup::StringArray tokens;
         tokens.addTokens (expr, " ", {});
 
         bool add = true;

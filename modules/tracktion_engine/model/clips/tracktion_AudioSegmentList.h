@@ -52,7 +52,7 @@ public:
         bool followedBySilence = false;
     };
 
-    const juce::Array<Segment>& getSegments() const         { return segments; }
+    const yup::Array<Segment>& getSegments() const         { return segments; }
 
     TimePosition getStart() const;
     TimePosition getEnd() const;
@@ -71,7 +71,7 @@ private:
     void chopSegment (Segment&, TimePosition at, int insertPos);
 
     AudioClipBase& clip;
-    juce::Array<Segment> segments;
+    yup::Array<Segment> segments;
     TimeDuration crossfadeTime;
     bool relativeTime = true;
 
@@ -84,7 +84,7 @@ private:
     void mergeSegments (double sampleRate);
     void initialiseSegment (Segment&, BeatPosition startBeat, BeatPosition endBeat, double sampleRate);
 
-    juce::OwnedArray<PatternGenerator::ProgressionItem> progression;
+    yup::OwnedArray<PatternGenerator::ProgressionItem> progression;
 };
 
 } // namespace tracktion::inline engine

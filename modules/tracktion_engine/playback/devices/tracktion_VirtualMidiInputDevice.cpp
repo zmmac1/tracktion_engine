@@ -19,12 +19,12 @@ struct VirtualMidiInputDeviceInstance  : public MidiInputDeviceInstanceBase
 
     VirtualMidiInputDevice& getVirtualMidiInput() const   { return static_cast<VirtualMidiInputDevice&> (owner); }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VirtualMidiInputDeviceInstance)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VirtualMidiInputDeviceInstance)
 };
 
 //==============================================================================
-VirtualMidiInputDevice::VirtualMidiInputDevice (Engine& e, juce::String deviceName, DeviceType devType,
-                                                juce::String deviceIDToUse, bool isAllMIDIIns)
+VirtualMidiInputDevice::VirtualMidiInputDevice (Engine& e, yup::String deviceName, DeviceType devType,
+                                                yup::String deviceIDToUse, bool isAllMIDIIns)
     : MidiInputDevice (e, deviceName, deviceIDToUse),
       useAllInputs (isAllMIDIIns),
       deviceType (devType)
@@ -49,7 +49,7 @@ InputDevice::DeviceType VirtualMidiInputDevice::getDeviceType() const
     return deviceType;
 }
 
-juce::String VirtualMidiInputDevice::getDeviceTypeDescription() const
+yup::String VirtualMidiInputDevice::getDeviceTypeDescription() const
 {
     return deviceType == trackMidiDevice ? TRANS("Track MIDI Input")
                                          : TRANS("Virtual MIDI Input");
@@ -63,7 +63,7 @@ InputDeviceInstance* VirtualMidiInputDevice::createInstance (EditPlaybackContext
     return new VirtualMidiInputDeviceInstance (*this, c);
 }
 
-juce::String VirtualMidiInputDevice::openDevice() { return {}; }
+yup::String VirtualMidiInputDevice::openDevice() { return {}; }
 void VirtualMidiInputDevice::closeDevice() {}
 
 void VirtualMidiInputDevice::setEnabled (bool b)
@@ -74,7 +74,7 @@ void VirtualMidiInputDevice::setEnabled (bool b)
     MidiInputDevice::setEnabled (b);
 }
 
-void VirtualMidiInputDevice::setMIDIInputSourceDevices (const juce::StringArray deviceIDs)
+void VirtualMidiInputDevice::setMIDIInputSourceDevices (const yup::StringArray deviceIDs)
 {
     if (deviceIDs != inputDeviceIDs)
     {
@@ -84,7 +84,7 @@ void VirtualMidiInputDevice::setMIDIInputSourceDevices (const juce::StringArray 
     }
 }
 
-void VirtualMidiInputDevice::toggleMIDIInputSourceDevice (const juce::String& deviceIDToToggle)
+void VirtualMidiInputDevice::toggleMIDIInputSourceDevice (const yup::String& deviceIDToToggle)
 {
     auto devices = inputDeviceIDs;
 
@@ -98,7 +98,7 @@ void VirtualMidiInputDevice::toggleMIDIInputSourceDevice (const juce::String& de
 
 void VirtualMidiInputDevice::loadProps()
 {
-    juce::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
+    yup::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
 
     auto n = engine.getPropertyStorage().getXmlPropertyItem (SettingID::virtualmidiin, propName);
 
@@ -110,19 +110,19 @@ void VirtualMidiInputDevice::loadProps()
 
 void VirtualMidiInputDevice::saveProps()
 {
-    juce::XmlElement n ("SETTINGS");
+    yup::XmlElement n ("SETTINGS");
 
     if (! useAllInputs)
         n.setAttribute ("inputDevices", inputDeviceIDs.joinIntoString (";"));
 
     MidiInputDevice::saveMidiProps (n);
 
-    juce::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
+    yup::String propName = isTrackDevice() ? "TRACKTION_TRACK_DEVICE" : getName();
 
     engine.getPropertyStorage().setXmlPropertyItem (SettingID::virtualmidiin, propName, n);
 }
 
-void VirtualMidiInputDevice::handleIncomingMidiMessage (const juce::MidiMessage& m, MPESourceID sourceID)
+void VirtualMidiInputDevice::handleIncomingMidiMessage (const yup::MidiMessage& m, MPESourceID sourceID)
 {
     auto message = m;
 
@@ -130,7 +130,7 @@ void VirtualMidiInputDevice::handleIncomingMidiMessage (const juce::MidiMessage&
         sendMessageToInstances (message, sourceID);
 }
 
-void VirtualMidiInputDevice::handleMessageFromPhysicalDevice (PhysicalMidiInputDevice& dev, const juce::MidiMessage& m)
+void VirtualMidiInputDevice::handleMessageFromPhysicalDevice (PhysicalMidiInputDevice& dev, const yup::MidiMessage& m)
 {
     if (useAllInputs || inputDeviceIDs.contains (dev.getDeviceID()))
         handleIncomingMidiMessage (m, dev.getMPESourceID());

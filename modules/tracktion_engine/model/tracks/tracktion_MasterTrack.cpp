@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-MasterTrack::MasterTrack (Edit& e, const juce::ValueTree& v)
+MasterTrack::MasterTrack (Edit& e, const yup::ValueTree& v)
     : Track (e, v, true)
 {
 }
@@ -28,8 +28,8 @@ MasterTrack::~MasterTrack()
 }
 
 bool MasterTrack::isMasterTrack() const               { return true; }
-juce::String MasterTrack::getName() const             { return TRANS("Master"); }
-juce::String MasterTrack::getSelectableDescription()  { return TRANS("Master Track"); }
+yup::String MasterTrack::getName() const             { return TRANS("Master"); }
+yup::String MasterTrack::getSelectableDescription()  { return TRANS("Master Track"); }
 bool MasterTrack::canContainPlugin (Plugin* p) const  { return p->canBeAddedToMaster(); }
 
 ChannelConfiguration MasterTrack::getChannelConfiguration() const

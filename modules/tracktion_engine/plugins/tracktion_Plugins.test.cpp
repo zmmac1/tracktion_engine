@@ -33,7 +33,7 @@ TEST_SUITE ("tracktion_engine")
         const auto numFrames = toSamples (duration, p.sampleRate);
 
         const auto transientPos = 1_tp;
-        const auto transientFile = graph::test_utilities::getTransientFile<juce::WavAudioFormat> (p.sampleRate, duration, transientPos, 0.5f);
+        const auto transientFile = graph::test_utilities::getTransientFile<yup::WavAudioFormat> (p.sampleRate, duration, transientPos, 0.5f);
         const auto af = AudioFile (engine, transientFile->getFile());
 
         auto track1 = getAudioTracks (*edit)[0];
@@ -49,7 +49,7 @@ TEST_SUITE ("tracktion_engine")
             auto output = player->getOutput();
             const auto expectedTransientSample = toSamples (transientPos + TimeDuration::fromSeconds (plugin->getLatencySeconds()), p.sampleRate);
 
-            auto f = graph::test_utilities::writeToTemporaryFile<juce::WavAudioFormat> (output, p.sampleRate, 0);
+            auto f = graph::test_utilities::writeToTemporaryFile<yup::WavAudioFormat> (output, p.sampleRate, 0);
             auto transient = graph::test_utilities::findFirstNonZeroSample (output.getChannel (0));
 
             if (shouldCheck)
@@ -114,9 +114,9 @@ TEST_SUITE ("tracktion_engine")
     }
 }
 
-static juce::BigInteger getTracksMask (const juce::Array<Track*>& tracks)
+static yup::BigInteger getTracksMask (const yup::Array<Track*>& tracks)
 {
-    juce::BigInteger tracksMask;
+    yup::BigInteger tracksMask;
 
     for (auto t : tracks)
         tracksMask.setBit (t->getIndexInEditTrackList());
@@ -126,11 +126,11 @@ static juce::BigInteger getTracksMask (const juce::Array<Track*>& tracks)
 }
 
 template<typename AudioFormatType>
-static std::unique_ptr<juce::TemporaryFile> getSinFile (double sampleRate)
+static std::unique_ptr<yup::TemporaryFile> getSinFile (double sampleRate)
 {
     // Create a 1s sin buffer
-    juce::AudioBuffer<float> buffer (1, (int) sampleRate);
-    juce::dsp::Oscillator<float> osc ([] (float in) { return std::sin (in); });
+    yup::AudioBuffer<float> buffer (1, (int) sampleRate);
+    yup::dsp::Oscillator<float> osc ([] (float in) { return std::sin (in); });
     osc.setFrequency (220.0);
     osc.prepare ({ double (sampleRate), uint32_t (sampleRate), 1 });
 
@@ -142,16 +142,16 @@ static std::unique_ptr<juce::TemporaryFile> getSinFile (double sampleRate)
 
     // Then write it to a temp file
     AudioFormatType format;
-    auto f = std::make_unique<juce::TemporaryFile> (format.getFileExtensions()[0]);
+    auto f = std::make_unique<yup::TemporaryFile> (format.getFileExtensions()[0]);
 
-    if (auto fileStream = std::unique_ptr<juce::OutputStream> (f->getFile().createOutputStream()))
+    if (auto fileStream = std::unique_ptr<yup::OutputStream> (f->getFile().createOutputStream()))
     {
         const int numQualityOptions = format.getQualityOptions().size();
         const int qualityOptionIndex = numQualityOptions == 0 ? 0 : (numQualityOptions / 2);
         const int bitDepth = format.getPossibleBitDepths().contains (16) ? 16 : 32;
 
-        if (auto writer = std::unique_ptr<juce::AudioFormatWriter> (AudioFormatType().createWriterFor (fileStream,
-                                                                                                       juce::AudioFormatWriterOptions()
+        if (auto writer = std::unique_ptr<yup::AudioFormatWriter> (AudioFormatType().createWriterFor (fileStream,
+                                                                                                       yup::WriteOptions()
                                                                                                         .withSampleRate (sampleRate)
                                                                                                         .withNumChannels (1)
                                                                                                         .withBitsPerSample (bitDepth)
@@ -165,28 +165,28 @@ static std::unique_ptr<juce::TemporaryFile> getSinFile (double sampleRate)
     return f;
 }
 
-static void expectPeak (Edit& edit, TimeRange tr, juce::Array<Track*> tracks, float expectedPeak)
+static void expectPeak (Edit& edit, TimeRange tr, yup::Array<Track*> tracks, float expectedPeak)
 {
     auto blockSize = edit.engine.getDeviceManager().getBlockSize();
     auto stats = Renderer::measureStatistics ("PDC Tests", edit, tr, getTracksMask (tracks), blockSize);
-    MESSAGE ("Stats: peak " * juce::String (stats.peak).toStdString()
-             * ", avg " * juce::String (stats.average).toStdString()
-             * ", duration " * juce::String (stats.audioDuration).toStdString());
-    CHECK_MESSAGE (juce::isWithin (stats.peak, expectedPeak, 0.001f), (juce::String ("Expected peak: ") + juce::String (expectedPeak, 4)).toStdString());
+    MESSAGE ("Stats: peak " * yup::String (stats.peak).toStdString()
+             * ", avg " * yup::String (stats.average).toStdString()
+             * ", duration " * yup::String (stats.audioDuration).toStdString());
+    CHECK_MESSAGE (yup::isWithin (stats.peak, expectedPeak, 0.001f), (yup::String ("Expected peak: ") + yup::String (expectedPeak, 4)).toStdString());
 }
 
 TEST_SUITE ("tracktion_engine")
 {
     TEST_CASE ("PDC")
     {
-        auto sinFile = getSinFile<juce::WavAudioFormat> (44100.0);
+        auto sinFile = getSinFile<yup::WavAudioFormat> (44100.0);
 
         auto& engine = *Engine::getEngines()[0];
         engine.getPluginManager().createBuiltInType<LatencyPlugin>();
 
         SUBCASE ("No latency")
         {
-            CHECK_EQ (sinFile->getFile().getFileExtension(), juce::String (".wav"));
+            CHECK_EQ (sinFile->getFile().getFileExtension(), yup::String (".wav"));
             auto edit = engine::test_utilities::createTestEdit (engine, 2);
             auto track1 = getAudioTracks (*edit)[0];
             auto track2 = getAudioTracks (*edit)[1];
@@ -219,8 +219,8 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("Source file with different sample rate")
         {
-            auto sinFile96Ogg = getSinFile<juce::OggVorbisAudioFormat> (96000.0);
-            CHECK_EQ (sinFile96Ogg->getFile().getFileExtension(), juce::String (".ogg"));
+            auto sinFile96Ogg = getSinFile<yup::OggVorbisAudioFormat> (96000.0);
+            CHECK_EQ (sinFile96Ogg->getFile().getFileExtension(), yup::String (".ogg"));
             auto edit = engine::test_utilities::createTestEdit (engine, 2);
             auto track1 = getAudioTracks (*edit)[0];
 
@@ -256,7 +256,7 @@ TEST_SUITE ("tracktion_engine")
     {
         auto& engine = *Engine::getEngines()[0];
 
-        const juce::TemporaryFile tempFile (".tracktionedit");
+        const yup::TemporaryFile tempFile (".tracktionedit");
         const auto editFile = tempFile.getFile();
 
         const float macroParameterValue = 0.3f;
@@ -276,12 +276,12 @@ TEST_SUITE ("tracktion_engine")
 
             // Add macro parameter
             const auto macroParameter = rackType->getMacroParameterListForWriting().createMacroParameter();
-            macroParameter->setNormalisedParameter (macroParameterValue, juce::NotificationType::sendNotification);
+            macroParameter->setNormalisedParameter (macroParameterValue, yup::NotificationType::sendNotification);
             CHECK (std::abs (getValueAt (*macroParameter, -1s) - macroParameterValue) <= 0.001f);
 
             auto volumeAndPan = dynamic_cast<VolumeAndPanPlugin*> (volumePlugin.get());
             auto volParam = volumeAndPan->volParam;
-            volParam->setNormalisedParameter (0.0f, juce::NotificationType::sendNotification);
+            volParam->setNormalisedParameter (0.0f, yup::NotificationType::sendNotification);
             volParam->addModifier (*macroParameter, modifierValue, modifierOffset, 0.5f);
             CHECK (volParam->isAutomationActive());
 
@@ -332,13 +332,13 @@ TEST_SUITE ("tracktion_engine")
         auto edit = engine::test_utilities::createTestEdit (engine, 1, Edit::forEditing);
 
         auto rackType = edit->getRackList().addNewRack();
-        auto modifier = rackType->getModifierList().insertModifier (juce::ValueTree (IDs::ENVELOPEFOLLOWER), 0, nullptr);
+        auto modifier = rackType->getModifierList().insertModifier (yup::ValueTree (IDs::ENVELOPEFOLLOWER), 0, nullptr);
         CHECK(rackType->addConnection (EditItemID(), 1, modifier->itemID, 1));
         CHECK(rackType->addConnection (EditItemID(), 2, modifier->itemID, 2));
 
         auto& track = *getAudioTracks (*edit)[0];
         auto fileLength = 5_td;
-        auto squareFile = graph::test_utilities::getSquareFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds());
+        auto squareFile = graph::test_utilities::getSquareFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds());
         auto squareAudioFile = AudioFile (engine, squareFile->getFile());
         insertWaveClip (track, {}, squareFile->getFile(),
                         ClipPosition {{ 0_tp, fileLength }}, DeleteExistingClips::no);
@@ -484,7 +484,7 @@ TEST_SUITE ("tracktion_engine")
         SUBCASE("Modifier")
         {
             auto modifierList = track->getModifierList();
-            auto lfo = modifierList->insertModifier (juce::ValueTree (IDs::LFO), 0, nullptr);
+            auto lfo = modifierList->insertModifier (yup::ValueTree (IDs::LFO), 0, nullptr);
             volParam->addModifier (*lfo);
             CHECK(volParam->isAutomationActive());
             CHECK(volPlugin->isAutomationNeeded());

@@ -24,7 +24,7 @@ TrackInsertPoint::TrackInsertPoint (EditItemID parent, EditItemID preceding)
 
 TrackInsertPoint::TrackInsertPoint (Track& t, bool insertBefore)
 {
-    juce::Array<Track*> siblingTracks;
+    yup::Array<Track*> siblingTracks;
 
     if (auto parent = t.getParentTrack())
     {
@@ -47,7 +47,7 @@ TrackInsertPoint::TrackInsertPoint (Track& t, bool insertBefore)
         precedingTrackID = siblingTracks.getUnchecked (index - (insertBefore ? 1 : 0))->itemID;
 }
 
-TrackInsertPoint::TrackInsertPoint (const juce::ValueTree& v)
+TrackInsertPoint::TrackInsertPoint (const yup::ValueTree& v)
 {
     {
         auto p = v.getParent();
@@ -72,7 +72,7 @@ TrackInsertPoint TrackInsertPoint::getEndOfTracks (Edit& e)
 }
 
 //==============================================================================
-TrackList::TrackList (Edit& e, const juce::ValueTree& parentTree)
+TrackList::TrackList (Edit& e, const yup::ValueTree& parentTree)
     : ValueTreeObjectList<Track> (parentTree), edit (e)
 {
 }
@@ -89,7 +89,7 @@ void TrackList::initialise()
     rebuilding = false;
 }
 
-Track* TrackList::getTrackFor (const juce::ValueTree& v) const
+Track* TrackList::getTrackFor (const yup::ValueTree& v) const
 {
     for (auto t : objects)
         if (t->state == v)
@@ -128,33 +128,33 @@ void TrackList::visitAllTracks (const std::function<bool(Track&)>& f, bool recur
         visitAllTopLevel (f);
 }
 
-bool TrackList::isMovableTrack (const juce::ValueTree& v) noexcept
+bool TrackList::isMovableTrack (const yup::ValueTree& v) noexcept
 {
     return v.hasType (IDs::TRACK) || v.hasType (IDs::FOLDERTRACK) || v.hasType (IDs::AUTOMATIONTRACK);
 }
 
-bool TrackList::isArrangerTrack (const juce::ValueTree& v) noexcept { return v.hasType (IDs::ARRANGERTRACK); }
-bool TrackList::isChordTrack (const juce::ValueTree& v) noexcept    { return v.hasType (IDs::CHORDTRACK); }
-bool TrackList::isMarkerTrack (const juce::ValueTree& v) noexcept   { return v.hasType (IDs::MARKERTRACK); }
-bool TrackList::isTempoTrack (const juce::ValueTree& v) noexcept    { return v.hasType (IDs::TEMPOTRACK); }
-bool TrackList::isMasterTrack (const juce::ValueTree& v) noexcept   { return v.hasType (IDs::MASTERTRACK); }
+bool TrackList::isArrangerTrack (const yup::ValueTree& v) noexcept { return v.hasType (IDs::ARRANGERTRACK); }
+bool TrackList::isChordTrack (const yup::ValueTree& v) noexcept    { return v.hasType (IDs::CHORDTRACK); }
+bool TrackList::isMarkerTrack (const yup::ValueTree& v) noexcept   { return v.hasType (IDs::MARKERTRACK); }
+bool TrackList::isTempoTrack (const yup::ValueTree& v) noexcept    { return v.hasType (IDs::TEMPOTRACK); }
+bool TrackList::isMasterTrack (const yup::ValueTree& v) noexcept   { return v.hasType (IDs::MASTERTRACK); }
 
-bool TrackList::isFixedTrack (const juce::ValueTree& v) noexcept
+bool TrackList::isFixedTrack (const yup::ValueTree& v) noexcept
 {
     return isMarkerTrack (v) || isTempoTrack (v) || isChordTrack (v) || isArrangerTrack (v) || isMasterTrack (v)
         || (v.hasType (IDs::AUTOMATIONTRACK) && isMasterTrack (v.getParent()));
 }
 
-bool TrackList::isTrack (const juce::ValueTree& v) noexcept         { return isMovableTrack (v) || isFixedTrack (v); }
+bool TrackList::isTrack (const yup::ValueTree& v) noexcept         { return isMovableTrack (v) || isFixedTrack (v); }
 
-bool TrackList::isTrack (const juce::Identifier& i) noexcept
+bool TrackList::isTrack (const yup::Identifier& i) noexcept
 {
     return i == IDs::TRACK || i == IDs::FOLDERTRACK || i == IDs::AUTOMATIONTRACK
         || i == IDs::MARKERTRACK || i == IDs::TEMPOTRACK || i == IDs::CHORDTRACK
         || i == IDs::ARRANGERTRACK || i == IDs::MASTERTRACK;
 }
 
-bool TrackList::hasAnySubTracks (const juce::ValueTree& v)
+bool TrackList::hasAnySubTracks (const yup::ValueTree& v)
 {
     for (int i = v.getNumChildren(); --i >= 0;)
         if (isMovableTrack (v.getChild (i)))
@@ -163,14 +163,14 @@ bool TrackList::hasAnySubTracks (const juce::ValueTree& v)
     return false;
 }
 
-bool TrackList::isSuitableType (const juce::ValueTree& v) const
+bool TrackList::isSuitableType (const yup::ValueTree& v) const
 {
     return isTrack (v);
 }
 
-Track* TrackList::createNewObject (const juce::ValueTree& v)
+Track* TrackList::createNewObject (const yup::ValueTree& v)
 {
-    juce::ValueTree vt (v);
+    yup::ValueTree vt (v);
     Track::Ptr t;
 
     if (rebuilding)
@@ -247,11 +247,11 @@ void TrackList::objectOrderChanged()
     edit.updateTrackStatusesAsync();
 }
 
-void TrackList::sortTracksByType (juce::ValueTree& editState, juce::UndoManager* um)
+void TrackList::sortTracksByType (yup::ValueTree& editState, juce::UndoManager* um)
 {
     struct TrackTypeSorter
     {
-        static int getPriority (const juce::ValueTree& v) noexcept
+        static int getPriority (const yup::ValueTree& v) noexcept
         {
             if (isMovableTrack (v))     return 6;
             if (isMasterTrack (v))      return 5;
@@ -262,7 +262,7 @@ void TrackList::sortTracksByType (juce::ValueTree& editState, juce::UndoManager*
             return 0;
         }
 
-        static int compareElements (const juce::ValueTree& first, const juce::ValueTree& second) noexcept
+        static int compareElements (const yup::ValueTree& first, const yup::ValueTree& second) noexcept
         {
             return getPriority (first) - getPriority (second);
         }
@@ -279,7 +279,7 @@ void TrackList::handleAsyncUpdate()
 }
 
 //==============================================================================
-int countNumTracks (const juce::ValueTree& v)
+int countNumTracks (const yup::ValueTree& v)
 {
     int total = 0;
 
@@ -356,7 +356,7 @@ static AutomationCurve* getDestCurve (Track& t, const AutomatableParameter::Ptr&
 }
 
 static bool mergeInto (const TrackAutomationSection& s,
-                       juce::Array<TrackAutomationSection>& dst)
+                       yup::Array<TrackAutomationSection>& dst)
 {
     for (auto& dstSeg : dst)
     {
@@ -370,20 +370,20 @@ static bool mergeInto (const TrackAutomationSection& s,
     return false;
 }
 
-static void mergeSections (const juce::Array<TrackAutomationSection>& src,
-                           juce::Array<TrackAutomationSection>& dst)
+static void mergeSections (const yup::Array<TrackAutomationSection>& src,
+                           yup::Array<TrackAutomationSection>& dst)
 {
     for (const auto& srcSeg : src)
         if (! mergeInto (srcSeg, dst))
             dst.add (srcSeg);
 }
 
-void moveAutomation (const juce::Array<TrackAutomationSection>& origSections, TimeDuration offset, bool copy)
+void moveAutomation (const yup::Array<TrackAutomationSection>& origSections, TimeDuration offset, bool copy)
 {
     if (origSections.isEmpty())
         return;
 
-    juce::Array<TrackAutomationSection> sections;
+    yup::Array<TrackAutomationSection> sections;
     mergeSections (origSections, sections);
 
     // find all the original curves
@@ -496,7 +496,7 @@ void moveAutomation (const juce::Array<TrackAutomationSection>& origSections, Ti
                 TimeRange startWithMargin        (newStart - errorMargin, newStart + errorMargin);
                 TimeRange endWithMargin          (newEnd   - errorMargin, newEnd   + errorMargin);
 
-                juce::Array<AutomationCurve::AutomationPoint> origPoints;
+                yup::Array<AutomationCurve::AutomationPoint> origPoints;
 
                 for (int i = 0; i < srcCurve.getNumPoints(); ++i)
                 {
@@ -536,7 +536,7 @@ void moveAutomation (const juce::Array<TrackAutomationSection>& origSections, Ti
     }
 
     // activate the automation curves on the new tracks
-    juce::Array<Track*> src, dst;
+    yup::Array<Track*> src, dst;
 
     for (auto& section : sections)
     {

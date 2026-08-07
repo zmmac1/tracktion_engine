@@ -31,7 +31,7 @@ public:
     };
 
     //==============================================================================
-    InputDevice (Engine&, juce::String name, juce::String deviceID);
+    InputDevice (Engine&, yup::String name, yup::String deviceID);
     ~InputDevice() override;
 
     //==============================================================================
@@ -59,7 +59,7 @@ public:
     /** This is a bit of a hack but allows the time for MIDI devices to be set through the base class interface. */
     virtual void masterTimeUpdate (double time) = 0;
 
-    static void setRetrospectiveLock (Engine&, const juce::Array<InputDeviceInstance*>&, bool lock);
+    static void setRetrospectiveLock (Engine&, const yup::Array<InputDeviceInstance*>&, bool lock);
     virtual void updateRetrospectiveBufferLength (double length) = 0;
 
     //==============================================================================
@@ -82,7 +82,7 @@ protected:
     and can therefore be assigned to slots/tracks etc.
     @see EditInputDevices
 */
-class InputDeviceInstance   : protected juce::ValueTree::Listener
+class InputDeviceInstance   : protected yup::ValueTree::Listener
 {
 public:
     struct Destination;
@@ -99,14 +99,14 @@ public:
     InputDevice& getInputDevice() noexcept      { return owner; }
 
     /** Returns the targets this instance is assigned to. */
-    juce::Array<EditItemID> getTargets() const;
+    yup::Array<EditItemID> getTargets() const;
 
     /** Assigns this input to either an AudioTrack or a ClipSlot. */
-    [[ nodiscard ]] tl::expected<Destination*, juce::String> setTarget (EditItemID targetID, bool moveToTrack, juce::UndoManager*,
+    [[ nodiscard ]] tl::expected<Destination*, yup::String> setTarget (EditItemID targetID, bool moveToTrack, juce::UndoManager*,
                                                                         std::optional<int> index = std::nullopt);
 
     /** Removes the destination with the given targetID. */
-    [[ nodiscard ]] juce::Result removeTarget (EditItemID targetID, juce::UndoManager*);
+    [[ nodiscard ]] yup::Result removeTarget (EditItemID targetID, juce::UndoManager*);
 
     /** Whether the track should monitor the input or not. */
     virtual bool isLivePlayEnabled (const Track&) const;
@@ -163,7 +163,7 @@ public:
     /** An array of either valid RecordingContexts or an error message if the recording couldn't be started.
         @see
     */
-    using PreparedContext = std::vector<tl::expected<std::unique_ptr<RecordingContext>, juce::String>>;
+    using PreparedContext = std::vector<tl::expected<std::unique_ptr<RecordingContext>, yup::String>>;
 
     /** Prepares a recording operation.
         @param      RecordingParameters  Determines the destinations and punch ranges
@@ -204,7 +204,7 @@ public:
     /** Stops a recording.
         @param StopRecordingParameters determines how stopped recordings are treated.
     */
-    virtual tl::expected<Clip::Array, juce::String> stopRecording (StopRecordingParameters) = 0;
+    virtual tl::expected<Clip::Array, yup::String> stopRecording (StopRecordingParameters) = 0;
 
     /** Stops a recording asyncronously.
         This can be used to trigger a recording to stop at a time in the future.
@@ -213,7 +213,7 @@ public:
         @param recordingStoppedCallback     A callback to call when the recording stops.
     */
     virtual void stopRecording (StopRecordingParameters,
-                                std::function<void (tl::expected<Clip::Array, juce::String>)>) = 0;
+                                std::function<void (tl::expected<Clip::Array, yup::String>)>) = 0;
 
     /** Returns true if there are any active recordings for this device. */
     virtual bool isRecording (EditItemID) = 0;
@@ -222,10 +222,10 @@ public:
     virtual bool isRecording() = 0;
 
     /** Returns the File that the given target is currently recording to. */
-    virtual juce::File getRecordingFile (EditItemID) const     { return {}; }
+    virtual yup::File getRecordingFile (EditItemID) const     { return {}; }
 
     /** Returns a fifo of recorded MIDInotes that can be used for drawing UI components */
-    virtual std::shared_ptr<choc::fifo::SingleReaderSingleWriterFIFO<juce::MidiMessage>> getRecordingNotes (EditItemID) const { return nullptr; }
+    virtual std::shared_ptr<choc::fifo::SingleReaderSingleWriterFIFO<yup::MidiMessage>> getRecordingNotes (EditItemID) const { return nullptr; }
 
     /** Returns the time that a given target started recording. */
     virtual TimePosition getPunchInTime (EditItemID) = 0;
@@ -233,10 +233,10 @@ public:
     /** Takes the retrospective buffer and creates clips from it, as if recording had been
         triggered in the past and stopped at the time of calling this function.
     */
-    virtual juce::Array<Clip*> applyRetrospectiveRecord (bool armedOnly) = 0;
+    virtual yup::Array<Clip*> applyRetrospectiveRecord (bool armedOnly) = 0;
 
     //==============================================================================
-    juce::ValueTree state;          /** The state of this instance. */
+    yup::ValueTree state;          /** The state of this instance. */
     InputDevice& owner;             /**< The InputDevice this is an instance of. */
     EditPlaybackContext& context;   /**< The EditPlaybackContext this instance belongs to. */
     Edit& edit;                     /**< The Edit this instance belongs to. */
@@ -251,7 +251,7 @@ public:
         }
 
         InputDeviceInstance& input; /**< The instance this belongs to. */
-        juce::ValueTree state;      /**< The state of this destination. */
+        yup::ValueTree state;      /**< The state of this destination. */
 
         /** The target for this destination, either an AudioTrack or ClipSlot. */
         const EditItemID targetID = EditItemID::fromProperty (state, IDs::targetID);
@@ -264,7 +264,7 @@ public:
 
         //==============================================================================
         /** @internal */
-        Destination (InputDeviceInstance& i, juce::ValueTree v)
+        Destination (InputDeviceInstance& i, yup::ValueTree v)
             : input (i), state (v)
         {
             recordEnabled.referTo (state, IDs::armed, nullptr, false);
@@ -272,7 +272,7 @@ public:
         }
 
         /** @internal */
-        juce::String getSelectableDescription() override
+        yup::String getSelectableDescription() override
         {
             return input.getInputDevice().getSelectableDescription();
         }
@@ -281,26 +281,26 @@ public:
     //==============================================================================
     struct WaveInputDestination : public Destination
     {
-        WaveInputDestination (InputDeviceInstance& i, juce::ValueTree v) : Destination (i, v) {}
+        WaveInputDestination (InputDeviceInstance& i, yup::ValueTree v) : Destination (i, v) {}
         ~WaveInputDestination() override { notifyListenersOfDeletion(); }
     };
 
     struct MidiInputDestination : public Destination
     {
-        MidiInputDestination (InputDeviceInstance& i, juce::ValueTree v) : Destination (i, v) {}
+        MidiInputDestination (InputDeviceInstance& i, yup::ValueTree v) : Destination (i, v) {}
         ~MidiInputDestination() override { notifyListenersOfDeletion(); }
     };
 
     struct VirtualMidiInputDestination : public Destination
     {
-        VirtualMidiInputDestination (InputDeviceInstance& i, juce::ValueTree v) : Destination (i, v) {}
+        VirtualMidiInputDestination (InputDeviceInstance& i, yup::ValueTree v) : Destination (i, v) {}
         ~VirtualMidiInputDestination() override { notifyListenersOfDeletion(); }
     };
 
     //==============================================================================
     struct DestinationList  : public ValueTreeObjectList<Destination>
     {
-        DestinationList (InputDeviceInstance& i, const juce::ValueTree& v)
+        DestinationList (InputDeviceInstance& i, const yup::ValueTree& v)
             : ValueTreeObjectList<Destination> (v), input (i)
         {
             rebuildObjects();
@@ -311,12 +311,12 @@ public:
             freeObjects();
         }
 
-        bool isSuitableType (const juce::ValueTree& v) const override
+        bool isSuitableType (const yup::ValueTree& v) const override
         {
             return v.hasType (IDs::INPUTDEVICEDESTINATION);
         }
 
-        Destination* createNewObject (const juce::ValueTree& v) override
+        Destination* createNewObject (const yup::ValueTree& v) override
         {
             switch (input.getInputDevice().getDeviceType())
             {
@@ -361,7 +361,7 @@ public:
         virtual void acceptInputBuffer (choc::buffer::ChannelArrayView<float>) {}
 
         /** Override this to receive MIDI input from the device if it has any. */
-        virtual void handleIncomingMidiMessage (const juce::MidiMessage&, MPESourceID) {}
+        virtual void handleIncomingMidiMessage (const yup::MidiMessage&, MPESourceID) {}
 
         /** This is called when a recording is aborted so listeners should trash their temp data */
         virtual void discardRecordings (EditItemID /*targetID*/) {}
@@ -374,9 +374,9 @@ public:
     virtual void removeConsumer (Consumer*) = 0;
 
 protected:
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
-    void valueTreeChildAdded (juce::ValueTree&, juce::ValueTree&) override;
-    void valueTreeChildRemoved (juce::ValueTree&, juce::ValueTree&, int) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
+    void valueTreeChildAdded (yup::ValueTree&, yup::ValueTree&) override;
+    void valueTreeChildRemoved (yup::ValueTree&, yup::ValueTree&, int) override;
 
     ClipSlot* getFreeSlot (AudioTrack&);
 
@@ -387,18 +387,18 @@ private:
     void updateRecordingStatus();
     void handleDestinationChange (EditItemID, bool);
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (InputDeviceInstance)
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputDeviceInstance)
+    YUP_DECLARE_WEAK_REFERENCEABLE (InputDeviceInstance)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InputDeviceInstance)
 };
 
 
 //==============================================================================
 //==============================================================================
 /** Returns the AudioTracks and their indexes this instance is assigned to. */
-[[ nodiscard ]] juce::Array<std::pair<AudioTrack*, int>> getTargetTracksAndIndexes (InputDeviceInstance&);
+[[ nodiscard ]] yup::Array<std::pair<AudioTrack*, int>> getTargetTracksAndIndexes (InputDeviceInstance&);
 
 /** Returns the AudioTracks this instance is assigned to. */
-[[ nodiscard ]] juce::Array<AudioTrack*> getTargetTracks (InputDeviceInstance&);
+[[ nodiscard ]] yup::Array<AudioTrack*> getTargetTracks (InputDeviceInstance&);
 
 /** Returns true if this instance is assigned to the given Track at the given index . */
 [[ nodiscard ]] bool isOnTargetTrack (InputDeviceInstance&, const Track&, int idx);
@@ -407,7 +407,7 @@ private:
 [[ nodiscard ]] bool isAttached (InputDeviceInstance&);
 
 /** Removes this instance from all assigned targets. */
-[[ nodiscard ]] juce::Result clearFromTargets (InputDeviceInstance&, juce::UndoManager*);
+[[ nodiscard ]] yup::Result clearFromTargets (InputDeviceInstance&, juce::UndoManager*);
 
 //==============================================================================
 /** Returns the destination if one has been assigned for the given arguments. */
@@ -417,7 +417,7 @@ private:
 [[ nodiscard ]] InputDeviceInstance::Destination* getDestination (InputDeviceInstance&, const ClipSlot&);
 
 /** Returns the destination if one has been assigned for the given arguments. */
-[[ nodiscard ]] InputDeviceInstance::Destination* getDestination (InputDeviceInstance&, const juce::ValueTree& destinationState);
+[[ nodiscard ]] InputDeviceInstance::Destination* getDestination (InputDeviceInstance&, const yup::ValueTree& destinationState);
 
 
 //==============================================================================
@@ -439,10 +439,10 @@ inline InputDeviceInstance::PreparedContext& append (InputDeviceInstance::Prepar
 }
 
 /** Splits the PreparedContext in to valid RecordingContexts and an array of error messages. */
-[[ nodiscard ]] inline std::pair<std::vector<std::unique_ptr<InputDeviceInstance::RecordingContext>>, juce::StringArray> extract (InputDeviceInstance::PreparedContext&& pc)
+[[ nodiscard ]] inline std::pair<std::vector<std::unique_ptr<InputDeviceInstance::RecordingContext>>, yup::StringArray> extract (InputDeviceInstance::PreparedContext&& pc)
 {
     std::vector<std::unique_ptr<InputDeviceInstance::RecordingContext>> recContexts;
-    juce::StringArray errors;
+    yup::StringArray errors;
 
     for (auto& res : pc)
     {

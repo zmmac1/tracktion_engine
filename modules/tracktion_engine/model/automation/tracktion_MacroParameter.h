@@ -24,32 +24,32 @@ public:
     */
     struct Assignment  : public AutomatableParameter::ModifierAssignment
     {
-        Assignment (const juce::ValueTree&, const MacroParameter&);
+        Assignment (const yup::ValueTree&, const MacroParameter&);
 
-        using Ptr = juce::ReferenceCountedObjectPtr<Assignment>;
+        using Ptr = yup::ReferenceCountedObjectPtr<Assignment>;
 
         bool isForModifierSource (const AutomatableParameter::ModifierSource&) const override;
 
         const EditItemID macroParamID;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Assignment)
     };
 
     //==============================================================================
-    MacroParameter (AutomatableEditItem&, Edit&, const juce::ValueTree&);
+    MacroParameter (AutomatableEditItem&, Edit&, const yup::ValueTree&);
     ~MacroParameter() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<MacroParameter>;
+    using Ptr = yup::ReferenceCountedObjectPtr<MacroParameter>;
 
     void initialise();
 
-    juce::String getParameterName() const override         { return macroName; }
+    yup::String getParameterName() const override         { return macroName; }
     std::optional<float> getDefaultValue() const override;
 
     Edit& edit;
-    juce::ValueTree state;
+    yup::ValueTree state;
     juce::CachedValue<float> value, defaultValue;
-    juce::CachedValue<juce::String> macroName;
+    juce::CachedValue<yup::String> macroName;
 
 private:
     virtual void parameterChanged (float, bool byAutomation) override;
@@ -61,35 +61,35 @@ MacroParameter::Ptr getMacroParameterForID (Edit&, EditItemID);
 //==============================================================================
 /** */
 class MacroParameterList    : public AutomatableEditItem,
-                              public juce::ChangeBroadcaster
+                              public yup::ChangeBroadcaster
 {
 public:
-    MacroParameterList (Edit&, const juce::ValueTree&);
+    MacroParameterList (Edit&, const yup::ValueTree&);
     ~MacroParameterList() override;
 
     MacroParameter* createMacroParameter();
     void removeMacroParameter (MacroParameter&);
     void hideMacroParametersFromTracks() const;
 
-    juce::ReferenceCountedArray<MacroParameter> getMacroParameters() const;
+    yup::ReferenceCountedArray<MacroParameter> getMacroParameters() const;
     void visitMacroParameters (const std::function<void(AutomatableParameter&)>& visit) const;
 
-    juce::String getName() const override     { return {}; }
+    yup::String getName() const override     { return {}; }
     Track* getTrack() const;
 
     //==============================================================================
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override {}
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override {}
 
-    juce::ValueTree state;
+    yup::ValueTree state;
 
 private:
     struct List;
-    juce::ValueTree parent;
+    yup::ValueTree parent;
     std::unique_ptr<List> list;
 };
 
 /** If this MacroParameterList belongs to an Plugin, this will return it. */
-juce::ReferenceCountedObjectPtr<Plugin> getOwnerPlugin (MacroParameterList*);
+yup::ReferenceCountedObjectPtr<Plugin> getOwnerPlugin (MacroParameterList*);
 
 //==============================================================================
 /**
@@ -99,7 +99,7 @@ class MacroParameterElement
 {
 public:
     /** Constructor. */
-    MacroParameterElement (Edit&, const juce::ValueTree&);
+    MacroParameterElement (Edit&, const yup::ValueTree&);
 
     /** Destructor. */
     virtual ~MacroParameterElement() = default;
@@ -110,10 +110,10 @@ public:
     /** This ensures that the list has been created */
     MacroParameterList& getMacroParameterListForWriting();
 
-    juce::ReferenceCountedArray<MacroParameter> getMacroParameters() const;
+    yup::ReferenceCountedArray<MacroParameter> getMacroParameters() const;
 
     Edit& ownerEdit;
-    juce::ValueTree parentStateForList;
+    yup::ValueTree parentStateForList;
 
 private:
     std::unique_ptr<MacroParameterList> macroParameterList;

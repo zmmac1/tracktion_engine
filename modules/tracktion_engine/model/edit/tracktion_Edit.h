@@ -66,7 +66,7 @@ class ClipEffect;
     @see EditFileOperations, tracktion_EditUtilities.h
 */
 class Edit  : public Selectable,
-              private juce::Timer
+              private yup::Timer
 {
 public:
     //==============================================================================
@@ -99,15 +99,15 @@ public:
         std::atomic<int> numTracksLoaded { 0 };
     };
 
-    using EditFileRetriever = std::function<juce::File()>;
-    using FilePathResolver = std::function<juce::File(const juce::String&)>;
+    using EditFileRetriever = std::function<yup::File()>;
+    using FilePathResolver = std::function<yup::File(const yup::String&)>;
 
     //==============================================================================
     /// Determines how the Edit will be created
     struct Options
     {
         Engine& engine;                                              ///< The Engine to use.
-        juce::ValueTree editState;                                   ///< The Edit state. @see createEmptyEdit
+        yup::ValueTree editState;                                   ///< The Edit state. @see createEmptyEdit
         ProjectItemRef editProjectItemID;                            ///< A ProjectItemID or file path identifying this Edit.
 
         EditRole role = forEditing;                                  ///< An optional role to open the Edit with.
@@ -139,7 +139,7 @@ public:
 
     //==============================================================================
     /// Returns the name of the Edit if a ProjectItem can be found for it.
-    juce::String getName();
+    yup::String getName();
 
     /** This callback can be set to return the file for this Edit.
         By default this uses ProjectManager to find a matching file for the Edit's
@@ -204,7 +204,7 @@ public:
     /** Returns the time the last change occurred.
         If no modifications occurred since this object was initialised, this returns the Time the Edit was last saved.
     */
-    juce::Time getTimeOfLastChange() const;
+    yup::Time getTimeOfLastChange() const;
 
     /** Resets the changed status so hasChangedSinceSaved returns false. */
     void resetChangedStatus();
@@ -220,18 +220,18 @@ public:
     static std::unique_ptr<Edit> createEdit (Options);
 
     /** Creates an Edit for previewing a file. */
-    static std::unique_ptr<Edit> createEditForPreviewingFile (Engine&, const juce::File&, const Edit* editToMatch,
+    static std::unique_ptr<Edit> createEditForPreviewingFile (Engine&, const yup::File&, const Edit* editToMatch,
                                                               bool tryToMatchTempo, bool tryToMatchPitch, bool* couldMatchTempo,
-                                                              juce::ValueTree midiPreviewPlugin,
-                                                              juce::ValueTree midiDrumPreviewPlugin = {},
+                                                              yup::ValueTree midiPreviewPlugin,
+                                                              yup::ValueTree midiDrumPreviewPlugin = {},
                                                               bool forceMidiToDrums = false,
                                                               std::unique_ptr<Edit> editToUpdate = {});
 
     /** Creates an Edit for previewing a preset. */
-    static std::unique_ptr<Edit> createEditForPreviewingPreset (Engine& engine, juce::ValueTree, const Edit* editToMatch,
+    static std::unique_ptr<Edit> createEditForPreviewingPreset (Engine& engine, yup::ValueTree, const Edit* editToMatch,
                                                                 bool tryToMatchTempo, bool* couldMatchTempo,
-                                                                juce::ValueTree midiPreviewPlugin,
-                                                                juce::ValueTree midiDrumPreviewPlugin = {},
+                                                                yup::ValueTree midiPreviewPlugin,
+                                                                yup::ValueTree midiDrumPreviewPlugin = {},
                                                                 bool forceMidiToDrums = false,
                                                                 std::unique_ptr<Edit> editToUpdate = {});
 
@@ -246,7 +246,7 @@ public:
                     This function doesn't set editFileRetriever, so relative paths won't resolve.
     */
     [[deprecated("Use loadEditForExamining for file-based edits")]]
-    static std::unique_ptr<Edit> createEditForExamining (Engine&, juce::ValueTree, EditRole role = EditRole::forExamining, LoadContext* = nullptr);
+    static std::unique_ptr<Edit> createEditForExamining (Engine&, yup::ValueTree, EditRole role = EditRole::forExamining, LoadContext* = nullptr);
 
     //==============================================================================
     /** Quick way to find and iterate all Track[s] in the Edit. */
@@ -272,7 +272,7 @@ public:
     InputDeviceInstance* getCurrentInstanceForInputDevice (InputDevice*) const;
 
     /** Returns all the active InputDeviceInstance[s] in the Edit. */
-    juce::Array<InputDeviceInstance*> getAllInputDevices() const;
+    yup::Array<InputDeviceInstance*> getAllInputDevices() const;
 
     //==============================================================================
     /** Returns the TransportControl which is used to stop/stop/position playback and recording. */
@@ -317,7 +317,7 @@ public:
     private:
         Edit& edit;
         const bool reallocateOnDestruction;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedRenderStatus)
+        YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedRenderStatus)
     };
 
     /** Returns true if the Edit is currently being rendered. */
@@ -329,7 +329,7 @@ public:
 
     //==============================================================================
     /** Retuns the description of this Selectable. */
-    juce::String getSelectableDescription() override            { return TRANS("Edit") + " - \"" + getName() + "\""; }
+    yup::String getSelectableDescription() override            { return TRANS("Edit") + " - \"" + getName() + "\""; }
 
     //==============================================================================
     /** Returns the juce::UndoManager used for this Edit. */
@@ -388,19 +388,19 @@ public:
 
     //==============================================================================
     /** Inserts a new AudioTrack in the Edit. */
-    juce::ReferenceCountedObjectPtr<AudioTrack> insertNewAudioTrack (TrackInsertPoint, SelectionManager*, bool addDefaultPlugins = true);
+    yup::ReferenceCountedObjectPtr<AudioTrack> insertNewAudioTrack (TrackInsertPoint, SelectionManager*, bool addDefaultPlugins = true);
 
     /** Inserts a new FolderTrack in the Edit, optionally as a submix. */
-    juce::ReferenceCountedObjectPtr<FolderTrack> insertNewFolderTrack (TrackInsertPoint, SelectionManager*, bool asSubmix);
+    yup::ReferenceCountedObjectPtr<FolderTrack> insertNewFolderTrack (TrackInsertPoint, SelectionManager*, bool asSubmix);
 
     /** Inserts a new AutomationTrack in the Edit. */
-    juce::ReferenceCountedObjectPtr<AutomationTrack> insertNewAutomationTrack (TrackInsertPoint, SelectionManager*);
+    yup::ReferenceCountedObjectPtr<AutomationTrack> insertNewAutomationTrack (TrackInsertPoint, SelectionManager*);
 
     /** Inserts a new Track with the given type in the Edit. */
-    Track::Ptr insertNewTrack (TrackInsertPoint, const juce::Identifier& xmlType, SelectionManager*);
+    Track::Ptr insertNewTrack (TrackInsertPoint, const yup::Identifier& xmlType, SelectionManager*);
 
     /** Inserts a new Track with the given state in the Edit. */
-    Track::Ptr insertTrack (TrackInsertPoint, juce::ValueTree, SelectionManager*);
+    Track::Ptr insertTrack (TrackInsertPoint, yup::ValueTree, SelectionManager*);
 
     /** Inserts a new Track with the given state in the Edit.
         @param parent       The track the new track should be nested in to.
@@ -408,7 +408,7 @@ public:
         @param preceeding   The track new track should go after.
                             If this is invalid, it will go at the end of the list.
     */
-    Track::Ptr insertTrack (juce::ValueTree, juce::ValueTree parent, juce::ValueTree preceeding, SelectionManager*);
+    Track::Ptr insertTrack (yup::ValueTree, yup::ValueTree parent, yup::ValueTree preceeding, SelectionManager*);
 
     //==============================================================================
     /** Moves a track to a new position. */
@@ -486,7 +486,7 @@ public:
     /** Returns and Clip[s] with the given linkGroupID.
         @see Clip::setLinkGroupID
     */
-    juce::Array<Clip*> findClipsInLinkGroup (juce::String linkGroupID) const;
+    yup::Array<Clip*> findClipsInLinkGroup (yup::String linkGroupID) const;
 
     //==============================================================================
     /** Adds this plugin to a list so mirrored Plugin[s] are updated asyncronously. */
@@ -525,7 +525,7 @@ public:
 
     //==============================================================================
     /** Toggles low latency monitoring for a set of plugins. */
-    void setLowLatencyMonitoring (bool enabled, const juce::Array<EditItemID>& plugins);
+    void setLowLatencyMonitoring (bool enabled, const yup::Array<EditItemID>& plugins);
 
     /** Returns true if in low latency monitoring mode. */
     bool getLowLatencyMonitoring() const noexcept               { return lowLatencyMonitoring; }
@@ -534,10 +534,10 @@ public:
         Don't call directly, use setLowLatencyMonitoring as you might be in low latency mode
         but not actually have to disable any plugins.
     */
-    void setLowLatencyDisabledPlugins (const juce::Array<EditItemID>& plugins);
+    void setLowLatencyDisabledPlugins (const yup::Array<EditItemID>& plugins);
 
     /** Returns the current set of diabled plugins. */
-    juce::Array<EditItemID> getLowLatencyDisabledPlugins()      { return lowLatencyDisabledPlugins; }
+    yup::Array<EditItemID> getLowLatencyDisabledPlugins()      { return lowLatencyDisabledPlugins; }
 
     /** Can be used to disable latency compensation when playing (it is enabled by default) */
     void setLatencyCompensationEnabled (bool enabled);
@@ -553,16 +553,16 @@ public:
 
     //==============================================================================
     /** Returns the name of an aux bus. */
-    juce::String getAuxBusName (int bus) const;
+    yup::String getAuxBusName (int bus) const;
 
     /** Sets the name of an aux bus. */
-    void setAuxBusName (int bus, const juce::String& name);
+    void setAuxBusName (int bus, const yup::String& name);
 
     //==============================================================================
     /** Returns all automatable parameters in an Edit.
         @param includeTrackParams Whether to include plugins on tracks and clips
     */
-    juce::Array<AutomatableParameter*> getAllAutomatableParams (bool includeTrackParams) const;
+    yup::Array<AutomatableParameter*> getAllAutomatableParams (bool includeTrackParams) const;
 
     /** Returns all automatable parameters in an Edit.
         @param includeTrackParams Whether to include plugins on tracks and clips
@@ -571,10 +571,10 @@ public:
 
     //==============================================================================
     /** Returns the currently set video file. */
-    juce::File getVideoFile() const;
+    yup::File getVideoFile() const;
 
     /** Sets a video file to display. */
-    void setVideoFile (const juce::File&, juce::String importDesc);
+    void setVideoFile (const yup::File&, yup::String importDesc);
 
     //==============================================================================
     /** Finds the next marker or start/end of a clip after a certain time. */
@@ -693,16 +693,16 @@ public:
     TimeRange getClickTrackRange() const noexcept;
 
     /** Returns the click track volume. */
-    float getClickTrackVolume() const noexcept              { return juce::jlimit (0.2f, 1.0f, clickTrackGain.get()); }
+    float getClickTrackVolume() const noexcept              { return yup::jlimit (0.2f, 1.0f, clickTrackGain.get()); }
 
     /** Returns the name of the device being used as the click track output. */
-    juce::String getClickTrackDevice() const;
+    yup::String getClickTrackDevice() const;
 
     /** Returns true if the given OutputDevice is being used as the click track output. */
     bool isClickTrackDevice (OutputDevice&) const;
 
     /** Sets the device to use as the click track output. */
-    void setClickTrackOutput (const juce::String& deviceName);
+    void setClickTrackOutput (const yup::String& deviceName);
 
     /** Sets the volume of the click track. */
     void setClickTrackVolume (float gain);
@@ -778,16 +778,16 @@ public:
     void cancelAllProxyGeneratorJobs() const;
 
     /** Returns the temp directory the Edit it using. */
-    juce::File getTempDirectory (bool createIfNonExistent) const;
+    yup::File getTempDirectory (bool createIfNonExistent) const;
 
     /** Sets the temp directory for the Edit to use. */
-    void setTempDirectory (const juce::File&);
+    void setTempDirectory (const yup::File&);
 
     //==============================================================================
     /** Metadata for the Edit. */
     struct Metadata
     {
-        juce::String artist, title, album, date, genre, comment, trackNumber;
+        yup::String artist, title, album, date, genre, comment, trackNumber;
     };
 
     /** Returns the current Metadata for the Edit. */
@@ -801,7 +801,7 @@ public:
         You shouldn't normally need this as it's only called by the Automap system.
         @see NovationAutomap
     */
-    juce::ValueTree getAutomapState();
+    yup::ValueTree getAutomapState();
 
     //==============================================================================
     /// Returns the MarkerManager
@@ -813,7 +813,7 @@ public:
     //==============================================================================
     /// Calls an editFinishedLoading method on OwnerType once after the Edit has finished loading.
     template<typename OwnerType>
-    struct LoadFinishedCallback   : public juce::Timer
+    struct LoadFinishedCallback   : public yup::Timer
     {
         LoadFinishedCallback (OwnerType& o, Edit& e) : owner (o), edit (e)
         {
@@ -866,7 +866,7 @@ public:
     void setPreviewLevelMeasurer (SharedLevelMeasurer::Ptr p)   { previewLevelMeasurer = p; }
 
     //==============================================================================
-    juce::CachedValue<juce::String> lastSignificantChange;  ///< The last time a change was made to the Edit. @see getTimeOfLastChange
+    juce::CachedValue<yup::String> lastSignificantChange;  ///< The last time a change was made to the Edit. @see getTimeOfLastChange
 
     juce::CachedValue<TimeDuration> masterFadeIn,      ///< The duration in seconds of the fade in.
                                     masterFadeOut,     ///< The duration in seconds of the fade out.
@@ -889,8 +889,8 @@ public:
     juce::CachedValue<float> clickTrackGain;        ///< The gain of the click track.
     juce::CachedValue<ProjectItemRef> videoSource;   ///< The ProjectItemRef of the video source.
 
-    juce::ValueTree state { IDs::EDIT };     ///< The ValueTree of the Edit state.
-    juce::ValueTree inputDeviceState;        ///< The ValueTree of the input device states.
+    yup::ValueTree state { IDs::EDIT };     ///< The ValueTree of the Edit state.
+    yup::ValueTree inputDeviceState;        ///< The ValueTree of the input device states.
 
 private:
     //==============================================================================
@@ -898,10 +898,10 @@ private:
     ProjectItemRef editProjectItemRef;
 
     // persistent properties (i.e. stuff that gets saved)
-    juce::CachedValue<juce::String> clickTrackDevice;
-    juce::CachedValue<juce::String> midiTimecodeSourceDevice, midiMachineControlSourceDevice, midiMachineControlDestDevice;
+    juce::CachedValue<yup::String> clickTrackDevice;
+    juce::CachedValue<yup::String> midiTimecodeSourceDevice, midiMachineControlSourceDevice, midiMachineControlDestDevice;
     juce::CachedValue<TimecodeDisplayFormat> timecodeFormat;
-    juce::ValueTree auxBusses, controllerMappings, automapState;
+    yup::ValueTree auxBusses, controllerMappings, automapState;
     std::unique_ptr<ParameterChangeHandler> parameterChangeHandler;
     std::unique_ptr<ParameterControlMappings> parameterControlMappings;
     std::unique_ptr<RackTypeList> rackTypes;
@@ -913,7 +913,7 @@ private:
     std::unique_ptr<MirroredPluginUpdateTimer> mirroredPluginUpdateTimer;
     std::unique_ptr<TransportControl> transportControl;
     std::unique_ptr<AutomationRecordManager> automationRecordManager;
-    juce::ReferenceCountedObjectPtr<VolumeAndPanPlugin> masterVolumePlugin;
+    yup::ReferenceCountedObjectPtr<VolumeAndPanPlugin> masterVolumePlugin;
     mutable std::unique_ptr<AbletonLink> abletonLink;
     std::unique_ptr<MarkerManager> markerManager;
     struct UndoTransactionTimer;
@@ -924,7 +924,7 @@ private:
     std::unique_ptr<FrozenTrackCallback> frozenTrackCallback;
     std::unique_ptr<PluginCache> pluginCache;
     std::unique_ptr<TrackCompManager> trackCompManager;
-    juce::Array<ModifierTimer*, juce::CriticalSection> modifierTimers;
+    yup::Array<ModifierTimer*, yup::CriticalSection> modifierTimers;
     std::unique_ptr<GlobalMacros> globalMacros;
 
     mutable std::optional<TimeDuration> totalEditLength;
@@ -940,15 +940,15 @@ private:
     juce::UndoManager undoManager;
     int numUndoTransactionInhibitors = 0;
     int numSaveInhibitors = 0;
-    mutable juce::File tempDirectory;
-    juce::Array<EditItemID> lowLatencyDisabledPlugins;
+    mutable yup::File tempDirectory;
+    yup::Array<EditItemID> lowLatencyDisabledPlugins;
     double normalLatencyBufferSizeSeconds = 0.0;
     bool isPreviewEdit = false;
     std::atomic<TimePosition> clickMark1Time { TimePosition() }, clickMark2Time { TimePosition() };
     std::atomic<bool> isFullyConstructed { false };
     mutable std::atomic<uint64_t> nextID { 0 }; // 0 is used as flag to initialise the next ID count
 
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     mutable std::unordered_set<EditItemID> usedIDs;
    #endif
 
@@ -970,13 +970,13 @@ private:
     std::unique_ptr<EditChangeResetterTimer> changeResetterTimer;
 
     SharedLevelMeasurer::Ptr previewLevelMeasurer;
-    juce::ListenerList<WastedMidiMessagesListener> wastedMidiMessagesListeners;
+    yup::ListenerList<WastedMidiMessagesListener> wastedMidiMessagesListeners;
 
     //==============================================================================
     friend struct TrackList;
 
-    Track::Ptr createTrack (const juce::ValueTree&);
-    Track::Ptr loadTrackFrom (juce::ValueTree&);
+    Track::Ptr createTrack (const yup::ValueTree&);
+    Track::Ptr loadTrackFrom (yup::ValueTree&);
     Track::Ptr loadedTrack (Track::Ptr);
     void updateTrackStatuses();
     void updateTrackStatusesAsync();
@@ -988,7 +988,7 @@ private:
 
     //==============================================================================
     void initialiseTempoAndPitch();
-    void initialiseTimecode (juce::ValueTree&);
+    void initialiseTimecode (yup::ValueTree&);
     void initialiseTransport();
     void initialiseMasterVolume (const Options&);
     void initialiseVideo();
@@ -1002,7 +1002,7 @@ private:
     void removeZeroLengthClips();
     void loadTracks();
     void loadOldTimeSigInfo();
-    void loadOldVideoInfo (const juce::ValueTree&);
+    void loadOldVideoInfo (const yup::ValueTree&);
     void loadOldStyleMarkers();
 
     void timerCallback() override;
@@ -1015,14 +1015,14 @@ private:
 
     // This constructor has been deprecated - use the other constructor that takes an Options,
     // or one of the static helper methods for creating an edit
-    Edit (Engine&, juce::ValueTree, EditRole, LoadContext*, int numUndoLevelsToStore);
+    Edit (Engine&, yup::ValueTree, EditRole, LoadContext*, int numUndoLevelsToStore);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Edit)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Edit)
 };
 
 //==============================================================================
 /** Deferred Edit object deleter. @see Engine::getEditDeleter() */
-struct EditDeleter  : private juce::AsyncUpdater
+struct EditDeleter  : private yup::AsyncUpdater
 {
     ~EditDeleter() override;
 
@@ -1032,25 +1032,25 @@ private:
     friend class Engine;
     EditDeleter();
 
-    juce::CriticalSection listLock;
-    juce::OwnedArray<Edit> editsToDelete;
+    yup::CriticalSection listLock;
+    yup::OwnedArray<Edit> editsToDelete;
 
     void handleAsyncUpdate() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditDeleter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EditDeleter)
 };
 
 //==============================================================================
 /** A list of all currently open edits. @see Engine::getActiveEdits() */
 struct ActiveEdits
 {
-    juce::Array<Edit*> getEdits() const;
+    yup::Array<Edit*> getEdits() const;
 
 private:
     friend class Engine;
     friend class Edit;
     friend class TransportControl;
-    juce::Array<Edit*, juce::CriticalSection> edits;
+    yup::Array<Edit*, yup::CriticalSection> edits;
     std::atomic<int> numTransportsPlaying { 0 };
 
     ActiveEdits();

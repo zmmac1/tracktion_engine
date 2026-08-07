@@ -16,7 +16,7 @@ namespace tracktion::inline engine {
 
     This specifies the BPM, time sig, etc. at a particular time
 */
-class TempoSetting   : public juce::ReferenceCountedObject,
+class TempoSetting   : public yup::ReferenceCountedObject,
                        public CurveEditorPoint
 {
 public:
@@ -25,18 +25,18 @@ public:
         Don't construct these directly, use the appropriate insert methods of
         TempoSequence.
     */
-    TempoSetting (TempoSequence&, const juce::ValueTree&);
+    TempoSetting (TempoSequence&, const yup::ValueTree&);
 
     /** Destructor. */
     ~TempoSetting() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<TempoSetting>;
+    using Ptr = yup::ReferenceCountedObjectPtr<TempoSetting>;
 
     /** Returns the Edit this setting belongs to. */
     Edit& getEdit() const;
 
     /** Creates a tree to prepresent a TempoSetting. */
-    static juce::ValueTree create (BeatPosition startBeat, double bpm, float curve);
+    static yup::ValueTree create (BeatPosition startBeat, double bpm, float curve);
 
     /** Minimum BPM a setting can have. */
     static constexpr double minBPM = 20.0;
@@ -46,7 +46,7 @@ public:
 
     //==============================================================================
     /** Returns the description of this Selectable. */
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
 
     //==============================================================================
     /** Returns the start beat of the setting. */
@@ -101,7 +101,7 @@ public:
     HashCode getHash() const noexcept;
 
     TempoSequence& ownerSequence;
-    juce::ValueTree state;
+    yup::ValueTree state;
 
     juce::CachedValue<BeatPosition> startBeatNumber;
     juce::CachedValue<double> bpm;

@@ -10,15 +10,15 @@
 
 namespace tracktion::inline engine {
 
-static int getFloatFileHeaderIntV1()  { return (int) juce::ByteOrder::littleEndianInt ("TRKF"); }
-static int getFloatFileHeaderIntV2()  { return (int) juce::ByteOrder::littleEndianInt ("TF64"); }
+static int getFloatFileHeaderIntV1()  { return (int) yup::ByteOrder::littleEndianInt ("TRKF"); }
+static int getFloatFileHeaderIntV2()  { return (int) yup::ByteOrder::littleEndianInt ("TF64"); }
 
 
 //==============================================================================
-class FloatAudioFormatReader  : public juce::AudioFormatReader
+class FloatAudioFormatReader  : public yup::AudioFormatReader
 {
 public:
-    FloatAudioFormatReader (juce::InputStream* in)
+    FloatAudioFormatReader (yup::InputStream* in)
         : AudioFormatReader (in, TRANS("Tracktion audio file"))
     {
         usesFloatingPointData = true;
@@ -51,7 +51,7 @@ public:
     }
 
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override
+                      yup::int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
@@ -77,10 +77,10 @@ public:
             }
 
             if (bigEndian)
-                ReadHelper<juce::AudioData::Float32, juce::AudioData::Float32, juce::AudioData::BigEndian>
+                ReadHelper<yup::AudioData::Float32, yup::AudioData::Float32, yup::AudioData::BigEndian>
                     ::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime);
             else
-                ReadHelper<juce::AudioData::Float32, juce::AudioData::Float32, juce::AudioData::LittleEndian>
+                ReadHelper<yup::AudioData::Float32, yup::AudioData::Float32, yup::AudioData::LittleEndian>
                     ::read (destSamples, startOffsetInDestBuffer, numDestChannels, tempBuffer, (int) numChannels, numThisTime);
 
             startOffsetInDestBuffer += numThisTime;
@@ -93,14 +93,14 @@ public:
     int dataStartOffset;
     bool bigEndian = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatAudioFormatReader)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatAudioFormatReader)
 };
 
 //==============================================================================
-class FloatAudioFormatWriter  : public juce::AudioFormatWriter
+class FloatAudioFormatWriter  : public yup::AudioFormatWriter
 {
 public:
-    FloatAudioFormatWriter (juce::OutputStream* out, double sampleRate_, unsigned int numChannels_)
+    FloatAudioFormatWriter (yup::OutputStream* out, double sampleRate_, unsigned int numChannels_)
         : AudioFormatWriter (out,
                              TRANS("Tracktion audio file"),
                              sampleRate_,
@@ -119,7 +119,7 @@ public:
     }
 
     //==============================================================================
-    bool write (const int** data, int numSamps) override
+    bool write (const int** data, int numSamps)
     {
         lengthInSamples += numSamps;
 
@@ -154,14 +154,14 @@ public:
     }
 
 private:
-    juce::int64 lengthInSamples;
+    yup::int64 lengthInSamples;
 
     void writeHeader()
     {
         const int headerSize = 512;
         output->writeInt (getFloatFileHeaderIntV2());
         output->writeInt (headerSize);
-        output->writeInt (juce::roundToInt (sampleRate));
+        output->writeInt (yup::roundToInt (sampleRate));
         output->writeInt64 (lengthInSamples);
         output->writeShort ((short)numChannels);
         output->writeShort (0); // big-endian
@@ -170,14 +170,14 @@ private:
             output->writeByte (0);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatAudioFormatWriter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FloatAudioFormatWriter)
 };
 
 //==============================================================================
-class MemoryMappedFloatReader   : public juce::MemoryMappedAudioFormatReader
+class MemoryMappedFloatReader   : public yup::MemoryMappedAudioFormatReader
 {
 public:
-    MemoryMappedFloatReader (const juce::File& f, const FloatAudioFormatReader& reader)
+    MemoryMappedFloatReader (const yup::File& f, const FloatAudioFormatReader& reader)
         : MemoryMappedAudioFormatReader (f, reader,
                                          reader.dataStartOffset,
                                          reader.lengthInSamples * 4 * reader.numChannels,
@@ -187,7 +187,7 @@ public:
     }
 
     bool readSamples (int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                      juce::int64 startSampleInFile, int numSamples) override
+                      yup::int64 startSampleInFile, int numSamples) override
     {
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
@@ -199,16 +199,16 @@ public:
         }
 
         if (bigEndian)
-            ReadHelper<juce::AudioData::Float32, juce::AudioData::Float32, juce::AudioData::BigEndian>
+            ReadHelper<yup::AudioData::Float32, yup::AudioData::Float32, yup::AudioData::BigEndian>
                 ::read (destSamples, startOffsetInDestBuffer, numDestChannels, sampleToPointer (startSampleInFile), (int) numChannels, numSamples);
         else
-            ReadHelper<juce::AudioData::Float32, juce::AudioData::Float32, juce::AudioData::LittleEndian>
+            ReadHelper<yup::AudioData::Float32, yup::AudioData::Float32, yup::AudioData::LittleEndian>
                 ::read (destSamples, startOffsetInDestBuffer, numDestChannels, sampleToPointer (startSampleInFile), (int) numChannels, numSamples);
 
         return true;
     }
 
-    void getSample (juce::int64 sample, float* result) const noexcept override
+    void getSample (yup::int64 sample, float* result) const noexcept
     {
         if (map == nullptr || ! mappedSection.contains (sample))
         {
@@ -221,17 +221,17 @@ public:
         const void* sourceData = sampleToPointer (sample);
 
         if (bigEndian)
-            ReadHelper<juce::AudioData::Float32, juce::AudioData::Float32, juce::AudioData::BigEndian>
+            ReadHelper<yup::AudioData::Float32, yup::AudioData::Float32, yup::AudioData::BigEndian>
                 ::read (&result, 0, 1, sourceData, 1, (int) numChannels);
         else
-            ReadHelper<juce::AudioData::Float32, juce::AudioData::Float32, juce::AudioData::LittleEndian>
+            ReadHelper<yup::AudioData::Float32, yup::AudioData::Float32, yup::AudioData::LittleEndian>
                 ::read (&result, 0, 1, sourceData, 1, (int) numChannels);
     }
 
-    using juce::MemoryMappedAudioFormatReader::readMaxLevels;
+    using yup::MemoryMappedAudioFormatReader::readMaxLevels;
 
-    void readMaxLevels (juce::int64 startSampleInFile, juce::int64 numSamples,
-                        juce::Range<float>* results, int numChannelsToRead) override
+    void readMaxLevels (yup::int64 startSampleInFile, yup::int64 numSamples,
+                        yup::Range<float>* results, int numChannelsToRead) override
     {
         if (numSamples <= 0)
         {
@@ -253,13 +253,13 @@ public:
 
         switch (bitsPerSample)
         {
-            case 8:     scanMinAndMax<juce::AudioData::UInt8> (startSampleInFile, numSamples, results, numChannelsToRead); break;
-            case 16:    scanMinAndMax<juce::AudioData::Int16> (startSampleInFile, numSamples, results, numChannelsToRead); break;
-            case 24:    scanMinAndMax<juce::AudioData::Int24> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 8:     scanMinAndMax<yup::AudioData::UInt8> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 16:    scanMinAndMax<yup::AudioData::Int16> (startSampleInFile, numSamples, results, numChannelsToRead); break;
+            case 24:    scanMinAndMax<yup::AudioData::Int24> (startSampleInFile, numSamples, results, numChannelsToRead); break;
             case 32:
             {
-                if (usesFloatingPointData) scanMinAndMax<juce::AudioData::Float32> (startSampleInFile, numSamples, results, numChannelsToRead);
-                else                       scanMinAndMax<juce::AudioData::Int32>   (startSampleInFile, numSamples, results, numChannelsToRead);
+                if (usesFloatingPointData) scanMinAndMax<yup::AudioData::Float32> (startSampleInFile, numSamples, results, numChannelsToRead);
+                else                       scanMinAndMax<yup::AudioData::Int32>   (startSampleInFile, numSamples, results, numChannelsToRead);
                 break;
             }
             default:    jassertfalse; break;
@@ -270,28 +270,28 @@ private:
     const bool bigEndian;
 
     template <typename SampleType>
-    void scanMinAndMax (int64_t startSampleInFile, int64_t numSamples, juce::Range<float>* results, int numChannelsToRead) const
+    void scanMinAndMax (int64_t startSampleInFile, int64_t numSamples, yup::Range<float>* results, int numChannelsToRead) const
     {
-        typedef juce::AudioData::Pointer<SampleType, juce::AudioData::LittleEndian, juce::AudioData::Interleaved, juce::AudioData::Const> SourceType;
+        typedef yup::AudioData::Pointer<SampleType, yup::AudioData::LittleEndian, yup::AudioData::Interleaved, yup::AudioData::Const> SourceType;
 
         for (int i = 0; i < numChannelsToRead; ++i)
             results[i] = SourceType (sampleToPointer (startSampleInFile), (int) numChannels).findMinAndMax ((size_t) numSamples);
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedFloatReader)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MemoryMappedFloatReader)
 };
 
 //==============================================================================
 FloatAudioFormat::FloatAudioFormat()  : AudioFormat ("Tracktion audio file", ".trkaudio") {}
 FloatAudioFormat::~FloatAudioFormat() {}
 
-juce::Array<int> FloatAudioFormat::getPossibleSampleRates()     { return { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000 }; }
-juce::Array<int> FloatAudioFormat::getPossibleBitDepths()       { return { 32 }; }
+yup::Array<int> FloatAudioFormat::getPossibleSampleRates() const     { return { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000 }; }
+yup::Array<int> FloatAudioFormat::getPossibleBitDepths() const       { return { 32 }; }
 
-bool FloatAudioFormat::canDoStereo()    { return true; }
-bool FloatAudioFormat::canDoMono()      { return true; }
+bool FloatAudioFormat::canDoStereo() const    { return true; }
+bool FloatAudioFormat::canDoMono() const      { return true; }
 
-bool FloatAudioFormat::canHandleFile (const juce::File& f)
+bool FloatAudioFormat::canHandleFile (const yup::File& f)
 {
     return f.hasFileExtension (".trkaudio")
        #if JUCE_WINDOWS
@@ -300,7 +300,7 @@ bool FloatAudioFormat::canHandleFile (const juce::File& f)
         || f.hasFileExtension (".freeze");
 }
 
-juce::AudioFormatReader* FloatAudioFormat::createReaderFor (juce::InputStream* in, bool deleteStreamIfOpeningFails)
+yup::AudioFormatReader* FloatAudioFormat::createReaderFor (yup::InputStream* in, bool deleteStreamIfOpeningFails)
 {
     std::unique_ptr<FloatAudioFormatReader> r (new FloatAudioFormatReader (in));
 
@@ -313,7 +313,7 @@ juce::AudioFormatReader* FloatAudioFormat::createReaderFor (juce::InputStream* i
     return {};
 }
 
-juce::MemoryMappedAudioFormatReader* FloatAudioFormat::createMemoryMappedReader (const juce::File& file)
+yup::MemoryMappedAudioFormatReader* FloatAudioFormat::createMemoryMappedReader (const yup::File& file)
 {
     if (auto fin = file.createInputStream())
     {
@@ -326,8 +326,8 @@ juce::MemoryMappedAudioFormatReader* FloatAudioFormat::createMemoryMappedReader 
     return {};
 }
 
-std::unique_ptr<juce::AudioFormatWriter> FloatAudioFormat::createWriterFor (std::unique_ptr<juce::OutputStream>& out,
-                                                                            const juce::AudioFormatWriterOptions& opts)
+std::unique_ptr<yup::AudioFormatWriter> FloatAudioFormat::createWriterFor (std::unique_ptr<yup::OutputStream>& out,
+                                                                            const yup::WriteOptions& opts)
 {
     return std::make_unique<FloatAudioFormatWriter> (out.release(), opts.getSampleRate(), opts.getNumChannels());
 }

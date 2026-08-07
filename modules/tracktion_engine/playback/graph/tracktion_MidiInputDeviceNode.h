@@ -28,7 +28,7 @@ public:
     bool isReadyToProcess() override;
     void process (ProcessContext&) override;
 
-    void handleIncomingMidiMessage (const juce::MidiMessage&, MPESourceID) override;
+    void handleIncomingMidiMessage (const yup::MidiMessage&, MPESourceID) override;
     void discardRecordings (EditItemID) override;
 
 private:
@@ -50,7 +50,7 @@ private:
         NodeState()
         {
             for (int i = 256; --i >= 0;)
-                incomingMessages.push_back (std::make_unique<MidiMessageWithSource> (juce::MidiMessage (0x80, 0, 0), MPESourceID()));
+                incomingMessages.push_back (std::make_unique<MidiMessageWithSource> (yup::MidiMessage (0x80, 0, 0), MPESourceID()));
         }
 
         std::atomic<MidiInputDeviceNode*> activeNode { nullptr };
@@ -63,7 +63,7 @@ private:
         MidiMessageArray liveRecordedMessages;
         int numLiveMessagesToPlay = 0; // the index of the first message that's been recorded in the current loop
 
-        juce::uint32 lastReadTime = juce::Time::getApproximateMillisecondCounter();
+        yup::uint32 lastReadTime = yup::Time::getApproximateMillisecondCounter();
         double lastPlayheadTime = 0;
         std::atomic<bool> canLoop { true };
     };
@@ -71,7 +71,7 @@ private:
     std::shared_ptr<NodeState> state;
 
     //==============================================================================
-    void processSection (ProcessContext&, juce::Range<int64_t> timelineRange);
+    void processSection (ProcessContext&, yup::Range<int64_t> timelineRange);
     void createProgramChanges (MidiMessageArray&);
     bool isLivePlayOverActive();
     void updateLoopOverdubs();

@@ -16,7 +16,7 @@ public:
     IconProG2 (ExternalControllerManager&);
     ~IconProG2();
 
-    void acceptMidiMessageInt (int deviceIdx, const juce::MidiMessage&) override;
+    void acceptMidiMessageInt (int deviceIdx, const yup::MidiMessage&) override;
 
     void loopOnOffChanged (bool isLoopOn) override;
     void punchOnOffChanged (bool isPunching) override;

@@ -152,7 +152,7 @@ private:
     const int numChannels;
     const bool hasMidi;
     Node* nodeDependancy = nullptr;
-    const size_t nodeID { (size_t) juce::Random::getSystemRandom().nextInt() };
+    const size_t nodeID { (size_t) yup::Random::getSystemRandom().nextInt() };
 };
 
 
@@ -291,7 +291,7 @@ namespace RackNodeBuilder
     static inline std::vector<std::pair<int, int>> createPinConnections (std::vector<RackConnectionData> connections)
     {
         // Check all the connections are from a single source/dest pair
-       #if JUCE_DEBUG
+       #if YUP_DEBUG
         for (auto c : connections)
         {
             jassert (c.sourceID == connections.front().sourceID);
@@ -323,7 +323,7 @@ namespace RackNodeBuilder
         return channelMap;
     }
 
-    static inline std::vector<RackConnectionData> getConnectionsBetween (juce::Array<const RackConnection*> allConnections,
+    static inline std::vector<RackConnectionData> getConnectionsBetween (yup::Array<const RackConnection*> allConnections,
                                                                          EditItemID sourceID, EditItemID destID)
     {
         std::vector<RackConnectionData> connections;

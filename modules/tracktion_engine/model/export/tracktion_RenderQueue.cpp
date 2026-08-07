@@ -11,7 +11,7 @@
 namespace tracktion::inline engine
 {
 
-ScopedTrackMuter::ScopedTrackMuter (Edit& edit, const juce::Array<EditItemID>& tracksToMute)
+ScopedTrackMuter::ScopedTrackMuter (Edit& edit, const yup::Array<EditItemID>& tracksToMute)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
 
@@ -71,7 +71,7 @@ void RenderQueue::Job::cancel()
     }
 }
 
-void RenderQueue::Job::setThumbnail (std::shared_ptr<juce::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> t)
+void RenderQueue::Job::setThumbnail (std::shared_ptr<yup::AudioFormatWriter::ThreadedWriter::IncomingDataReceiver> t)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     jassert (state == State::pending);
@@ -223,7 +223,7 @@ void RenderQueue::startNextJob()
                                            {
                                                jobPtr->renderSucceeded = renderResult.has_value();
 
-                                               juce::MessageManager::callAsync ([alive, this, jobPtr, result = std::move (renderResult)]() mutable
+                                               yup::MessageManager::callAsync ([alive, this, jobPtr, result = std::move (renderResult)]() mutable
                                                {
                                                    if (auto stillAlive = alive.lock(); stillAlive != nullptr && *stillAlive)
                                                        handleJobFinished (*jobPtr, std::move (result));
@@ -237,7 +237,7 @@ void RenderQueue::startNextJob()
         onFinished();
 }
 
-void RenderQueue::handleJobFinished (Job& job, tl::expected<juce::File, std::string> result)
+void RenderQueue::handleJobFinished (Job& job, tl::expected<yup::File, std::string> result)
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
     job.handle = nullptr;
@@ -254,7 +254,7 @@ void RenderQueue::handleJobFinished (Job& job, tl::expected<juce::File, std::str
         else
         {
             job.state = Job::State::failed;
-            job.error = juce::String (result.error());
+            job.error = yup::String (result.error());
         }
     }
 

@@ -28,67 +28,67 @@ bool UIBehaviour::paste (const Clipboard& clipboard)
 }
 
 //==============================================================================
-void UIBehaviour::showWarningAlert (const juce::String& title, const juce::String& message)
+void UIBehaviour::showWarningAlert (const yup::String& title, const yup::String& message)
 {
-    juce::AlertWindow::showMessageBoxAsync (juce::AlertWindow::WarningIcon, title, message);
+    yup::AlertWindow::showMessageBoxAsync (yup::AlertWindow::WarningIcon, title, message);
 }
 
-void UIBehaviour::showOkCancelAlertBoxAsync (const juce::String& title, const juce::String& message,
-                                              const juce::String& ok, const juce::String& cancel,
+void UIBehaviour::showOkCancelAlertBoxAsync (const yup::String& title, const yup::String& message,
+                                              const yup::String& ok, const yup::String& cancel,
                                               std::function<void (bool)> callback)
 {
-    auto options = juce::MessageBoxOptions()
-                     .withIconType (juce::MessageBoxIconType::QuestionIcon)
+    auto options = yup::MessageBoxOptions()
+                     .withIconType (yup::MessageBoxIconType::QuestionIcon)
                      .withTitle (title)
                      .withMessage (message)
                      .withButton (ok.isNotEmpty() ? ok : TRANS("OK"))
                      .withButton (cancel.isNotEmpty() ? cancel : TRANS("Cancel"));
 
-    juce::AlertWindow::showAsync (options, [cb = std::move (callback)] (int result)
+    yup::AlertWindow::showAsync (options, [cb = std::move (callback)] (int result)
     {
         if (cb)
             cb (result == 1);
     });
 }
 
-void UIBehaviour::showYesNoCancelAlertBoxAsync (const juce::String& title, const juce::String& message,
-                                                 const juce::String& yes, const juce::String& no,
-                                                 const juce::String& cancel,
+void UIBehaviour::showYesNoCancelAlertBoxAsync (const yup::String& title, const yup::String& message,
+                                                 const yup::String& yes, const yup::String& no,
+                                                 const yup::String& cancel,
                                                  std::function<void (int)> callback)
 {
-    auto options = juce::MessageBoxOptions()
-                     .withIconType (juce::MessageBoxIconType::QuestionIcon)
+    auto options = yup::MessageBoxOptions()
+                     .withIconType (yup::MessageBoxIconType::QuestionIcon)
                      .withTitle (title)
                      .withMessage (message)
                      .withButton (yes.isNotEmpty() ? yes : TRANS("Yes"))
                      .withButton (no.isNotEmpty() ? no : TRANS("No"))
                      .withButton (cancel.isNotEmpty() ? cancel : TRANS("Cancel"));
 
-    juce::AlertWindow::showAsync (options, [cb = std::move (callback)] (int result)
+    yup::AlertWindow::showAsync (options, [cb = std::move (callback)] (int result)
     {
         if (cb)
             cb (result);
     });
 }
 
-void UIBehaviour::showInfoMessage (const juce::String& message)
+void UIBehaviour::showInfoMessage (const yup::String& message)
 {
-    if (auto c = juce::Desktop::getInstance().getMainMouseSource().getComponentUnderMouse())
+    if (auto c = yup::Desktop::getInstance()->getMainMouseSource().getComponentUnderMouse())
     {
-        auto bmc = new juce::BubbleMessageComponent();
+        auto bmc = new yup::BubbleMessageComponent();
         bmc->addToDesktop (0);
-        bmc->showAt (c, juce::AttributedString (message), 2000, true, true);
+        bmc->showAt (c, yup::AttributedString (message), 2000, true, true);
     }
 }
 
-void UIBehaviour::showWarningMessage (const juce::String& message)
+void UIBehaviour::showWarningMessage (const yup::String& message)
 {
     showInfoMessage (message);
 }
 
 //==============================================================================
-void UIBehaviour::nudgeSelectedClips (TimecodeSnapType snapType, const juce::String& commandDesc,
-                                      SelectionManager& sm, const juce::Array<Clip*>& clips, bool automationLocked)
+void UIBehaviour::nudgeSelectedClips (TimecodeSnapType snapType, const yup::String& commandDesc,
+                                      SelectionManager& sm, const yup::Array<Clip*>& clips, bool automationLocked)
 {
     jassert (clips.size() > 0);
     auto& ed = clips.getFirst()->edit;
@@ -127,7 +127,7 @@ void UIBehaviour::nudgeSelectedClips (TimecodeSnapType snapType, const juce::Str
 
         if (trackDelta != 0)
         {
-            juce::Array<TrackAutomationSection> sections;
+            yup::Array<TrackAutomationSection> sections;
 
             if (automationLocked)
             {
@@ -153,7 +153,7 @@ void UIBehaviour::nudgeSelectedClips (TimecodeSnapType snapType, const juce::Str
     }
     else if (delta != TimeDuration())
     {
-        juce::Array<TrackAutomationSection> sections;
+        yup::Array<TrackAutomationSection> sections;
 
         if (automationLocked)
             for (auto&& clip : clips)
@@ -189,7 +189,7 @@ void UIBehaviour::nudgeSelectedClips (TimecodeSnapType snapType, const juce::Str
     }
 }
 
-void UIBehaviour::nudgeSelected (TimecodeSnapType snapType, const juce::String& commandDesc, bool automationLocked)
+void UIBehaviour::nudgeSelected (TimecodeSnapType snapType, const yup::String& commandDesc, bool automationLocked)
 {
     if (auto sm = getCurrentlyFocusedSelectionManager())
     {
@@ -221,7 +221,7 @@ void UIBehaviour::nudgeSelected (TimecodeSnapType snapType, const juce::String& 
     }
 }
 
-void UIBehaviour::nudgeSelected (const juce::String& commandDesc)
+void UIBehaviour::nudgeSelected (const yup::String& commandDesc)
 {
     if (auto edit = getCurrentlyFocusedEdit())
         nudgeSelected (edit->getTransport().getSnapType(), commandDesc, false);

@@ -27,7 +27,7 @@ TEST_SUITE("tracktion_engine")
 
         // Sin file must outlive everything!
         auto fileLength = 5_td;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds());
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds());
 
         // Rack
         VolumeAndPanPlugin::Ptr volPanPlugin (dynamic_cast<VolumeAndPanPlugin*> (edit->getPluginCache().getOrCreatePluginFor (VolumeAndPanPlugin::create()).get()));
@@ -64,7 +64,7 @@ TEST_SUITE("tracktion_engine")
         // Internal plugin automation
         {
             rackInstance->wetGain->getCurve().clear (um);
-            rackInstance->wetGain->setParameter (1.0f, juce::dontSendNotification);
+            rackInstance->wetGain->setParameter (1.0f, yup::dontSendNotification);
 
             auto volParam = volPanPlugin->volParam;
             auto& volCurve = volParam->getCurve();
@@ -330,7 +330,7 @@ TEST_SUITE("tracktion_engine")
         auto track = getAudioTracks (*edit)[0];
 
         auto fileLength = 2_td;
-        auto sinFile = graph::test_utilities::getSinFile<juce::WavAudioFormat> (44100.0, fileLength.inSeconds(), 2, 220.0f);
+        auto sinFile = graph::test_utilities::getSinFile<yup::WavAudioFormat> (44100.0, fileLength.inSeconds(), 2, 220.0f);
 
         insertWaveClip (*track, {}, sinFile->getFile(), { .time = { 0_tp, fileLength } },
                         DeleteExistingClips::no);
@@ -404,7 +404,7 @@ TEST_SUITE("tracktion_engine")
         section.src = track;
         section.dst = track;
 
-        juce::Array<TrackAutomationSection> sections;
+        yup::Array<TrackAutomationSection> sections;
         sections.add (section);
 
         // Move the automation by +2s

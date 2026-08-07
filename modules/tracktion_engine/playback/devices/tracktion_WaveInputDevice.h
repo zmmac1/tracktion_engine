@@ -22,14 +22,14 @@ public:
     WaveInputDevice (Engine&, const WaveDeviceDescription&, DeviceType);
     ~WaveInputDevice() override;
 
-    static juce::StringArray getMergeModes();
-    juce::StringArray getRecordFormatNames();
+    static yup::StringArray getMergeModes();
+    yup::StringArray getRecordFormatNames();
 
     void resetToDefault();
     void setEnabled (bool) override;
 
     DeviceType getDeviceType() const override                   { return deviceType; }
-    juce::String getDeviceTypeDescription() const override;
+    yup::String getDeviceTypeDescription() const override;
 
     InputDeviceInstance* createInstance (EditPlaybackContext&) override;
 
@@ -45,8 +45,8 @@ public:
     /** @deprecated Use setChannelConfiguration() instead. */
     [[deprecated ("Use setChannelConfiguration() instead")]]
     void setStereoPair (bool);
-    juce::PopupMenu createChannelGroupMenu (bool includeSetAllChannelsOptions);
-    juce::Array<int> getAvailableBitDepths() const;
+    yup::PopupMenu createChannelGroupMenu (bool includeSetAllChannelsOptions);
+    yup::Array<int> getAvailableBitDepths() const;
     void setBitDepth (int);
     int getBitDepth() const                                     { return bitDepth; }
     void checkBitDepth();
@@ -68,17 +68,17 @@ public:
         recording context. Safe to call from the message thread. */
     bool isAnyRecordingActive() const;
 
-    juce::String getFilenameMask() const;
-    void setFilenameMask (const juce::String&);
+    yup::String getFilenameMask() const;
+    void setFilenameMask (const yup::String&);
     void setFilenameMaskToDefault();
 
-    void setOutputFormat (const juce::String&);
-    juce::String getOutputFormat() const                        { return outputFormat; }
-    void setMergeMode (const juce::String&);
-    juce::String getMergeMode() const;
+    void setOutputFormat (const yup::String&);
+    yup::String getOutputFormat() const                        { return outputFormat; }
+    void setMergeMode (const yup::String&);
+    yup::String getMergeMode() const;
 
     const ChannelConfiguration& getChannels() const noexcept        { return deviceDescription.channels; }
-    const juce::AudioChannelSet& getChannelSet() const noexcept     { return channelSet; }
+    const yup::AudioChannelSet& getChannelSet() const noexcept     { return channelSet; }
 
     /** Updates the channel configuration for track devices.
         Call this before recording to match the source track's channel layout. */
@@ -95,7 +95,7 @@ public:
     WaveDeviceDescription deviceDescription;
 
 protected:
-    juce::String openDevice();
+    yup::String openDevice();
     void closeDevice();
 
 private:
@@ -103,38 +103,38 @@ private:
     friend class WaveInputDeviceInstance;
 
     const DeviceType deviceType;
-    juce::AudioChannelSet channelSet;
+    yup::AudioChannelSet channelSet;
 
-    juce::String filenameMask;
+    yup::String filenameMask;
     float inputGainDb = 0;
-    juce::String outputFormat;
+    yup::String outputFormat;
     int bitDepth = 0, mergeMode = 0;
     float recordTriggerDb = 0;
     double recordAdjustMs = 0;
     std::atomic<bool> meterGateClosed { false };
     std::unique_ptr<RetrospectiveRecordBuffer> retrospectiveBuffer;
 
-    void feedLevelMeasurerThroughGate (juce::AudioBuffer<float>&, int start, int numSamples);
+    void feedLevelMeasurerThroughGate (yup::AudioBuffer<float>&, int start, int numSamples);
 
     void loadProps();
     void saveProps() override;
-    juce::AudioFormat* getFormatToUse() const;
+    yup::AudioFormat* getFormatToUse() const;
 
-    juce::Array<WaveInputDeviceInstance*> instances;
-    juce::CriticalSection instanceLock;
+    yup::Array<WaveInputDeviceInstance*> instances;
+    yup::CriticalSection instanceLock;
 
     void addInstance (WaveInputDeviceInstance*);
     void removeInstance (WaveInputDeviceInstance*);
 
     TimeDuration getAdjustmentSeconds();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveInputDevice)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveInputDevice)
 };
 
 
 //==============================================================================
-class WaveInputRecordingThread  : public juce::Thread,
-                                  private juce::Timer
+class WaveInputRecordingThread  : public yup::Thread,
+                                  private yup::Timer
 {
 public:
     //==============================================================================
@@ -154,7 +154,7 @@ public:
     void removeUser();
 
     //==============================================================================
-    void addBlockToRecord (AudioFileWriter&, const juce::AudioBuffer<float>&,
+    void addBlockToRecord (AudioFileWriter&, const yup::AudioBuffer<float>&,
                            int start, int numSamples, const RecordingThumbnailManager::Thumbnail::Ptr&);
     void waitForWriterToFinish (AudioFileWriter&);
     void run() override;
@@ -172,7 +172,7 @@ private:
     void prepareToStart();
     void flushAndStop();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveInputRecordingThread)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveInputRecordingThread)
 };
 
 } // namespace tracktion::inline engine

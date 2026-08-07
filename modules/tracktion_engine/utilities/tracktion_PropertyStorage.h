@@ -18,56 +18,56 @@ class PropertyStorage
 {
 public:
     //==============================================================================
-    PropertyStorage (juce::String appName_) : appName (appName_) {}
+    PropertyStorage (yup::String appName_) : appName (appName_) {}
     virtual ~PropertyStorage() {}
 
-    static juce::StringRef settingToString (SettingID);
+    static yup::StringRef settingToString (SettingID);
 
     //==============================================================================
-    virtual juce::File getAppCacheFolder();
-    virtual juce::File getAppPrefsFolder();
+    virtual yup::File getAppCacheFolder();
+    virtual yup::File getAppPrefsFolder();
 
     virtual void flushSettingsToDisk() {}
 
     //==============================================================================
     virtual void removeProperty (SettingID);
 
-    virtual juce::var getProperty (SettingID setting, const juce::var& defaultValue = {});
-    virtual void setProperty (SettingID setting, const juce::var& value);
+    virtual yup::var getProperty (SettingID setting, const yup::var& defaultValue = {});
+    virtual void setProperty (SettingID setting, const yup::var& value);
 
-    virtual std::unique_ptr<juce::XmlElement> getXmlProperty (SettingID setting);
-    virtual void setXmlProperty (SettingID setting, const juce::XmlElement&);
-
-    //==============================================================================
-    virtual void removePropertyItem (SettingID setting, juce::StringRef item);
-
-    virtual juce::var getPropertyItem (SettingID setting, juce::StringRef item, const juce::var& defaultValue = {});
-    virtual void setPropertyItem (SettingID setting, juce::StringRef item, const juce::var& value);
-
-    virtual std::unique_ptr<juce::XmlElement> getXmlPropertyItem (SettingID setting, juce::StringRef item);
-    virtual void setXmlPropertyItem (SettingID setting, juce::StringRef item, const juce::XmlElement&);
+    virtual std::unique_ptr<yup::XmlElement> getXmlProperty (SettingID setting);
+    virtual void setXmlProperty (SettingID setting, const yup::XmlElement&);
 
     //==============================================================================
-    virtual juce::File getDefaultLoadSaveDirectory (juce::StringRef label);
-    virtual void setDefaultLoadSaveDirectory (juce::StringRef label, const juce::File& newPath);
+    virtual void removePropertyItem (SettingID setting, yup::StringRef item);
 
-    virtual juce::File getDefaultLoadSaveDirectory (ProjectItem::Category);
+    virtual yup::var getPropertyItem (SettingID setting, yup::StringRef item, const yup::var& defaultValue = {});
+    virtual void setPropertyItem (SettingID setting, yup::StringRef item, const yup::var& value);
+
+    virtual std::unique_ptr<yup::XmlElement> getXmlPropertyItem (SettingID setting, yup::StringRef item);
+    virtual void setXmlPropertyItem (SettingID setting, yup::StringRef item, const yup::XmlElement&);
 
     //==============================================================================
-    virtual juce::String getUserName();
-    virtual juce::String getApplicationName()       { return appName; }
-    virtual juce::String getApplicationVersion()    { return "Unknown"; }
+    virtual yup::File getDefaultLoadSaveDirectory (yup::StringRef label);
+    virtual void setDefaultLoadSaveDirectory (yup::StringRef label, const yup::File& newPath);
+
+    virtual yup::File getDefaultLoadSaveDirectory (ProjectItem::Category);
+
+    //==============================================================================
+    virtual yup::String getUserName();
+    virtual yup::String getApplicationName()       { return appName; }
+    virtual yup::String getApplicationVersion()    { return "Unknown"; }
 
     //==============================================================================
     // If you are using the default implementation of PropertyStorage, it uses a
     // PropertiesFile to store its state. This accessor method lets you use it in
-    // case you need it for things like a juce::PluginListComponent.
-    virtual juce::PropertiesFile& getPropertiesFile();
+    // case you need it for things like a yup::PluginListComponent.
+    virtual yup::PropertiesFile& getPropertiesFile();
 
 private:
-    juce::String appName;
+    yup::String appName;
 
-    std::unique_ptr<juce::PropertiesFile> propertiesFile;
+    std::unique_ptr<yup::PropertiesFile> propertiesFile;
 };
 
 } // namespace tracktion::inline engine

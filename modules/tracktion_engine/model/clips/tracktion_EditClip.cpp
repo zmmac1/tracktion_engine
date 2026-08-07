@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-EditClip::EditClip (const juce::ValueTree& v, EditItemID clipID, ClipOwner& targetParent, ProjectItemRef sourceEditRef)
+EditClip::EditClip (const yup::ValueTree& v, EditItemID clipID, ClipOwner& targetParent, ProjectItemRef sourceEditRef)
     : AudioClipBase (v, clipID, Type::edit, targetParent),
       waveInfo (getAudioFile().getInfo())
 {
@@ -20,7 +20,7 @@ EditClip::EditClip (const juce::ValueTree& v, EditItemID clipID, ClipOwner& targ
     sourceFileReference.setToProjectFileReference (sourceEditRef);
 
     auto um = getUndoManager();
-    copyColourFromMarker.referTo (state, IDs::copyColour, um, false);
+    copyColorFromMarker.referTo (state, IDs::copyColor, um, false);
     trimToMarker.referTo (state, IDs::trimToMarker, um, false);
     renderEnabled.referTo (state, IDs::renderEnabled, um, true);
 }
@@ -64,22 +64,22 @@ void EditClip::cloneFrom (Clip* c)
     {
         AudioClipBase::cloneFrom (other);
 
-        copyColourFromMarker .setValue (other->copyColourFromMarker, nullptr);
+        copyColorFromMarker .setValue (other->copyColorFromMarker, nullptr);
         trimToMarker         .setValue (other->trimToMarker, nullptr);
         renderEnabled        .setValue (other->renderEnabled, nullptr);
     }
 }
 
 //==============================================================================
-juce::String EditClip::getSelectableDescription()
+yup::String EditClip::getSelectableDescription()
 {
     return TRANS("Edit Clip") + " - \"" + getName() + "\"";
 }
 
-juce::File EditClip::getOriginalFile() const
+yup::File EditClip::getOriginalFile() const
 {
     jassert (editSnapshot == nullptr || editSnapshot->getFile() == sourceFileReference.getFile());
-    return editSnapshot != nullptr ? editSnapshot->getFile() : juce::File();
+    return editSnapshot != nullptr ? editSnapshot->getFile() : yup::File();
 }
 
 void EditClip::setLoopDefaults()
@@ -130,7 +130,7 @@ void EditClip::renderComplete()
     AudioClipBase::renderComplete();
 }
 
-juce::String EditClip::getRenderMessage()
+yup::String EditClip::getRenderMessage()
 {
     TRACKTION_ASSERT_MESSAGE_THREAD
 
@@ -138,10 +138,10 @@ juce::String EditClip::getRenderMessage()
         return {};
 
     auto numRenderingJobs = edit.engine.getRenderManager().getNumJobs();
-    juce::String remainderMessage;
+    yup::String remainderMessage;
 
     if (numRenderingJobs > 0)
-        remainderMessage << " (" << juce::String (numRenderingJobs) << " " << TRANS("remaining") << ")";
+        remainderMessage << " (" << yup::String (numRenderingJobs) << " " << TRANS("remaining") << ")";
 
     if (renderJob == nullptr)
         return TRANS("Rendering referenced Edits") + "..." + remainderMessage;
@@ -151,10 +151,10 @@ juce::String EditClip::getRenderMessage()
     if (progress <= 0.0f)
         return TRANS("Rendering referenced Edits") + "..." + remainderMessage;
 
-    return TRANS("Rendering Edit: ") + juce::String (juce::roundToInt (progress * 100.0f)) + "%";
+    return TRANS("Rendering Edit: ") + yup::String (yup::roundToInt (progress * 100.0f)) + "%";
 }
 
-juce::String EditClip::getClipMessage()
+yup::String EditClip::getClipMessage()
 {
     if (! sourceFileReference.getSourceProjectItemRef().isValid())
         return TRANS("No source set");
@@ -174,7 +174,7 @@ void EditClip::sourceMediaChanged()
     if (sourceMediaReEntrancyCheck)
         return;
 
-    const juce::ScopedValueSetter<bool> svs (sourceMediaReEntrancyCheck, true);
+    const yup::ScopedValueSetter<bool> svs (sourceMediaReEntrancyCheck, true);
 
     auto newRef = sourceFileReference.getSourceProjectItemRef();
 
@@ -239,7 +239,7 @@ bool EditClip::isUsingFile (const AudioFile& af)
     return false;
 }
 
-void EditClip::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& i)
+void EditClip::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& i)
 {
     if (v == state && i == IDs::renderEnabled)
     {
@@ -318,7 +318,7 @@ void EditClip::editFinishedLoading()
     editLoadedCallback.reset();
 }
 
-void EditClip::setTracksToRender (const juce::Array<EditItemID>& trackIDs)
+void EditClip::setTracksToRender (const yup::Array<EditItemID>& trackIDs)
 {
     if (renderOptions != nullptr)
     {
@@ -331,7 +331,7 @@ void EditClip::updateReferencedEdits()
 {
     CRASH_TRACER
 
-    juce::ReferenceCountedArray<EditSnapshot> current, added, removed;
+    yup::ReferenceCountedArray<EditSnapshot> current, added, removed;
 
     if (editSnapshot != nullptr)
         current = editSnapshot->getNestedEditObjects();

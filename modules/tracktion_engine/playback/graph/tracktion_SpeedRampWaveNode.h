@@ -73,19 +73,19 @@ private:
 
     AudioFile audioFile;
     LiveClipLevel clipLevel;
-    juce::Range<int64_t> editPositionInSamples;
+    yup::Range<int64_t> editPositionInSamples;
     double audioFileSampleRate = 0;
     const ChannelConfiguration channelsToUse, destChannels;
     AudioFileCache::Reader::Ptr reader;
 
     struct PerChannelState;
-    juce::OwnedArray<PerChannelState> channelState;
+    yup::OwnedArray<PerChannelState> channelState;
     bool playedLastBlock = false;
 
     //==============================================================================
     int64_t editTimeToFileSample (TimePosition) const noexcept;
     bool updateFileSampleRate();
-    void processSection (ProcessContext&, juce::Range<int64_t> timelineRange);
+    void processSection (ProcessContext&, yup::Range<int64_t> timelineRange);
 
     //==============================================================================
     static double rescale (AudioFadeCurve::Type, double proportion, bool rampUp);

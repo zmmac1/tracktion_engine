@@ -35,7 +35,7 @@ private:
     AudioTrack::Ptr track;
     std::unique_ptr<tracktion::graph::Node> input;
 
-    juce::CriticalSection liveMidiLock;
+    yup::CriticalSection liveMidiLock;
     MidiMessageArray liveMidiMessages;
     MPESourceID midiSourceID = createUniqueMPESourceID();
 
@@ -44,7 +44,7 @@ private:
 
     //==============================================================================
     void injectLiveMidiMessage (AudioTrack&, const MidiMessageWithSource&, bool& wasUsed) override;
-    void recordedMidiMessageSentToPlugins (AudioTrack&, const juce::MidiMessage&) override {}
+    void recordedMidiMessageSentToPlugins (AudioTrack&, const yup::MidiMessage&) override {}
 };
 
 } // namespace tracktion::inline engine

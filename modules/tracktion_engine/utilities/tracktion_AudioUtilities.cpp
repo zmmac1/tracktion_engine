@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-void sanitiseValues (juce::AudioBuffer<float>& buffer, int start, int numSamps,
+void sanitiseValues (yup::AudioBuffer<float>& buffer, int start, int numSamps,
                      float maxAbsValue, float minAbsThreshold)
 {
     for (int j = buffer.getNumChannels(); --j >= 0;)
@@ -48,7 +48,7 @@ void resetFP() noexcept
     _fpreset();
    #endif
 
-   #if JUCE_MAC && JUCE_INTEL
+   #if YUP_MAC && YUP_INTEL
     feclearexcept (FE_ALL_EXCEPT);
    #endif
 }
@@ -57,7 +57,7 @@ static unsigned short getFPStatus() noexcept
 {
     unsigned short sw = 0;
 
-  #if JUCE_INTEL
+  #if YUP_INTEL
    #if JUCE_32BIT
     #if JUCE_WINDOWS
      _asm fstsw WORD PTR sw
@@ -76,7 +76,7 @@ inline void clearFP() noexcept
     _clearfp();
    #endif
 
-   #if JUCE_MAC && JUCE_INTEL
+   #if YUP_MAC && YUP_INTEL
     __asm __volatile ("fclex");
    #endif
 }
@@ -92,31 +92,31 @@ bool hasFloatingPointDenormaliseOccurred() noexcept
     return false;
 }
 
-void zeroDenormalisedValuesIfNeeded (juce::AudioBuffer<float>& buffer) noexcept
+void zeroDenormalisedValuesIfNeeded (yup::AudioBuffer<float>& buffer) noexcept
 {
-    juce::ignoreUnused (buffer);
+    yup::ignoreUnused (buffer);
 
-   #if JUCE_INTEL
+   #if YUP_INTEL
     if (hasFloatingPointDenormaliseOccurred())
         if (! buffer.hasBeenCleared())
             sanitiseValues (buffer, 0, buffer.getNumSamples(), 100.0f);
    #endif
 }
 
-void addAntiDenormalisationNoise (juce::AudioBuffer<float>& buffer, int start, int numSamples) noexcept
+void addAntiDenormalisationNoise (yup::AudioBuffer<float>& buffer, int start, int numSamples) noexcept
 {
-    juce::ignoreUnused (buffer, start, numSamples);
+    yup::ignoreUnused (buffer, start, numSamples);
 
-   #if JUCE_INTEL
+   #if YUP_INTEL
     if (buffer.hasBeenCleared())
     {
         for (int i = buffer.getNumChannels(); --i >= 0;)
-            juce::FloatVectorOperations::fill (buffer.getWritePointer (i, start), 0.000000045f, numSamples);
+            yup::FloatVectorOperations::fill (buffer.getWritePointer (i, start), 0.000000045f, numSamples);
     }
     else
     {
         for (int i = buffer.getNumChannels(); --i >= 0;)
-            juce::FloatVectorOperations::add (buffer.getWritePointer (i, start), 0.000000045f, numSamples);
+            yup::FloatVectorOperations::add (buffer.getWritePointer (i, start), 0.000000045f, numSamples);
     }
    #endif
 }
@@ -154,12 +154,12 @@ float gainToVolumeFaderPosition (float gain) noexcept
     return (gain > 0.0f) ? std::exp (((20.0f * std::log10 (gain)) - 6.0f) * (1.0f / volScaleFactor)) : 0.0f;
 }
 
-juce::String gainToDbString (float gain, float infLevel, int decPlaces)
+yup::String gainToDbString (float gain, float infLevel, int decPlaces)
 {
-    return juce::Decibels::toString (gainToDb (gain), decPlaces, infLevel);
+    return yup::Decibels::toString (gainToDb (gain), decPlaces, infLevel);
 }
 
-float dbStringToDb (const juce::String& dbStr)
+float dbStringToDb (const yup::String& dbStr)
 {
     if (dbStr.contains ("INF"))
         return -100.0f;
@@ -167,7 +167,7 @@ float dbStringToDb (const juce::String& dbStr)
     return dbStr.retainCharacters ("0123456789.-").getFloatValue();
 }
 
-float dbStringToGain (const juce::String& dbStr)
+float dbStringToGain (const yup::String& dbStr)
 {
     if (dbStr.contains ("INF"))
         return 0.0f;
@@ -175,12 +175,12 @@ float dbStringToGain (const juce::String& dbStr)
     return dbToGain (dbStringToDb (dbStr));
 }
 
-juce::String getPanString (float pan)
+yup::String getPanString (float pan)
 {
     if (std::abs (pan) < 0.001f)
         return TRANS("Centre");
 
-    const juce::String s (pan, 3);
+    const yup::String s (pan, 3);
 
     if (pan < 0.0f)
         return s + " " + TRANS("Left");
@@ -188,9 +188,9 @@ juce::String getPanString (float pan)
     return "+" + s + " " + TRANS("Right");
 }
 
-juce::String getSemitonesAsString (double semitones)
+yup::String getSemitonesAsString (double semitones)
 {
-    juce::String t;
+    yup::String t;
 
     if (semitones > 0)
         t << "+";
@@ -198,7 +198,7 @@ juce::String getSemitonesAsString (double semitones)
     if (std::abs (semitones - (int) semitones) < 0.01)
         t << (int) semitones;
     else
-        t << juce::String (semitones, 2);
+        t << yup::String (semitones, 2);
 
     if (std::abs (semitones) != 1)
         return TRANS("33 semitones").replace ("33", t);
@@ -221,7 +221,7 @@ bool isAudioDataAlmostSilent (const float* data, int num)
 
 float getAudioDataMagnitude (const float* data, int num)
 {
-    auto range = juce::FloatVectorOperations::findMinAndMax (data, num);
+    auto range = yup::FloatVectorOperations::findMinAndMax (data, num);
 
     return std::max (std::abs (range.getStart()),
                      std::abs (range.getEnd()));
@@ -242,7 +242,7 @@ void getGainsFromVolumeFaderPositionAndPan (float volSliderPos, float pan, const
     }
     else
     {
-        const float halfPi = juce::MathConstants<float>::pi * 0.5f;
+        const float halfPi = yup::MathConstants<float>::pi * 0.5f;
 
         pan = (pan + 1.0f) * 0.5f; // Scale to range (0.0f, 1.0f) from (-1.0f, 1.0f) for simplicity
 
@@ -285,9 +285,9 @@ void setDefaultPanLaw (const PanLaw panLaw)
     defaultPanLaw = panLaw;
 }
 
-juce::StringArray getPanLawChoices (bool includeDefault) noexcept
+yup::StringArray getPanLawChoices (bool includeDefault) noexcept
 {
-    juce::StringArray s;
+    yup::StringArray s;
 
     if (includeDefault)
         s.add ("(" + TRANS("Use Default") + ")");
@@ -302,16 +302,16 @@ juce::StringArray getPanLawChoices (bool includeDefault) noexcept
 }
 
 //==============================================================================
-void convertIntsToFloats (juce::AudioBuffer<float>& buffer)
+void convertIntsToFloats (yup::AudioBuffer<float>& buffer)
 {
     for (int i = buffer.getNumChannels(); --i >= 0;)
     {
         float* d = buffer.getWritePointer (i);
-        juce::FloatVectorOperations::convertFixedToFloat (d, (const int*) d, 1.0f / (float) 0x7fffffff, buffer.getNumSamples());
+        yup::FloatVectorOperations::convertFixedToFloat (d, (const int*) d, 1.0f / (float) 0x7fffffff, buffer.getNumSamples());
     }
 }
 
-void convertFloatsToInts (juce::AudioBuffer<float>& buffer)
+void convertFloatsToInts (yup::AudioBuffer<float>& buffer)
 {
     for (int j = buffer.getNumChannels(); --j >= 0;)
     {
@@ -323,7 +323,7 @@ void convertFloatsToInts (juce::AudioBuffer<float>& buffer)
 
             if (samp <= -1.0)      *d++ = std::numeric_limits<int>::min();
             else if (samp >= 1.0)  *d++ = std::numeric_limits<int>::max();
-            else                   *d++ = juce::roundToInt (std::numeric_limits<int>::max() * samp);
+            else                   *d++ = yup::roundToInt (std::numeric_limits<int>::max() * samp);
         }
     }
 }
@@ -351,7 +351,7 @@ struct TwoChannelDestination
     }
 };
 
-void AudioFadeCurve::applyCrossfadeSection (juce::AudioBuffer<float>& buffer,
+void AudioFadeCurve::applyCrossfadeSection (yup::AudioBuffer<float>& buffer,
                                             int channel, int startSample, int numSamples,
                                             AudioFadeCurve::Type type, float startAlpha, float endAlpha)
 {
@@ -364,7 +364,7 @@ void AudioFadeCurve::applyCrossfadeSection (juce::AudioBuffer<float>& buffer,
     }
 }
 
-void AudioFadeCurve::applyCrossfadeSection (juce::AudioBuffer<float>& buffer,
+void AudioFadeCurve::applyCrossfadeSection (yup::AudioBuffer<float>& buffer,
                                             int startSample, int numSamples, AudioFadeCurve::Type type,
                                             float startAlpha, float endAlpha)
 {
@@ -398,8 +398,8 @@ struct AddingFadeApplier
     }
 };
 
-void AudioFadeCurve::addWithCrossfade (juce::AudioBuffer<float>& dest,
-                                       const juce::AudioBuffer<float>& src,
+void AudioFadeCurve::addWithCrossfade (yup::AudioBuffer<float>& dest,
+                                       const yup::AudioBuffer<float>& src,
                                        int destChannel, int destStartIndex,
                                        int sourceChannel, int sourceStartIndex,
                                        const int numSamples,
@@ -423,12 +423,12 @@ void AudioFadeCurve::addWithCrossfade (juce::AudioBuffer<float>& dest,
     }
 }
 
-void AudioFadeCurve::drawFadeCurve (juce::Graphics& g, const AudioFadeCurve::Type fadeType,
-                                    float x1, float x2, float top, float bottom, juce::Rectangle<int> clip)
+void AudioFadeCurve::drawFadeCurve (yup::Graphics& g, const AudioFadeCurve::Type fadeType,
+                                    float x1, float x2, float top, float bottom, yup::Rectangle<int> clip)
 {
     const float fadeLineThickness = 1.5f;
 
-    juce::Path s;
+    yup::Path s;
 
     if (fadeType == AudioFadeCurve::linear)
     {
@@ -451,7 +451,7 @@ void AudioFadeCurve::drawFadeCurve (juce::Graphics& g, const AudioFadeCurve::Typ
         s.lineTo (right, x1 > x2 ? bottom : top);
     }
 
-    g.strokePath (s, juce::PathStrokeType (fadeLineThickness));
+    g.strokePath (s, yup::StrokeType (fadeLineThickness));
 
     s.lineTo (x1, top);
     s.closeSubPath();
@@ -463,11 +463,11 @@ void AudioFadeCurve::drawFadeCurve (juce::Graphics& g, const AudioFadeCurve::Typ
 //==============================================================================
 struct AudioScratchBuffer::Buffer
 {
-    juce::AudioBuffer<float> buffer { 2, 41000 };
+    yup::AudioBuffer<float> buffer { 2, 41000 };
     std::atomic<bool> isFree { true };
 };
 
-struct AudioScratchBuffer::BufferList   : private juce::DeletedAtShutdown
+struct AudioScratchBuffer::BufferList   : private yup::DeletedAtShutdown
 {
     BufferList()
     {
@@ -501,9 +501,9 @@ struct AudioScratchBuffer::BufferList   : private juce::DeletedAtShutdown
     }
 
     std::shared_mutex mutex;
-    juce::OwnedArray<Buffer> buffers;
+    yup::OwnedArray<Buffer> buffers;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferList)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferList)
 };
 
 JUCE_IMPLEMENT_SINGLETON (AudioScratchBuffer::BufferList)
@@ -515,7 +515,7 @@ AudioScratchBuffer::AudioScratchBuffer (int numChans, int numSamples)
     buffer.setSize (numChans, numSamples, false, false, true);
 }
 
-AudioScratchBuffer::AudioScratchBuffer (const juce::AudioBuffer<float>& srcBuffer)
+AudioScratchBuffer::AudioScratchBuffer (const yup::AudioBuffer<float>& srcBuffer)
   : allocatedBuffer (BufferList::getInstance()->get()),
     buffer (allocatedBuffer->buffer)
 {
@@ -584,7 +584,7 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("-2.5dB")
         {
-            const auto centreGain = juce::Decibels::decibelsToGain (-2.5f);
+            const auto centreGain = yup::Decibels::decibelsToGain (-2.5f);
             testPanLaw (PanLaw2point5dBCenter, 0.0f, 0.0f, 0.0f, 0.0f);                 // Zero
             testPanLaw (PanLaw2point5dBCenter, 1.0f, 0.0f, centreGain, centreGain);     // Unity
             testPanLaw (PanLaw2point5dBCenter, 1.0f, -1.0f, 1.0f, 0.0f);                // Hard left
@@ -593,7 +593,7 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("-3dB")
         {
-            const auto centreGain = juce::Decibels::decibelsToGain (-3.0f);
+            const auto centreGain = yup::Decibels::decibelsToGain (-3.0f);
             testPanLaw (PanLaw3dBCenter, 0.0f, 0.0f, 0.0f, 0.0f);                 // Zero
             testPanLaw (PanLaw3dBCenter, 1.0f, 0.0f, centreGain, centreGain);     // Unity
             testPanLaw (PanLaw3dBCenter, 1.0f, -1.0f, 1.0f, 0.0f);                // Hard left
@@ -602,7 +602,7 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("-4.5dB")
         {
-            const auto centreGain = juce::Decibels::decibelsToGain (-4.5f);
+            const auto centreGain = yup::Decibels::decibelsToGain (-4.5f);
             testPanLaw (PanLaw4point5dBCenter, 0.0f, 0.0f, 0.0f, 0.0f);             // Zero
             testPanLaw (PanLaw4point5dBCenter, 1.0f, 0.0f, centreGain, centreGain); // Unity
             testPanLaw (PanLaw4point5dBCenter, 1.0f, -1.0f, 1.0f, 0.0f);            // Hard left
@@ -611,7 +611,7 @@ TEST_SUITE ("tracktion_engine")
 
         SUBCASE ("-6dB")
         {
-            const auto centreGain = juce::Decibels::decibelsToGain (-6.0f);
+            const auto centreGain = yup::Decibels::decibelsToGain (-6.0f);
             testPanLaw (PanLaw6dBCenter, 0.0f, 0.0f, 0.0f, 0.0f);               // Zero
             testPanLaw (PanLaw6dBCenter, 1.0f, 0.0f, centreGain, centreGain);   // Unity
             testPanLaw (PanLaw6dBCenter, 1.0f, -1.0f, 1.0f, 0.0f);              // Hard left

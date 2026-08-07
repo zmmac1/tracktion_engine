@@ -20,15 +20,15 @@ public:
     static const char* getPluginName()                      { return NEEDS_TRANS("Phaser"); }
     static const char* xmlTypeName;
 
-    juce::String getName() const override                   { return TRANS("Phaser"); }
-    juce::String getPluginType() override                   { return xmlTypeName; }
+    yup::String getName() const override                   { return TRANS("Phaser"); }
+    yup::String getPluginType() override                   { return xmlTypeName; }
     void initialise (const PluginInitialisationInfo&) override;
     void deinitialise() override;
-    int getNumOutputChannelsGivenInputs (int numInputChannels) override  { return juce::jmin (numInputChannels, 2); }
+    int getNumOutputChannelsGivenInputs (int numInputChannels) override  { return yup::jmin (numInputChannels, 2); }
     BusLayout getBusses() const override   { return BusLayout::singleStereoInOut(); }
     void applyToBuffer (const PluginRenderContext&) override;
-    juce::String getSelectableDescription() override;
-    void restorePluginStateFromValueTree (const juce::ValueTree&) override;
+    yup::String getSelectableDescription() override;
+    void restorePluginStateFromValueTree (const yup::ValueTree&) override;
 
     juce::CachedValue<float> depth, rate, feedbackGain;
 
@@ -37,7 +37,7 @@ private:
     double filterVals[2][8];
     double sweep = 0.0, sweepFactor = 0.0, minSweep = 0.0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PhaserPlugin)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PhaserPlugin)
 };
 
 } // namespace tracktion::inline engine

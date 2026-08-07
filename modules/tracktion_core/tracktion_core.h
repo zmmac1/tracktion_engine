@@ -15,7 +15,7 @@
  JUCE Module Format.txt file.
 
 
- BEGIN_JUCE_MODULE_DECLARATION
+ BEGIN_YUP_MODULE_DECLARATION
 
   ID:               tracktion_core
   vendor:           Tracktion Corporation
@@ -25,9 +25,9 @@
   website:          http://www.tracktion.com
   license:          Proprietary
 
-  dependencies:     juce_audio_formats
+  dependencies:     yup_audio_formats
 
- END_JUCE_MODULE_DECLARATION
+ END_YUP_MODULE_DECLARATION
 
 *******************************************************************************/
 

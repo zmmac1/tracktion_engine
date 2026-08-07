@@ -12,7 +12,7 @@ namespace tracktion::inline engine {
 
 /**
 */
-class Clipboard   : private juce::DeletedAtShutdown
+class Clipboard   : private yup::DeletedAtShutdown
 {
 public:
     //==============================================================================
@@ -81,13 +81,13 @@ public:
             yes /**< Do copy autmation. */
         };
 
-        void addClip (int trackOffset, const juce::ValueTree& state);
+        void addClip (int trackOffset, const yup::ValueTree& state);
         void addSelectedClips (const SelectableList&, TimeRange, AutomationLocked);
-        void addAutomation (const juce::Array<TrackSection>&, TimeRange);
+        void addAutomation (const yup::Array<TrackSection>&, TimeRange);
 
         struct ClipInfo
         {
-            juce::ValueTree state;
+            yup::ValueTree state;
             int trackOffset = 0;
             std::optional<int> slotOffset;
             bool hasBeatTimes = false;
@@ -101,10 +101,10 @@ public:
 
         struct AutomationCurveSection
         {
-            juce::String pluginName, paramID;
+            yup::String pluginName, paramID;
             int trackOffset = 0;
             std::vector<AutomationCurve::AutomationPoint> points;
-            juce::Range<float> valueRange;
+            yup::Range<float> valueRange;
         };
 
         std::vector<AutomationCurveSection> automationCurves;
@@ -117,8 +117,8 @@ public:
 
         struct SceneInfo
         {
-            juce::ValueTree state;
-            std::vector<juce::ValueTree> clips;
+            yup::ValueTree state;
+            std::vector<yup::ValueTree> clips;
         };
 
         std::vector<SceneInfo> scenes;
@@ -135,7 +135,7 @@ public:
         using ContentType::pasteIntoEdit;
         bool pasteIntoEdit (const EditPastingOptions&) const override;
 
-        std::vector<juce::ValueTree> tracks;
+        std::vector<yup::ValueTree> tracks;
     };
 
     struct TempoChanges  : public ContentType
@@ -160,21 +160,21 @@ public:
 
     struct AutomationPoints  : public ContentType
     {
-        AutomationPoints (const AutomationCurve&, juce::Range<float>, EditTimeRange, float defaultValue);
+        AutomationPoints (const AutomationCurve&, yup::Range<float>, EditTimeRange, float defaultValue);
         AutomationPoints (AutomatableParameter&, const AutomationCurve&, TimeRange);
         /// Multi-track constructor: copies automation from all parameters on the given tracks within the time range.
-        AutomationPoints (const juce::Array<Track*>&, TimeRange);
+        AutomationPoints (const yup::Array<Track*>&, TimeRange);
         /// Multi-parameter constructor: copies automation from specific parameters within the time range.
-        AutomationPoints (const juce::Array<AutomatableParameter*>&, TimeRange);
+        AutomationPoints (const yup::Array<AutomatableParameter*>&, TimeRange);
         ~AutomationPoints() override;
 
         using ContentType::pasteIntoEdit;
         bool pasteIntoEdit (const EditPastingOptions&) const override;
 
         /// Multi-curve paste: pastes automation curves to target tracks by position offset.
-        bool pasteIntoTracks (const juce::Array<Track*>& targetTracks, TimePosition pasteStartTime) const;
+        bool pasteIntoTracks (const yup::Array<Track*>& targetTracks, TimePosition pasteStartTime) const;
 
-        bool pasteAutomationCurve (AutomationCurve& targetCurve, juce::Range<float> targetValueRange,
+        bool pasteAutomationCurve (AutomationCurve& targetCurve, yup::Range<float> targetValueRange,
                                    float targetDefaultValue, std::optional<EditTimeRange> targetRange) const;
 
         bool pasteAutomationCurve (AutomatableParameter&, AutomationCurve&, TimeRange targetRange) const;
@@ -187,9 +187,9 @@ public:
         {
             int trackOffset = 0;
             int paramIndex = 0;
-            juce::String pluginName, paramID;
+            yup::String pluginName, paramID;
             std::vector<AutomationCurve::AutomationPoint> points;
-            juce::Range<float> valueRange;
+            yup::Range<float> valueRange;
         };
 
         std::vector<CurveSection> curves;
@@ -201,9 +201,9 @@ public:
         MIDIEvents();
         ~MIDIEvents() override;
 
-        std::pair<juce::Array<MidiNote*>, juce::Array<MidiControllerEvent*>> pasteIntoClip (MidiClip&,
-                                                                                            const juce::Array<MidiNote*>& selectedNotes,
-                                                                                            const juce::Array<MidiControllerEvent*>& selectedEvents,
+        std::pair<yup::Array<MidiNote*>, yup::Array<MidiControllerEvent*>> pasteIntoClip (MidiClip&,
+                                                                                            const yup::Array<MidiNote*>& selectedNotes,
+                                                                                            const yup::Array<MidiControllerEvent*>& selectedEvents,
                                                                                             TimePosition cursorPosition, const std::function<BeatPosition (BeatPosition)>& snapBeat,
                                                                                             int destController) const;
 
@@ -211,16 +211,16 @@ public:
         using ContentType::pasteIntoEdit;
         bool pasteIntoEdit (const EditPastingOptions&) const override;
 
-        std::vector<juce::ValueTree> notes;
-        std::vector<juce::ValueTree> controllers;
+        std::vector<yup::ValueTree> notes;
+        std::vector<yup::ValueTree> controllers;
 
     private:
-        juce::Array<MidiNote*> pasteNotesIntoClip (MidiClip&, const juce::Array<MidiNote*>& selectedNotes,
+        yup::Array<MidiNote*> pasteNotesIntoClip (MidiClip&, const yup::Array<MidiNote*>& selectedNotes,
                                                    TimePosition cursorPosition, const std::function<BeatPosition (BeatPosition)>& snapBeat) const;
 
-        juce::Array<MidiControllerEvent*> pasteControllersIntoClip (MidiClip& clip,
-                                                                    const juce::Array<MidiNote*>& selectedNotes,
-                                                                    const juce::Array<MidiControllerEvent*>& selectedEvents,
+        yup::Array<MidiControllerEvent*> pasteControllersIntoClip (MidiClip& clip,
+                                                                    const yup::Array<MidiNote*>& selectedNotes,
+                                                                    const yup::Array<MidiControllerEvent*>& selectedEvents,
                                                                     TimePosition cursorPosition, const std::function<BeatPosition (BeatPosition)>& snapBeat,
                                                                     int destController) const;
     };
@@ -233,7 +233,7 @@ public:
         using ContentType::pasteIntoEdit;
         bool pasteIntoEdit (const EditPastingOptions&) const override;
 
-        std::vector<juce::ValueTree> pitches;
+        std::vector<yup::ValueTree> pitches;
     };
 
     struct TimeSigs  : public ContentType
@@ -244,7 +244,7 @@ public:
         using ContentType::pasteIntoEdit;
         bool pasteIntoEdit (const EditPastingOptions&) const override;
 
-        std::vector<juce::ValueTree> timeSigs;
+        std::vector<yup::ValueTree> timeSigs;
     };
 
     struct Plugins  : public ContentType
@@ -255,8 +255,8 @@ public:
         using ContentType::pasteIntoEdit;
         bool pasteIntoEdit (const EditPastingOptions&) const override;
 
-        std::vector<juce::ValueTree> plugins;
-        std::vector<std::pair<SafeSelectable<Edit>, juce::ValueTree>> rackTypes;
+        std::vector<yup::ValueTree> plugins;
+        std::vector<std::pair<SafeSelectable<Edit>, yup::ValueTree>> rackTypes;
     };
 
     struct Takes  : public ContentType
@@ -266,7 +266,7 @@ public:
 
         bool pasteIntoClip (WaveAudioClip&) const;
 
-        juce::ValueTree items;
+        yup::ValueTree items;
     };
 
     struct Modifiers  : public ContentType
@@ -277,7 +277,7 @@ public:
         using ContentType::pasteIntoEdit;
         bool pasteIntoEdit (const EditPastingOptions&) const override;
 
-        std::vector<juce::ValueTree> modifiers;
+        std::vector<yup::ValueTree> modifiers;
     };
 
     //==============================================================================
@@ -297,14 +297,14 @@ public:
     bool hasContentWithType() const           { return getContentWithType<Type>() != nullptr; }
 
     //==============================================================================
-    void addListener (juce::ChangeListener*);
-    void removeListener (juce::ChangeListener*);
+    void addListener (yup::ChangeListener*);
+    void removeListener (yup::ChangeListener*);
 
 private:
     std::unique_ptr<ContentType> content;
-    juce::ChangeBroadcaster broadcaster;
+    yup::ChangeBroadcaster broadcaster;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Clipboard)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Clipboard)
 };
 
 AudioTrack* getOrInsertAudioTrackNearestIndex (Edit& edit, int trackIndex);

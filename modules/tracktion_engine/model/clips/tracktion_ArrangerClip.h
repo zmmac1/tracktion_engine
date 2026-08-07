@@ -16,23 +16,23 @@ namespace tracktion::inline engine {
 class ArrangerClip  : public Clip
 {
 public:
-    ArrangerClip (const juce::ValueTree&, EditItemID, ClipOwner& targetParent);
+    ArrangerClip (const yup::ValueTree&, EditItemID, ClipOwner& targetParent);
     ~ArrangerClip() override;
 
-    using Ptr = juce::ReferenceCountedObjectPtr<ArrangerClip>;
+    using Ptr = yup::ReferenceCountedObjectPtr<ArrangerClip>;
 
-    juce::String getSelectableDescription() override;
+    yup::String getSelectableDescription() override;
     bool canBeAddedTo (ClipOwner&) override;
-    juce::Colour getDefaultColour() const override;
+    yup::Color getDefaultColor() const override;
     void initialise() override;
 
     bool isMidi() const override                                    { return false; }
     bool isMuted() const override                                   { return false; }
 
 protected:
-    void valueTreePropertyChanged (juce::ValueTree&, const juce::Identifier&) override;
+    void valueTreePropertyChanged (yup::ValueTree&, const yup::Identifier&) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrangerClip)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ArrangerClip)
 };
 
 } // namespace tracktion::inline engine

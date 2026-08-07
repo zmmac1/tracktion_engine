@@ -14,9 +14,9 @@ namespace tracktion::inline engine {
 namespace Click
 {
     int getMidiClickNote (Engine&, bool big);
-    juce::String getClickWaveFile (Engine&, bool big);
+    yup::String getClickWaveFile (Engine&, bool big);
     void setMidiClickNote (Engine&, bool big, int noteNum);
-    void setClickWaveFile (Engine&, bool big, const juce::String& filename);
+    void setClickWaveFile (Engine&, bool big, const yup::String& filename);
 }
 
 //==============================================================================
@@ -46,17 +46,17 @@ private:
     tempo::Sequence::Position tempoPosition { sequence };
 
     double sampleRate = 44100.0;
-    juce::AudioBuffer<float> bigClick, littleClick;
+    yup::AudioBuffer<float> bigClick, littleClick;
     int bigClickMidiNote = 37, littleClickMidiNote = 76;
 
     //==============================================================================
     bool isPlaying();
-    void trigger (juce::AudioBuffer<float>*);
+    void trigger (yup::AudioBuffer<float>*);
     void render (choc::buffer::ChannelArrayView<float>&);
     void reset();
     int samplesRemaining();
 
-    juce::AudioBuffer<float>* currentSample = nullptr;
+    yup::AudioBuffer<float>* currentSample = nullptr;
     int samplePos = -1;
 
     //==============================================================================

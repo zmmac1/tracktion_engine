@@ -16,7 +16,7 @@ LoopInfo::LoopInfo (Engine& e)
     initialiseMissingProps();
 }
 
-LoopInfo::LoopInfo (Engine& e, const juce::File& f)
+LoopInfo::LoopInfo (Engine& e, const yup::File& f)
     : engine (e), state (IDs::LOOPINFO)
 {
     auto& formatManager = engine.getAudioFileFormatManager();
@@ -25,19 +25,19 @@ LoopInfo::LoopInfo (Engine& e, const juce::File& f)
     {
         if (auto fin = f.createInputStream())
         {
-            const std::unique_ptr<juce::AudioFormatReader> afr (af->createReaderFor (fin.release(), true));
+            const std::unique_ptr<yup::AudioFormatReader> afr (af->createReaderFor (fin.release(), true));
             init (afr.get(), af, f);
         }
     }
 }
 
-LoopInfo::LoopInfo (Engine& e, const juce::AudioFormatReader* afr, const juce::AudioFormat* af, const juce::File& f)
+LoopInfo::LoopInfo (Engine& e, const yup::AudioFormatReader* afr, const yup::AudioFormat* af, const yup::File& f)
     : engine (e), state (IDs::LOOPINFO)
 {
     init (afr, af, f);
 }
 
-LoopInfo::LoopInfo (Engine& e, const juce::ValueTree& v, juce::UndoManager* u)
+LoopInfo::LoopInfo (Engine& e, const yup::ValueTree& v, juce::UndoManager* u)
     : engine (e), state (v), um (u), maintainParent (v.getParent().isValid())
 {
     initialiseMissingProps();
@@ -66,7 +66,7 @@ void LoopInfo::setBpm (double newBpm, double currentBpm)
     {
         jassert (getNumBeats() > 0);
         const double ratio = newBpm / currentBpm;
-        setNumBeats (juce::jmax (1.0, getNumBeats() * ratio));
+        setNumBeats (yup::jmax (1.0, getNumBeats() * ratio));
     }
 }
 
@@ -131,7 +131,7 @@ double LoopInfo::getNumBeats() const              { return getProp<double> (IDs:
 void LoopInfo::setNumBeats (double b)             { setProp (IDs::numBeats, b); }
 
 //==============================================================================
-bool LoopInfo::isLoopable() const                  { const juce::ScopedLock sl (lock); return ! isOneShot() && getNumBeats() > 0.0 && getDenominator() > 0 && getNumerator() > 0; }
+bool LoopInfo::isLoopable() const                  { const yup::ScopedLock sl (lock); return ! isOneShot() && getNumBeats() > 0.0 && getDenominator() > 0 && getNumerator() > 0; }
 bool LoopInfo::isOneShot() const                   { return getProp<bool> (IDs::oneShot); }
 
 //==============================================================================
@@ -139,26 +139,26 @@ int LoopInfo::getRootNote() const                  { return getProp<int> (IDs::r
 void LoopInfo::setRootNote (int note)              { setProp<int> (IDs::rootNote, note); }
 
 //==============================================================================
-SampleCount LoopInfo::getInMarker() const          { return getProp<juce::int64> (IDs::inMarker); }
-SampleCount LoopInfo::getOutMarker() const         { return getProp<juce::int64> (IDs::outMarker); }
+SampleCount LoopInfo::getInMarker() const          { return getProp<yup::int64> (IDs::inMarker); }
+SampleCount LoopInfo::getOutMarker() const         { return getProp<yup::int64> (IDs::outMarker); }
 
-void LoopInfo::setInMarker (SampleCount in)        { setProp<juce::int64> (IDs::inMarker, in); }
-void LoopInfo::setOutMarker (SampleCount out)      { setProp<juce::int64> (IDs::outMarker, out); }
+void LoopInfo::setInMarker (SampleCount in)        { setProp<yup::int64> (IDs::inMarker, in); }
+void LoopInfo::setOutMarker (SampleCount out)      { setProp<yup::int64> (IDs::outMarker, out); }
 
 //==============================================================================
 int LoopInfo::getNumLoopPoints() const
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     return getLoopPoints().getNumChildren();
 }
 
 LoopInfo::LoopPoint LoopInfo::getLoopPoint (int idx) const
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     auto lp = getLoopPoints().getChild (idx);
 
     if (lp.isValid())
-        return { static_cast<juce::int64> (lp.getProperty (IDs::value)),
+        return { static_cast<yup::int64> (lp.getProperty (IDs::value)),
                  (LoopPointType) static_cast<int> (lp.getProperty (IDs::type)) };
 
     return {};
@@ -166,11 +166,11 @@ LoopInfo::LoopPoint LoopInfo::getLoopPoint (int idx) const
 
 void LoopInfo::addLoopPoint (SampleCount pos, LoopPointType type)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     duplicateIfShared();
 
     auto t = createValueTree (IDs::LOOPPOINT,
-                              IDs::value, (juce::int64) pos,
+                              IDs::value, (yup::int64) pos,
                               IDs::type, (int) type);
 
     getOrCreateLoopPoints().addChild (t, -1, nullptr);
@@ -178,17 +178,17 @@ void LoopInfo::addLoopPoint (SampleCount pos, LoopPointType type)
 
 void LoopInfo::changeLoopPoint (int idx, SampleCount pos, LoopPointType type)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     duplicateIfShared();
 
     auto lp = getLoopPoints().getChild (idx);
-    lp.setProperty (IDs::value, (juce::int64) pos, um);
+    lp.setProperty (IDs::value, (yup::int64) pos, um);
     lp.setProperty (IDs::type, (int) type, um);
 }
 
 void LoopInfo::deleteLoopPoint (int idx)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     duplicateIfShared();
     getLoopPoints().removeChild (idx, um);
     removeChildIfEmpty (IDs::LOOPPOINTS);
@@ -196,14 +196,14 @@ void LoopInfo::deleteLoopPoint (int idx)
 
 void LoopInfo::clearLoopPoints()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     duplicateIfShared();
     state.removeChild (getLoopPoints(), um);
 }
 
 void LoopInfo::clearLoopPoints (LoopPointType type)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     auto lps = getLoopPoints();
 
     for (int i = lps.getNumChildren(); --i >= 0;)
@@ -211,21 +211,21 @@ void LoopInfo::clearLoopPoints (LoopPointType type)
             lps.removeChild (i, nullptr);
 }
 
-int LoopInfo::getNumTags() const                { const juce::ScopedLock sl (lock); return getTags().getNumChildren(); }
-void LoopInfo::clearTags()                      { const juce::ScopedLock sl (lock); duplicateIfShared(); state.removeChild (getTags(), um); }
-juce::String LoopInfo::getTag (int idx) const   { const juce::ScopedLock sl (lock); return getTags().getChild (idx).getProperty (IDs::name).toString(); }
+int LoopInfo::getNumTags() const                { const yup::ScopedLock sl (lock); return getTags().getNumChildren(); }
+void LoopInfo::clearTags()                      { const yup::ScopedLock sl (lock); duplicateIfShared(); state.removeChild (getTags(), um); }
+yup::String LoopInfo::getTag (int idx) const   { const yup::ScopedLock sl (lock); return getTags().getChild (idx).getProperty (IDs::name).toString(); }
 
-void LoopInfo::addTag (const juce::String& tag)
+void LoopInfo::addTag (const yup::String& tag)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     duplicateIfShared();
 
-    juce::ValueTree t (IDs::TAG);
+    yup::ValueTree t (IDs::TAG);
     t.setProperty (IDs::name, tag, um);
     getOrCreateTags().addChild (t, -1, um);
 }
 
-void LoopInfo::addTags (const juce::StringArray& tags)
+void LoopInfo::addTags (const yup::StringArray& tags)
 {
     for (const auto& t : tags)
         addTag (t);
@@ -233,7 +233,7 @@ void LoopInfo::addTags (const juce::StringArray& tags)
 
 void LoopInfo::initialiseMissingProps()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     setPropertyIfMissing (state, IDs::numBeats, 0.0, um);
     setPropertyIfMissing (state, IDs::denominator, 0, um);
     setPropertyIfMissing (state, IDs::numerator, 0, um);
@@ -244,14 +244,14 @@ void LoopInfo::initialiseMissingProps()
     setPropertyIfMissing (state, IDs::outMarker, -1, um);
 }
 
-LoopInfo& LoopInfo::copyFrom (const juce::ValueTree& o)
+LoopInfo& LoopInfo::copyFrom (const yup::ValueTree& o)
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
     copyValueTree (state, o, um);
     return *this;
 }
 
-void LoopInfo::removeChildIfEmpty (const juce::Identifier& i)
+void LoopInfo::removeChildIfEmpty (const yup::Identifier& i)
 {
     auto v = state.getChildWithName (i);
 
@@ -259,15 +259,15 @@ void LoopInfo::removeChildIfEmpty (const juce::Identifier& i)
         state.removeChild (v, um);
 }
 
-juce::ValueTree LoopInfo::getLoopPoints() const       { const juce::ScopedLock sl (lock); return state.getChildWithName (IDs::LOOPPOINTS); }
-juce::ValueTree LoopInfo::getOrCreateLoopPoints()     { const juce::ScopedLock sl (lock); return state.getOrCreateChildWithName (IDs::LOOPPOINTS, um); }
+yup::ValueTree LoopInfo::getLoopPoints() const       { const yup::ScopedLock sl (lock); return state.getChildWithName (IDs::LOOPPOINTS); }
+yup::ValueTree LoopInfo::getOrCreateLoopPoints()     { const yup::ScopedLock sl (lock); return state.getOrCreateChildWithName (IDs::LOOPPOINTS, um); }
 
-juce::ValueTree LoopInfo::getTags() const             { const juce::ScopedLock sl (lock); return state.getChildWithName (IDs::TAGS); }
-juce::ValueTree LoopInfo::getOrCreateTags()           { const juce::ScopedLock sl (lock); return state.getOrCreateChildWithName (IDs::TAGS, um); }
+yup::ValueTree LoopInfo::getTags() const             { const yup::ScopedLock sl (lock); return state.getChildWithName (IDs::TAGS); }
+yup::ValueTree LoopInfo::getOrCreateTags()           { const yup::ScopedLock sl (lock); return state.getOrCreateChildWithName (IDs::TAGS, um); }
 
 void LoopInfo::duplicateIfShared()
 {
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
     if (state.getReferenceCount() <= 1)
         return;
@@ -296,19 +296,19 @@ void LoopInfo::duplicateIfShared()
     }
 }
 
-static bool isSameFormat (const juce::AudioFormat* af1, const juce::AudioFormat* af2)
+static bool isSameFormat (const yup::AudioFormat* af1, const yup::AudioFormat* af2)
 {
     return af1 == af2 || (af1 != nullptr && af2 != nullptr
                            && af1->getFormatName() == af2->getFormatName());
 }
 
-void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat* af, const juce::File& file)
+void LoopInfo::init (const yup::AudioFormatReader* afr, const yup::AudioFormat* af, const yup::File& file)
 {
     if (afr == nullptr || af == nullptr)
         return;
 
     auto& formatManager = engine.getAudioFileFormatManager();
-    const juce::ScopedLock sl (lock);
+    const yup::ScopedLock sl (lock);
 
    #if TRACKTION_ENABLE_REX
     if (isSameFormat (af, formatManager.getRexFormat()))
@@ -319,7 +319,7 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
         setProp (IDs::bpm, bpm);
         setProp (IDs::numBeats, bpm * ((static_cast<double> (afr->lengthInSamples) / afr->sampleRate) / 60.0));
 
-        juce::StringArray beatPoints;
+        yup::StringArray beatPoints;
         beatPoints.addTokens (afr->metadataValues[RexAudioFormat::rexBeatPoints], ";", {});
         beatPoints.removeEmptyStrings();
 
@@ -330,20 +330,20 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
    #endif
     if (isSameFormat (af, formatManager.getAiffFormat()))
     {
-        const int rootNote = afr->metadataValues[juce::AiffAudioFormat::appleRootSet] == "1"
-                                ? afr->metadataValues[juce::AiffAudioFormat::appleRootNote].getIntValue() : -1;
+        const int rootNote = afr->metadataValues[yup::AiffAudioFormat::appleRootSet] == "1"
+                                ? afr->metadataValues[yup::AiffAudioFormat::appleRootNote].getIntValue() : -1;
 
         setRootNote (rootNote);
-        setProp (IDs::oneShot, afr->metadataValues[juce::AiffAudioFormat::appleOneShot] == "1");
-        setDenominator (afr->metadataValues[juce::AiffAudioFormat::appleDenominator].getIntValue());
-        setNumerator (afr->metadataValues[juce::AiffAudioFormat::appleNumerator].getIntValue());
-        const double numBeats = afr->metadataValues[juce::AiffAudioFormat::appleBeats].getDoubleValue();
+        setProp (IDs::oneShot, afr->metadataValues[yup::AiffAudioFormat::appleOneShot] == "1");
+        setDenominator (afr->metadataValues[yup::AiffAudioFormat::appleDenominator].getIntValue());
+        setNumerator (afr->metadataValues[yup::AiffAudioFormat::appleNumerator].getIntValue());
+        const double numBeats = afr->metadataValues[yup::AiffAudioFormat::appleBeats].getDoubleValue();
         setProp (IDs::numBeats, numBeats);
         setProp (IDs::bpm, (numBeats * 60.0) / (static_cast<double> (afr->lengthInSamples) / afr->sampleRate));
 
-        juce::StringArray t;
-        t.addTokens (afr->metadataValues[juce::AiffAudioFormat::appleTag], ";", {});
-        t.add (afr->metadataValues[juce::AiffAudioFormat::appleKey]);
+        yup::StringArray t;
+        t.addTokens (afr->metadataValues[yup::AiffAudioFormat::appleTag], ";", {});
+        t.add (afr->metadataValues[yup::AiffAudioFormat::appleKey]);
         t.removeEmptyStrings();
 
         for (int i = 0; i < t.size(); ++i)
@@ -351,18 +351,18 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
     }
     else if (isSameFormat (af, formatManager.getWavFormat()))
     {
-        auto s = afr->metadataValues[juce::WavAudioFormat::tracktionLoopInfo];
+        auto s = afr->metadataValues[yup::WavAudioFormat::tracktionLoopInfo];
 
         if (s.isNotEmpty())
         {
-            if (auto n = juce::parseXML (s))
-                copyFrom (juce::ValueTree::fromXml (*n));
+            if (auto n = yup::parseXML (s))
+                copyFrom (yup::ValueTree::fromXml (*n));
         }
         else
         {
-            const int rootNote = afr->metadataValues[juce::WavAudioFormat::acidRootSet] == "1"
-                                    ? afr->metadataValues[juce::WavAudioFormat::acidRootNote].getIntValue() : -1;
-            const double numBeats = afr->metadataValues[juce::WavAudioFormat::acidBeats].getDoubleValue();
+            const int rootNote = afr->metadataValues[yup::WavAudioFormat::acidRootSet] == "1"
+                                    ? afr->metadataValues[yup::WavAudioFormat::acidRootNote].getIntValue() : -1;
+            const double numBeats = afr->metadataValues[yup::WavAudioFormat::acidBeats].getDoubleValue();
 
             if (rootNote == -1)
                 if (auto smplNote = afr->metadataValues["MidiUnityNote"].getIntValue())
@@ -370,25 +370,25 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
 
             setRootNote (rootNote);
             setNumBeats (numBeats);
-            setProp (IDs::oneShot, afr->metadataValues[juce::WavAudioFormat::acidOneShot] == "1");
-            setDenominator (afr->metadataValues[juce::WavAudioFormat::acidDenominator].getIntValue());
-            setNumerator (afr->metadataValues[juce::WavAudioFormat::acidNumerator].getIntValue());
-            setNumBeats (afr->metadataValues[juce::WavAudioFormat::acidBeats].getDoubleValue());
+            setProp (IDs::oneShot, afr->metadataValues[yup::WavAudioFormat::acidOneShot] == "1");
+            setDenominator (afr->metadataValues[yup::WavAudioFormat::acidDenominator].getIntValue());
+            setNumerator (afr->metadataValues[yup::WavAudioFormat::acidNumerator].getIntValue());
+            setNumBeats (afr->metadataValues[yup::WavAudioFormat::acidBeats].getDoubleValue());
             setProp (IDs::bpm, (numBeats * 60.0) / (static_cast<double> (afr->lengthInSamples) / afr->sampleRate));
         }
     }
     else if (isSameFormat (af, formatManager.getNativeAudioFormat()))
     {
-        juce::String s = afr->metadataValues[juce::WavAudioFormat::tracktionLoopInfo];
+        yup::String s = afr->metadataValues[yup::WavAudioFormat::tracktionLoopInfo];
 
         if (s.isNotEmpty())
         {
-            if (auto n = juce::parseXML (s))
-                copyFrom (juce::ValueTree::fromXml (*n));
+            if (auto n = yup::parseXML (s))
+                copyFrom (yup::ValueTree::fromXml (*n));
         }
         else
         {
-            const juce::String tempoString = afr->metadataValues["tempo"];
+            const yup::String tempoString = afr->metadataValues["tempo"];
             auto bpm = tempoString.getDoubleValue();
 
             setProp (IDs::bpm, bpm);
@@ -399,7 +399,7 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
                 setNumBeats ((fileDuration / 60.0) * bpm);
             }
 
-            const juce::String beatCount = afr->metadataValues["beat count"];
+            const yup::String beatCount = afr->metadataValues["beat count"];
 
             if (beatCount.isNotEmpty() && bpm == 0)
             {
@@ -410,7 +410,7 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
                 setNumBeats (beats);
             }
 
-            const juce::String timeSig (afr->metadataValues["time signature"]);
+            const yup::String timeSig (afr->metadataValues["time signature"]);
 
             if (timeSig.isNotEmpty())
             {
@@ -418,7 +418,7 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
                 setNumerator (timeSig.fromFirstOccurrenceOf ("/", false, false).getIntValue());
             }
 
-            const juce::String keySig (afr->metadataValues["key signature"]);
+            const yup::String keySig (afr->metadataValues["key signature"]);
 
             if (keySig.isNotEmpty())
             {
@@ -428,19 +428,19 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
             }
         }
     }
-    else if (afr->metadataValues.containsKey (juce::WavAudioFormat::acidBeats)
-              || afr->metadataValues.containsKey (juce::WavAudioFormat::acidNumerator))
+    else if (afr->metadataValues.containsKey (yup::WavAudioFormat::acidBeats)
+              || afr->metadataValues.containsKey (yup::WavAudioFormat::acidNumerator))
     {
-        const int rootNote = afr->metadataValues[juce::WavAudioFormat::acidRootSet] == "1"
-                                ? afr->metadataValues[juce::WavAudioFormat::acidRootNote].getIntValue() : -1;
-        const double numBeats = afr->metadataValues[juce::WavAudioFormat::acidBeats].getDoubleValue();
+        const int rootNote = afr->metadataValues[yup::WavAudioFormat::acidRootSet] == "1"
+                                ? afr->metadataValues[yup::WavAudioFormat::acidRootNote].getIntValue() : -1;
+        const double numBeats = afr->metadataValues[yup::WavAudioFormat::acidBeats].getDoubleValue();
 
         setRootNote (rootNote);
         setNumBeats (numBeats);
-        setProp (IDs::oneShot, afr->metadataValues[juce::WavAudioFormat::acidOneShot] == "1");
-        setDenominator (afr->metadataValues[juce::WavAudioFormat::acidDenominator].getIntValue());
-        setNumerator (afr->metadataValues[juce::WavAudioFormat::acidNumerator].getIntValue());
-        setNumBeats (afr->metadataValues[juce::WavAudioFormat::acidBeats].getDoubleValue());
+        setProp (IDs::oneShot, afr->metadataValues[yup::WavAudioFormat::acidOneShot] == "1");
+        setDenominator (afr->metadataValues[yup::WavAudioFormat::acidDenominator].getIntValue());
+        setNumerator (afr->metadataValues[yup::WavAudioFormat::acidNumerator].getIntValue());
+        setNumBeats (afr->metadataValues[yup::WavAudioFormat::acidBeats].getDoubleValue());
         setProp (IDs::bpm, (numBeats * 60.0) / (static_cast<double> (afr->lengthInSamples) / afr->sampleRate));
     }
     else if (afr->metadataValues.containsKey ("MidiUnityNote"))
@@ -450,13 +450,13 @@ void LoopInfo::init (const juce::AudioFormatReader* afr, const juce::AudioFormat
             setRootNote (note);
     }
 
-    if (file != juce::File() && float (state.getProperty (IDs::bpm)) < 0.001f)
+    if (file != yup::File() && float (state.getProperty (IDs::bpm)) < 0.001f)
         deduceTempo (file, *afr);
 
     initialiseMissingProps();
 }
 
-std::optional<float> LoopInfo::getCueTempo (const juce::StringPairArray& metadata)
+std::optional<float> LoopInfo::getCueTempo (const yup::StringPairArray& metadata)
 {
     if (auto tempoStr = metadata["CueLabel0Text"]; tempoStr.isNotEmpty())
         if (tempoStr.contains ("Tempo:"))
@@ -466,14 +466,14 @@ std::optional<float> LoopInfo::getCueTempo (const juce::StringPairArray& metadat
     return {};
 }
 
-static juce::StringArray reverseTokens (juce::StringRef stringToTokenise, juce::StringRef breakCharacters, juce::StringRef quoteCharacters)
+static yup::StringArray reverseTokens (yup::StringRef stringToTokenise, yup::StringRef breakCharacters, yup::StringRef quoteCharacters)
 {
-    auto tokens = juce::StringArray::fromTokens (stringToTokenise, breakCharacters, quoteCharacters);
+    auto tokens = yup::StringArray::fromTokens (stringToTokenise, breakCharacters, quoteCharacters);
     std::reverse (tokens.strings.begin(), tokens.strings.end());
     return tokens;
 }
 
-std::optional<float> LoopInfo::getFileNameTempo (const juce::String& rawName)
+std::optional<float> LoopInfo::getFileNameTempo (const yup::String& rawName)
 {
     auto name = rawName.replace (" ", "_").replace ("-", "_");
 
@@ -488,7 +488,7 @@ std::optional<float> LoopInfo::getFileNameTempo (const juce::String& rawName)
 
             auto val = token.getIntValue();
 
-            if (val > 50 && val < 250 && juce::String (val) == token)
+            if (val > 50 && val < 250 && yup::String (val) == token)
                 return float (val);
         }
     }
@@ -500,14 +500,14 @@ std::optional<float> LoopInfo::getFileNameTempo (const juce::String& rawName)
         while (token.startsWith ("0"))
             token = token.substring (1);
 
-        if (val > 50 && val < 250 && juce::String (val) == token)
+        if (val > 50 && val < 250 && yup::String (val) == token)
             return float (val);
     }
 
     return {};
 }
 
-std::optional<int> LoopInfo::getFileNameRootNote (const juce::String& rawName)
+std::optional<int> LoopInfo::getFileNameRootNote (const yup::String& rawName)
 {
     auto name = rawName.replace (" ", "_").toLowerCase();
 
@@ -539,7 +539,7 @@ std::optional<int> LoopInfo::getFileNameRootNote (const juce::String& rawName)
     return {};
 }
 
-bool LoopInfo::deduceTempo (const juce::File& file, const juce::AudioFormatReader& afr)
+bool LoopInfo::deduceTempo (const yup::File& file, const yup::AudioFormatReader& afr)
 {
     auto len = static_cast<double> (afr.lengthInSamples) / afr.sampleRate;
     if (len <= 1.0 || len > 60.0)
@@ -569,13 +569,13 @@ bool LoopInfo::deduceTempo (const juce::File& file, const juce::AudioFormatReade
     {
         setRootNote (*root);
        #if LOG_DEDUCED_TEMPO
-        DBG(fn + juce::String::formatted (": %.1f bpm %.1f beats ", *tempo, beats) + juce::MidiMessage::getMidiNoteName (*root, true, false, 4));
+        DBG(fn + yup::String::formatted (": %.1f bpm %.1f beats ", *tempo, beats) + yup::MidiMessage::getMidiNoteName (*root, true, false, 4));
        #endif
     }
     else
     {
        #if LOG_DEDUCED_TEMPO
-        DBG(fn + juce::String::formatted (": %.1f bpm %.1f beats", *tempo, beats));
+        DBG(fn + yup::String::formatted (": %.1f bpm %.1f beats", *tempo, beats));
        #endif
     }
 

@@ -10,22 +10,22 @@
 
 namespace tracktion::inline engine {
 
-static juce::String getDeprecatedPluginDescSuffix (const juce::PluginDescription& d)
+static yup::String getDeprecatedPluginDescSuffix (const yup::PluginDescription& d)
 {
-    return "-" + juce::String::toHexString (d.fileOrIdentifier.hashCode())
-         + "-" + juce::String::toHexString (d.deprecatedUid);
+    return "-" + yup::String::toHexString (d.fileOrIdentifier.hashCode())
+         + "-" + yup::String::toHexString (d.deprecatedUid);
 }
 
-juce::String createIdentifierString (const juce::PluginDescription& d)
+yup::String createIdentifierString (const yup::PluginDescription& d)
 {
-    return d.pluginFormatName + "-" + d.name + getDeprecatedPluginDescSuffix (d);
+    return d.name + "-" + d.name + getDeprecatedPluginDescSuffix (d);
 }
 
-class ExternalPlugin::ProcessorChangedManager   : public juce::AudioProcessorListener,
-                                                  private juce::AsyncUpdater
+class ExternalPlugin::ProcessorChangedManager   : public yup::AudioProcessorListener,
+                                                  private yup::AsyncUpdater
 {
 public:
-    ProcessorChangedManager (ExternalPlugin& p, juce::AudioPluginInstance& i)
+    ProcessorChangedManager (ExternalPlugin& p, yup::AudioPluginInstance& i)
         : plugin (p), instance (i)
     {
         instance.addListener (this);
@@ -38,7 +38,7 @@ public:
         instance.removeListener (this);
     }
 
-    void audioProcessorParameterChanged (juce::AudioProcessor*, int, float) override
+    void audioProcessorParameterChanged (yup::AudioProcessor*, int, float) override
     {
         if (plugin.edit.isLoading())
             return;
@@ -47,7 +47,7 @@ public:
         triggerAsyncUpdate();
     }
 
-    void audioProcessorChanged (juce::AudioProcessor*, const ChangeDetails&) override
+    void audioProcessorChanged (yup::AudioProcessor*, const ChangeDetails&) override
     {
         if (plugin.edit.isLoading())
             return;
@@ -58,8 +58,8 @@ public:
 
 private:
     ExternalPlugin& plugin;
-    juce::AudioPluginInstance& instance;
-    JUCE_DECLARE_NON_COPYABLE (ProcessorChangedManager)
+    yup::AudioPluginInstance& instance;
+    YUP_DECLARE_NON_COPYABLE (ProcessorChangedManager)
 
     static bool hasAnyModifiers (AutomatableEditItem& item)
     {
@@ -141,7 +141,7 @@ private:
 class ExternalPlugin::LoadedInstance
 {
 public:
-    static std::unique_ptr<LoadedInstance> create (ExternalPlugin& ep, std::unique_ptr<juce::AudioPluginInstance> pi)
+    static std::unique_ptr<LoadedInstance> create (ExternalPlugin& ep, std::unique_ptr<yup::AudioPluginInstance> pi)
     {
         assert (pi);
 
@@ -153,19 +153,19 @@ public:
         return loadedInstance;
     }
 
-    juce::AudioPluginInstance& getInstance()
+    yup::AudioPluginInstance& getInstance()
     {
         return *pluginInstance;
     }
 
-    std::unique_ptr<juce::AudioPluginInstance> releaseInstance()
+    std::unique_ptr<yup::AudioPluginInstance> releaseInstance()
     {
         processorChangedManager.reset();
         return std::move (pluginInstance);
     }
 
 private:
-    std::unique_ptr<juce::AudioPluginInstance> pluginInstance;
+    std::unique_ptr<yup::AudioPluginInstance> pluginInstance;
     std::unique_ptr<ProcessorChangedManager> processorChangedManager;
 
     LoadedInstance() = default;
@@ -173,8 +173,8 @@ private:
 
 
 //==============================================================================
-struct AsyncPluginDeleter  : private juce::Timer,
-                             private juce::DeletedAtShutdown
+struct AsyncPluginDeleter  : private yup::Timer,
+                             private yup::DeletedAtShutdown
 {
     AsyncPluginDeleter() = default;
 
@@ -190,7 +190,7 @@ struct AsyncPluginDeleter  : private juce::Timer,
 
     JUCE_DECLARE_SINGLETON (AsyncPluginDeleter, false)
 
-    void deletePlugin (std::unique_ptr<juce::AudioPluginInstance> p)
+    void deletePlugin (std::unique_ptr<yup::AudioPluginInstance> p)
     {
         if (p)
         {
@@ -226,20 +226,20 @@ struct AsyncPluginDeleter  : private juce::Timer,
 
         CRASH_TRACER_PLUGIN (plugins.getLast()->getName().toUTF8());
 
-        const juce::ScopedValueSetter<bool> setter (recursive, true, false);
+        const yup::ScopedValueSetter<bool> setter (recursive, true, false);
 
-        juce::Component modal;
+        yup::Component modal;
         modal.enterModalState (false);
 
         plugins.removeLast();
     }
 
 private:
-    juce::OwnedArray<juce::AudioPluginInstance> plugins;
+    yup::OwnedArray<yup::AudioPluginInstance> plugins;
     bool recursive = false;
     std::function<void()> onEmptyCallback;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncPluginDeleter)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AsyncPluginDeleter)
 };
 
 JUCE_IMPLEMENT_SINGLETON (AsyncPluginDeleter)
@@ -259,14 +259,14 @@ void waitForPluginDeletion (std::function<void()> onComplete)
 
 //==============================================================================
 #if JUCE_PLUGINHOST_VST
-struct ExtraVSTCallbacks  : public juce::AudioPluginExtensions::VSTClient::ExtraFunctions
+struct ExtraVSTCallbacks  : public yup::AudioPluginExtensions::VSTClient::ExtraFunctions
 {
     ExtraVSTCallbacks (Edit& ed) : edit (ed) {}
 
-    juce::int64 getTempoAt (juce::int64 samplePos) override
+    yup::int64 getTempoAt (yup::int64 samplePos) override
     {
         auto sampleRate = edit.engine.getDeviceManager().getSampleRate();
-        return (juce::int64) (10000.0 * edit.tempoSequence.getTempoAt (TimePosition::fromSamples (samplePos, sampleRate)).getBpm());
+        return (yup::int64) (10000.0 * edit.tempoSequence.getTempoAt (TimePosition::fromSamples (samplePos, sampleRate)).getBpm());
     }
 
     // returns 0: not supported, 1: off, 2:read, 3:write, 4:read/write
@@ -283,12 +283,12 @@ struct ExtraVSTCallbacks  : public juce::AudioPluginExtensions::VSTClient::Extra
     Edit& edit;
 
     ExtraVSTCallbacks() = delete;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExtraVSTCallbacks)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExtraVSTCallbacks)
 };
 #endif // JUCE_PLUGINHOST_VST
 
 //==============================================================================
-class ExternalPlugin::PluginPlayHead  : public juce::AudioPlayHead
+class ExternalPlugin::PluginPlayHead  : public yup::AudioPlayHead
 {
 public:
     PluginPlayHead (ExternalPlugin& p)
@@ -319,7 +319,7 @@ public:
         }
     }
 
-    juce::Optional<PositionInfo> getPosition() const override
+    yup::Optional<PositionInfo> getPosition() const override
     {
         PositionInfo result;
 
@@ -334,14 +334,14 @@ public:
         result.setIsLooping (transport.looping);
 
         if (transport.looping)
-            result.setLoopPoints (juce::AudioPlayHead::LoopPoints ({ loopStart.getPPQTime(), loopEnd.getPPQTime() }));
+            result.setLoopPoints (yup::AudioPlayHead::LoopPoints ({ loopStart.getPPQTime(), loopEnd.getPPQTime() }));
 
         result.setTimeInSeconds (localTime.inSeconds());
         result.setTimeInSamples (toSamples (localTime, plugin.sampleRate));
 
         const auto timeSig = currentPos.getTimeSignature();
         result.setBpm (currentPos.getTempo());
-        result.setTimeSignature (juce::AudioPlayHead::TimeSignature ({ timeSig.numerator, timeSig.denominator }));
+        result.setTimeSignature (yup::AudioPlayHead::TimeSignature ({ timeSig.numerator, timeSig.denominator }));
 
         const auto ppqPositionOfLastBarStart = currentPos.getPPQTimeOfBarStart();
         result.setPpqPositionOfLastBarStart (ppqPositionOfLastBarStart);
@@ -372,15 +372,15 @@ private:
         return AudioPlayHead::fps30; //Just to cope with it.
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginPlayHead)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginPlayHead)
 };
 
 //==============================================================================
 namespace
 {
-    void readBusLayout (juce::AudioProcessor::BusesLayout& busesLayout,
-                        const juce::ValueTree& state,
-                        juce::AudioProcessor& plugin, bool isInput)
+    void readBusLayout (yup::AudioProcessor::AudioBusLayout& busesLayout,
+                        const yup::ValueTree& state,
+                        yup::AudioProcessor& plugin, bool isInput)
     {
         jassert (state.hasType (IDs::LAYOUT));
         auto& targetBuses = (isInput ? busesLayout.inputBuses
@@ -416,7 +416,7 @@ namespace
                 const auto layout = v[IDs::layout].toString();
 
                 if (layout.isNotEmpty())
-                    targetBuses.getReference (busIdx) = juce::AudioChannelSet::fromAbbreviatedString (layout);
+                    targetBuses.getReference (busIdx) = yup::AudioChannelSet::fromAbbreviatedString (layout);
             }
         }
 
@@ -433,13 +433,13 @@ namespace
             targetBuses.add (plugin.getChannelLayoutOfBus (isInput, targetBuses.size()));
     }
 
-    juce::AudioProcessor::BusesLayout readBusesLayout (const juce::var& layout, juce::AudioProcessor& plugin)
+    yup::AudioProcessor::AudioBusLayout readAudioBusLayout (const yup::var& layout, yup::AudioProcessor& plugin)
     {
-        juce::AudioProcessor::BusesLayout busesLayout;
+        yup::AudioProcessor::AudioBusLayout busesLayout;
 
         if (auto* mb = layout.getBinaryData())
         {
-            auto v = juce::ValueTree::readFromData (mb->getData(), mb->getSize());
+            auto v = yup::ValueTree::readFromData (mb->getData(), mb->getSize());
             readBusLayout (busesLayout, v, plugin, true);
             readBusLayout (busesLayout, v, plugin, false);
         }
@@ -447,16 +447,16 @@ namespace
         return busesLayout;
     }
 
-    juce::ValueTree createBusLayout (const juce::AudioProcessor::BusesLayout& layout, bool isInput)
+    yup::ValueTree createBusLayout (const yup::AudioProcessor::AudioBusLayout& layout, bool isInput)
     {
         auto& buses = (isInput ? layout.inputBuses : layout.outputBuses);
 
-        juce::ValueTree v (isInput ? IDs::INPUTS : IDs::OUTPUTS);
+        yup::ValueTree v (isInput ? IDs::INPUTS : IDs::OUTPUTS);
 
         for (int busIdx = 0; busIdx < buses.size(); ++busIdx)
         {
             auto& set = buses.getReference (busIdx);
-            juce::String layoutName = set.isDisabled() ? "disabled" : set.getSpeakerArrangementAsString();
+            yup::String layoutName = set.isDisabled() ? "disabled" : set.getSpeakerArrangementAsString();
 
             auto bus = createValueTree (IDs::BUS,
                                         IDs::index, busIdx,
@@ -465,10 +465,10 @@ namespace
             v.addChild (bus, -1, nullptr);
         }
 
-        return v.getNumChildren() > 0 ? v : juce::ValueTree();
+        return v.getNumChildren() > 0 ? v : yup::ValueTree();
     }
 
-    juce::ValueTree createBusesLayout (const juce::AudioProcessor::BusesLayout& layout)
+    yup::ValueTree createAudioBusLayout (const yup::AudioProcessor::AudioBusLayout& layout)
     {
         auto inputs = createBusLayout (layout, true);
         auto outputs = createBusLayout (layout, false);
@@ -476,22 +476,22 @@ namespace
         if (inputs.getNumChildren() == 0 && outputs.getNumChildren() == 0)
             return {};
 
-        juce::ValueTree v (IDs::LAYOUT);
+        yup::ValueTree v (IDs::LAYOUT);
         v.addChild (inputs, -1, nullptr);
         v.addChild (outputs, -1, nullptr);
 
         return v;
     }
 
-    juce::MemoryBlock createBusesLayoutProperty (const juce::AudioProcessor::BusesLayout& layout)
+    yup::MemoryBlock createAudioBusLayoutProperty (const yup::AudioProcessor::AudioBusLayout& layout)
     {
-        juce::MemoryBlock mb;
+        yup::MemoryBlock mb;
 
-        auto v = createBusesLayout (layout);
+        auto v = createAudioBusLayout (layout);
 
         if (v.isValid())
         {
-            juce::MemoryOutputStream os (mb, false);
+            yup::MemoryOutputStream os (mb, false);
             v.writeToStream (os);
         }
 
@@ -500,20 +500,20 @@ namespace
 
     void restoreChannelLayout (ExternalPlugin& plugin)
     {
-        auto setDefaultChannelConfig = [] (juce::AudioProcessor& ap, bool input)
+        auto setDefaultChannelConfig = [] (yup::AudioProcessor& ap, bool input)
         {
             // If the main bus is mono, set to stereo if supported
             const int n = ap.getBusCount (input);
 
             if (n >= 1)
             {
-                auto bestSet = juce::AudioChannelSet::disabled();
+                auto bestSet = yup::AudioChannelSet::disabled();
 
                 if (auto bus = ap.getBus (input, 0))
                 {
                     if (bus->getCurrentLayout().size() < 2)
                     {
-                        for (int i = 0; i < juce::AudioChannelSet::maxChannelsOfNamedLayout; i++)
+                        for (int i = 0; i < yup::AudioChannelSet::maxChannelsOfNamedLayout; i++)
                         {
                             auto set = bus->supportedLayoutWithChannels (i);
 
@@ -524,7 +524,7 @@ namespace
                             }
                         }
 
-                        if (bestSet != juce::AudioChannelSet::disabled())
+                        if (bestSet != yup::AudioChannelSet::disabled())
                             bus->setCurrentLayout (bestSet);
                     }
                 }
@@ -535,7 +535,7 @@ namespace
         {
             if (plugin.state.hasProperty (IDs::layout))
             {
-                plugin.setBusesLayout (readBusesLayout (plugin.state.getProperty (IDs::layout), *ap));
+                plugin.setAudioBusLayout (readAudioBusLayout (plugin.state.getProperty (IDs::layout), *ap));
             }
             else
             {
@@ -663,26 +663,26 @@ ExternalPlugin::ExternalPlugin (PluginCreationInfo info)  : Plugin (info)
     desc.fileOrIdentifier = state[IDs::filename];
     setEnabled (state.getProperty (IDs::enabled, true));
     desc.name = state[IDs::name];
-    desc.manufacturerName = state[IDs::manufacturer];
+    desc.vendor = state[IDs::manufacturer];
     identiferString = createIdentifierString (desc);
 
     initialiseFully();
 }
 
-juce::ValueTree ExternalPlugin::create (Engine&, const juce::PluginDescription& desc)
+yup::ValueTree ExternalPlugin::create (Engine&, const yup::PluginDescription& desc)
 {
     auto v = createValueTree (IDs::PLUGIN,
                               IDs::type, xmlTypeName,
-                              IDs::uniqueId, juce::String::toHexString (desc.uniqueId),
-                              IDs::uid, juce::String::toHexString (desc.deprecatedUid),
+                              IDs::uniqueId, yup::String::toHexString (desc.uniqueId),
+                              IDs::uid, yup::String::toHexString (desc.deprecatedUid),
                               IDs::filename, desc.fileOrIdentifier,
                               IDs::name, desc.name,
-                              IDs::manufacturer, desc.manufacturerName);
+                              IDs::manufacturer, desc.vendor);
 
     return v;
 }
 
-juce::String ExternalPlugin::getLoadError()
+yup::String ExternalPlugin::getLoadError()
 {
     if (hasLoadedInstance || isAsyncInitialising)
         return {};
@@ -741,7 +741,7 @@ void ExternalPlugin::forceFullReinitialise()
 
 void ExternalPlugin::updateDebugName()
 {
-    debugName = desc.name + " (" + desc.pluginFormatName + ")";
+    debugName = desc.name + " (" + desc.name + ")";
 }
 
 void ExternalPlugin::buildParameterList()
@@ -786,7 +786,7 @@ void ExternalPlugin::buildParameterList()
                 }
 
                 // Just use the index for the ID for now until this has been added to JUCE
-                auto parameterID = juce::String (i);
+                auto parameterID = yup::String (i);
 
                 if (isCmajorPatchPluginFormat (desc))
                 {
@@ -795,10 +795,10 @@ void ExternalPlugin::buildParameterList()
                     // stability. Don't broaden this to other formats: VST3/AU/LV2 return
                     // their native ids from getParameterID(), and switching them off the
                     // historical index id would orphan automation in existing edits.
-                    if (auto hosted = dynamic_cast<juce::HostedAudioProcessorParameter*> (parameter))
+                    if (auto hosted = dynamic_cast<yup::HostedAudioProcessorParameter*> (parameter))
                         parameterID = hosted->getParameterID();
                 }
-                else if (auto paramWithID = dynamic_cast<juce::AudioProcessorParameterWithID*> (parameter))
+                else if (auto paramWithID = dynamic_cast<yup::AudioProcessorParameterWithID*> (parameter))
                 {
                     parameterID = paramWithID->paramID;
                 }
@@ -830,25 +830,25 @@ void ExternalPlugin::refreshParameterValues()
             p->valueChangedByPlugin();
 }
 
-static std::unique_ptr<juce::PluginDescription> findMatchingPluginDescription (Engine& engine, const juce::PluginDescription& desc)
+static std::unique_ptr<yup::PluginDescription> findMatchingPluginDescription (Engine& engine, const yup::PluginDescription& desc)
 {
     auto& pm = engine.getPluginManager();
 
     if (desc.uniqueId != 0)
         for (auto d : pm.knownPluginList.getTypes())
             if (d.uniqueId == desc.uniqueId && (desc.fileOrIdentifier.isEmpty() || desc.fileOrIdentifier == d.fileOrIdentifier))
-                return std::make_unique<juce::PluginDescription> (d);
+                return std::make_unique<yup::PluginDescription> (d);
 
     if (desc.deprecatedUid != 0)
         for (auto d : pm.knownPluginList.getTypes())
             if (d.deprecatedUid == desc.deprecatedUid)
-                return std::make_unique<juce::PluginDescription> (d);
+                return std::make_unique<yup::PluginDescription> (d);
 
     if (desc.fileOrIdentifier.isNotEmpty())
     {
         for (auto d : pm.knownPluginList.getTypes())
             if (d.fileOrIdentifier == desc.fileOrIdentifier)
-                return std::make_unique<juce::PluginDescription> (d);
+                return std::make_unique<yup::PluginDescription> (d);
 
         return engine.getEngineBehaviour().findDescriptionForFileOrID (desc.fileOrIdentifier);
     }
@@ -856,19 +856,19 @@ static std::unique_ptr<juce::PluginDescription> findMatchingPluginDescription (E
     return {};
 }
 
-static std::unique_ptr<juce::PluginDescription> findDescForName (Engine& engine, const juce::String& name,
-                                                                 const juce::String& format)
+static std::unique_ptr<yup::PluginDescription> findDescForName (Engine& engine, const yup::String& name,
+                                                                 const yup::String& format)
 {
     if (name.isEmpty())
         return {};
 
     auto& pm = engine.getPluginManager();
 
-    auto findName = [&pm, format] (const juce::String& nameToFind) -> std::unique_ptr<juce::PluginDescription>
+    auto findName = [&pm, format] (const yup::String& nameToFind) -> std::unique_ptr<yup::PluginDescription>
     {
         for (auto d : pm.knownPluginList.getTypes())
-            if (d.name == nameToFind && d.pluginFormatName == format)
-                return std::make_unique<juce::PluginDescription> (d);
+            if (d.name == nameToFind && d.name == format)
+                return std::make_unique<yup::PluginDescription> (d);
 
         return {};
     };
@@ -887,7 +887,7 @@ static std::unique_ptr<juce::PluginDescription> findDescForName (Engine& engine,
     return {};
 }
 
-std::unique_ptr<juce::PluginDescription> ExternalPlugin::findMatchingPlugin() const
+std::unique_ptr<yup::PluginDescription> ExternalPlugin::findMatchingPlugin() const
 {
     CRASH_TRACER
     auto& pm = engine.getPluginManager();
@@ -895,7 +895,7 @@ std::unique_ptr<juce::PluginDescription> ExternalPlugin::findMatchingPlugin() co
     if (auto p = pm.knownPluginList.getTypeForIdentifierString (createIdentifierString (desc)))
         return p;
 
-    auto getPreferredFormat = [] (juce::PluginDescription d)
+    auto getPreferredFormat = [] (yup::PluginDescription d)
     {
         auto file = d.fileOrIdentifier.toLowerCase();
         if (file.endsWith (".vst3"))                            return "VST3";
@@ -907,13 +907,13 @@ std::unique_ptr<juce::PluginDescription> ExternalPlugin::findMatchingPlugin() co
     // If that fails, retry with format inferred from file extension
     {
         auto descWithFormat = desc;
-        descWithFormat.pluginFormatName = getPreferredFormat (desc);
+        descWithFormat.name = getPreferredFormat (desc);
 
         if (auto p = pm.knownPluginList.getTypeForIdentifierString (createIdentifierString (descWithFormat)))
             return p;
     }
 
-    if (desc.pluginFormatName.isEmpty())
+    if (desc.name.isEmpty())
     {
         if (auto p = pm.knownPluginList.getTypeForIdentifierString ("VST3" + createIdentifierString (desc)))
             return p;
@@ -933,11 +933,11 @@ std::unique_ptr<juce::PluginDescription> ExternalPlugin::findMatchingPlugin() co
 
     for (auto d : pm.knownPluginList.getTypes())
         if (d.name == desc.name)
-            return std::make_unique<juce::PluginDescription> (d);
+            return std::make_unique<yup::PluginDescription> (d);
 
     for (auto d : pm.knownPluginList.getTypes())
-        if (juce::File::createFileWithoutCheckingPath (d.fileOrIdentifier).getFileNameWithoutExtension() == desc.name)
-            return std::make_unique<juce::PluginDescription> (d);
+        if (yup::File::createFileWithoutCheckingPath (d.fileOrIdentifier).getFileNameWithoutExtension() == desc.name)
+            return std::make_unique<yup::PluginDescription> (d);
 
     return {};
 }
@@ -996,7 +996,7 @@ void ExternalPlugin::trackPropertiesChanged()
     TRACKTION_ASSERT_MESSAGE_THREAD
     if (auto t = getOwnerTrack(); t != nullptr)
         if (auto pi = getAudioPluginInstance())
-            pi->updateTrackProperties ({ t->getName(), t->getColour().getARGB() });
+            pi->updateTrackProperties ({ t->getName(), t->getColor().getARGB() });
 }
 
 //==============================================================================
@@ -1041,7 +1041,7 @@ void ExternalPlugin::flushPluginStateToValueTree()
 
     if (desc.fileOrIdentifier.isNotEmpty())
     {
-        state.setProperty ("manufacturer", desc.manufacturerName, um);
+        state.setProperty ("manufacturer", desc.vendor, um);
         state.setProperty (IDs::name, desc.name, um);
         itemID.writeID (state, um);
         state.setProperty (IDs::uid, getPluginUID(), um);
@@ -1054,7 +1054,7 @@ void ExternalPlugin::flushPluginStateToValueTree()
             state.setProperty (IDs::programNum,  pi->getCurrentProgram(), um);
 
         TRACKTION_ASSERT_MESSAGE_THREAD
-        juce::MemoryBlock chunk;
+        yup::MemoryBlock chunk;
 
         pi->suspendProcessing (true);
         pi->getStateInformation (chunk);
@@ -1068,20 +1068,20 @@ void ExternalPlugin::flushPluginStateToValueTree()
         else
             state.removeProperty (IDs::state, um);
 
-        flushBusesLayoutToValueTree();
+        flushAudioBusLayoutToValueTree();
     }
 }
 
-void ExternalPlugin::flushBusesLayoutToValueTree()
+void ExternalPlugin::flushAudioBusLayoutToValueTree()
 {
-    const juce::ScopedValueSetter<bool> svs (isFlushingLayoutToState, true);
+    const yup::ScopedValueSetter<bool> svs (isFlushingLayoutToState, true);
 
     // Save buses layout
     if (auto ap = getAudioPluginInstance())
     {
         auto* um = getUndoManager();
 
-        auto mb = createBusesLayoutProperty (ap->getBusesLayout());
+        auto mb = createAudioBusLayoutProperty (ap->getAudioBusLayout());
 
         if (mb.getSize() > 0)
             state.setProperty (IDs::layout, mb, um);
@@ -1090,9 +1090,9 @@ void ExternalPlugin::flushBusesLayoutToValueTree()
     }
 }
 
-void ExternalPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
+void ExternalPlugin::restorePluginStateFromValueTree (const yup::ValueTree& v)
 {
-    juce::String s;
+    yup::String s;
 
     if (v.hasProperty (IDs::state))
     {
@@ -1119,7 +1119,7 @@ void ExternalPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
         if (getNumPrograms() > 1)
             setCurrentProgram (v.getProperty (IDs::programNum), false);
 
-        juce::MemoryBlock chunk;
+        yup::MemoryBlock chunk;
         chunk.fromBase64Encoding (s);
 
         if (chunk.getSize() > 0)
@@ -1127,7 +1127,7 @@ void ExternalPlugin::restorePluginStateFromValueTree (const juce::ValueTree& v)
     }
 }
 
-void ExternalPlugin::getPluginStateFromTree (juce::MemoryBlock& mb)
+void ExternalPlugin::getPluginStateFromTree (yup::MemoryBlock& mb)
 {
     auto s = state.getProperty (IDs::state).toString();
     mb.reset();
@@ -1150,7 +1150,7 @@ void ExternalPlugin::updateFromMirroredPluginIfNeeded (Plugin& changedPlugin)
             if (auto otherInstance = other->getAudioPluginInstance();
                 otherInstance && other->desc.isDuplicateOf (desc))
             {
-                juce::MemoryBlock chunk;
+                yup::MemoryBlock chunk;
                 otherInstance->getStateInformation (chunk);
 
                 if (chunk.getSize() > 0)
@@ -1165,7 +1165,7 @@ void ExternalPlugin::initialise (const PluginInitialisationInfo& info)
 {
     CRASH_TRACER_PLUGIN (getDebugName());
 
-    const juce::ScopedLock sl (processMutex);
+    const yup::ScopedLock sl (processMutex);
 
     if (mpeRemapper == nullptr)
         mpeRemapper = std::make_unique<MPEChannelRemapper>();
@@ -1220,7 +1220,7 @@ void ExternalPlugin::deinitialise()
     {
         CRASH_TRACER_PLUGIN (getDebugName());
 
-        const juce::ScopedLock sl (processMutex);
+        const yup::ScopedLock sl (processMutex);
         pi->setPlayHead (nullptr); // must be done first!
 
         if (playhead != nullptr)
@@ -1233,7 +1233,7 @@ void ExternalPlugin::reset()
     if (auto pi = getAudioPluginInstance())
     {
         CRASH_TRACER_PLUGIN (getDebugName());
-        const juce::ScopedLock sl (processMutex);
+        const yup::ScopedLock sl (processMutex);
         pi->reset();
     }
 }
@@ -1264,8 +1264,8 @@ void ExternalPlugin::prepareIncomingMidiMessages (MidiMessageArray& incoming, in
 
         for (auto chan = 1; chan <= 16; ++chan)
         {
-            midiBuffer.addEvent (juce::MidiMessage::allNotesOff (chan), 0);
-            midiBuffer.addEvent (juce::MidiMessage::controllerEvent (chan, 0x40, 0), 0); // sustain pedal off
+            midiBuffer.addEvent (yup::MidiMessage::allNotesOff (chan), 0);
+            midiBuffer.addEvent (yup::MidiMessage::controllerEvent (chan, 0x40, 0), 0); // sustain pedal off
         }
     }
 
@@ -1275,7 +1275,7 @@ void ExternalPlugin::prepareIncomingMidiMessages (MidiMessageArray& incoming, in
 
         activeNotes.iterate ([&eventsSentOnChannel, this, isPlaying] (int chan, int noteNumber)
         {
-            midiBuffer.addEvent (juce::MidiMessage::noteOff (chan, noteNumber), 0);
+            midiBuffer.addEvent (yup::MidiMessage::noteOff (chan, noteNumber), 0);
 
             if ((eventsSentOnChannel & (1u << chan)) == 0)
             {
@@ -1283,20 +1283,20 @@ void ExternalPlugin::prepareIncomingMidiMessages (MidiMessageArray& incoming, in
 
                 if (! supportsMPE)
                 {
-                    midiBuffer.addEvent (juce::MidiMessage::controllerEvent (chan, 66 /* sustain pedal off */, 0), 0);
-                    midiBuffer.addEvent (juce::MidiMessage::controllerEvent (chan, 64 /* hold pedal off */, 0), 0);
+                    midiBuffer.addEvent (yup::MidiMessage::controllerEvent (chan, 66 /* sustain pedal off */, 0), 0);
+                    midiBuffer.addEvent (yup::MidiMessage::controllerEvent (chan, 64 /* hold pedal off */, 0), 0);
                 }
                 else
                 {
                     // MPE standard (and JUCE implementation) now requires this instead of allNotesOff.
-                    midiBuffer.addEvent (juce::MidiMessage::allControllersOff (1), 0);
-                    midiBuffer.addEvent (juce::MidiMessage::allControllersOff (16), 0);
+                    midiBuffer.addEvent (yup::MidiMessage::allControllersOff (1), 0);
+                    midiBuffer.addEvent (yup::MidiMessage::allControllersOff (16), 0);
                 }
 
                 // NB: Some buggy plugins seem to fail to respond to note-ons if they are preceded
                 // by an all-notes-off, so avoid this if just dragging the cursor around while playing.
                 if (! isPlaying)
-                    midiBuffer.addEvent (juce::MidiMessage::allNotesOff (chan), 0);
+                    midiBuffer.addEvent (yup::MidiMessage::allNotesOff (chan), 0);
             }
         });
 
@@ -1306,10 +1306,10 @@ void ExternalPlugin::prepareIncomingMidiMessages (MidiMessageArray& incoming, in
         // Reset MPE zone to match MIDI generated by clip
         if (supportsMPE)
         {
-            juce::MPEZoneLayout layout;
+            yup::MPEZoneLayout layout;
             layout.setLowerZone (15);
 
-            auto layoutBuffer = juce::MPEMessages::setZoneLayout (layout);
+            auto layoutBuffer = yup::MPEMessages::setZoneLayout (layout);
             for (auto itr : layoutBuffer)
             {
                 auto result = itr.getMessage();
@@ -1337,7 +1337,7 @@ void ExternalPlugin::prepareIncomingMidiMessages (MidiMessageArray& incoming, in
             activeNotes.clearNote (m.getChannel(), m.getNoteNumber());
         }
 
-        auto sample = juce::jlimit (0, numSamples - 1, juce::roundToInt (m.getTimeStamp() * sampleRate));
+        auto sample = yup::jlimit (0, numSamples - 1, yup::roundToInt (m.getTimeStamp() * sampleRate));
         midiBuffer.addEvent (m, sample);
     }
 
@@ -1349,8 +1349,8 @@ void ExternalPlugin::prepareIncomingMidiMessages (MidiMessageArray& incoming, in
 
         DBG ("----------");
 
-        for (juce::MidiBuffer::Iterator iter (midiBuffer); iter.getNextEvent (midiData, numBytes, midiEventPos);)
-            DBG (juce::String::toHexString (midiData, numBytes) << "   " << midiEventPos);
+        for (yup::MidiBuffer::Iterator iter (midiBuffer); iter.getNextEvent (midiData, numBytes, midiEventPos);)
+            DBG (yup::String::toHexString (midiData, numBytes) << "   " << midiEventPos);
     }
    #endif
 
@@ -1378,7 +1378,7 @@ void ExternalPlugin::applyToBuffer (const PluginRenderContext& fc)
     assert (loadedInstance);
     CRASH_TRACER_PLUGIN (getDebugName());
 
-    const juce::ScopedLock sl (processMutex);
+    const yup::ScopedLock sl (processMutex);
     auto pi = getAudioPluginInstance();
 
     if (playhead != nullptr)
@@ -1471,17 +1471,17 @@ void ExternalPlugin::applyToBuffer (const PluginRenderContext& fc)
                 auto numBytes = msg.getRawDataSize();
                 auto time = fc.midiBufferOffset + itr.samplePosition / sampleRate;
 
-                fc.bufferForMidiMessages->addMidiMessage (juce::MidiMessage (midiData, numBytes, time), midiSourceID);
+                fc.bufferForMidiMessages->addMidiMessage (yup::MidiMessage (midiData, numBytes, time), midiSourceID);
             }
         }
     }
 }
 
-void ExternalPlugin::processPluginBlock (juce::AudioPluginInstance& pluginInstance, const PluginRenderContext& fc, bool processedBypass)
+void ExternalPlugin::processPluginBlock (yup::AudioPluginInstance& pluginInstance, const PluginRenderContext& fc, bool processedBypass)
 {
     // N.B. The processMutex is already locked by the calling function
 
-    juce::AudioBuffer<float> asb (fc.destBuffer->getArrayOfWritePointers(), fc.destBuffer->getNumChannels(),
+    yup::AudioBuffer<float> asb (fc.destBuffer->getArrayOfWritePointers(), fc.destBuffer->getNumChannels(),
                                   fc.bufferStartSample, fc.bufferNumSamples);
 
     auto dry = dryGain->getCurrentValue();
@@ -1554,17 +1554,17 @@ Plugin::BusLayout ExternalPlugin::getBusses() const
     return layout;
 }
 
-void ExternalPlugin::getChannelNames (juce::StringArray* ins,
-                                      juce::StringArray* outs)
+void ExternalPlugin::getChannelNames (yup::StringArray* ins,
+                                      yup::StringArray* outs)
 {
     if (auto pi = getAudioPluginInstance())
     {
         CRASH_TRACER_PLUGIN (getDebugName());
 
-        auto getChannelName = [](juce::AudioProcessor::Bus* bus, int index)
+        auto getChannelName = [](yup::AudioProcessor::Bus* bus, int index)
         {
-            return bus != nullptr ? juce::AudioChannelSet::getChannelTypeName (bus->getCurrentLayout().getTypeOfChannel (index))
-                                  : juce::String();
+            return bus != nullptr ? yup::AudioChannelSet::getChannelTypeName (bus->getCurrentLayout().getTypeOfChannel (index))
+                                  : yup::String();
         };
 
         if (ins != nullptr)
@@ -1608,9 +1608,9 @@ double ExternalPlugin::getTailLength() const
 }
 
 //==============================================================================
-juce::File ExternalPlugin::getFile() const
+yup::File ExternalPlugin::getFile() const
 {
-    auto f = juce::File::createFileWithoutCheckingPath (desc.fileOrIdentifier);
+    auto f = yup::File::createFileWithoutCheckingPath (desc.fileOrIdentifier);
 
     if (f.exists())
         return f;
@@ -1618,10 +1618,10 @@ juce::File ExternalPlugin::getFile() const
     return {};
 }
 
-juce::String ExternalPlugin::getSelectableDescription()
+yup::String ExternalPlugin::getSelectableDescription()
 {
-    if (desc.pluginFormatName.isNotEmpty())
-        return getName() + " (" + desc.pluginFormatName + " " + TRANS("Plugin") + ")";
+    if (desc.name.isNotEmpty())
+        return getName() + " (" + desc.name + " " + TRANS("Plugin") + ")";
 
     return getName();
 }
@@ -1643,7 +1643,7 @@ int ExternalPlugin::getCurrentProgram() const
     return 0;
 }
 
-juce::String ExternalPlugin::getProgramName (int index)
+yup::String ExternalPlugin::getProgramName (int index)
 {
     if (index == getCurrentProgram())
         return getCurrentProgramName();
@@ -1654,7 +1654,7 @@ juce::String ExternalPlugin::getProgramName (int index)
     return {};
 }
 
-bool ExternalPlugin::hasNameForMidiNoteNumber (int note, int midiChannel, juce::String& name)
+bool ExternalPlugin::hasNameForMidiNoteNumber (int note, int midiChannel, yup::String& name)
 {
     if (takesMidiInput())
     {
@@ -1670,7 +1670,7 @@ bool ExternalPlugin::hasNameForMidiNoteNumber (int note, int midiChannel, juce::
     return false;
 }
 
-bool ExternalPlugin::hasNameForMidiProgram (int programNum, int bank, juce::String& name)
+bool ExternalPlugin::hasNameForMidiProgram (int programNum, int bank, yup::String& name)
 {
     if (takesMidiInput() && isSynth() && getNumPrograms() > 0)
     {
@@ -1687,17 +1687,17 @@ bool ExternalPlugin::hasNameForMidiProgram (int programNum, int bank, juce::Stri
     return false;
 }
 
-juce::String ExternalPlugin::getNumberedProgramName (int i)
+yup::String ExternalPlugin::getNumberedProgramName (int i)
 {
     auto s = getProgramName(i);
 
     if (s.isEmpty())
         s = "(" + TRANS("Unnamed") + ")";
 
-    return juce::String (i + 1) + " - " + s;
+    return yup::String (i + 1) + " - " + s;
 }
 
-juce::String ExternalPlugin::getCurrentProgramName()
+yup::String ExternalPlugin::getCurrentProgramName()
 {
     if (auto pi = getAudioPluginInstance())
         return pi->getProgramName (pi->getCurrentProgram());
@@ -1705,7 +1705,7 @@ juce::String ExternalPlugin::getCurrentProgramName()
     return {};
 }
 
-void ExternalPlugin::setCurrentProgramName (const juce::String& name)
+void ExternalPlugin::setCurrentProgramName (const yup::String& name)
 {
     CRASH_TRACER_PLUGIN (getDebugName());
 
@@ -1722,7 +1722,7 @@ void ExternalPlugin::setCurrentProgram (int index, bool sendChangeMessage)
 
         CRASH_TRACER_PLUGIN (getDebugName());
 
-        index = juce::jlimit (0, getNumPrograms() - 1, index);
+        index = yup::jlimit (0, getNumPrograms() - 1, index);
 
         if (index != getCurrentProgram())
         {
@@ -1770,7 +1770,7 @@ int ExternalPlugin::getTotalNumInputChannels() const
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
 
-bool ExternalPlugin::setBusesLayout (juce::AudioProcessor::BusesLayout layout)
+bool ExternalPlugin::setAudioBusLayout (yup::AudioProcessor::AudioBusLayout layout)
 {
     if (auto pi = getAudioPluginInstance())
     {
@@ -1786,14 +1786,14 @@ bool ExternalPlugin::setBusesLayout (juce::AudioProcessor::BusesLayout layout)
         pi->releaseResources();
         isInstancePrepared = false;
 
-        if (pi->setBusesLayout (layout))
+        if (pi->setAudioBusLayout (layout))
         {
             if (! edit.isLoading())
             {
                 if (auto r = getOwnerRackType())
                     r->checkConnections();
 
-                flushBusesLayoutToValueTree();
+                flushAudioBusLayoutToValueTree();
             }
 
             return true;
@@ -1803,7 +1803,7 @@ bool ExternalPlugin::setBusesLayout (juce::AudioProcessor::BusesLayout layout)
     return false;
 }
 
-bool ExternalPlugin::setBusLayout (juce::AudioChannelSet set, bool isInput, int busIndex)
+bool ExternalPlugin::setBusLayout (yup::AudioChannelSet set, bool isInput, int busIndex)
 {
     if (auto pi = getAudioPluginInstance())
     {
@@ -1828,7 +1828,7 @@ bool ExternalPlugin::setBusLayout (juce::AudioChannelSet set, bool isInput, int 
                     if (auto r = getOwnerRackType())
                         r->checkConnections();
 
-                    flushBusesLayoutToValueTree();
+                    flushAudioBusLayoutToValueTree();
                 }
 
                 return true;
@@ -1840,9 +1840,9 @@ bool ExternalPlugin::setBusLayout (juce::AudioChannelSet set, bool isInput, int 
 }
 
 //==============================================================================
-void ExternalPlugin::startPluginInstanceCreation (const juce::PluginDescription& description)
+void ExternalPlugin::startPluginInstanceCreation (const yup::PluginDescription& description)
 {
-   #if JUCE_DEBUG
+   #if YUP_DEBUG
     jassert (! hasLoadedInstance); // This should have already been deleted!
    #endif
 
@@ -1886,7 +1886,7 @@ void ExternalPlugin::startPluginInstanceCreation (const juce::PluginDescription&
     }
 }
 
-void ExternalPlugin::completePluginInstanceCreation (std::unique_ptr<juce::AudioPluginInstance> newInstance)
+void ExternalPlugin::completePluginInstanceCreation (std::unique_ptr<yup::AudioPluginInstance> newInstance)
 {
     if (! newInstance)
     {
@@ -1907,7 +1907,7 @@ void ExternalPlugin::completePluginInstanceCreation (std::unique_ptr<juce::Audio
         if (auto xml = vstClient->getVSTXML())
             vstXML.reset (VSTXML::createFor (*xml));
 
-        vstClient->setExtraFunctions (juce::rawToUniquePtr (new ExtraVSTCallbacks (edit)));
+        vstClient->setExtraFunctions (yup::rawToUniquePtr (new ExtraVSTCallbacks (edit)));
     }
    #endif
 
@@ -1963,7 +1963,7 @@ void ExternalPlugin::buildParameterTree() const
     if (auto p2 = getAutomatableParameter (1))
         paramTree.rootNode->addSubNode (new AutomatableParameterTree::TreeNode (p2));
 
-    juce::SortedSet<int> paramsInTree;
+    yup::SortedSet<int> paramsInTree;
 
     if (vstXML)
     {
@@ -1995,7 +1995,7 @@ void ExternalPlugin::buildParameterTree() const
 
 void ExternalPlugin::buildParameterTree (const VSTXML::Group* group,
                                          AutomatableParameterTree::TreeNode* treeNode,
-                                         juce::SortedSet<int>& paramsInTree) const
+                                         yup::SortedSet<int>& paramsInTree) const
 {
     for (int i = 0; i < group->paramTree.size(); ++i)
     {
@@ -2023,7 +2023,7 @@ void ExternalPlugin::deleteFromParent()
     Plugin::deleteFromParent();
 }
 
-juce::AudioPluginInstance* ExternalPlugin::getAudioPluginInstance() const
+yup::AudioPluginInstance* ExternalPlugin::getAudioPluginInstance() const
 {
     if (! hasLoadedInstance)
         return {};
@@ -2031,7 +2031,7 @@ juce::AudioPluginInstance* ExternalPlugin::getAudioPluginInstance() const
     return &loadedInstance->getInstance();
 }
 
-void ExternalPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::Identifier& id)
+void ExternalPlugin::valueTreePropertyChanged (yup::ValueTree& v, const yup::Identifier& id)
 {
     if (v == state && id == IDs::layout)
     {
@@ -2040,10 +2040,10 @@ void ExternalPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::I
 
         if (auto ap = getAudioPluginInstance())
         {
-            auto stateLayout = readBusesLayout (v.getProperty(IDs::layout), *ap);
+            auto stateLayout = readAudioBusLayout (v.getProperty(IDs::layout), *ap);
 
-            if (stateLayout != ap->getBusesLayout())
-                setBusesLayout (stateLayout);
+            if (stateLayout != ap->getAudioBusLayout())
+                setAudioBusLayout (stateLayout);
         }
     }
     else
@@ -2052,7 +2052,7 @@ void ExternalPlugin::valueTreePropertyChanged (juce::ValueTree& v, const juce::I
     }
 }
 
-juce::Array<Exportable::ReferencedItem> ExternalPlugin::getReferencedItems()
+yup::Array<Exportable::ReferencedItem> ExternalPlugin::getReferencedItems()
 {
     return engine.getEngineBehaviour().getReferencedItems (*this);
 }
@@ -2099,7 +2099,7 @@ struct AudioProcessorEditorContentComp  : public Plugin::EditorComponent
         return editor != nullptr && editor->isResizable();
     }
 
-    juce::ComponentBoundsConstrainer* getBoundsConstrainer() override
+    yup::ComponentBoundsConstrainer* getBoundsConstrainer() override
     {
         if (editor != nullptr)
             return editor->getConstrainer();
@@ -2113,7 +2113,7 @@ struct AudioProcessorEditorContentComp  : public Plugin::EditorComponent
             editor->setBounds (getLocalBounds());
     }
 
-    void childBoundsChanged (juce::Component* c) override
+    void childBoundsChanged (yup::Component* c) override
     {
         if (c == editor.get())
         {
@@ -2143,10 +2143,10 @@ struct AudioProcessorEditorContentComp  : public Plugin::EditorComponent
     }
 
     ExternalPlugin& plugin;
-    std::unique_ptr<juce::AudioProcessorEditor> editor;
+    std::unique_ptr<yup::AudioProcessorEditor> editor;
 
     AudioProcessorEditorContentComp() = delete;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorEditorContentComp)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorEditorContentComp)
 };
 
 std::unique_ptr<Plugin::EditorComponent> ExternalPlugin::createEditor()
@@ -2160,11 +2160,11 @@ std::unique_ptr<Plugin::EditorComponent> ExternalPlugin::createEditor()
 }
 
 //==============================================================================
-bool ExternalPlugin::requiresAsyncInstantiation (Engine& e, const juce::PluginDescription& d)
+bool ExternalPlugin::requiresAsyncInstantiation (Engine& e, const yup::PluginDescription& d)
 {
     for (auto format : e.getPluginManager().pluginFormatManager.getFormats())
     {
-        if (format->getName() == d.pluginFormatName
+        if (format->getName() == d.name
             && format->fileMightContainThisPluginType (d.fileOrIdentifier)
             && format->requiresUnblockedMessageThreadDuringCreation (d))
            return true;
@@ -2174,7 +2174,7 @@ bool ExternalPlugin::requiresAsyncInstantiation (Engine& e, const juce::PluginDe
 }
 
 //==============================================================================
-PluginWetDryAutomatableParam::PluginWetDryAutomatableParam (const juce::String& xmlTag, const juce::String& name, Plugin& owner)
+PluginWetDryAutomatableParam::PluginWetDryAutomatableParam (const yup::String& xmlTag, const yup::String& name, Plugin& owner)
     : AutomatableParameter (xmlTag, name, owner, { 0.0f, 1.0f })
 {
 }
@@ -2184,14 +2184,14 @@ PluginWetDryAutomatableParam::~PluginWetDryAutomatableParam()
     notifyListenersOfDeletion();
 }
 
-juce::String PluginWetDryAutomatableParam::valueToString (float value)
+yup::String PluginWetDryAutomatableParam::valueToString (float value)
 {
-    return juce::Decibels::toString (juce::Decibels::gainToDecibels (value), 1);
+    return yup::Decibels::toString (yup::Decibels::gainToDecibels (value), 1);
 }
 
-float PluginWetDryAutomatableParam::stringToValue (const juce::String& s)
+float PluginWetDryAutomatableParam::stringToValue (const yup::String& s)
 {
-    return juce::Decibels::decibelsToGain (dbStringToDb (s));
+    return yup::Decibels::decibelsToGain (dbStringToDb (s));
 }
 
 } // namespace tracktion::inline engine

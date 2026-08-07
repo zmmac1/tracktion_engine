@@ -10,7 +10,7 @@
 
 namespace tracktion::inline engine {
 
-OutputDevice::OutputDevice (Engine& e, juce::String n, juce::String idToUse)
+OutputDevice::OutputDevice (Engine& e, yup::String n, yup::String idToUse)
    : IODevice (e, std::move (n), std::move (idToUse))
 {
 }

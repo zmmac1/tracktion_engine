@@ -22,10 +22,10 @@ public:
     ~WaveOutputDevice() override;
 
     void resetToDefault();
-    juce::String getDeviceTypeDescription() const override          { return NEEDS_TRANS("Wave Audio Output"); }
+    yup::String getDeviceTypeDescription() const override          { return NEEDS_TRANS("Wave Audio Output"); }
     void setEnabled (bool) override;
     const ChannelConfiguration& getChannels() const noexcept        { return deviceDescription.channels; }
-    const juce::AudioChannelSet& getChannelSet() const noexcept     { return channelSet; }
+    const yup::AudioChannelSet& getChannelSet() const noexcept     { return channelSet; }
 
     void reverseChannels (bool);
     bool isReversed() const         { return leftRightReversed; }
@@ -48,7 +48,7 @@ public:
     /** @deprecated Use setChannelConfiguration() instead. */
     [[deprecated ("Use setChannelConfiguration() instead")]]
     void setStereoPair (bool);
-    juce::PopupMenu createChannelGroupMenu (bool includeSetAllChannelsOptions);
+    yup::PopupMenu createChannelGroupMenu (bool includeSetAllChannelsOptions);
 
     WaveOutputDeviceInstance* createInstance (EditPlaybackContext&);
 
@@ -64,7 +64,7 @@ public:
     LevelMeasurer levelMeasurer;
 
 protected:
-    juce::String openDevice() override;
+    yup::String openDevice() override;
     void closeDevice() override;
 
 private:
@@ -72,7 +72,7 @@ private:
     friend class WaveOutputDeviceInstance;
 
     ChannelConfiguration originalChannels;
-    juce::AudioChannelSet channelSet;
+    yup::AudioChannelSet channelSet;
     bool ditheringEnabled, leftRightReversed;
     choc::SmallVector<float*, 8> meterChannelPtrs;
 
@@ -89,7 +89,7 @@ private:
     void saveProps();
     void applyChannelOrdering();
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveOutputDevice)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveOutputDevice)
 };
 
 //==============================================================================
@@ -103,11 +103,11 @@ public:
 protected:
     std::vector<Ditherer> ditherers;
     MidiMessageArray midiBuffer;
-    juce::AudioBuffer<float> outputBuffer;
+    yup::AudioBuffer<float> outputBuffer;
 
     WaveOutputDevice& getWaveOutput() const     { return static_cast<WaveOutputDevice&> (owner); }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveOutputDeviceInstance)
+    YUP_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveOutputDeviceInstance)
 };
 
 } // namespace tracktion::inline engine
