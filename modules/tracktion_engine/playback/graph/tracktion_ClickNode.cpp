@@ -9,6 +9,11 @@
 */
 
 
+// R10 FIX includes (the linear-resample loader): <algorithm>/<cmath>/<cstring>
+#include <algorithm>
+#include <cmath>
+#include <cstring>
+
 namespace tracktion::inline engine {
 
 namespace
@@ -23,23 +28,46 @@ namespace
         if (r == nullptr)
             return {};
 
-        auto ratio = r->sampleRate / targetSampleRate;
-        auto targetLength = (int) (static_cast<double> (r->lengthInSamples) / ratio);
+        // R10 FIX (track-r10, 2026-10-30): the yup ResamplingAudioSource
+        // outputs DIGITAL SILENCE in this build for ratio != 1 — the A/B
+        // receipt (the instrumented loadStage printfs): the DIRECT reader
+        // read = 0.996 FS, the resampler output = 0.00000, for BOTH click
+        // WAVs (44.1k -> 48k, the upsampling branch). The click buffers
+        // loaded 933/975 samples of pure silence -> the metronome rendered
+        // nothing (the phaseC1a T6 class, red since r7). Replace the
+        // resampler stage with a deterministic linear-interpolation
+        // resample (a 19 ms tick — transparent at this scale). The yup
+        // resampler bug is a NAMED FORK BUG (the PLAN §2.7 register;
+        // its own instrumented round owns the root cause).
+        const auto srcLen = (int) r->lengthInSamples;
+        const auto numCh = (int) r->numChannels;
+        const auto ratio = r->sampleRate / targetSampleRate;
+        const auto targetLength = (int) (static_cast<double> (srcLen) / ratio);
 
-        yup::AudioBuffer<float> buf ((int) r->numChannels, targetLength);
+        yup::AudioBuffer<float> srcBuf (numCh, srcLen);
+        r->read (&srcBuf, 0, srcLen, 0, true, true);
 
+        yup::AudioBuffer<float> buf (numCh, targetLength);
+
+        for (int ch = 0; ch < numCh; ++ch)
         {
-            yup::AudioFormatReaderSource readerSource (r.get(), false);
+            const auto* src = srcBuf.getReadPointer (ch);
+            auto* dst = buf.getWritePointer (ch);
 
-            yup::ResamplingAudioSource resamplerSource (&readerSource, false, (int) r->numChannels);
-            resamplerSource.setResamplingRatio (ratio);
-            resamplerSource.prepareToPlay (targetLength, targetSampleRate);
+            if (std::abs (ratio - 1.0) < 1.0e-9)
+            {
+                std::memcpy (dst, src, (size_t) srcLen * sizeof (float));
+                continue;
+            }
 
-            yup::AudioSourceChannelInfo info;
-            info.buffer = &buf;
-            info.startSample = 0;
-            info.numSamples = targetLength;
-            resamplerSource.getNextAudioBlock (info);
+            for (int i = 0; i < targetLength; ++i)
+            {
+                const auto srcPos = i * ratio;
+                const auto i0 = (int) srcPos;
+                const auto i1 = std::min (i0 + 1, srcLen - 1);
+                const auto a = (float) (srcPos - (double) i0);
+                dst[i] = src[i0] * (1.0f - a) + src[i1] * a;
+            }
         }
 
         return buf;
